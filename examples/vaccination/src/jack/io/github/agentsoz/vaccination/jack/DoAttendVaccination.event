@@ -1,0 +1,7 @@
+package io.github.agentsoz.vaccination.jack;
+
+public event DoAttendVaccination extends BDIGoalEvent {
+
+	#posted as post() {}
+	
+}

@@ -1,0 +1,8 @@
+package io.github.agentsoz.vaccination.jack;
+
+public event DoScheduleVaccination extends BDIGoalEvent {
+
+	public long scheduledTime;
+	
+	#posted as post() {}
+}

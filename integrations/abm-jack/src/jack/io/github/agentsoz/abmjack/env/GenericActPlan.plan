@@ -1,0 +1,49 @@
+package io.github.agentsoz.abmjack.env;
+import io.github.agentsoz.bdiabm.data.ActionContent.State;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+public plan GenericActPlan extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: GenericActPlan
+*/
+   //Events handled by the plan are declared here.
+
+   #handles event GenericActGoal genericactgoal_h;
+
+
+   // Declarations of any beliefset/data that the plan accesses.
+   #reads data ActionList ActionData_dat;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+   /* Action Reminder:
+      Name: GenericAction
+   */
+
+   context()
+   {
+      // Trigger: Event "GenericActGoal"
+
+
+      true;
+   }
+
+   body()
+   {  
+      genericactgoal_h.am.packageAction(getAgent().getBasename(), genericactgoal_h.actionID, genericactgoal_h.parameters);
+      @waitFor(new GenericActionStateCursor(ActionData_dat, genericactgoal_h.actionID));
+      genericactgoal_h.parameters = ActionData_dat.getParameters(genericactgoal_h.actionID);
+      if(ActionData_dat.getState(genericactgoal_h.actionID).equals(State.PASSED)) {
+         true;
+      } else {
+         false;
+      }
+   }
+}

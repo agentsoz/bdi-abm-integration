@@ -1,0 +1,6 @@
+package io.github.agentsoz.vaccination.jack;
+
+public event DoConsiderVaccination extends Event {
+
+	#posted as post() {}
+}

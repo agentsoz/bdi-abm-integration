@@ -1,0 +1,37 @@
+package io.github.agentsoz.abmjack.env;
+import bdisim.data.ActionContent.State;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+public plan UpdateActionPlan extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: UpdateActionPlan
+*/
+   //Events handled by the plan are declared here.
+   #handles event UpdateAction updateaction_h;
+
+
+   // Declarations of any beliefset/data that the plan accesses.
+   #modifies data ActionList ActionData_dat;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+   context()
+   {
+      // Trigger: Event "UpdateAction"
+
+
+      true;
+   }
+
+   body()
+   {
+      ActionData_dat.insert(updateaction_h.actionID, updateaction_h.state, updateaction_h.params);
+   }
+}

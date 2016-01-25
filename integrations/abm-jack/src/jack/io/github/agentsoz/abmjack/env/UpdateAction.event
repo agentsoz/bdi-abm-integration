@@ -1,0 +1,27 @@
+package io.github.agentsoz.abmjack.env;
+import io.github.agentsoz.bdiabm.data.ActionContent.State;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+public event UpdateAction extends BDIGoalEvent
+{
+/*
+ * Message Name: UpdateAction
+*/
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+   /*Posting Method Declarations*/
+   public String actionID;
+   public State state;
+   public Object[] params;
+   #posted as 
+   postEvent(String actionID, State state, Object[] params)
+   {
+      this.actionID = actionID;
+      this.state = state;
+      this.params = params;
+   }
+}

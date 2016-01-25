@@ -1,0 +1,48 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+import io.github.agentsoz.abmjack.shared.GlobalTime;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+
+import java.util.Random;
+
+public plan DelayVaccination extends Plan
+{
+	#handles event DoActOnVaccinationDecision event;
+	#posts event DoConsiderVaccination consider;
+	#posts event GenericActGoal action;
+	
+
+	static boolean relevant(DoActOnVaccinationDecision ev) {
+        return true;
+    }
+    
+	context() {
+		(((Householder)getAgent()).getDeliberationDecision().equals(Global.DECIDED_TO_DELAY_VACCINATION));
+	}
+
+	/*
+	 * Delays vaccination.
+	 * The delay action can fail in the ABMS if the agent
+	 * keeps delaying the vaccination indefinitely
+	 * (after some number of cumulative months)
+	 */
+	body() {
+		Householder agent = (Householder)getAgent();
+		Log.debug(agent.getBasename()+" delaying vaccination");
+		GenericActGoal gag = action.act(((Householder)(getAgent())).getActionManager(),Global.MessageID.DelayVaccination, null);
+		@subtask(gag);
+		Log.debug(agent.getBasename()+" finished delaying vaccination, so will reconsider vaccination now");
+		DoConsiderVaccination dcv = consider.post();
+		@post(dcv);
+	}
+
+	#reasoning method fail () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+	}
+
+	#reasoning method pass () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+    }
+}

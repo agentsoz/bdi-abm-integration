@@ -1,0 +1,32 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+
+public plan AttendVaccination extends Plan {
+
+	#posts event GenericActGoal genericactgoal_p;
+	#handles event DoAttendVaccination gotovaccination_h;
+
+    static boolean relevant(DoAttendVaccination ev) {
+        return true;
+    }
+
+    context() {
+		true;
+	}
+
+	body() {
+		GenericActGoal gag = genericactgoal_p.act(((Householder)(getAgent())).getActionManager(), Global.MessageID.AttendVaccination, null);
+		@subtask(gag);
+	}
+	
+	#reasoning method fail () {
+       Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+    }
+	
+	#reasoning method pass () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+    }
+}

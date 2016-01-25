@@ -1,0 +1,64 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.ActionID;
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+
+public plan ConsiderVaccination extends Plan {
+
+	#handles event DoConsiderVaccination event;
+	#posts event DoActOnVaccinationDecision act;
+
+    static boolean relevant(DoConsiderVaccination ev) {
+        return true;
+    }
+
+    // Always applies
+	context() {
+		true;
+	}
+
+	body() {
+		// Get a handle to the Householder agent object
+		Householder agent = (Householder)getAgent();
+
+		// Make a decision about vaccination
+		String decision = randomDecision();
+		
+		// Save the decision 
+		agent.setDeliberationDecision(decision);
+		
+		// Finally, post the goal to act on the decision
+		act.post();
+	}
+
+	/**
+	 * Make a random decision about vaccination.
+	 */
+	private String randomDecision() {
+		Householder agent = (Householder)getAgent();
+		String decision = Global.UNDECIDED;
+		switch (Global.getRandomInstance().nextInt(2)) {
+		case 0:
+			decision = Global.DECIDED_TO_REJECT_VACCINATION;
+			break;
+		case 1:
+			decision = Global.DECIDED_TO_VACCINATE;
+			break;
+		case 2:
+			decision = Global.DECIDED_TO_DELAY_VACCINATION;
+			break;
+		}
+		return decision;
+		
+	}
+	
+	#reasoning method fail () {
+	       Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+    }
+	
+	#reasoning method pass () {
+	       Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+    }
+}

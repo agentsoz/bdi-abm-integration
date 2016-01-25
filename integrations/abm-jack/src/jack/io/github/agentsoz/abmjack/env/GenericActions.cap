@@ -1,0 +1,38 @@
+package io.github.agentsoz.abmjack.env;
+import io.github.agentsoz.abmjack.shared.ActionManager;
+
+
+public capability GenericActions extends Capability
+		 /*implements Interface*/
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+/*
+Capability Name: GenericActions
+*/
+
+	//Knowledge bases used are declared here.
+	/*	You may need to change the statement declaration of data/beliefset to:
+	#agent | #global | #private | #import | #export
+	*/
+	#private data ActionList ActionData_dat(/*String actionID, String state, String parameters*/);
+
+	//Plans directly used are declared here.
+	#uses plan UpdateActionPlan ;
+
+	#uses plan GenericActPlan ;
+
+	//Events handled, posted and sent are declared here.
+
+	#handles external event UpdateAction ;
+
+	#handles external event GenericActGoal ;
+
+	// Inner capabilities are declared here.
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	/* Action Reminder:
+		Name: GenericAction
+	*/
+	//other Data Member and Method definitions.
+}

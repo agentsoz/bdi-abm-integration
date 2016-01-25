@@ -1,0 +1,7 @@
+package io.github.agentsoz.vaccination.jack;
+
+public event DoHandlePercept extends Event {
+
+	#posted as post(String type, double value, String content, String timeStamp) {
+	}
+}

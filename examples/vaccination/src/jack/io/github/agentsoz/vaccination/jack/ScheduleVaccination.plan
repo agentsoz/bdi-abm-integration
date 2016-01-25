@@ -1,0 +1,40 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+
+public plan ScheduleVaccination extends Plan {
+	#handles event DoScheduleVaccination event;
+	#posts event GenericActGoal action;
+
+	static boolean relevant(DoScheduleVaccination ev) {
+        return true;
+    }
+
+    // Always applies
+	context() {
+		true;
+	}
+
+	body() {
+		GenericActGoal gag = action.act(((Householder)(getAgent())).getActionManager(),Global.MessageID.ScheduleVaccination, null);
+		@subtask(gag);
+		//Parse circumvents a weird runtime error thinking that scheduledTime is a string
+		//schedulevaccination_h.scheduledTime = Long.parseLong(((String)gag.parameters[0]));
+	}
+	
+	#reasoning method fail () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+	}
+	
+	#reasoning method pass () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+	}
+}

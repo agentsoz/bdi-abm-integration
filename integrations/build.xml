@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<!-- Configuration of the Ant build system to generate a Jar file --> 
+<project name="bdisim" default="dist" basedir=".">
+
+	<property name="build.dir" value="bin"/>
+	<property name="src" value="src"/>
+	<property name="jar.repast.plugin" value="repast-jadex-plugin.jar"/>
+	<property name="jar.jadex.dev" value="repast-jadex-dev.jar"/>
+
+	<!-- CHANGE THIS BASED ON YOUR OWN SETUP -->
+	<property name="jadex.dir" value="../edmund/projectworkspace/Jadex Replast/jadex-2.4"/> 
+	<property name="repast.dir" value="../../eclipse/plugins"/> 
+	<!-- CHANGE THIS BASED ON YOUR OWN SETUP -->
+
+	<path id="lib-jadex">
+        <fileset dir="${jadex.dir}">
+			<include name="lib/*.jar"/>
+		</fileset>
+		<fileset dir="${build.dir}" />
+		<fileset file="lib/commons-cli-1.2.jar" />
+	</path>
+
+	<path id="lib-repast">
+		<fileset dir="${repast.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${build.dir}" />
+	</path>
+
+	<target name="config" description="Initial setup">
+	        <mkdir dir="${build.dir}"/>
+	</target>
+
+	<target name="compile-jadex-dev" description="" depends="config">
+	        <javac debug="${debug}" srcdir="${src}" includes="rmit/agent/jadex/**" destdir="${build.dir}" includeantruntime="false">
+			<classpath refid="lib-jadex"/>
+	        </javac>
+	</target>
+
+	<target name="compile-repast-plugin" description="" depends="config">
+		<javac debug="${debug}" srcdir="${src}" includes="rmit/agent/repast/**" destdir="${build.dir}" includeantruntime="false">
+			<classpath refid="lib-repast"/>
+		</javac>
+	</target>
+	
+	<target name="dist" description="Build distribution" depends="compile-jadex-dev, compile-repast-plugin">
+		<copy file="${src}/rmit/agent/jadex/abm_interface/super_central/SuperCentralOrganizer.application.xml" tofile="${build.dir}/rmit/agent/jadex/abm_interface/super_central/SuperCentralOrganizer.application.xml"/>
+		<copy file="${src}/rmit/agent/jadex/abm_interface/super_central/SuperStarter.agent.xml" tofile="${build.dir}/rmit/agent/jadex/abm_interface/super_central/SuperStarter.agent.xml"/>
+		<copy file="${src}/rmit/agent/jadex/abm_interface/central_organizer/Starter.agent.xml" tofile="${build.dir}/rmit/agent/jadex/abm_interface/central_organizer/Starter.agent.xml"/>
+		<copy file="${src}/rmit/agent/jadex/abm_interface/agent/Template_AgentDefinition.agent.xml" tofile="${build.dir}/rmit/agent/jadex/abm_interface/agent/Template_AgentDefinition.agent.xml"/>
+		<copy file="${src}/rmit/agent/jadex/abm_interface/agent/Template_Capability.capability.xml" tofile="${build.dir}/rmit/agent/jadex/abm_interface/agent/Template_Capability.capability.xml"/>
+		<copy file="${src}/rmit/agent/jadex/abm_interface/Template_PropertiesFile.properties" tofile="${build.dir}/rmit/agent/jadex/abm_interface/Template_PropertiesFile.properties"/>
+
+		<jar destfile="${jar.repast.plugin}" basedir="${build.dir}" includes="rmit/agent/repast/**"/>
+		<jar destfile="${jar.jadex.dev}" basedir="${build.dir}" includes="rmit/agent/jadex/**"/>
+	</target>
+
+	<target name="clean" description="Delete all generated files">
+	        <delete dir="${build.dir}"/>
+		<delete file="${jar.repast.plugin}"/>
+		<delete file="${jar.jadex.dev}"/>
+	</target>
+
+
+</project>

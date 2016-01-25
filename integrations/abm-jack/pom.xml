@@ -1,0 +1,189 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>io.github.agentsoz</groupId>
+    <artifactId>bdi-abm-integration</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>abm-jack</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>ABM JACK Integration</name>
+  <description>Allows the use of JACK (aosgrp.com/products/jack) as the underlying BDI system </description>
+
+  <!--
+  First JACK must be installed in the local Maven repository as follows:
+  mvn install:install-file \
+    -Dfile=JACKROOT/lib/jack.jar \
+    -DgroupId=com.aosgrp \
+    -DartifactId=jack \
+    -Dversion=5.6 \
+    -Dpackaging=jar
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.aosgrp</groupId>
+      <artifactId>jack</artifactId>
+      <version>5.6</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>bdi-abm</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <!-- Generate Java sources from JACK code -->
+          <execution>
+            <id>generate-java-from-jack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <!-- automatically creates the classpath using all project dependencies -->
+                <classpath/>
+                <argument>aos.main.JackBuild</argument>
+                <argument>-wd</argument>
+                <argument>src/jack</argument>
+                <argument>-d</argument>
+                <argument>${project.build.directory}/generated-sources/jack</argument>
+                <argument>-nc</argument>
+                <argument>-r</argument>
+                <argument>-DJAVACARGS=-g</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <!-- here the phase you need -->
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated-sources/jack</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/jack</directory>
+                  <includes>
+                    <include>**/*.java</include>
+                  </includes>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>add-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>${project.build.directory}/generated-sources/jack</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.codehaus.mojo
+                    </groupId>
+                    <artifactId>
+                      license-maven-plugin
+                    </artifactId>
+                    <versionRange>
+                      [1.8,)
+                    </versionRange>
+                    <goals>
+                      <goal>
+                        update-project-license
+                      </goal>
+                      <goal>
+                        update-file-header
+                      </goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <versionRange>[1.2.1,)</versionRange>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>true</runOnIncremental>
+                    </execute>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>
+                      build-helper-maven-plugin
+                    </artifactId>
+                    <versionRange>[1.9.1,)</versionRange>
+                    <goals>
+                      <goal>add-source</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnIncremental>true</runOnIncremental>
+                    </execute>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

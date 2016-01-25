@@ -1,0 +1,12 @@
+package io.github.agentsoz.vaccination.jack;
+
+public event DoActOnVaccinationDecision extends BDIGoalEvent {
+
+	#set behaviour ApplicableSet new;
+	#set behavior ApplicableChoice random; // choose a plan randomly from applicable set
+	#set behavior Recover repost;
+	#set behavior ApplicableExclusion none;
+	#set behavior ApplicableExclusion failed;
+	
+	#posted as post() {}
+}

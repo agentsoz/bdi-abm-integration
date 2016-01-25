@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  BDI-ABM Integration Package
+  %%
+  Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+
+<!-- agent with idle feature -->  
+<agent xmlns="http://jadex.sourceforge.net/jadex"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jadex.sourceforge.net/jadex
+	                    http://jadex.sourceforge.net/jadex-bdi-2.3.xsd"
+  name="SuperStarter"
+  package="rmit.agent.jadex.abm_interface.super_central">
+    <imports>
+        <import>jadex.commons.*</import>
+		<import>jadex.rules.rulesystem.rules.functions.*</import>
+		<import>jadex.extension.envsupport.environment.*</import>
+		<import>jadex.extension.envsupport.environment.space2d.*</import>
+		<import>jadex.extension.envsupport.math.*</import>
+		<import>jadex.bdi.examples.cleanerworld.*</import>
+		<import>jadex.commons.future.*</import>
+    </imports>
+    
+    <beliefs>
+        <belief name="environment" class="ContinuousSpace2D">
+ 			<fact class="IFuture">$scope.getParentAccess().getExtension("my2dspace")</fact>
+ 		</belief>  
+ 	</beliefs>
+ 	
+    <goals>
+        <achievegoal name="start"></achievegoal>
+    </goals>
+    
+    <plans>
+        <plan name="startPlan">
+            <body class ="SuperStartPlan"></body>
+            <trigger>
+                <goal ref ="start"></goal>
+            </trigger>
+        </plan>
+    </plans>
+    
+    <configurations>
+        <configuration name="default">
+            <goals>
+                <initialgoal ref = "start"/>
+            </goals>
+        </configuration>
+    </configurations>
+    </agent>

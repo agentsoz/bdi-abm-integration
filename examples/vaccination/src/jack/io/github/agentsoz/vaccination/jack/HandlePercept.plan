@@ -1,0 +1,35 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.ActionID;
+import io.github.agentsoz.vaccination.Log;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+
+public plan HandlePercept extends Plan {
+
+	#handles event DoScheduleVaccination event;
+
+    static boolean relevant(DoScheduleVaccination ev) {
+        return true;
+    }
+
+    // Always applies
+    context() {
+		true;
+	}
+
+	body()
+	{
+		// Get a handle to the Householder agent object
+		Householder agent = (Householder)getAgent();
+
+		// TODO: Process the incoming percept
+		
+	}
+	#reasoning method fail () {
+	       Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+    }
+	
+	#reasoning method pass () {
+	       Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+    }
+}

@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.agentsoz</groupId>
+  <artifactId>bdi-abm-integration</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>BDI ABM Integration</name>
+  <description>Integrating Belief-Desire-Intention (BDI) systems with Agent-based Models (ABM)</description>
+  <url>https://github.com/agentsoz/bdi-abm-integration.git</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <scm>
+    <connection>scm:git:https://github.com/agentsoz/bdi-abm-integration.git</connection>
+    <developerConnection>scm:git:https://github.com/agentsoz/bdi-abm-integration.git</developerConnection>
+    <url>https://github.com/agentsoz/bdi-abm-integration.git</url>
+    <tag>HEAD</tag>
+  </scm> 
+  
+  <licenses>
+    <license>
+      <name>GNU General Lesser Public License, Version 3.0</name>
+      <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Dhirendra Singh</name>
+      <email>dhi.singh@gmail.com</email>
+      <organization>AgentsOZ</organization>
+      <organizationUrl>http://agentsoz.github.io</organizationUrl>
+    </developer>
+    <developer>
+      <name>Sewwandi Perera</name>
+      <email>sperera@outlook.com</email>
+      <organization>AgentsOZ</organization>
+      <organizationUrl>http://agentsoz.github.io</organizationUrl>
+    </developer>
+  </developers>
+  
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <modules>
+    <module>util</module>
+    <module>integrations/bdi-abm</module>
+    <module>integrations/bdi-gams</module>
+    <module>integrations/abm-jack</module>
+    <module>integrations/abm-jill</module>
+    <module>integrations/abm-jadex</module>
+    <module>integrations/bdi-matsim</module>    
+    <module>examples/conservation</module> 
+    <module>examples/bushfire</module>
+    <module>examples/vaccination</module> 
+  </modules>
+
+  <build>
+    <!-- plugins used by all modules (not optional) -->
+    <plugins>
+      <!-- Begin SONATYPE setup : http://central.sonatype.org/pages/apache-maven.html -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.3</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+      	</configuration>
+      </plugin>   
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.8</version>
+        <configuration>
+          <organizationName>AgentsOZ</organizationName>
+          <copyrightOwners>by its authors. See AUTHORS file.</copyrightOwners>
+          <projectName>BDI-ABM Integration Package</projectName>
+          <inceptionYear>2014</inceptionYear>
+          <licenseName>lgpl_v3</licenseName>
+        </configuration>
+        <executions>
+          <execution>
+            <id>first</id>
+            <goals>
+              <goal>update-project-license</goal>
+              <goal>update-file-header</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <!-- Used by some but possibly not all modules (optional) -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.9.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+  </build>
+
+  <dependencies>
+    <!-- logging framework -->
+    <dependency> 
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.13</version>
+    </dependency>
+    <!-- for JSON-style toString() of objects --> 
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3.1</version>
+    </dependency>
+    <!-- JUnit for unit testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

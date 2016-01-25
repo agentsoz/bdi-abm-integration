@@ -1,0 +1,42 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.abmjack.shared.GlobalTime;
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+import java.util.Random;
+
+public plan Vaccinate extends Plan {
+
+	#handles event DoActOnVaccinationDecision event;
+	#posts event DoScheduleVaccination schedule;
+	#posts event DoAttendVaccination attend;
+	
+	static boolean relevant(DoActOnVaccinationDecision ev) {
+        return true;
+    }
+    
+	context() {
+		(((Householder)getAgent()).getDeliberationDecision().equals(Global.DECIDED_TO_VACCINATE));
+	}
+
+	body() {
+		DoScheduleVaccination sv = schedule.post();
+		Log.debug(agent.getBasename()+" scheduling vaccination now");
+		@subtask(sv);
+		Log.debug(agent.getBasename()+" scheduled vaccination for "+schedule.scheduledTime+" months so will wait till then");
+
+		DoAttendVaccination gtv = attend.post();
+		Log.debug(agent.getBasename()+" finished waiting for "+schedule.scheduledTime+" months, so going for vaccination appointment now");
+		@subtask(gtv);
+		Log.debug(agent.getBasename()+" finished vaccination appointment");
+	}
+	
+	#reasoning method fail () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " failed!");
+	}
+	
+	#reasoning method pass () {
+		Log.debug(getAgent().getBasename()+":" + this.getClass().getName() + " passed");
+	}
+
+}

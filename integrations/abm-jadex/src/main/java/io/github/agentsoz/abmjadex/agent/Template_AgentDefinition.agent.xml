@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  BDI-ABM Integration Package
+  %%
+  Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+
+<!--
+2/20/2013 
+These are the template for agent definition file to be working with Jadex-Repast 
+Collaboration System. 
+
+Change the name and package of the agent accordingly.
+Any alteration to any part of the "System Default Part",
+might impose breaks down of the system. Except for the requirement of adding
+beliefs assignment to inner capabilities.
+
+6/05/2013
+Modification made on regards of inner capabilities issue.
+-->  
+<agent xmlns="http://jadex.sourceforge.net/jadex"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jadex.sourceforge.net/jadex
+	                    http://jadex.sourceforge.net/jadex-bdi-2.3.xsd"
+  name="Template_AgentDefinition"
+  package="rmit.agent.jadex.abm_interface">
+  
+<!-- ............................System Default Part.................................... -->
+	<!-- 
+		This section are required as part of the system to communicate with Repast.
+		Please refrain from modifying or accessing the beliefs, goals, and plans, in this section.
+		The only modification would be needed is the addition of assignment of the beliefs toward
+		each of user-specific inner capability.
+		
+		In the future we intend to 
+	-->
+    <imports>
+        <import>java.util.*</import>
+        <import>rmit.agent.jadex.abm_interface.*</import>
+        <import>rmit.agent.jadex.abm_interface.agent.*</import>
+        <import>rmit.agent.jadex.abm_interface.clientserver.*</import>
+        <import>rmit.agent.jadex.abm_interface.data_structure.*</import>
+        <import>jadex.commons.*</import>
+		<import>jadex.rules.rulesystem.rules.functions.*</import>
+		<import>jadex.extension.envsupport.environment.*</import>
+		<import>jadex.extension.envsupport.environment.space2d.*</import>
+		<import>jadex.commons.future.*</import> 
+    </imports>
+     <beliefs>     
+        <belief name="environment" class="ContinuousSpace2D">
+ 			<fact class="IFuture">$scope.getParentAccess().getExtension("my2dspace")</fact>
+ 			<!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+ 		</belief>
+ 		<belief name="myself" class="ISpaceObject" exported="true">
+  			<fact>$beliefbase.environment.getAvatar($scope.getComponentDescription(), $scope.getAgentModel().getFullName())</fact>
+  			<!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			--> 
+  		</belief>
+		<belief name="suspendedGoals" class="SyncArrayList">
+            <fact>new SyncArrayList()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="noOfWait" class="SyncInteger">
+            <fact>new SyncInteger()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name ="noOfTopLevelGoal" class ="SyncInteger">
+            <fact>new SyncInteger()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name ="dispatchedTopLevelGoal" class ="SyncArrayList">
+            <fact>new SyncArrayList()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="subGoals" class="SyncArrayList">
+            <fact>new SyncArrayList()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="noOfMessageEvent" class="SyncInteger">
+            <fact>new SyncInteger()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="actionChange" class="Boolean">
+            <fact>false</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="isIdle" class="Boolean">
+            <fact>false</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="agentState" class="Integer">
+            <fact>4</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="componentAgentIDMap" class = "HashMap">
+            <fact>new HashMap()</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+        <belief name="justBorn" class="Boolean">
+            <fact>true</fact>
+            <!-- 
+ 				add assignments to each of user-specific inner capability 
+ 				ex : <assignto ref="InnerCapability.environment"/>
+ 			-->
+        </belief>
+    </beliefs>
+    <goals>
+        <achievegoal name="readyToIdle"></achievegoal>
+    </goals>
+    <plans>
+        <plan name="idlePlan">
+            <body class ="StepManagerPlan"></body>
+            <trigger>
+                <goal ref ="readyToIdle"></goal>
+            </trigger>
+        </plan>
+        <plan name="birthPlan">
+            <body class ="BirthPlan"></body>
+            <trigger>
+                <condition>$beliefbase.justBorn</condition>
+            </trigger>
+        </plan>
+    </plans>
+<!-- ..............................End of System Defined Definition.................................................... -->
+
+<!-- Start Your Specific Agent Definition Here On -->
+<!-- 
+	User Specific Inner Capabilities :
+        	For each of the application specific capabilities(Non-Jadex Caps Libraries). 
+        	User are required to add assignment of the belief in each of the default beliefs to the 
+        	capabilities respected default beliefs. These are required as it is the core
+       		of the idle tracking system for agent in Jadex. 
+        	ex :  
+        	<belief name="environment" class="ContinuousSpace2D">
+ 				<fact class="IFuture">$scope.getParentAccess().getExtension("my2dspace")</fact>
+ 				<assignto ref="ChangeTargetC.environment"/>
+ 				<assignto ref="FindC.environment"/>
+ 				<assignto ref="RespondRequestC.environment"/>
+ 				<assignto ref="ChaseC.environment"/>
+ 			</belief>
+-->
+<!-- 
+	Adhoc Percept Query :
+  		In order to define an adhoc query of percept values from Repast, define the following belief :
+  		(Adjust the <queryPercept> (without angle brackets)in this format according to the name of
+  		 percept you would like to define in your system. Do not modify the rest of the code.)
+  		  
+        <belief name="queryPercept" class="Object" evaluationmode="pull">
+            <fact>AdhocPerceptQuery.query((String)$beliefbase.myself.getProperty("agentID"),"queryPercept",$beliefbase.environment.getProperty("server"))</fact>
+        </belief>
+        
+        In order to do the query inside a plan; user do the retrieval of belief value, like they normally
+        do with Jadex.
+-->
+</agent>

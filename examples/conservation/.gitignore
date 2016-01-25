@@ -1,0 +1,6 @@
+/target/
+_gams_java_*
+*.csv
+*.log
+*.out
+

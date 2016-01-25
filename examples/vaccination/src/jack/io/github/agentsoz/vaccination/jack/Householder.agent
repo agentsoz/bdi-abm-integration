@@ -1,0 +1,132 @@
+package io.github.agentsoz.vaccination.jack;
+
+import io.github.agentsoz.vaccination.ActionID;
+import io.github.agentsoz.vaccination.PerceptID;
+import io.github.agentsoz.vaccination.Global;
+import io.github.agentsoz.vaccination.Log;
+
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.abmjack.env.GenericActions;
+import io.github.agentsoz.abmjack.env.UpdateAction;
+import io.github.agentsoz.abmjack.shared.ActionManager;
+import io.github.agentsoz.abmjack.shared.GlobalTime;
+import io.github.agentsoz.bdiabm.data.ActionContent.State;
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import java.io.*;
+import java.util.Random;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+
+public agent Householder extends Agent /*implements InterfaceName*/
+{
+
+	
+	/* ----------------------------------------------------------------------
+	 * This agents's goals and plans
+	 * ----------------------------------------------------------------------
+	 */
+	
+	// Goal/plans used to deliberate at vaccination time
+	#posts event DoConsiderVaccination consider;
+	#uses plan ConsiderVaccination;
+	
+	// Goal/plan to handle incoming percepts
+	#posts event DoHandlePercept perceptHandler;
+	#uses plan HandlePercept;
+	
+	// Goals/Plans used to act on the deliberation decision
+	#handles event DoActOnVaccinationDecision;
+	#uses plan DelayVaccination;
+	#uses plan Vaccinate;
+	#uses plan RejectVaccination;
+
+	// Goals/Plans used to proceed with vaccination
+	#handles event DoScheduleVaccination;
+	#uses plan ScheduleVaccination ;
+	#handles event DoAttendVaccination;
+	#uses plan AttendVaccination;
+
+	// External (environmental) actions
+	#posts event GenericActGoal genericactgoal_p;
+
+
+	/* ----------------------------------------------------------------------
+	 * Capabilities that this agent uses
+	 * ----------------------------------------------------------------------
+	 */
+	#has capability GenericActions genericactions_cap;
+
+	/* ----------------------------------------------------------------------
+	 * State variables
+	 * ----------------------------------------------------------------------
+	 */
+	private ActionManager am;
+	private String deliberationDecision;
+
+	/* ----------------------------------------------------------------------
+	 * Constructors
+	 * ----------------------------------------------------------------------
+	 */
+	public Householder(String name, ActionManager am) {
+		super(name);
+		this.am = am;
+		deliberationDecision = Global.UNDECIDED;
+	}
+	
+	/* ----------------------------------------------------------------------
+	 * Getters and Setters
+	 * ----------------------------------------------------------------------
+	 */
+	
+	public ActionManager getActionManager() {
+		return am;
+	}
+	
+	public String getDeliberationDecision() {
+		return deliberationDecision;
+	}
+
+	public void setDeliberationDecision(String decision) {
+		deliberationDecision = decision;
+	}
+
+	/* ----------------------------------------------------------------------
+	 * Methods to trigger top level goals
+	 * ----------------------------------------------------------------------
+	 */
+
+	private void doConsiderVaccination() {
+		Log.debug(this.getName()+" posted DoConsiderVaccination event");
+		postEvent(consider.post());
+	}
+	
+	public void doHandlePercept(String percept, Object params) {
+		if(percept.equals(Global.MessageID.VaccTime)) {
+			doConsiderVaccination();	
+		}
+		// TODO: Add handlers for other percepts
+		//if (some_condition) {
+		//	Log.debug(this.getName()+" posted DoHandlePercept event");
+		//	postEvent(perceptHandler.post(type, value, content, timeStamp));
+		//}
+	}
+
+	/**
+	 * Update action state
+	 */
+	
+	public void updateActionState(String actionID, State state, Object[] params) {
+		System.out.println(this.getName()+" posted update action state "+actionID+", "+state.toString());
+		// TODO: Commenting this out, but might break stuff!
+		//postEvent(updateaction_p.postEvent(actionID, state, params));
+		
+	}
+
+	
+}

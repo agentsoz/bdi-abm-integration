@@ -1,0 +1,28 @@
+package io.github.agentsoz.abmjack.env;
+import io.github.agentsoz.abmjack.shared.*;
+
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+public event GenericActGoal extends BDIGoalEvent
+{
+/*
+ * Message Name: GenericActGoal
+*/
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+   /*Posting Method Declarations*/
+	public ActionManager am;
+   public String actionID;
+   public Object[] parameters;
+   #posted as 
+   act(ActionManager am, String actionID, Object[] parameters)
+   {
+	this.am = am;
+      this.actionID = actionID;
+      this.parameters = parameters;
+      //state will be INITIATED
+   }
+}

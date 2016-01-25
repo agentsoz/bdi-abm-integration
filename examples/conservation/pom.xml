@@ -1,0 +1,128 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>io.github.agentsoz</groupId>
+    <artifactId>bdi-abm-integration</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>conservation-ethics</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>Conservation Ethics Example</name>
+  <description>Application using JACK-GAMS integration</description>
+
+  <developers>
+    <developer>
+      <name>Sewwandi Perera</name>
+      <email>sperera@outlook.com</email>
+      <organization>AgentsOZ</organization>
+      <organizationUrl>http://agentsoz.github.io</organizationUrl>
+    </developer>
+    <developer>
+      <name>Dhirendra Singh</name>
+      <email>dhi.singh@gmail.com</email>
+      <organization>AgentsOZ</organization>
+      <organizationUrl>http://agentsoz.github.io</organizationUrl>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.gams</groupId>
+      <artifactId>gams</artifactId>
+      <version>24.4</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>jill</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>bdi-abm</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>abm-jill</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>bdi-gams</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- assemble the distribution -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>agentsoz.conservation.Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptor>src/assembly/dep.xml</descriptor>
+        </configuration>
+        <executions>
+          <execution>
+            <id>create-archive</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.codehaus.mojo
+                    </groupId>
+                    <artifactId>
+                      license-maven-plugin
+                    </artifactId>
+                    <versionRange>
+                      [1.8,)
+                    </versionRange>
+                    <goals>
+                      <goal>
+                        update-project-license
+                      </goal>
+                      <goal>
+                        update-file-header
+                      </goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

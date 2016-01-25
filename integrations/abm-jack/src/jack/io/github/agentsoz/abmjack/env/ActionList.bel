@@ -1,0 +1,159 @@
+package io.github.agentsoz.abmjack.env;
+import io.github.agentsoz.abmjack.shared.*;
+import io.github.agentsoz.bdiabm.data.ActionContent.State;
+import java.util.StringTokenizer;
+/**
+ * 
+ * @author Alex Lutman
+ *
+ */
+public beliefset ActionList extends ClosedWorld /*or OpenWorld*/
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+/*
+ * Beliefset Name: ActionList
+ */
+
+   // Zero or more #key field declarations.
+   // These describe the key attributes of each belief.
+   #key field String actionID;
+
+
+
+   // Zero of more #value field declarations.
+   // These describe the data attributes of each belief.
+   #value field String state;
+
+   #value field String parameters;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+   private final String NO_PARAMS = "null";
+   #indexed query qGetData(String actionID, logical String state, logical String parameters);
+   #indexed query qGetAll(logical String actionID, logical String state, logical String parameters);
+   #function query String fGetState(String actionID)
+   {
+      logical String state;
+      logical String parameters;
+      try{
+         Cursor c = qGetData(actionID, state, parameters);
+         c.next();
+         return state.getValue();
+      }
+      catch(Exception e){
+         e.printStackTrace();
+         System.exit(1);
+      }
+
+      return null;
+   
+   }
+   public State getState(String actionID) {
+      try {
+         return stringToState(fGetState(actionID));
+      }
+      catch(BeliefSetException bse) {
+         bse.printStackTrace();
+         System.exit(1);
+      }
+      return null;
+   }
+   #function query String fGetParameters(String actionID)
+   {
+      logical String parameters;
+      logical String state;
+      try{
+         Cursor c = qGetData(actionID, state, parameters);
+         c.next();
+         return parameters.getValue();
+      }
+      catch(Exception e){
+         e.printStackTrace();
+         System.exit(1);
+      }
+
+      return null;
+   }
+   public Object[] getParameters(String actionID) {
+      try {
+         return stringToParams(fGetParameters(actionID));
+      }
+      catch(BeliefSetException bse) {
+         bse.printStackTrace();
+         System.exit(1);
+      }
+      return null;
+   }
+   private Object[] stringToParams(String params) {
+      if(params.equals(NO_PARAMS)) {
+         return null;
+      }
+      StringTokenizer st = new StringTokenizer(params, ":");
+      Object[] newParams = new Object[st.countTokens()];
+      int i = 0;
+      while(st.hasMoreTokens()) {
+         newParams[i++] = st.nextToken();
+      }
+      return newParams;
+   
+   }
+   private String paramsToString(Object[] params) {
+      if(params == null || params.length == 0) {
+         return NO_PARAMS;
+      }
+      String newString = params[0].toString();
+      for(int i = 1; i < params.length; i++) {
+         newString.concat(":").concat(params[i].toString());
+      }
+      if(newString.endsWith(":")) {
+         newString = newString.substring(0, (newString.length()-2));
+      };
+      return newString;
+   }
+   
+   public void insert(String actionID, State state, Object[] params) {
+      try {
+         add(actionID, stateToString(state), paramsToString(params));
+      }
+      catch(BeliefSetException bse) {
+         bse.printStackTrace();
+         System.exit(1);
+      }
+   }
+   
+   private State stringToState(String state) {
+      return State.valueOf(state);
+   
+   }
+   private String stateToString(State state) {
+      return state.toString();
+   }
+   
+   public void displayAll() {
+      try {
+         fDisplayAll();
+      }
+      catch (BeliefSetException bse) {
+         bse.printStackTrace();
+         System.exit(1);
+      }
+   }
+   
+   //Cannot have a return of void hence the string. Cannot put this into a normal method as it causes problems with logical variables
+   #function query String fDisplayAll() {
+      System.out.println("Displaying all Actions");
+      logical String actionID;
+      logical String state;
+      logical String parameters;
+      try{
+         Cursor c = qGetAll(actionID, state, parameters);
+         for( ; c.next() ; ) {
+            System.out.println("actionID: "+actionID+", state: "+state+", params: "+parameters);
+         }
+      }
+      catch(Exception e){
+         e.printStackTrace();
+         System.exit(1);
+      }
+      return null;
+   }
+}

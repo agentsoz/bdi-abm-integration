@@ -1,0 +1,372 @@
+\documentclass{article} % ----- Lamport s 160 ff
+\usepackage{a4}
+\usepackage{fullpage}
+%\special{header=draft.ps}
+\usepackage{epsfig}
+\usepackage{pdfpages}
+\usepackage{url}
+%\usepackage{longtable}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{csquotes}
+\usepackage{titlesec}
+\usepackage{amssymb,amsmath}
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+
+\newcommand{\Omit}[1]{}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex plus 0.3ex}
+
+%%%%%%%%%%%%%%%%%
+% tighter lists
+%%%%%%%%%%%%%%%%%
+\newcounter{bean}
+
+\newenvironment{tightenumerate}{
+                \begin{list}{
+                  {\mbox {
+                      \arabic{bean}.\/}}}{\usecounter{bean}
+                      \setlength{\itemsep}{-1pt}\setlength{\topsep}{0pt}}}{
+                \end{list}}
+
+\newenvironment{tightitemize}{
+                \begin{list}{$\bullet$}{
+                    \setlength{\itemsep}{-1pt}}{\setlength{\topsep}{0pt}}}{
+                \end{list}}
+
+
+
+\begin{document}
+\begin{center}
+{\Large \bf{Conservation Workshop Notes}}
+\end{center}
+
+These notes are the results of the workshop with Sarah, Sayed, Fiona,
+Lin, Dhirendra, where we decided on some details of the
+project. Produced months later from handwritten notes. It is
+complemented by a section on the actual implementation.
+
+We decided to model a situation where people's bidding behaviour is
+influenced by a \textit{Conservation Ethic} (C) and a \textit{Profit
+  Motive} (P).
+These would both be represented by a measure/barometer, which is
+affected (goes up/down) based on outcomes of auctions.
+
+Agents can be split into 4 groups: HighC\_LowP, HighC\_HighP, LowC\_LowP,
+LowC\_HighP. To avoid sharp behaviour changes around threshholds, for
+each auction we categorise an agent as high on each measure, with a
+probability that increases as they approach or exceed the threshold.
+
+We describe the behaviour of these agents in terms of the
+probability that they will bid at all, and the nature of the bids they
+will submit. We also describe how successful participants,
+unsuccessful participants and non-participants are affected by the auction
+outcomes overall, in terms of adjustment to their C measure. All
+agents adjust their P measure proportional to the amount of overall
+profit in the winning bids, unless profit is low in which case there
+is a small static increase. Cost recovery average outcomes have no
+effect on P. 
+
+\section{Behaviour of agent groups}
+\subsection{HighC\_LowP}
+Agents in this group are assumed to have a high probability of
+participating in the auction, and are expected to place many bids that are
+somewhere close to cost - can be slightly above or slightly below.
+
+The conservation ethic of the three subgroups is affected as follows:
+\begin{tightenumerate}
+\item Successful participants:\\
+if the profit is low to
+medium, this will decrease their conservation ethic. If it is high it
+will increase the conservation ethic. If it is cost recovery there
+will be no effect on conservation ethic.
+\item Unsuccessful participants:\\
+conservation ethic will decrease proportional to the profit obtained by
+others; cost recovery results in small decrease in conservation ethic.
+\item Non-participants:\\
+same as for unsuccessful participants.
+\end{tightenumerate}
+
+\subsection{HighC\_HighP}
+Agents will have a high probability of participating, and will place a
+moderate number of bids with moderate profit.
+
+The conservation ethic is affected  in the same way as HighC\_LowP
+(i.e. the key aspect is whether they currently have high or low
+conservation ethic).
+
+\subsection{LowC\_HighP}
+Agents will participate according to the probability that there is a
+chance of making a substantial profit, calculated by the percentage of
+successful bids in the last three rounds which made a medium or high
+profit. They will place only bids that can give a substantial profit
+(calculated as a dollar amount, not as a percentage).
+
+Conservation ethic is affected as follows:
+\begin{tightenumerate}
+\item Successful participants:\\
+If profit is in the range 0--medium threshold, then conservation ethic
+will decline; else conservation ethic will increase proportional to
+profit. 
+\item Unsuccessful participants:\\
+Small fixed negative effect on conservation ethic.
+\item Non-participants:\\
+Any payment leads to a small decline in conservation ethic,
+proportional to the profit.
+\end{tightenumerate}
+
+\subsection{LowC\_LowP}
+Agents will participate with low probability, with a random number of
+bids with medium profit.  Conservation ethic is affected in the same
+way as for LowC\_HighP agents.
+
+\section{Effect of social norms}
+We assume that as norms change regarding conservation ethic, so does
+the conservation ethic of individual agents. Thus at each step, an
+average conservation ethic is calculated, and agents below this value
+increase their conservation ethic, proportional to their distance from
+the average.
+{\it Lin says: maybe if the conservation ethic is trending upwards,
+  agents above the average should also increase their C? If they see
+  themselves as conservationists they will try to stay above the
+  average? Or if their distance from the average has decreased since
+  last step, then with some probability, restore the distance from the
+  average? Need to discuss this...}
+
+\section{Implementation}
+\subsection{Assigning high vs low C and P groups at each auction}
+Both conservation ethic barometer and profit motive barometer can vary 
+from 0 to 100. The upper limit of both of these barometers are configurable 
+and currently we have configured them to 100. The percentage of agents who 
+have high conservation ethic barometer (highCEAgentsPercentage) ranges 
+from 0-100\%. The number of landholders is configurable and currently we 
+have set it to 100. 
+
+During the system startup, we calculate the number of agents who have 
+high conservation ethic barometer based on the highCEAgentsPercentage 
+and number of land holders in the population.
+\begin{equation}\label{xx}
+\begin{split}
+number of agents who have high CE = number of landholders * highCEAgentsPercentage
+\end{split}
+\end{equation}
+Next, when initialising landholders, random values between 50 - 100 
+are assigned for the agents who should have high conservation ethic 
+barometer. Random values below 50 are assigned as conservation ethic 
+barometers of other landholders. 
+
+We do not control the number of agents who have high/low profit motive 
+barometers. Therefore, random values within the range from 0 to 100 are 
+assigned as profit motive barometers of agents. 
+
+
+\subsection{Probability of participating}
+Low probability set to 30\%, high probability set to 80\%. 
+
+Probability of participation for LowC\_HighP category is calculated based 
+on the number of successful bids in the last three auction rounds.
+\begin{equation}\label{xx}
+\begin{split}
+probability = number of successful bids with a good profit/number of successful bids
+\end{split}
+\end{equation}
+To calculate the \enquote{goodProfit}, the package, which is in the first quartile position
+when all packages are sorted in the descending order of their opportunity
+costs, is selected as the reference package. The \enquote{goodProfit} is the profit that 
+can be achieved by the reference package when \enquote{highProfitPercentage} is applied on it.
+\begin{equation}\label{xx}
+\begin{split}
+goodProfit = referencePackage.opportunityCost*(highProfitPercentage / 100)
+\end{split}
+\end{equation}
+Eg: If there are 8 winning bids, and 2 of them make a good profit, there will be 25\% 
+chance agents in this class will participate.
+
+\subsection{Number of bids calculation}
+We use two configurable variables to calculate number of bids.
+\begin{itemize}
+\item[-] defaultMaxNumberOfBids : ranges from 5 to 16.
+\item[-] bidAddon : ranges from 5 to 10.
+\end{itemize}
+These two values are used to differentiate the number of bids 
+selected by HighC\_LowP and HighC\_HighP categories.
+
+\begin{tightitemize}
+\item {\bf HighC\_LowP}\\ %many
+Agents in this category select \enquote{defaultMaxNumberOfBids + 
+bidAddon} number of packages.
+\item {\bf HighC\_HighP}\\ %moderate
+Agents in this category selects exactly 
+\enquote{defaultMaxNumberOfBids} number of packages.
+\item {\bf LowC\_HighP}\\  % all bids that give sufficient profit
+No constraint on number of bids, but with current calculation will
+tend to be about 20 of the 26 available packages.  \textit{Lin says:
+  this seems quite a large number - get SS view on this}.
+\textit{\\Sew says: It selects nearly 6 packages not 20.  
+I had initially documented that reference package is the one at 
+the 25th percentile. It should be corrected as 75th percentile.} 
+\item {\bf LowC\_LowP}\\ %random
+Random number between 1 and 26.
+
+\end{tightitemize}
+
+\subsection{Size of bids calculation}
+Amount of bid is calculated to be in a low, medium or high range, by
+taking an area above and below a low/medium/high threshold. The size
+of the area above/below the threshold is configurable and is called
+the proftVariability. The low threshold is always 0. The minimum for
+the medium threshold is 10\% and the minimum for the high threshold is
+20\%. The distaance between low and medium, and medium and high
+threshholds is called the profitDifferential, and is configurable.
+The profitDifferential ranges from 10-50\%. Possibly,
+once we understand the effects of the size and level of separation of
+these ranges we will simply use fixed ranges.
+\begin{tightitemize}
+\item {\bf HighC\_LowP}\\ % low profit range
+A configurable range, centred around 0. Will likely decide a fixed
+range centred around 0.
+\item {\bf HighC\_HighP}\\ % medium range
+A configurable range centred around a threshold that is a configurable
+amount above 0. Will likely decide a fixed range around a fixed threshold.
+\item {\bf LowC\_HighP}\\  % bids give good $ amount profit
+To calculate what is a \enquote{good amount of profit}, we take the package
+that is at the 75th percentile in terms of opportunity cost (i.e. \$
+size of package) and apply the high profit percentage on it. This number is 
+fixed for a given configuration with 100 rounds.
+
+For a given round the agent uses a profit multiplier in the high
+profit range (configurable around a high profit threshold, which is
+the same distance from the medium threshold as that is from 0), and
+submits all bids resulting in a profit above the 
+\enquote{good amount of profit}. This will mostly be the packages including
+and above the reference package in size, but with some variability
+(due to using a profit range to determine bids).
+\item {\bf LowC\_LowP}\\ % medium
+Same as for HighC\_HighP -- medium profit range.
+\end{tightitemize}
+
+\subsection{Calculation of changes to conservation ethic based on results}
+Following configurable parameters are used to update agents' conservation 
+ethic barometer.
+\begin{itemize}
+\item[-] agentConservationEthicModifier : conservation ethic barometer is 
+updated using this factor when the modification is done proportional to 
+the profit. Ranges from 0.05 to 20.
+\item[-] staticAgentConservationEthicModifier : a fixed value at 0.25. 
+This is used to update conservation ethic barometer when static modifications 
+to the barometer is needed.
+\end{itemize}
+
+\begin{tightitemize}
+\item {\bf HighC successful}\\ % low-med profit down; high up; cost none.
+The profit of the successful bid made by the agent is calculated as a percentage 
+of the bid price. If the profit is within the range from zero to the upper 
+margin of medium profit percentage range, decline agent's C proportional to 
+the profit. 
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C ( 1- |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+If the agent's C is above the upper margin of medium profit percentage 
+range, increase agent's C proportional to the profit.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C ( 1+ |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+
+\item {\bf HighC unsuccessful}\\ % down prop to profit; cost small down
+The highest profit made by any agent in the population is calculated as
+ a percentage of the bid price. If the profit is below zero (no profit 
+has been made), decline agent's C proportional to the profit. 
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C  = agent's current C * (1 - |profit| * agentConservationEthicModifier)
+\end{split}
+\end{equation}
+If there is some profit, decline agents's C as below.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C - staticAgentConservationEthicModifier
+\end{split}
+\end{equation}
+
+\item {\bf HighC non-participant}\\  % as above
+The highest profit made by any agent in the population is calculated 
+as a percentage of the bid price. If the profit is above the medium 
+profit percentage, decline agent's C proportional to the profit.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current  * (1 - |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+
+\item {\bf LowC successful }\\ % 0-med down; med-high up prop to profit
+The profit of the successful bid made by the agent is calculated as a 
+percentage of the bid price. If the profit is within the range from zero 
+to the upper margin of medium profit percentage range, decline agent's 
+C proportional to the profit. 
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C ( 1- |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+If the agent's C is above the upper margin of medium profit percentage 
+range, increase agent's C proportional to the profit.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C ( 1+ |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+
+\item {\bf LowC unsuccessful}\\ % small fixed down
+Agent's C is always declined.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current C - staticAgentConservationEthicModifier
+\end{split}
+\end{equation}
+
+\item {\bf LowC non-participant}\\ % small down prop to profit.
+The highest profit made by any agent in the population is calculated as 
+a percentage of the bid price. If the profit is above zero, decline agent's 
+C proportional to the profit.
+\begin{equation}\label{xx}
+\begin{split}
+agent's new C = agent's current  * (1 - |profit| * agentConservationEthicModifier/100)
+\end{split}
+\end{equation}
+
+\end{tightitemize}
+
+\subsection{Calculation of social norm increases in C}
+The factor \enquote{socialNormUpdatePercentage} is used to update agents' 
+C based on social norm. It ranges from 10 to 100.
+If individual agent's C is below the average conservation ethic of all 
+agents at the auction cycle start time, agent's C is increased using 
+the socialNormUpdatePercentage. 
+\begin{equation}
+\begin{split}
+new CE = current CE + (average CE - current CE) * socialNormUpdatePercentage/100
+\end{split}
+\end{equation}
+
+\subsection{Calculation of changes to profit motive barometer}
+\begin{tightitemize}
+\item {\bf HichP}\\
+The highest profit made by any agent in the population is calculated
+ as a percentage of the bid price. Next, the agent's P is updated 
+proportional to the profit using the factor agentProfitMotivationModifier. 
+This factor ranges from 0.05 to 20.
+\begin{equation}
+\begin{split}
+New P = Current P * (1 + |profit| * agentProfitMotivationModifier)
+\end{split}
+\end{equation}
+
+\item {\bf LowP}\\
+Agent's P increased by 0.25 (staticAgentProfitMotivationModifier)
+
+\end{tightitemize}
+\end{document}

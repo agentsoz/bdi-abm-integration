@@ -1,0 +1,236 @@
+<!--
+  #%L
+  BDI-ABM Integration Package
+  %%
+  Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+<!-- 
+	The following data relates to defining regions etc for the town
+
+	The geography file contains a list of locations. 
+	These can be of the types:
+		s = school
+		e = evacuation point
+		c = control point
+
+	Schools are used for residents who have children. They will travel to
+	one of the schools before evacuating.
+
+	TODO check that zero and 2+ schools work correctly
+
+	Evacuation points are where residents will evacuate too.
+
+	Control points are used to define evacuation routes.
+
+	Locations require a coordinate (easting, northing).
+
+	The town is divided into "regions".
+	If no regions are defined, the software assumes the whole area is one region.
+
+	Routes are defined by a sequence of control points.
+	If no routes are defined, a route with a single waypoint (the relief centre) is created for each region.
+
+-->
+<geography>
+<location 
+	name = "school"
+	easting="342625.83362445177"
+	northing = "5821266.798878116"
+	type = "s"
+/>
+<location 
+	name = "Heathmont"
+	easting="345587.97761380253"
+	northing = "5812102.807097912"
+	type = "e"
+/>
+<route>
+   <data
+      name = "RouteToHeathmontFromEast"
+      region = "Warrandyte-East"
+      shelter = "ShelterAtHeathmont"
+      description = "FAST"
+   />
+   <path>
+	   <waypoint 
+	      name="Heathmont"
+	   />
+   </path>   
+</route>
+
+<route>
+   <data
+      name = "RouteToHeathmontFromWest"
+      region = "Warrandyte-West"
+      shelter = "ShelterAtHeathmont"
+      description = "FAST"
+   />
+   <path>
+	   <waypoint 
+	      name="Heathmont"
+	   />
+   </path>   
+</route>
+
+<route>
+   <data
+      name = "RouteToHeathmontFromCentre"
+      region = "Warrandyte-Centre"
+      shelter = "ShelterAtHeathmont"
+      description = "FAST"
+   />
+   <path>
+	   <waypoint 
+	      name="Heathmont"
+	   />
+   </path>   
+</route>
+
+<route>
+   <data
+      name = "RouteToHeathmontFromNorth"
+      region = "Warrandyte-North"
+      shelter = "ShelterAtHeathmont"
+      description = "FAST"
+   />
+   <path>
+	   <waypoint 
+	      name="Heathmont"
+	   />
+   </path>   
+</route>
+
+<region>
+	<data
+		name = "Warrandyte-North"
+      	easting="342685"
+      	northing="5823103"
+      	population="600"
+	/>
+	<polygon>
+		<vertex 
+			easting="340040"
+			northing = "5821158"
+		/>
+		<vertex 
+			easting="340040"
+			northing = "5825049"
+		/>
+		<vertex 
+			easting="345331"
+			northing = "5825049"
+		/>
+		<vertex 
+			easting="345331"
+			northing = "5821158"
+		/>
+	</polygon>	
+</region>
+
+<region>
+	<data
+		name = "Warrandyte-East"
+      	easting="344706"
+      	northing="5820222"
+      	population="600"
+	/>
+	<polygon>
+		<vertex 
+			easting="343436"
+			northing = "5817568"
+		/>
+		<vertex 
+			easting="343436"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="345975"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="345975"
+			northing = "5817568"
+		/>
+	</polygon>	
+</region>
+
+<region>
+	<data
+		name = "Warrandyte-West"
+      	easting="340112"
+      	northing="5820222"
+      	population="600"
+	/>
+	<polygon>
+		<vertex 
+			easting="338806"
+			northing = "5817568"
+		/>
+		<vertex 
+			easting="338806"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="341419"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="341419"
+			northing = "5817568"
+		/>
+	</polygon>	
+</region>
+
+<region>
+	<data
+		name = "Warrandyte-Centre"
+      	easting="342425"
+      	northing="5820222"
+      	population="600"
+	/>
+	<polygon>
+		<vertex 
+			easting="341400"
+			northing = "5817568"
+		/>
+		<vertex 
+			easting="341400"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="343450"
+			northing = "5822877"
+		/>
+		<vertex 
+			easting="343450"
+			northing = "5817568"
+		/>
+	</polygon>	
+</region>
+
+<relief_centre>
+	<data
+		name = "ShelterAtHeathmont"
+		location = "Heathmont"
+		capacity = "2000"
+	/>
+</relief_centre>
+
+</geography>
+
+

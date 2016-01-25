@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  BDI-ABM Integration Package
+  %%
+  Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+
+<!--
+Template for building a Central Organizer
+-->
+<applicationtype xmlns="http://jadex.sourceforge.net/jadex"
+	xmlns:env="http://jadex.sourceforge.net/jadex-envspace"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jadex.sourceforge.net/jadex 
+	                    http://jadex.sourceforge.net/jadex-application-2.3.xsd
+	                    http://jadex.sourceforge.net/jadex-envspace 
+	                    http://jadex.sourceforge.net/jadex-envspace-2.3.xsd"
+	name="Template_CentralOrganizer" package="rmit.agent.jadex.abm_interface">
+	
+	<imports>
+		<import>jadex.extension.envsupport.environment.space2d.*</import>
+		<import>jadex.extension.envsupport.environment.*</import>
+		<import>jadex.extension.envsupport.math.*</import>
+		<import>jadex.extension.envsupport.dataview.*</import>
+		<import>jadex.extension.envsupport.observer.perspective.*</import>
+		<import>jadex.bdi.planlib.*</import>
+		<import>jadex.bdi.examples.cleanerworld.cleaner.*</import>
+		<import>jadex.bridge.service.types.clock.IClockService</import>
+		<import>jadex.bridge.service.search.*</import>
+		<import>jadex.bridge.service.*</import>
+		<import>jadex.bridge.*</import>
+		<import>jadex.commons.future.*</import>
+		<import>rmit.agent.jadex.abm_interface.data_structure.*</import>
+		<import>java.util.*</import>
+		<import>rmit.agent.jadex.abm_interface.*</import>
+		<import>bdisim.data.*</import>
+	</imports>
+	
+	<extensiontypes>
+	    <env:envspacetype name="2dspace" class="ContinuousSpace2D" width ="1" height ="1">
+	        <env:property name="border">Space2D.BORDER_STRICT</env:property>
+	        <env:objecttypes>
+	            <env:objecttype name="starter"/>
+	            <env:objecttype name="agent">
+	                <env:property name="agentID" class ="String"/>
+	                <env:property name="componentID" class = "IComponentIdentifier"></env:property>
+	                <env:property name="actionContainer" class ="ActionContainer"/>
+	                <env:property name="perceptContainer" class ="PerceptContainer"/>
+	            </env:objecttype>
+	        </env:objecttypes>
+	        <env:avatarmappings>
+	            <env:avatarmapping objecttype="starter" componenttype="Starter"/>
+	        </env:avatarmappings>
+	        <env:actiontypes>
+	            <env:actiontype name="idle_action" class="IdleAction"></env:actiontype>
+	            <env:actiontype name="unidle_agent_action" class="UnidleAgentAction"></env:actiontype>
+	            <env:actiontype name="query_percept_action" class="QueryPerceptAction"></env:actiontype>
+	            <env:actiontype name="inter_central_action" class="InterCentralAction"></env:actiontype>
+	            <env:actiontype name="kill_action" class="KillAgentsAction"></env:actiontype>
+	            <env:actiontype class="FloatingMsgUpdateAction" name="update_float_action"/>      
+	        </env:actiontypes>
+	        <env:spaceexecutor class="DeltaTimeExecutor">
+				<env:property name="space">$space</env:property>
+				<env:property name="tick">true</env:property>
+			</env:spaceexecutor>
+	    </env:envspacetype>
+	</extensiontypes>
+	
+	<componenttypes>
+	    <componenttype filename="/Starter.agent.xml" name="Starter"/>
+	</componenttypes>
+
+	<configurations>
+	    <configuration name="default">
+	        <extensions>
+	            <env:envspace name="my2dspace" type="2dspace" width = "1.0" height = "1.0">
+	                <env:property name="agentDataContainer" class ="AgentDataContainer">
+	                    new AgentDataContainer()
+	                </env:property>
+	                <env:property name="agentStateList" class ="AgentStateList">
+	                    new AgentStateList()
+	                </env:property>
+	                <env:property name="agentToBeBornList" class ="AgentStateList">
+	                    new AgentStateList()
+	                </env:property>
+	                <env:property name="server" class ="Object">
+	                    null
+	                </env:property>
+	                <env:property name="agentTypeList" class ="ArrayList">
+	                    new ArrayList()
+	                </env:property>
+	                <env:property name="repastAddress" class ="String">
+	                    null
+	                </env:property>
+	                <env:property name="superCentralAddress" class ="String">
+	                    null
+	                </env:property>
+	                <env:property name="myAddress" class ="String">
+	                    null
+	                </env:property>
+	                 <env:property name="componentAgentIDMap" class ="HashMap">
+	                    new HashMap()
+	                </env:property>
+	               	<env:property name="floatingMsgNum" class ="SyncInteger">
+	                    new SyncInteger()
+	                </env:property>
+	                <env:property class="Integer" name="co_port">1099</env:property>
+                    <env:property class="Integer" name="sc_port">1099</env:property>
+                    <env:property class="String" name="sc_host">"localhost"</env:property>
+                    <env:property class="String" name="sc_name">"super"</env:property>
+	            </env:envspace>
+	        </extensions>
+	        <components>
+	            <component type="Starter"></component>
+	        </components>
+	    </configuration>
+	</configurations>
+</applicationtype>
