@@ -5,17 +5,10 @@ BDI system. For more information on the BDI-ABM integration project,
 see the top level README.
 
 
-
+<a name="Dependencies"></a>
 ## Dependencies
 
-JDK 1.7 
-
-April 28, 2015: At the time of writing, all applications using this integation
-should use JDK 1.7. The current version of JACK does not build with 
-JDK 1.8.
-
-
-JACK 5.6 (aosgrp.com/products/jack)
+- JACK 5.6 (aosgrp.com/products/jack)
 
 Make sure JACK is installed on your system. Then assuming JACKROOT is the 
 root directory of the installation, issue the following command to install
@@ -32,9 +25,11 @@ the JACK library in your local Maven repository:
 
 ## How to Compile
 
+1.  Install dependencies to your local maven repository using the 
+    instructions given above (see [Dependencies](#Dependencies))
 
-For instructions on how to build this library, see the top level README.
-
+2.  To Build the ABM-JACK integration layer: In `/integrations/abm-jack/`, 
+    do `mvn clean install`
 
 
 ## License

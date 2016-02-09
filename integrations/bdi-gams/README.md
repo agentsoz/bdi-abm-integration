@@ -5,15 +5,14 @@ ABM. For more information on the BDI-ABM integration project,
 see the top level README.
 
 
-
+<a name="Dependencies"></a>
 ## Dependencies
 
-GAMS 24.4 (www.gams.com)
+- GAMS 24.4 (www.gams.com)
 
 Make sure GAMS is installed on your system. Then assuming GAMSROOT is the 
 root directory of the installation, issue the following command to install
-the GAMS Java API library in your local Maven
-repository:
+the GAMS Java API library in your local Maven repository:
 
    > mvn install:install-file \
       -Dfile=GAMSROOT/apifiles/Java/api/GAMSJavaAPI.jar \
@@ -26,7 +25,11 @@ repository:
 
 ## How to Compile
 
-For instructions on how to build this library, see the top level README.
+1.  Install dependencies to your local maven repository using the 
+    instructions given above (see [Dependencies](#Dependencies))
+
+2.  To Build the ABM-GAMS integration layer: In `/integrations/abm-gams/`, 
+    do `mvn clean install`
 
 
 

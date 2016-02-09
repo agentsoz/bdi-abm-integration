@@ -9,6 +9,8 @@ https://bitbucket.org/ngeard/simodd-bdi. The parent decision making is
 offloaded to the BDI counterparts (in JACK) that exists only for a 
 portion of the agents life (from pregnancy to a few years after that).
 
+
+
 ## Dependencies
 
 
@@ -18,32 +20,26 @@ This program depends on the following libraries:
 * ABM-JACK-Integration (`/integrations/abm-jack`)
 
 
+
 ## How to Compile
 
-1. Install the parent POM:
 
-   > cd ../.. && mvn clean install --non-recursive && cd -
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+    `mvn clean install -N`
+2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
+    for instructions
+3.  Build the ABM-JACK library: See `/integrations/abm-jack/README.md`
+    for instructions
+4.  Build the Bushfire application: In `/examples/vaccination`, do
+    `mvn clean install`
 
-2. Build the BDI-ABM integration layer:
-
-   > cd ../../integrations/bdi-abm && mvn clean install && cd -
-
-3. Build the ABM-JACK integration layer (assuming you have 
-   first installed the ABM-JACK dependencies as per 
-   `../../../integrations/bdi-abm/README.md`):
- 
-   > cd ../../integrations/abm-jack && mvn clean install && cd -
-   
-4. Finally, build the vaccination application:
-
-   > mvn clean install
 
 ## How to Run
 
 
 To run from the command line:
 
-   > ./test/run.sh
+        > ./test/run.sh
 
 
 

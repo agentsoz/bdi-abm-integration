@@ -20,6 +20,7 @@ in the following papers papers:
    In Winter Simulation Conference (WSC), pages 345-356, 2011.
 
 
+
 ## How to use this software
 
 Examples of BDI-ABM applications are provided in the `./examples` directory.
@@ -43,9 +44,8 @@ Integration   | Directory                   | Description
 BDI-ABM       | `./integrations/bdi-abm`    | BDI-ABM communication and data layer
 BDI-GAMS      | `./integrations/bdi-gams`   | Integration for GAMS (www.gams.com) 
 BDI-MATSim    | `./integrations/bdi-matsim` | Integration for MATSim (www.matsim.org)
-BDI-Repast    | `./integrations/bdi-repast` | Integration for Repast (repast.sourceforge.net)
-ABM-GORITE    | `./integrations/abm-gorite` | Integration for GORITE (www.intendico.com/gorite)
 ABM-JACK      | `./integrations/abm-jack`   | Integration for JACK (aosgrp.com/products/jack)
+ABM-JILL      | `./integrations/abm-jill`   | Integration for JILL (http://agentsoz.github.io/jill)
 ABM-Jadex     | `./integrations/abm-jadex`  | Integration for Jadex (http://www.activecomponents.org/bin/view/About/Features)
 
 Integrations are pulled together to build application examples. The following
@@ -55,9 +55,15 @@ Example             | Directory                  | Description
 :-------------------|:---------------------------|:----------------------------
 Bushfire            | `./examples/bushfire`      | Uses JACK and MATSim
 Conservation Ethics | `./examples/cnoservation`  | Uses JACK and GAMS
-Taxi Service        | `./examples/taxi`          | Uses GORITE and MATSim
 Child Vaccination   | `./examples/vaccination`   | Uses JACK and a custom Python-based ABM
-Humans and Zombies  | `./examples/zombies`       | Uses Jadex and Repast
+
+In addition to above, the repository consists of an *util* project. It lives in 
+`./util` and contains the utility classes used by integration libraries and example 
+applications in the repository.
+
+Project     | Directory      | Description
+:-----------|:---------------|:--------------------------------------------
+Util        | `./util`       | Contains utility classes for integration libraries and example applications
 
 
 
@@ -80,26 +86,55 @@ Humans and Zombies  | `./examples/zombies`       | Uses Jadex and Repast
   *The project will not build unless these dependencies have been 
    resolved.*
 
+
+
 ## Compiling
 
-This software is managed by the Apache Maven software management tool. You
-can build the software in two ways. 
 
-* The entire suite of integrations and examples can be built using the 
-  command line. Ensure that you have Maven installed
-  (see [Dependencies](#Dependencies)). Then from the top level directory
-  containing `pom.xml`, do `mvn clean install`.
+### Bushfire example
 
-* Each integration and example also contains an Eclipse project. First 
-  ensure that you have an appropriate version that supports Maven 
-  (see [Dependencies](#Dependencies)). Then import the existing project 
-  (e.g., `./integrations/bdi-abm/.project`) into Eclipse, and it should 
-  build without any additional configuration. 
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+    `mvn clean install -N`
+2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
+    for instructions
+3.  Build the UTIL library: See `/util/README.md`
+    for instructions
+4.  Build the ABM-JACK library: See `/integrations/abm-jack/README.md`
+    for instructions
+5.  Build the ABM-JILL library: See `/integrations/abm-jill/README.md`
+    for instructions
+6.  Build the Bushfire application: In `/examples/bushfire`, do
+    `mvn clean install`
+
+
+### Conservation Example
+
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+    `mvn clean install -N`
+2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
+    for instructions
+3.  Build the BDI-GAMS library: See `/integrations/bdi-gams/README.md`
+    for instructions
+4.  Build the ABM-JILL library: See `/integrations/abm-jill/README.md`
+    for instructions
+5.  Build the Bushfire application: In `/examples/conservation`, do
+    `mvn clean install`
+
+
+### Vaccination Example
+
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+    `mvn clean install -N`
+2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
+    for instructions
+3.  Build the ABM-JACK library: See `/integrations/abm-jack/README.md`
+    for instructions
+4.  Build the Bushfire application: In `/examples/vaccination`, do
+    `mvn clean install`
 
 
 
 ## License
-
 
 BDI-ABM Integration Package
 Copyright (C) 2014, 2015 by its authors. See AUTHORS file.

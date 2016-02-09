@@ -27,8 +27,29 @@ libraries.
 
 ## How to Compile
 
+### Command Line
+  
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+    `mvn clean install -N`
+2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
+    for instructions
+3.  Build the BDI-GAMS library: See `/integrations/bdi-gams/README.md`
+    for instructions
+4.  Build the ABM-JILL library: See `/integrations/abm-jill/README.md`
+    for instructions
+5.  Build the Bushfire application: In `/examples/conservation`, do
+    `mvn clean install`
 
-For instructions on how to build this library, see the top level README.
+### Eclipse
+
+Ensure that you have the corrent version of Eclipse installed. See 
+`../../README.md` for details. Then import and build the following 
+Eclipse projects:
+
+*  `/integrations/bdi-abm` 
+*  `/integrations/abm-jack` 
+*  `/integrations/bdi-gams` 
+*  `/examples/conservation` 
 
 
 
@@ -37,7 +58,7 @@ For instructions on how to build this library, see the top level README.
 
 To run from the command line:
 
-   > ./test/run.sh
+        > ./test/run.sh
 
 
 

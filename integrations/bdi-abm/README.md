@@ -9,8 +9,14 @@ including build instructions, see the top level README.
 
 
 
-## License
+## How to Compile
 
+To Build the BDI-ABM integration layer: In `/integrations/bdi-abm/`, 
+do `mvn clean install`
+
+
+
+## License
 
 BDI-ABM Integration Library
 Copyright (C) 2014, 2015 by its authors. See AUTHORS file.

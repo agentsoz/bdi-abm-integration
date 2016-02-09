@@ -1,30 +1,33 @@
-# ABM-JADEX Integration Library
+# ABM-JILL Integration Library
 
-This ABM-JADEX Integration library allows the use of JADEX as the underlying
+This ABM-JILL Integration library allows the use of JILL as the underlying
 BDI system. For more information on the BDI-ABM integration project, 
 see the top level README.
 
-For information about Jadex see:
-http://www.activecomponents.org/bin/view/Documentation/Overview
 
 
-
+<a name="Dependencies"></a>
 ## Dependencies
 
-- Jadex 2.3 (http://www.activecomponents.org/bin/view/About/Features)
+- JILL 0.3.1-SNAPSHOT (http://agentsoz.github.io/jill)
 
-Jadex dependency is automatically resolved by Maven.
+Download the 0.3.1-SNAPSHOT version of JILL from https://github.com/agentsoz/jill.
+Next, in `/jill/`, do `mvn clean install` to install the Jill library to your 
+local Maven repository.
 
 
 
 ## How to Compile
 
-To Build the BDI-MATSIM integration layer: In `/integrations/bdi-jadex/`, 
-do `mvn clean install`
+1.  Install dependencies to your local maven repository using the 
+    instructions given above (see [Dependencies](#Dependencies))
 
+2.  To Build the ABM-JILL integration layer: In `/integrations/abm-jill/`, 
+    do `mvn clean install`
 
 
 ## License
+
 
 BDI-ABM Integration Library
 Copyright (C) 2014, 2015 by its authors. See AUTHORS file.
@@ -43,3 +46,6 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 For contact information, see AUTHORS file.
+
+
+
