@@ -29,10 +29,12 @@ analysis <- function(db) {
 	boxplot(s1_data, ylab ="Percentage of agents increased/decreased their CE \n in 100 auction cycles",ylim=range(c(0,100)), las = 2)
 	title('Initial high CE agents% = 25%')
 
-	print(sprintf('Average percentage of high CE agents increased their CE: %s', mean(s1_data[,1])))
-	print(sprintf('Average percentage of high CE agents decreased their CE: %s', mean(s1_data[,2])))
-	print(sprintf('Average percentage of low CE agents increased their CE: %s', mean(s1_data[,3])))
-	print(sprintf('Average percentage of low CE agents decreased their CE: %s', mean(s1_data[,4])))
+	#print('=======T-test between box 1 and 2:=========')
+	#t.test(s1_data[,c("High CE:\nIncreased CE")], s1_data[,c("High CE:\nDecreased CE")])
+
+	print('=======T-test between box 3 and 4:=========')
+	t.test(s1_data[,c("Low CE:\nIncreased CE")], s1_data[,c("Low CE:\nDecreased CE")])
+
 }
 
 readData <- function(db, sampleNumber){
@@ -91,7 +93,7 @@ readData <- function(db, sampleNumber){
 		output[r,] = c(high_ce_increased * 100/initially_high, high_ce_decreased* 100/initially_high, low_ce_increased * 100/initially_low, low_ce_decreased* 100/initially_low)
 	}
 
-	print(output)
+	#print(output)
 	return(output)
 }
 
