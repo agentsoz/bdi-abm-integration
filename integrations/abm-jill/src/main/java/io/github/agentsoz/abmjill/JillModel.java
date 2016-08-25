@@ -85,6 +85,7 @@ public abstract class JillModel implements BDIServerInterface {
 			AgentStateList agentList, 
 			ABMServerInterface abmServer,
 			Object[] params) {
+		nextContainer = agentDataContainer;
 		// Parse the command line options
 		ArgumentsLoader.parse((String[])params);
 		// Load the configuration 
