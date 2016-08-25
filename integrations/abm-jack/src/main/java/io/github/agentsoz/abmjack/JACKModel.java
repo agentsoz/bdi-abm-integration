@@ -257,11 +257,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 				}
 			}
 		} while (allIdle == false);
-		try {
-			abmServer.takeControl(nextContainer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void createAgents(String[] agentIDs) {
