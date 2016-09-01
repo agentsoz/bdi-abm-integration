@@ -45,12 +45,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import io.github.agentsoz.jill.Main;
 import io.github.agentsoz.jill.config.Config;
-import io.github.agentsoz.jill.core.GlobalState;
-import io.github.agentsoz.jill.util.AObjectCatalog;
 import io.github.agentsoz.jill.util.ArgumentsLoader;
-import io.github.agentsoz.jill.util.Log;
 
 public abstract class JillModel implements BDIServerInterface {
 
@@ -113,6 +109,8 @@ public abstract class JillModel implements BDIServerInterface {
 	// package new agent action into the agent data container
 	public static void packageAgentAction(String agentID, String actionID,
 			Object[] parameters) {
+		
+		((Agent) GlobalState.agents.get(Integer.valueOf(agentID))).packageAction(actionID, parameters);
 
 		ActionContainer ac = nextContainer.getOrCreate(agentID)
 				.getActionContainer();
