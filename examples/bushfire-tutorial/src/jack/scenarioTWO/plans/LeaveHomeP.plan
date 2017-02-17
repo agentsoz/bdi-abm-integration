@@ -1,0 +1,44 @@
+package scenarioTWO.plans;
+import scenarioTWO.events.*;
+import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.bushfire.datacollection.ScenarioTwoData;
+import io.github.agentsoz.bushfire.shared.ActionID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public plan LeaveHomeP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: LeaveP
+*/
+	//Events handled by the plan are declared here.
+	#handles event LeaveFromHome leavefromhome_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+	context()
+	{
+		true;
+	}
+
+	body()
+	{
+		logger.debug("leaveHome plan initiated..");
+		double delayTime = 10.0;
+		Object[] leave_params = new Object[] { (Object)ActionID.setDriveTime ,delayTime,"Current"};
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.setDriveTime, leave_params );
+
+		@post( gag );
+	}
+}

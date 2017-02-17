@@ -1,0 +1,70 @@
+package scenarioTWO.plans;
+import scenarioTWO.events.*;
+import scenarioTWO.data.*;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.bushfire.datacollection.ScenarioTwoData;
+import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.bushfire.shared.ActionID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public plan LeaveNowP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: LeaveNowP
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event AssessThreatG assessthreatg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+	#reads data depTime depTimesBDB_dat;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	/* Action Reminder:
+		Name: drive_to(evac_dest)
+	*/
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+	context()
+	{
+		/*Context: cc : agent is not at home and dont have time to get back to home */
+
+		// Trigger: Event "AssessThreatG"
+
+		( res.getTravelTime() * 0.75 > res.getTimeLeftToEvac() && (!res.currentLocation.equals("home"))  );
+
+	//	true;
+	//false;
+	}
+
+	body()
+	{
+		//logger.info("agent {} | current location {}  ", res.agentID, res.currentLocation);
+		logger.debug("agent: " + res.agentID + "| current location - " + res.currentLocation + "| time left to evac : " + res.getTimeLeftToEvac() + " | initiated LeaveNow plan ");
+
+
+		res.initiatedAction=ActionID.CONNECT_TO;
+		res.targetDestination="Safe";
+
+		Object[] drive_params = new Object[] { (Object)ActionID.CONNECT_TO, res.targetDestination};
+
+		ScenarioTwoData.leaveNow++;
+		ScenarioTwoData.connectToAgents.add((Object)res.agentID);
+		ScenarioTwoData.connectToDepTimes.add((Object)res.getCurrentTime());
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.CONNECT_TO, drive_params );
+		long startTime = res.getCurrentTime();
+		@subtask( gag );
+
+	}
+}

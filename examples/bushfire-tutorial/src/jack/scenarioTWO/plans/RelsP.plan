@@ -1,0 +1,122 @@
+package scenarioTWO.plans;
+import scenarioTWO.events.*;
+import scenarioTWO.data.*;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.bushfire.shared.ActionID;
+import scenarioTWO.agents.EvacResident;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.Random;
+
+public plan RelsP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: RelsP
+Description: Lin - get a relative from a random address. This goal instantiated only with some probability.
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event RelsG relsg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	/* Action Reminder:
+		Name: drive_to(rel) and pickup(rels)
+	*/
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+
+	context()
+	{
+		/*Context: cc : relsNeedPickUp==true
+*/
+		// Trigger: Event "KidsG"
+
+
+		true;
+	}
+
+	body()
+	{
+		logger.info("agent " + res.agentID + " initiated picking up relatives..");
+
+		double[] relCoords = getRandomCoordinate(); // 1. get a destination
+		int pickuptime = res.bdiConnector.getPickupTime() * 60; // 2. get a random pickup time in minutes and convert it to seconds
+
+	/*
+		//1.driveTo action
+		res.initiatedAction=ActionID.DRIVETO;
+		res.targetDestination="Relatives";
+
+		Object[] params = new Object[] { (Object)ActionID.DRIVETO, relCoords, res.targetDestination};
+		logger.debug(" Action : "+ActionID.DRIVETO + " relatives: coords: " + relCoords[0] +" "+ relCoords[1]);
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO, params );
+		long startTime = res.getCurrentTime();
+		@subtask( gag );
+
+		logger.info("driveTo action returned, issuing pickup activity");
+
+		//2.pickup action
+		if(res.currentLocation.equals("Relatives")) {
+			logger.debug("agent has reached the relatives destination");
+			Object[] params = new Object[] { (Object)ActionID.PICKUP, pickuptime, relCoords};
+			logger.debug(" Action : "+ActionID.PICKUP + " pickup time: " + pickuptime);
+			GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.PICKUP, params );
+			@subtask( gag );
+		}
+
+		else
+		{
+			logger.error(" agent is not at the relatives location, BDI action pickup failed !!");
+		}
+
+		*/
+
+
+		res.initiatedAction=ActionID.driveToAndPickUp;
+		res.targetDestination="Relatives";
+
+		Object[] params = new Object[] { (Object)ActionID.driveToAndPickUp , relCoords, res.targetDestination, pickuptime};
+
+		logger.debug("agent " + res.agentID + " Action : "+ActionID.driveToAndPickUp + " relatives: coords: " + relCoords[0] +" "+ relCoords[1] + " pickup-time :  "+ pickuptime );
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.driveToAndPickUp, params );
+		long startTime = res.getCurrentTime();
+		@subtask( gag );
+
+
+
+		//after pick up rels calculations  | endtime should minus the pickup time to get the travel time
+		long endTime = res.getCurrentTime();
+		long tripTime = (endTime -pickuptime) - startTime;
+		res.addToTravelTime(tripTime);
+		logger.debug(" Trip time to pick up relatives for agent {} is {}",res.agentID , (Object)tripTime);
+
+	}
+
+	private double[] getRandomCoordinate() {
+		Random random = new Random();
+		double[] coordinates = new double[2];
+
+		int distance = random.nextInt(res.bdiConnector.getMaxDistanceToRelatives());
+		logger.trace( " | Max distance to relatives: " + res.bdiConnector.getMaxDistanceToRelatives());
+		double angle = random.nextDouble() * 2 * Math.PI;
+
+		// Calculating destination's X coordinate
+		coordinates[0] = res.startLocation[0] + distance * Math.cos(angle);
+
+		// Calculating destination's Y coordinate
+		coordinates[1] = res.startLocation[1] + distance * Math.sin(angle);
+
+		return coordinates;
+	}
+}

@@ -1,0 +1,30 @@
+package scenarioTWO.events;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scenarioTWO.data.*;
+
+public event EvacAlert extends BDIGoalEvent
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+/*
+ * Percept Name: EvacAlert
+ */
+
+	//This Event was converted from Percept: EvacAlert
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+final Logger logger = LoggerFactory.getLogger("");
+
+
+public String message;
+
+
+	/*Posting Method Declarations*/
+	#posted as fireAlert(String msg)
+	{
+		this.message = msg;	
+		logger.trace(" Agent " + getAgent().getBasename() + " : post EvacAlert G");
+	}
+}

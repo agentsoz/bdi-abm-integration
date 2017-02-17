@@ -1,0 +1,80 @@
+package scenarioTWO.plans;
+import scenarioTWO.events.*;
+import scenarioTWO.data.*;
+import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.bushfire.datacollection.ScenarioTwoData;
+import io.github.agentsoz.bushfire.shared.ActionID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public plan GoHomeP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: GoHomeP
+Description: Set prepared_to_evac_flag = false
+
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event AssessThreatG assessthreatg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+	#reads data depTime depTimesBDB_dat;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+	/* Action Reminder:
+		Name: drive_to(home)
+	*/
+
+	context()
+	{
+		/*Context: cc : agent is not at home and have time to go home  */
+
+
+		( res.getTravelTime() * 0.75 <= res.getTimeLeftToEvac()  && (!res.currentLocation.equals("home"))   );
+
+
+		// Trigger: Event "AssessThreatG"
+
+
+		//true;
+		//false;
+	}
+
+	body()
+	{
+			logger.debug("agent: " + res.agentID + "| current location - " + res.currentLocation + "| time left to evac : " + res.getTimeLeftToEvac() + " | initiated goHome plan  ");
+
+
+	//	logger.info( " time left to evac : " + res.getTimeLeftToEvac() + " initiated goHome plan ");
+	//	logger.debug("current location of agent {} is : {} ", res.agentID, res.currentLocation);
+
+		res.initiatedAction=ActionID.DRIVETO;
+		res.targetDestination="Home";
+
+		Object[] drive_params = new Object[] { (Object)ActionID.DRIVETO , res.startLocation , res.targetDestination};
+
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO, drive_params );
+		@subtask( gag );
+
+
+		res.waitAtHomeFlag = true;
+		logger.trace("updated agent {} waitAtHomeFlag to true", res.agentID);
+		ScenarioTwoData.goHome++;
+
+		logger.trace("GoHome plan returned at " + res.getCurrentTime() + " for agent " + res.agentID);
+
+	}
+}
