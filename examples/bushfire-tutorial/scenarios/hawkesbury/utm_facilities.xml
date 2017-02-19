@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE facilities SYSTEM "http://www.matsim.org/files/dtd/facilities_v1.dtd">
+<facilities>
+
+<!-- ====================================================================== -->
+
+	<facility id="0" x="288770" y="6279407">
+		<activity type="Evacuation">
+			<capacity value="730.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="1" x="300721" y="6269455">
+		<activity type="Evacuation">
+			<capacity value="600.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="10" x="302501" y="6270660">
+		<activity type="Evacuation">
+			<capacity value="589.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="11" x="293225" y="6269335">
+		<activity type="Evacuation">
+			<capacity value="155.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="12" x="299521" y="6279063">
+		<activity type="Evacuation">
+			<capacity value="155.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="13" x="294748" y="6274107">
+		<activity type="Evacuation">
+			<capacity value="258.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="14" x="285556" y="6279561">
+		<activity type="Evacuation">
+			<capacity value="108.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="15" x="294154" y="6270848">
+		<activity type="Evacuation">
+			<capacity value="202.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="16" x="289206" y="6275881">
+		<activity type="Evacuation">
+			<capacity value="316.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="17" x="287015" y="6266070">
+		<activity type="Evacuation">
+			<capacity value="544.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="18" x="292825" y="6261806">
+		<activity type="Evacuation">
+			<capacity value="621.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="19" x="302724" y="6267451">
+		<activity type="Evacuation">
+			<capacity value="228.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="2" x="294981" y="6266477">
+		<activity type="Evacuation">
+			<capacity value="215.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="20" x="301455" y="6263193">
+		<activity type="Evacuation">
+			<capacity value="683.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="21" x="297671" y="6276036">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="22" x="293261" y="6278412">
+		<activity type="Evacuation">
+			<capacity value="342.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="23" x="287687" y="6269528">
+		<activity type="Evacuation">
+			<capacity value="159.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="24" x="284493" y="6267752">
+		<activity type="Evacuation">
+			<capacity value="6.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="25" x="295570" y="6272151">
+		<activity type="Evacuation">
+			<capacity value="198.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="26" x="301824" y="6265047">
+		<activity type="Evacuation">
+			<capacity value="683.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="27" x="284069" y="6262918">
+		<activity type="Evacuation">
+			<capacity value="771.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="28" x="304214" y="6271951">
+		<activity type="Evacuation">
+			<capacity value="122.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="29" x="284557" y="6261276">
+		<activity type="Evacuation">
+			<capacity value="627.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="3" x="283864" y="6259870">
+		<activity type="Evacuation">
+			<capacity value="523.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="30" x="295321" y="6267643">
+		<activity type="Evacuation">
+			<capacity value="154.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="31" x="292333" y="6260339">
+		<activity type="Evacuation">
+			<capacity value="696.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="32" x="302719" y="6273179">
+		<activity type="Evacuation">
+			<capacity value="155.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="33" x="292001" y="6267857">
+		<activity type="Evacuation">
+			<capacity value="178.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="34" x="299695" y="6265450">
+		<activity type="Evacuation">
+			<capacity value="811.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="35" x="297898" y="6275125">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="36" x="296897" y="6275398">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="37" x="282257" y="6261561">
+		<activity type="Evacuation">
+			<capacity value="642.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="38" x="292981" y="6262954">
+		<activity type="Evacuation">
+			<capacity value="621.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="39" x="300776" y="6281131">
+		<activity type="Evacuation">
+			<capacity value="410.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="4" x="299405" y="6276320">
+		<activity type="Evacuation">
+			<capacity value="231.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="40" x="288097" y="6278382">
+		<activity type="Evacuation">
+			<capacity value="144.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="41" x="301426" y="6272554">
+		<activity type="Evacuation">
+			<capacity value="589.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="42" x="294044" y="6265691">
+		<activity type="Evacuation">
+			<capacity value="569.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="43" x="300805" y="6277731">
+		<activity type="Evacuation">
+			<capacity value="686.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="44" x="283172" y="6263372">
+		<activity type="Evacuation">
+			<capacity value="772.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="45" x="284185" y="6273311">
+		<activity type="Evacuation">
+			<capacity value="110.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="46" x="292101" y="6275473">
+		<activity type="Evacuation">
+			<capacity value="459.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="47" x="296177" y="6274466">
+		<activity type="Evacuation">
+			<capacity value="3.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="48" x="284773" y="6264483">
+		<activity type="Evacuation">
+			<capacity value="772.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="49" x="291299" y="6273661">
+		<activity type="Evacuation">
+			<capacity value="459.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="5" x="285471" y="6270834">
+		<activity type="Evacuation">
+			<capacity value="200.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="50" x="294441" y="6283594">
+		<activity type="Evacuation">
+			<capacity value="636.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="51" x="299795" y="6264662">
+		<activity type="Evacuation">
+			<capacity value="811.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="52" x="294263" y="6276213">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="53" x="300616" y="6264520">
+		<activity type="Evacuation">
+			<capacity value="811.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="54" x="291047" y="6281222">
+		<activity type="Evacuation">
+			<capacity value="730.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="55" x="295032" y="6263026">
+		<activity type="Evacuation">
+			<capacity value="477.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="56" x="297214" y="6277301">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="57" x="302871" y="6264541">
+		<activity type="Evacuation">
+			<capacity value="683.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="58" x="296513" y="6278357">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="59" x="302149" y="6262835">
+		<activity type="Evacuation">
+			<capacity value="683.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="6" x="305327" y="6274484">
+		<activity type="Evacuation">
+			<capacity value="187.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="60" x="297145" y="6272299">
+		<activity type="Evacuation">
+			<capacity value="170.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="61" x="297921" y="6279066">
+		<activity type="Evacuation">
+			<capacity value="92.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="62" x="296146" y="6280887">
+		<activity type="Evacuation">
+			<capacity value="730.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="63" x="281686" y="6265640">
+		<activity type="Evacuation">
+			<capacity value="771.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="64" x="281212" y="6260374">
+		<activity type="Evacuation">
+			<capacity value="642.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="65" x="302545" y="6275955">
+		<activity type="Evacuation">
+			<capacity value="686.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="66" x="292874" y="6264113">
+		<activity type="Evacuation">
+			<capacity value="296.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="67" x="293161" y="6282234">
+		<activity type="Evacuation">
+			<capacity value="730.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="68" x="286498" y="6276391">
+		<activity type="Evacuation">
+			<capacity value="176.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="69" x="300576" y="6265274">
+		<activity type="Evacuation">
+			<capacity value="811.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="7" x="297861" y="6274016">
+		<activity type="Evacuation">
+			<capacity value="116.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="70" x="300646" y="6273951">
+		<activity type="Evacuation">
+			<capacity value="73.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="71" x="282378" y="6265157">
+		<activity type="Evacuation">
+			<capacity value="772.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="72" x="286339" y="6263802">
+		<activity type="Evacuation">
+			<capacity value="631.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="73" x="294604" y="6263699">
+		<activity type="Evacuation">
+			<capacity value="477.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="74" x="295644" y="6276205">
+		<activity type="Evacuation">
+			<capacity value="755.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="75" x="282617" y="6264258">
+		<activity type="Evacuation">
+			<capacity value="772.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="76" x="298898" y="6279629">
+		<activity type="Evacuation">
+			<capacity value="75.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="77" x="287200" y="6267886">
+		<activity type="Evacuation">
+			<capacity value="544.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="78" x="291194" y="6262496">
+		<activity type="Evacuation">
+			<capacity value="621.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="79" x="296281" y="6273185">
+		<activity type="Evacuation">
+			<capacity value="209.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="8" x="285209" y="6262076">
+		<activity type="Evacuation">
+			<capacity value="627.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="80" x="308858" y="6257202">
+		<activity type="Safe">
+			<capacity value="38343.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="81" x="287510" y="6246920">
+		<activity type="Safe">
+			<capacity value="38343.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="82" x="299887" y="6247043">
+		<activity type="Safe">
+			<capacity value="38343.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="83" x="316896" y="6262500">
+		<activity type="Safe">
+			<capacity value="38343.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="84" x="314909" y="6258958">
+		<activity type="Safe">
+			<capacity value="38343.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="9" x="283373" y="6260848">
+		<activity type="Evacuation">
+			<capacity value="523.0"/>
+			<opentime day="wkday" end_time="08:20:00" start_time="00:00:00"/>
+		</activity>
+
+	</facility>
+
+<!-- ====================================================================== -->
+
+</facilities>

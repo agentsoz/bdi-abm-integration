@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<geography>
+        <location easting="295586" name="Hawkesbury High School" northing="6284565" type="s"/>
+        <location easting="299076" name="Windsor High School" northing="6278024" type="s"/>
+        <location easting="276676" name="St Columba's Catholic College" northing="6271479" type="s"/>
+        <location easting="287405" name="Colo High School" northing="6283228" type="s"/>
+        <location easting="318440" name="Galston High School" northing="6273744" type="s"/>
+        <location easting="285643" name="Hawkesbury Independent School" northing="6288059" type="s"/>
+        <location easting="285721" name="Comleroy Road Public School" northing="6290527" type="s"/>
+        <location easting="303042" name="Ebenezer Public School" northing="6287762" type="s"/>
+        <location easting="297173" name="Windsor Park Public School" northing="6275472" type="s"/>
+        <location easting="297378" name="Windsor Public School" northing="6278882" type="s"/>
+        <location easting="295447" name="Bligh Park Public School" northing="6275635" type="s"/>
+        <location easting="291931" name="Richmond Public School" northing="6280093" type="s"/>
+        <location easting="288131" name="Richmond North Public School" northing="6281975" type="s"/>
+        <location easting="293501" name="Kurrajong Public School" northing="6289831" type="s"/>
+        <location easting="293510" name="Kurrajong East Public School" northing="6289806" type="s"/>
+        <location easting="284686" name="Castlereagh Public School" northing="6272579" type="s"/>
+        <location easting="300725" name="Arndell Anglican College" northing="6277835" type="s"/>
+</geography>

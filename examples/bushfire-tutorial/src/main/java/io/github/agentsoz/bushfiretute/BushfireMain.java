@@ -155,13 +155,13 @@ public class BushfireMain {
 				break;
 			case "-h":
 				exit(null);
-			case "-l":
+			case "-logfile":
 				if (i + 1 < args.length) {
 					i++;
 					logFile = args[i];
 				}
 				break;
-			case "-level":
+			case "-loglevel":
 				if (i + 1 < args.length) {
 					i++;
 					try {

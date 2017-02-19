@@ -1,0 +1,107 @@
+<!--
+  #%L
+  BDI-ABM Integration Package
+  %%
+  Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+
+  You should have received a copy of the GNU General Lesser Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+<!--
+	This is the top level config file for the scenario.
+	Its primary role is to point to all of the other config
+	and input files required by the scenario.
+NOTE : becareful when you added
+-->
+
+<simulation>
+
+<!-- bushfile evacuation report file -->
+<reportfile name="./halls-gap-evacuation-report.txt" />
+
+<!-- define the matsim configuration file -->
+<matsimfile name="scenarios/hawkesbury/config.xml"/>
+
+<!-- define the fire model file (specify the coordinate system as latlong or utm) -->
+<firefile name="scenarios/hawkesbury/halls_gap_fire.txt" coordinates="latlong"/>
+
+<!-- define a geography file -->
+<geographyfile name= "scenarios/hawkesbury/hawkesbury_geography.xml" coordinates="utm"/>
+
+<!-- Number of BDI agents (N) to initialise. The total number of
+     agents (M) is determined by the MATSim population file.
+     The final number of BDI agents will be the lesser of N,M.
+     Setting N really high (so that it is always greater than M),
+     will ensure that the entire MATSim population has BDI conterparts
+-->
+<bdiagents number="10000000" />
+
+<!-- define the port number for the unity GUI-->
+<!-- <port number="9876" die_on_disconnect="true"/> -->
+
+<!-- define data for the residents-->
+<!-- relatives is a value (0.0-1.0) that defines the probability that a resident
+will have a relative in the town needing to be collected prior to evacuation-->
+<!-- kids is a value (0.0-1.0) that defines the probability that a resident
+will have children in the town needing to be collected from school prior to evacuation-->
+<!-- max_distance_to_relatives provides the maximum distance in metres from agents
+start location to relative's location-->
+
+<!-- Insert the number of the scneario to be executed CHANGED from ruN to scenario Type-->
+<scenario
+	scenarioType="2"
+/>
+
+
+<demographics
+	relatives="1.0"
+	kids="1.0"
+	max_distance_to_school="20.0"
+	max_distance_to_relatives="1000"
+	max_pickuptime_for_kids_and_rels="15"
+	departure_Trigger_Time="1800"
+	max_distance_to_neighbours="20"
+	max_neighbours="2"
+	min_neighbours="1"
+	max_friends="2"
+	min_friends="0"
+	max_familyMembers="2"
+	min_familymembers="0"
+/>
+<!-- departureTriggerTime : time used to alert agents at homes to start driving to their evacuation central points -->
+
+
+<!-- setting diff_turn : if you set to a larger diff_turn, agents who arrive at evac point (end activity evac) will
+continue evacuating to safe. Because, when a panic percept comes only, the conditions are cheked in BDI side
+so the first panic percept comes in the first diff_turn
+ -->
+<snmodel
+
+	diff_seed="1"
+	diff_turn="15"
+	panic_act_threshold="0.25"
+	low_panic_threshold="0.25"
+	medium_panic_threshold="0.50"
+	high_panic_threshold="0.75"
+	maxRandomPanicRange="1.0"
+	minRandomPanicRange="0.75"
+	volatility="25"
+	networkType="random"
+	avg_links="2"
+/>
+
+</simulation>
+
+
