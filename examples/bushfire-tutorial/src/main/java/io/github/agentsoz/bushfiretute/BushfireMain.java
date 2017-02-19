@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.bushfiretute;
 
 /*
  * #%L
@@ -37,7 +37,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bushfire.Config;
+import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.dataInterface.DataServer;
 
 public class BushfireMain {

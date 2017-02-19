@@ -1,10 +1,11 @@
-package io.github.agentsoz.bushfire.bdi;
+package io.github.agentsoz.bushfiretute;
 
 /*
  * #%L
+
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,17 +23,17 @@ package io.github.agentsoz.bushfire.bdi;
  * #L%
  */
 
-public interface IBdiConnector {
+import io.github.agentsoz.bdimatsim.MatsimParameterHandler;
 
-    public int getMaxDistanceToRelatives();
-    
-    public int getPickupTime();
-    
-    public double getHighPanicThreshold();
-    
-    public double getMedPanicThreshold();
-    
-    public double getLowPanicThreshold();
-    
-    public int getDiffTurn();
+public class MATSimBDIParameterHandler extends MatsimParameterHandler {
+	
+	public MATSimBDIParameterHandler() {
+		super();
+	}
+
+	@Override
+	public int getNumberOfAgents(){
+		return Config.getNumBDIAgents();
+	}
+
 }

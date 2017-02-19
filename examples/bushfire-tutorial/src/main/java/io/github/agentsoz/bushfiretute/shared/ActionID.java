@@ -1,11 +1,11 @@
-package io.github.agentsoz.bushfire.shared;
+package io.github.agentsoz.bushfiretute.shared;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import io.github.agentsoz.bushfire.Config;
+import io.github.agentsoz.bushfiretute.Config;
 
 
 /*

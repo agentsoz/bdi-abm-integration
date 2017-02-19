@@ -2,7 +2,7 @@ package scenarioTWO.plans;
 import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.bushfire.shared.ActionID;
+import io.github.agentsoz.bushfiretute.shared.ActionID;
 import scenarioTWO.agents.EvacResident;
 
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.bushfiretute;
 
 /*
  * #%L
@@ -43,8 +43,8 @@ import org.w3c.dom.NodeList;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import io.github.agentsoz.bushfire.datamodels.Location;
-import io.github.agentsoz.bushfire.datamodels.School;
+import io.github.agentsoz.bushfiretute.datamodels.Location;
+import io.github.agentsoz.bushfiretute.datamodels.School;
 
 
 /**

@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire.datacollection;
+package io.github.agentsoz.bushfiretute.datacollection;
 
 /*
  * #%L

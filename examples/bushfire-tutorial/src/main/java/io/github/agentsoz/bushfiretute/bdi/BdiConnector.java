@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire.bdi;
+package io.github.agentsoz.bushfiretute.bdi;
 
 /*
  * #%L
@@ -22,11 +22,11 @@ package io.github.agentsoz.bushfire.bdi;
  * #L%
  */
 
-import io.github.agentsoz.bushfire.BDIModel;
-
-import io.github.agentsoz.bushfire.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.Config;
 
 
 public class BdiConnector implements IBdiConnector{

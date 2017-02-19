@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.bushfiretute;
 
 /*
  * #%L
@@ -34,10 +34,9 @@ import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
-//import bushfire.FireModule;
-import io.github.agentsoz.bushfire.DataTypes;
-import io.github.agentsoz.bushfire.bdi.BdiConnector;
-import io.github.agentsoz.bushfire.shared.ActionID;
+import io.github.agentsoz.bushfiretute.DataTypes;
+import io.github.agentsoz.bushfiretute.bdi.BdiConnector;
+import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.dataInterface.DataClient;
 import io.github.agentsoz.dataInterface.DataServer;
 import io.github.agentsoz.dataInterface.DataSource;

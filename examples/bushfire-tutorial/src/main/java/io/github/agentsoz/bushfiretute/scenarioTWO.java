@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.bushfiretute;
 
 /*
  * #%L
@@ -32,17 +32,17 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.agentsoz.bushfire.shared.ActionID;
 import io.github.agentsoz.abmjack.shared.ActionManager;
 import io.github.agentsoz.abmjack.shared.GlobalTime;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
+import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
+import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.dataInterface.DataServer;
 import aos.jack.jak.agent.Agent;
 import scenarioTWO.agents.EvacResident;
-import io.github.agentsoz.bushfire.datacollection.ScenarioTwoData;
 
 public class scenarioTWO extends BDIModel{
 

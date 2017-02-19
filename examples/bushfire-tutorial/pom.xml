@@ -120,9 +120,9 @@
                 <javac source="1.7" target="1.7" debug="true" includeantruntime="false" failonerror="true"
                        destdir="${project.build.directory}/classes">
                   <src path="${basedir}/src/main/java/"/>
-                  <include name="io/github/agentsoz/bushfire/bdi/IBdiConnector.java"/>
-                  <include name="io/github/agentsoz/bushfire/datacollection/ScenarioTwoData.java"/>
-                  <include name="io/github/agentsoz/bushfire/shared/ActionID.java"/>
+                  <include name="io/github/agentsoz/bushfiretute/bdi/IBdiConnector.java"/>
+                  <include name="io/github/agentsoz/bushfiretute/datacollection/ScenarioTwoData.java"/>
+                  <include name="io/github/agentsoz/bushfiretute/shared/ActionID.java"/>
                   <classpath refid="maven.compile.classpath"/>
                 </javac>
                 <copy todir="${project.build.directory}/generated-sources/jack">
