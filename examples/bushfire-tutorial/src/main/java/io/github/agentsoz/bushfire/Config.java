@@ -22,16 +22,12 @@ package io.github.agentsoz.bushfire;
  * #L%
  */
 
-import io.github.agentsoz.bushfire.datamodels.Location;
-import io.github.agentsoz.bushfire.datamodels.Region;
-import io.github.agentsoz.bushfire.datamodels.ReliefCentre;
-import io.github.agentsoz.bushfire.datamodels.Route;
-
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -47,6 +43,10 @@ import org.w3c.dom.NodeList;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import io.github.agentsoz.bushfire.datamodels.Location;
+import io.github.agentsoz.bushfire.datamodels.School;
+
+
 /**
  * 
  * Utility class to hold configuration information
@@ -59,6 +59,8 @@ public class Config {
 	// all the config info is held statically so it can be accessed globally
 	private static String configFile = null;
 
+	private static int scenario=0;
+	
 	private static String reportFile = "bushfire-evacuation-report.txt";
 	private static String bdiSimFile = null;
 	private static String matSimFile = null;
@@ -67,24 +69,59 @@ public class Config {
 	private static String fireFile = null;
 	private static String controllerFile = null;
 	private static boolean useGUI = false;
-	private static boolean bypassController = false;
+	private static boolean bypassController = true;
+	private static boolean controllerUserInput = false;
 	private static boolean dieOnDisconnect = false;
 	private static int port = -1;
+	
+	//Scenario2 : kids & relatives Params
 	private static double proportionWithKids = 0.0;
+	private static double maxDistanceToSchool = 0.0 ;
+	
 	private static double proportionWithRelatives = 0.0;
-	private static int maxDistanceToRelatives = 1000;
-	private static double[] evacDelay = new double[] { 0.0, 0.0 };
-	private static HashMap<String, Location> locations = new HashMap<String, Location>();
-	private static HashMap<String, Region> regions = new HashMap<String, Region>();
-	private static HashMap<String, Route> routes = new HashMap<String, Route>();
-	public static HashMap<String, ReliefCentre> reliefCentres = new HashMap<String, ReliefCentre>();
+	private static int maxDistanceToRelatives = 0 ;
+	private static int maxPickups = 0;
+	
+	private static int max_pickuptime = 0;
+	
+	private static int depTrigTime = 0;
+	
+	//Scenario3: diffusion Params
+	private static int seed = 0 ;
+	private static int diffTurn = 0 ;
+	private static int avgLinks = 0 ;
+	private static String networkType = " " ;
+	private static double act_threshold = 0.0 ;
+	private static double volatility=0.0;
+	private static double maxRandomPanicRange = 0.0;
+	private static double minRandomPanicRange = 0.0;
+
+	private static double maxDistanceToNeighbours = 0.0;
+	
+	private static int max_neighbours = 0 ;
+	private static int min_neighbours = 0 ;
+	
+	private static int max_friends= 0 ;
+	private static int min_friends = 0 ;
+	
+	private static int max_familyMembers = 0 ;
+	private static int min_familyMembers = 0 ;
+
+	private static double high_panic = 0.0 ; 
+	private static double med_panic = 0.0 ;
+	private static double low_panic = 0.0 ;
+	
+	
+	private static HashMap<Integer, School> schools = new HashMap<Integer, School>();
+	private static ArrayList<String> agentsWithoutSchools =  new ArrayList<String>();
+	
 	private static Image image = new Image();
 	private static String fireFireCoordinateSystem = "longlat";
 	private static String coordinate_system = "longlat";
-	private static int distanceToNewShelters = 50000;
-	private static int safeDistance = 100;
-	private static HashMap<String, Boolean> choicePoints = new HashMap<String, Boolean>();
-
+	private static int schoolCount = 0; //to set a inique int ID to each school
+	
+	static Random rand =  new Random();
+	
 	public static class Image {
 		public String file;
 		public double west, east, north, south;
@@ -98,30 +135,30 @@ public class Config {
 		}
 	}
 	
-	public static HashMap<String, Location> getLocationMap(){
-		return locations;
-	}
-	
-	public static boolean getChoicePoint(String choice){
-		return choicePoints.get(choice);
-	}
-
-	public static HashMap<String, Route> getRouteMap(){
-		return routes;
-	}
-	
-	public static HashMap<String, Region> getRegionMap(){
-		return regions;
-	}
-	
-	public static HashMap<String, ReliefCentre> getReliefCentreMap(){
-		return reliefCentres;
-	}
-
 	public static Image getImage() {
 		return image;
 	}
 
+	public int getAgentsWithoutSchool() { 
+		return agentsWithoutSchools.size();
+	}
+	
+	public static HashMap<Integer,School> getSchools() { 
+		return schools;
+	}
+	
+	public static int getMaxPickUps()
+	{
+		int maxPickups = (int) (proportionWithRelatives * 38343.0) + 10;
+		return maxPickups;
+	}
+	
+	public static int getPickUpTime()
+	{
+		//int pickuptime = rand.nextInt(max_pickuptime - min_pickuptime) + min_pickuptime ;
+		return max_pickuptime ;
+	}
+	
 	// basic get/set for simple data
 	public static String getReportFile() {
 		return reportFile;
@@ -135,6 +172,10 @@ public class Config {
 		return fireFile;
 	}
 
+	public static int getScenario() {
+		return scenario;
+	}
+	
 	public static int getPort() {
 		return port;
 	}
@@ -142,7 +183,27 @@ public class Config {
 	public static int getNumBDIAgents() {
 		return numBDIAgents;
 	}
+	
+	public static int getSeed() {
+		return seed;
+	}
+	
+	public static int getDiffturn() {
+		return diffTurn;
+	}
 
+	public static int getAvgLinks() {
+		return avgLinks;
+	}
+	
+	public static String getNetworkType() {
+		return networkType;
+	}
+	
+	public static double getActivationThreshold() {
+		return act_threshold;
+	}
+	
 	public static boolean getBypassController() {
 		return bypassController;
 	}
@@ -155,6 +216,37 @@ public class Config {
 		return proportionWithKids;
 	}
 
+	public static double getmaxDistanceToSchool() {
+		return maxDistanceToSchool;
+	}
+	public static double getHighPanicThreshold() {
+		return high_panic;
+	}
+	
+	public static double getMedPanicThreshold() {
+		return med_panic;
+	}
+	
+	public static double getLowPanicThreshold() {
+		return low_panic;
+	}
+	
+	public static double getVolatility() {
+		return volatility;
+	}
+
+//	public static int getExtDiffTurn() {
+//		return ext_diffTurn;
+//	}
+	
+	public static double getMinRandomPanicRange() {
+		return minRandomPanicRange;
+	}
+	public static double getMaxRandomPanicRange() {
+		return maxRandomPanicRange;
+	}
+
+	
 	public static double getProportionWithRelatives() {
 		return proportionWithRelatives;
 	}
@@ -162,11 +254,32 @@ public class Config {
 	public static int getMaxDistanceToRelatives() {
 		return maxDistanceToRelatives;
 	}
-
-	public static double[] getEvacDelay() {
-		return evacDelay;
+	
+	public static double getMaxDistanceToNeighbours() {
+		return maxDistanceToNeighbours;
 	}
-
+	
+	public static int getMaxNeighboursLimit() {
+		return max_neighbours;
+	}
+	public static int getMinNeighboursLimit() {
+		return min_neighbours;
+	}
+	
+	public static int getMaxFriendsLimit() {
+		return max_friends;
+	}
+	public static int getMinFriendsLimit() {
+		return min_friends;
+	}
+	
+	public static int getMaxFamiliesLimit() {
+		return max_familyMembers;
+	}
+	public static int getMinFamiliesLimit() {
+		return min_familyMembers;
+	}
+	
 	public static String getCoordinate_system() {
 		return coordinate_system;
 	}
@@ -175,41 +288,6 @@ public class Config {
 		return fireFireCoordinateSystem;
 	}
 
-	public static Location getLocation(String name) {
-		return locations.get(name);
-	}
-
-	public static Set<String> getLocations() {
-		return locations.keySet();
-	}
-
-	public static Region getRegion(String name) {
-		return regions.get(name);
-	}
-
-	public static Set<String> getRegionsByName() {
-		return regions.keySet();
-	}
-
-	public static Collection<Region> getRegions() {
-		return regions.values();
-	}
-
-	public static Route getRoute(String name) {
-		return routes.get(name);
-	}
-
-	public static Set<String> getRoutes() {
-		return routes.keySet();
-	}
-
-	public static ReliefCentre getReliefCentre(String name) {
-		return reliefCentres.get(name);
-	}
-
-	public static Set<String> getReliefCentres() {
-		return reliefCentres.keySet();
-	}
 
 	public static boolean getUseGUI() {
 		return useGUI;
@@ -227,15 +305,9 @@ public class Config {
 		configFile = string;
 	}
 
-	/**
-	 * Pick one of the listed evac points
-	 */
-	public static String getRandomEvacPoint() {
-		int n = new Random().nextInt(reliefCentres.size());
-		ReliefCentre rc = (ReliefCentre) reliefCentres.values().toArray()[n];
-		return rc.getName();
+	public static int getDepartureTriggerTime() {
+		return depTrigTime;
 	}
-
 	/**
 	 * read the config file (xml) and save data
 	 * 
@@ -312,35 +384,102 @@ public class Config {
 						}
 					}
 					if (nodeName.equals("demographics")) {
+						try {
+							String k = node.getAttributes().getNamedItem("kids").getNodeValue();
+							proportionWithKids = Double.parseDouble(k);
+							String r = node.getAttributes().getNamedItem("relatives").getNodeValue();
+							proportionWithRelatives = Double.parseDouble(r);
+							String d = node.getAttributes().getNamedItem("max_distance_to_school").getNodeValue();
+							maxDistanceToSchool = Double.parseDouble(d);
+							
+							String dist = node.getAttributes().getNamedItem("max_distance_to_relatives").getNodeValue();
+							maxDistanceToRelatives = Integer.parseInt(dist); 	
+							
+							String max_pickup = node.getAttributes().getNamedItem("max_pickuptime_for_kids_and_rels").getNodeValue();
+							max_pickuptime =Integer.parseInt(max_pickup);					
+							
+							String val = node.getAttributes().getNamedItem("departure_Trigger_Time").getNodeValue();
+							depTrigTime = Integer.parseInt(val);
+							
+							String nei_dist = node.getAttributes().getNamedItem("max_distance_to_neighbours").getNodeValue();
+							maxDistanceToNeighbours  = Double.parseDouble(nei_dist);
+							
+							String maxN = node.getAttributes().getNamedItem("max_neighbours").getNodeValue();
+							max_neighbours = Integer.parseInt(maxN);
+							
+							String minN = node.getAttributes().getNamedItem("min_neighbours").getNodeValue();
+							min_neighbours = Integer.parseInt(minN);
+							
+							String maxF = node.getAttributes().getNamedItem("max_friends").getNodeValue();
+							max_friends = Integer.parseInt(maxF);
+							
+							String minF = node.getAttributes().getNamedItem("min_friends").getNodeValue();
+							min_friends = Integer.parseInt(minF);
 
-						String k = node.getAttributes().getNamedItem("kids")
-								.getNodeValue();
-						proportionWithKids = Double.parseDouble(k);
-						String r = node.getAttributes()
-								.getNamedItem("relatives").getNodeValue();
-						proportionWithRelatives = Double.parseDouble(r);
-						String d = node.getAttributes()
-								.getNamedItem("max_distance_to_relatives")
-								.getNodeValue();
-						maxDistanceToRelatives = Integer.parseInt(d);
+							String maxFam = node.getAttributes().getNamedItem("max_familyMembers").getNodeValue();
+							max_familyMembers = Integer.parseInt(maxFam);
+							
+							String minFam = node.getAttributes().getNamedItem("min_familyMembers").getNodeValue();
+							min_familyMembers = Integer.parseInt(minFam);
+							
+							
+						}
+						catch (Exception e) {
+							System.err
+									.println("WARNING: could not read from the node demographics "	+ e.getMessage());
+						}
+
 					}
-					if (nodeName.equals("evac_info")) {
-
-						String shelterDistance = node.getAttributes().getNamedItem("ad_hoc_evac_dist")
-								.getNodeValue();
-						setDistanceToNewShelters(Integer.parseInt(shelterDistance));
-						String safeDistance = node.getAttributes().getNamedItem("safe_distance_to_fire")
-								.getNodeValue();
-						setSafeDistance(Integer.parseInt(safeDistance));						
+					if (nodeName.equals("snmodel")) {
+						try {
+						String s = node.getAttributes().getNamedItem("diff_seed").getNodeValue();
+						seed = Integer.parseInt(s);
+						
+						String t = node.getAttributes().getNamedItem("diff_turn").getNodeValue();
+						diffTurn = Integer.parseInt(t);
+						
+						String links = node.getAttributes().getNamedItem("avg_links").getNodeValue();
+						avgLinks = Integer.parseInt(links);
+		
+						String type = node.getAttributes().getNamedItem("networkType").getNodeValue();
+						networkType  = type;
+						
+						String thr = node.getAttributes().getNamedItem("panic_act_threshold").getNodeValue();
+						act_threshold  = Double.parseDouble(thr);
+							
+						String high = node.getAttributes().getNamedItem("high_panic_threshold").getNodeValue();
+						high_panic  = Double.parseDouble(high);
+						
+						String med = node.getAttributes().getNamedItem("medium_panic_threshold").getNodeValue();
+						med_panic  = Double.parseDouble(med);
+						
+						String low = node.getAttributes().getNamedItem("low_panic_threshold").getNodeValue();
+						low_panic  = Double.parseDouble(low); 
+								
+//						String ext = node.getAttributes().getNamedItem("ext_diffTurn").getNodeValue();
+//						ext_diffTurn = Integer.parseInt(ext);
+						
+						String maxP = node.getAttributes().getNamedItem("maxRandomPanicRange").getNodeValue();
+						maxRandomPanicRange  = Double.parseDouble(maxP);
+						
+						String minP = node.getAttributes().getNamedItem("minRandomPanicRange").getNodeValue();
+						minRandomPanicRange  = Double.parseDouble(minP);
+						
+						String vol = node.getAttributes().getNamedItem("volatility").getNodeValue();
+						volatility = Double.parseDouble(vol);
+						
+						}
+						catch (Exception e) {
+							System.err
+									.println("WARNING: could not read from the node snmodel "	+ e.getMessage());
+						}
+						
 					}
-					if (nodeName.equals("evac_delay")) {
+					if (nodeName.equals("scenario")) {
+						String no = node.getAttributes().getNamedItem("scenarioType").getNodeValue();
+						scenario = Integer.parseInt(no);
 
-						String k = node.getAttributes().getNamedItem("min")
-								.getNodeValue();
-						evacDelay[0] = Double.parseDouble(k);
-						String r = node.getAttributes().getNamedItem("max")
-								.getNodeValue();
-						evacDelay[1] = Double.parseDouble(r);
+												
 					}
 					if (nodeName.equals("image")) {
 						try {
@@ -390,12 +529,7 @@ public class Config {
 							bypassController = Boolean.parseBoolean(s);
 							s = node.getAttributes()
 									.getNamedItem("userControl").getNodeValue();
-						}
-						if (nodeName.equals("choicePoints")) {
-							NodeList choicePointNodes = node.getChildNodes();
-							for (int j = 0; j < choicePointNodes.getLength(); j++) {
-								readChoicePoint(choicePointNodes.item(j));
-							}
+							controllerUserInput = Boolean.parseBoolean(s);
 						}
 					}
 				}
@@ -410,8 +544,8 @@ public class Config {
 
 		logger.debug("matSimFilefile = " + matSimFile);
 		logger.debug("bdiSimFile = " + bdiSimFile);
-		logger.debug("fireFile = " + fireFile);
 		logger.debug("geographyFile = " + geographyFile);
+//		logger.debug("fireFile = " + fireFile);
 
 		// TODO should check existence of all files and stop gracefully
 		// TODO should also allow some files to not exist and setup
@@ -420,10 +554,8 @@ public class Config {
 
 		if (geographyFile != null) {
 			if (readGeography()) {
-				printLocations();
-				printRegions();
-				printRoutes();
-				printShelters();
+				printSchools();
+
 			} else {
 				return false;
 			}
@@ -432,25 +564,6 @@ public class Config {
 		if (matSimFile == null) {
 			return false;
 		}
-		return true;
-	}
-
-	private static boolean readChoicePoint(Node node) {
-		if (node instanceof Element) {
-			String nodeName = node.getNodeName();
-			if (nodeName.equals("goal")) {
-				try {
-					String goal = node.getAttributes().getNamedItem("name").getNodeValue();
-					String m = node.getAttributes().getNamedItem("manual").getNodeValue();
-					boolean manual = Boolean.parseBoolean(m);
-					choicePoints.put(goal, manual);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return false;
-				}
-			}
-		}
-		
 		return true;
 	}
 
@@ -469,69 +582,46 @@ public class Config {
 
 			NodeList nl = doc.getDocumentElement().getChildNodes();
 			List<Node> locationNodes = new ArrayList<Node>();
-			List<Node> regionNodes = new ArrayList<Node>();
-			List<Node> routeNodes = new ArrayList<Node>();
-			List<Node> reliefCentreNodes = new ArrayList<Node>();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					String nodeName = node.getNodeName();
 					logger.trace("found node " + nodeName);
 					if (nodeName.equals("location")) {
-						locationNodes.add(node);
-					}
-					if (nodeName.equals("region")) {
-						regionNodes.add(node);
-					}
-					if (nodeName.equals("route")) {
-						routeNodes.add(node);
-					}
-					if (nodeName.equals("relief_centre")) {
-						reliefCentreNodes.add(node);
+						locationNodes.add(node); // adding all location nodes
 					}
 				}
 			}
-			for (Node n : locationNodes)
-				if (!readLocation(n)) {
+			for (Node n : locationNodes) 
+				if (!readSchool(n)) {
 					result = false;
 				}
-			for (Node n : routeNodes)
-				if (!readRoute(n)) {
-					result = false;
-				}
-			for (Node n : reliefCentreNodes)
-				if (!readReliefCentre(n)) {
-					result = false;
-				}
-			for (Node n : regionNodes)
-				if (!readRegion(n)) {
-					result = false;
-				}
+
 		} catch (Exception e) {
 			logger.error("Unable to read geography file " + geographyFile);
 			return false;
 		}
-		if (locations.size() == 0) {
-			logger.error("No locations configured in " + geographyFile);
+		if (schools.size() == 0) {
+			logger.error("No schools configured in " + geographyFile);
 			return false;
 		}
-		if (reliefCentres.size() == 0) {
-			logger.error("No relief centres configured in " + geographyFile);
-			return false;
-		}
+//		if (reliefCentres.size() == 0) {
+//			logger.error("No relief centres configured in " + geographyFile);
+//			return false;
+//		}
 
 		return result;
 
 	}
 
 	/**
-	 * read the list of locations and store them.
+	 * read the list of schools and store them.
 	 * 
 	 * @param parent
 	 *            The node containing the list
 	 * @return false if there was a problem
 	 */
-	private static boolean readLocation(Node node) {
+	private static boolean readSchool(Node node) {
 		boolean result = true;
 		try {
 			String name = node.getAttributes().getNamedItem("name")
@@ -544,8 +634,9 @@ public class Config {
 					.getNodeValue();
 			double easting = Double.parseDouble(eastStr);
 			double northing = Double.parseDouble(northStr);
-			Location l = new Location(name, easting, northing);
-			locations.put(name, l);
+			School scl = new School(schoolCount,name, type, easting, northing);
+			schools.put(schoolCount, scl);
+			schoolCount++;
 		} catch (Exception e) {
 			logger.error("Could not read location from config file: "
 					+ e.getMessage());
@@ -554,255 +645,91 @@ public class Config {
 		return result;
 	}
 
+	public static void  readSchoolFromList(HashMap<Double,Double> schoolLocs) {
+		for(Map.Entry entry : schoolLocs.entrySet()) {
+			double east = (double) entry.getKey();
+			double north =  (double) entry.getValue();
+			
+			School scl = new School(schoolCount,"school","s", east, north);			
+			schools.put(schoolCount, scl);
+			schoolCount++;			
+		}
+		printSchools();
+	}
+	private static void printSchools(){
+		for (Integer key : schools.keySet()) {
+			School scl = schools.get(key);
+			logger.trace("school info : {} ", scl.toString());
+
+		}
+//		testGetRandomSchool();
+	}
 	/**
-	 * read a region from the geography file and store it
-	 * 
-	 * @param parent
+	 * measures the distance in between two locations in km and randomly
+	 * selects coords of a school.
+	 * @param agentLoc : home location of the agent .These should be UTM (meters)
+	 * @param distRange : distance range in km
 	 * @return
 	 */
-	private static boolean readRegion(Node parent) {
-		boolean result = true;
-		Region region = new Region();
-		NodeList nl = parent.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				String nodeName = node.getNodeName();
-				if (nodeName.equals("data")) {
-					try {
-						String name = node.getAttributes().getNamedItem("name")
-								.getNodeValue();
-						String eastStr = node.getAttributes()
-								.getNamedItem("easting").getNodeValue();
-						String northStr = node.getAttributes()
-								.getNamedItem("northing").getNodeValue();
-						String populationStr = node.getAttributes()
-								.getNamedItem("population").getNodeValue();
-						int population = Integer.parseInt(populationStr);
-						if(((Element) node).hasAttribute("regionid")){
-							String regionId = node.getAttributes()
-									.getNamedItem("regionid").getNodeValue();
-							region.setRegionId(regionId);
-						}
-						double easting = Double.parseDouble(eastStr);
-						double northing = Double.parseDouble(northStr);
-						region.setName(name);
-						region.setCentre(easting, northing);
-						region.setPopulation(population);
-						regions.put(name, region);
-					} catch (Exception e) {
-						logger.error("Could not parse <data> node in config file: "
-								+ e.getMessage());
-						return false;
-					}
-				}
-				if (nodeName.equals("polygon")) {
-					if (region != null) {
-						readPolygon(node, region);
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	// get region encompassing a particular location
-	public static Region getRegion(double easting, double northing) {
-		Region smallest = null;
-		for (Region r : regions.values()) {
-			// TODO this check assumes regions are rectangular - may want to
-			// improve this later
-			if (easting > r.getWestEdge() && easting < r.getEastEdge()
-					&& northing > r.getSouthEdge()
-					&& northing < r.getNorthEdge()) {
-				if (smallest == null || r.getArea() < smallest.getArea()) {
-					smallest = r;
-				}
-			}
-		}
-		return smallest;
-	}
-
-	private static void readPolygon(Node parent, Region r) {
-		NodeList nl = parent.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				String nodeName = node.getNodeName();
-				if (nodeName.equals("vertex")) {
-					try {
-						// double[] vertex = new double[2];
-						String eastStr = node.getAttributes()
-								.getNamedItem("easting").getNodeValue();
-						String northStr = node.getAttributes()
-								.getNamedItem("northing").getNodeValue();
-						double easting = Double.parseDouble(eastStr);
-						double northing = Double.parseDouble(northStr);
-						r.add(new double[] { easting, northing });
-					} catch (Exception e) {
-						logger.error("Could not parse <vertex> data: "
-								+ e.getMessage());
-					}
-				}
-			}
-		}
-	}
-
-	private static void printRegions() {
-		for (String s : regions.keySet()) {
-			Region r = regions.get(s);
-			logger.debug("region " + r.toString() + ":" + r.getArea() + " shelters: " +r.getViableReliefCentres());
-		}
+	public static School getRandomSchool(String id,double[] agentLoc) {
+		 int schoolID;
+		 double distRange = maxDistanceToSchool;
+		 School selectedSchool=null;
+		 ArrayList<School> schoolsWithinDistance = new ArrayList<School> ();
+		 for(School school : schools.values()) {
+			 //distance is returned in km
+			 if(school.distance(agentLoc,school.getCoordinates()) <= distRange)
+			 {
+				 schoolsWithinDistance.add(school);
+			 }
+		 }
+		 if(!schoolsWithinDistance.isEmpty()) {
+			 Random rand =  new Random();
+			 logger.debug("number of schools within the range : {}", schoolsWithinDistance.size());
+			 logger.debug(" selected school array : {}",schoolsWithinDistance.toString());
+			 int num = rand.nextInt(schoolsWithinDistance.size());
+			 selectedSchool= schoolsWithinDistance.get(num);
+			 logger.debug("selected school ID : " + selectedSchool.getID());
+			 
+			 
+			School scl = schools.get(selectedSchool.getID());
+			scl.addKid(id);
+			
+			logger.trace("added kid {} to school {} ",id, scl.getID());
+			 
+		 }
+		 else {
+			 agentsWithoutSchools.add(id);
+		 }
+		 return selectedSchool;
 	}
 	
-	private static void printLocations(){
-		for (String key : locations.keySet()) {
-			Location l = locations.get(key);
-			logger.debug("location " + l.getName() + ":" + l.getCoordinates());
-		}
+	public static double[] getRandomSchoolCoords(String id,double[] agentLoc) {
+		double[] coords =  null; 
+		School randomSchool = getRandomSchool(id,agentLoc);
+		if(randomSchool != null) {
+			coords = randomSchool.getCoordinates();
+		}	
+		return coords;
 	}
 	
-	private static void printShelters(){
-		for (String key : reliefCentres.keySet()) {
-			ReliefCentre r = reliefCentres.get(key);
-			logger.debug("Shelter " + r.getName() + ":" + r.getCapacity());
+	public static int getRandomSchoolID(String id, double[] agentLoc) {
+		int schoolID=-1; 
+		School randomSchool = getRandomSchool(id,agentLoc);
+		if(randomSchool != null) {
+			schoolID = randomSchool.getID();
+
 		}
+				
+		return schoolID;
 	}
-
-	private static boolean readRoute(Node parent) {
-		boolean result = true;
-		NodeList nl = parent.getChildNodes();
-		String name = "";
-		String shelter = "";
-		String region = "";
-		String desc = "";
-		List<String> routeNames = new ArrayList<String>();
-		List<Coordinate> routeCoords = new ArrayList<Coordinate>();
-
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				String nodeName = node.getNodeName();
-				if (nodeName.equals("data")) {
-					try {
-						name = node.getAttributes().getNamedItem("name")
-								.getNodeValue();
-						shelter = node.getAttributes().getNamedItem("shelter")
-								.getNodeValue();
-						region = node.getAttributes().getNamedItem("region")
-								.getNodeValue();
-						desc = node.getAttributes().getNamedItem("description")
-								.getNodeValue();
-
-					} catch (Exception e) {
-						result = false;
-					}
-				}
-				if (nodeName.equals("path")) {
-					readPath(node, routeNames, routeCoords);
-				}
-			}
-		}
-
-		if (result) {
-			routes.put(name, new Route(name, region, shelter, desc, routeNames,
-					routeCoords));
-		}
-
-		return result;
+	
+	public static void testGetRandomSchool()
+	{
+		//testing getRandomSchool method
+		double[] test = {1500.0,1000.0};
+		School school = getRandomSchool("1",test); //
+		logger.debug("selected school coords : easting - {} northing -{}", school.getEasting(), school.getNorthing());
 	}
-
-	private static void readPath(Node parent, List<String> routeNames,
-			List<Coordinate> routeCoords) {
-		NodeList nl = parent.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				String nodeName = node.getNodeName();
-				if (nodeName.equals("waypoint")) {
-					try {
-						String s = node.getAttributes().getNamedItem("name")
-								.getNodeValue();
-						if (locations.containsKey(s)) {
-							Location l = getLocation(s);
-							routeNames.add(s);
-							routeCoords.add(new Coordinate(l.getX(), l
-									.getY()));
-						} else {
-							logger.warn("Waypoint '" + s
-									+ "' is not in the list of known locations");
-						}
-					} catch (Exception e) {
-					}
-				}
-			}
-		}
-	}
-
-	private static boolean readReliefCentre(Node parent) {
-		boolean result = true;
-		NodeList nl = parent.getChildNodes();
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				String nodeName = node.getNodeName();
-				if (nodeName.equals("data")) {
-					/**
-					 * All the attributes are currently required
-					 */
-					try {
-						String name = node.getAttributes().getNamedItem("name")
-								.getNodeValue();
-						String location = node.getAttributes()
-								.getNamedItem("location").getNodeValue();
-						Coordinate locationCoords = new Coordinate();
-						
-						if(locations.containsKey(location)){
-							Location l = locations.get(location);
-							locationCoords = new Coordinate(l.getX(), l.getY());
-						} else{
-							logger.warn("Shelter location '" + location
-									+ "' is not in the list of known locations");
-							result = false;
-						}
-						
-						String capacityString = node.getAttributes()
-								.getNamedItem("capacity").getNodeValue();
-						int capacity = Integer.parseInt(capacityString);
-
-						ReliefCentre r = new ReliefCentre(name, location, locationCoords,
-								capacity);
-						reliefCentres.put(name, r);
-					} catch (Exception e) {
-						System.err
-								.println("An error occured reading a relief_centre from the config file");
-						result = false;
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	private static void printRoutes() {
-		for (String s : routes.keySet()) {
-			logger.debug("found route " + s);
-		}
-	}
-
-	public static int getDistanceToNewShelters() {
-		return distanceToNewShelters;
-	}
-
-	public static void setDistanceToNewShelters(int distanceToNewShelters) {
-		Config.distanceToNewShelters = distanceToNewShelters;
-	}
-
-	public static int getSafeDistance() {
-		return safeDistance;
-	}
-
-	public static void setSafeDistance(int safeDistance) {
-		Config.safeDistance = safeDistance;
-	}
+	
 }

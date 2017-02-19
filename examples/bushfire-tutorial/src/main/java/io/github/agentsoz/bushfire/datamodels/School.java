@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire.bdi;
+package io.github.agentsoz.bushfire.datamodels;
 
 /*
  * #%L
@@ -22,17 +22,43 @@ package io.github.agentsoz.bushfire.bdi;
  * #L%
  */
 
-public interface IBdiConnector {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
-    public int getMaxDistanceToRelatives();
-    
-    public int getPickupTime();
-    
-    public double getHighPanicThreshold();
-    
-    public double getMedPanicThreshold();
-    
-    public double getLowPanicThreshold();
-    
-    public int getDiffTurn();
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class School extends Location{
+
+	public HashMap<Integer,School> schools = new HashMap<Integer,School>();
+
+	final Logger logger = LoggerFactory.getLogger("");
+	public int ID;
+	private ArrayList<String> kids;
+	
+	public School(int id,String n, String t, double east, double north) {
+		
+		super(n, t, east, north);
+		this.ID=id;
+		kids = new ArrayList<String>();
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+
+	public ArrayList<String> getKids() {
+		return this.kids;
+	}
+
+	public void addKid(String kid) {
+		this.kids.add(kid);
+	}
+	
+	
 }

@@ -26,8 +26,10 @@ package io.github.agentsoz.bushfire;
 public class DataTypes {
    
    public static final String MATSIM_AGENT_UPDATES = "matsim_agent_updates";
+   public static final String PANIC_DATA_UPDATES = "panic_data_updates";
    public static final String FIRE                 = "fire";
    public static final String FIRE_ALERT           = "fire_alert";
+   public static final String FIREALERT 		   = "FireAlert";
    public static final String EVAC_BROADCAST       = "evac_broadcast";
    public static final String BDI_AGENT_UPDATES    = "bdi_agent_updates";
    public static final String LOCATION             = "location";
@@ -41,4 +43,8 @@ public class DataTypes {
    public static final String EVAC_SCHEDULE        = "evac_schedule";
    public static final String IMAGE                = "image";
    public static final String REGION_ASSIGNMENT    = "region_assignment";
+   public static final String  LEAVENOW		 	   = "leave now"; 
+   public static final String RANDOM			   = "random";
+   public static final String  SMALL_WORLD		   = "sw"; 
+   public static final String PANIC_PERCEPT		   = "panic percept";
 }

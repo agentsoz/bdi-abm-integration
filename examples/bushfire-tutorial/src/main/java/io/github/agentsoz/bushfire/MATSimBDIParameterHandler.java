@@ -1,7 +1,8 @@
-package io.github.agentsoz.bushfire.bdi;
+package io.github.agentsoz.bushfire;
 
 /*
  * #%L
+
  * BDI-ABM Integration Package
  * %%
  * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
@@ -22,7 +23,17 @@ package io.github.agentsoz.bushfire.bdi;
  * #L%
  */
 
-public class BDIConstants{
+import io.github.agentsoz.bdimatsim.MatsimParameterHandler;
 
-    public final static String FIRE_BELIEF_KEY = "Fire";
+public class MATSimBDIParameterHandler extends MatsimParameterHandler {
+	
+	public MATSimBDIParameterHandler() {
+		super();
+	}
+
+	@Override
+	public int getNumberOfAgents(){
+		return Config.getNumBDIAgents();
+	}
+
 }
