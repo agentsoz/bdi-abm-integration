@@ -35,24 +35,17 @@ import io.github.agentsoz.bushfiretute.Config;
  *
  */
  public class ActionID {
-    //An action that taxis may give to request their MATSim counterpart to drive to a given coordinate
-    public static final String DRIVETO = "drive to";
-    //An action that taxis may give to ask for a given goal
+	 //An action that any Matsim Agent can carry out
+	 public static final String DRIVETO = "drive to";
+	 public static final String REQUESTLOCATION = "Request Location";
 
     public static final String CONNECT_TO = "connect to";
 
     public static final String PICKUP = "pick up";
-    public static final String driveToAndPickUp = "drive to and pick up";
+    public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
     //An action that recieves a destination and a pick up
 
-    public static final String setDriveTime = "set drive time";
+    public static final String SET_DRIVE_TIME = "set drive time";
     //An action that changes the currently executing activity
-
-    public static final String REQUESTLOCATION = "Request Location";
-
-    public static final String REQUESTJOB = "request job";
-    //An action that operators may give to ask to be notified with a list of any new job requests
-    public static final String AWAITJOBS = "await jobs";
-
 
 }

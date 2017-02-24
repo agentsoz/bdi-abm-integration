@@ -82,14 +82,14 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 		*/
 
 
-		res.initiatedAction=ActionID.driveToAndPickUp;
+		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
 		res.targetDestination="Relatives";
 
-		Object[] params = new Object[] { (Object)ActionID.driveToAndPickUp , relCoords, res.targetDestination, pickuptime};
+		Object[] params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , relCoords, res.targetDestination, pickuptime};
 
-		logger.debug("agent " + res.agentID + " Action : "+ActionID.driveToAndPickUp + " relatives: coords: " + relCoords[0] +" "+ relCoords[1] + " pickup-time :  "+ pickuptime );
+		logger.debug("agent " + res.agentID + " Action : "+ActionID.DRIVETO_AND_PICKUP + " relatives: coords: " + relCoords[0] +" "+ relCoords[1] + " pickup-time :  "+ pickuptime );
 
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.driveToAndPickUp, params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, params );
 		long startTime = res.getCurrentTime();
 		@subtask( gag );
 

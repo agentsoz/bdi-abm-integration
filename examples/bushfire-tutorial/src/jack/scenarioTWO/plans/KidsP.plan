@@ -76,13 +76,13 @@ Plan Name: KidsP
 		}
 
 	*/
-		////driveToAndPickUp
-		res.initiatedAction=ActionID.driveToAndPickUp;
+		////DRIVETO_AND_PICKUP
+		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
 		res.targetDestination="school";
 
-		Object[] pickup_params = new Object[] { (Object)ActionID.driveToAndPickUp , res.schoolLocation , "Kids", pickuptime};
+		Object[] pickup_params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , res.schoolLocation , "Kids", pickuptime};
 
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.driveToAndPickUp, pickup_params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, pickup_params );
 		long startTime = res.getCurrentTime();
 		@subtask( gag );
 

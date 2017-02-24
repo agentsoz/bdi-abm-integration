@@ -130,7 +130,7 @@ public class scenarioTWO extends BDIModel{
 			String passed = state.PASSED.toString();
 			
 			//selecting action types which have a destination allocated
-			if(actionID.equals(ActionID.DRIVETO) || actionID.equals(ActionID.CONNECT_TO) || actionID.equals(ActionID.driveToAndPickUp) ) { 
+			if(actionID.equals(ActionID.DRIVETO) || actionID.equals(ActionID.CONNECT_TO) || actionID.equals(ActionID.DRIVETO_AND_PICKUP) ) { 
 				
 				//if the action state is passed and the action type equals the last initiated action type 
 				if( returnedState.compareTo(passed) == 0 && actionID.equals(((EvacResident) agent).initiatedAction) ) {  //equals
@@ -166,7 +166,7 @@ public class scenarioTWO extends BDIModel{
 		}
 		
 		// listens for fire alerts, evac broadcasts and matsim agent updates
-		@Override
+		//@Override
 		public boolean dataUpdate(double time, String dataType, Object data) {
 
 			switch (dataType) {

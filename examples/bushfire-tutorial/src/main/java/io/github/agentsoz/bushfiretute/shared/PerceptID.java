@@ -1,10 +1,10 @@
-package io.github.agentsoz.bdimatsim.actionsPercepts;
+package io.github.agentsoz.bushfiretute.shared;
 
 /*
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,6 +22,8 @@ package io.github.agentsoz.bdimatsim.actionsPercepts;
  * #L%
  */
 
-public interface PerceptHandler {
-	public Object[] processPercept(String agentID, String perceptID);
+public final class PerceptID {
+    public static final String ARRIVED_CONNECT_TO = "Arrived to connect to";
+    public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
+    public static final String PICKED_UP = "picked up";
 }

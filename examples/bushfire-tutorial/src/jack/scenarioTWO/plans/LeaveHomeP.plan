@@ -35,9 +35,9 @@ Plan Name: LeaveP
 	{
 		logger.debug("leaveHome plan initiated..");
 		double delayTime = 10.0;
-		Object[] leave_params = new Object[] { (Object)ActionID.setDriveTime ,delayTime,"Current"};
+		Object[] leave_params = new Object[] { (Object)ActionID.SET_DRIVE_TIME ,delayTime,"Current"};
 
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.setDriveTime, leave_params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.SET_DRIVE_TIME, leave_params );
 
 		@post( gag );
 	}

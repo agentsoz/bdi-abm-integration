@@ -56,8 +56,7 @@ import scenarioTWO.agents.EvacResident;
  *  DataClient - receives dataUpdate from the subscribed data type.
  */
 
-public class BDIModel extends JACKModel implements DataClient, DataSource,
-		 ActionManager {  //DataSource
+public class BDIModel extends JACKModel {  //DataSource
 
 	final Logger logger = LoggerFactory.getLogger("");
 	protected BdiConnector bdiConnector;
@@ -86,12 +85,6 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 
 	@Override
 	public void setup(ABMServerInterface abmServer) {
-
-		dataServer = DataServer.getServer("Bushfire");
-		dataServer.subscribe(this, DataTypes.FIRE_ALERT);
-		dataServer.subscribe(this, DataTypes.MATSIM_AGENT_UPDATES);
-		dataServer.registerSource("time", this); //DATA source
-
 		bdiConnector = new BdiConnector(this); //passing this instance of the bushfire application
 	}
 
@@ -100,15 +93,6 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 	public void finish() {
 		logger.info("shut down");
 //		EvacuationReport.close();
-	}
-
-	void promptControllerInput() {
-		SimpleMessage msg = new SimpleMessage();
-		msg.name = DataTypes.UI_PROMPT;
-		String prompt = "Specify input for EvacController agent?";
-		String[] options = new String[] { "Yes", "No" };
-		msg.params = new Object[] { prompt, options };
-		dataServer.publish(DataTypes.UI_PROMPT, msg);
 	}
 
 	@Override
@@ -134,9 +118,9 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 		}
 		
 		//pick up action
-		if ((String) parameters[0] == ActionID.driveToAndPickUp) {
-			logger.trace("received a driveToAndPickUp action in package action");
-			callSuperPackageAction(agentID, ActionID.driveToAndPickUp, parameters);
+		if ((String) parameters[0] == ActionID.DRIVETO_AND_PICKUP) {
+			logger.trace("received a DRIVETO_AND_PICKUP action in package action");
+			callSuperPackageAction(agentID, ActionID.DRIVETO_AND_PICKUP, parameters);
 	
 		}	
 		
@@ -148,9 +132,9 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 		}
 		
 		//pick up action
-		if ((String) parameters[0] == ActionID.setDriveTime) {
-			logger.trace("received a setDriveTime action in package action");
-			callSuperPackageAction(agentID, ActionID.setDriveTime, parameters);
+		if ((String) parameters[0] == ActionID.SET_DRIVE_TIME) {
+			logger.trace("received a SET_DRIVE_TIME action in package action");
+			callSuperPackageAction(agentID, ActionID.SET_DRIVE_TIME, parameters);
 	
 		}
 		
@@ -183,16 +167,6 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 //	
 	protected void callSuperPackageAction(String agentID, String action, Object[] parameters){
 		super.packageAction(agentID, action, parameters);
-
-		if (dataServer != null) {
-			// publish new agent actions
-			SimpleMessage message = new SimpleMessage();
-			message.name = "updateAgentBDI";
-			message.params = new Object[] { agentID, parameters[0],
-					parameters[1], parameters[2] };
-			
-			dataServer.publish(DataTypes.BDI_AGENT_UPDATES, message);
-		}
 	}
 
 
@@ -200,7 +174,7 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 	public Agent createAgent(String agentID, Object[] initData) {
 
 		logger.debug("agent {} initiated from bushfire application", agentID);
-		return new EvacResident(agentID,bdiConnector, this); //Test package agent
+		return new EvacResident(agentID, bdiConnector, this); //Test package agent
 
 	}
 
@@ -225,17 +199,6 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 			}
 	}
 
-	@Override
-	public boolean dataUpdate(double time, String dataType, Object data) {
-		return false;
-	}
-	
-	@Override
-	public void updateAction(Agent agent, String actionID, State state,
-			Object[] parameters) {
-
-	}
-
 	public boolean getKids() {
 		return new Random().nextDouble() < Config.getProportionWithKids();
 	}
@@ -244,18 +207,20 @@ public class BDIModel extends JACKModel implements DataClient, DataSource,
 		return new Random().nextDouble() < Config.getProportionWithRelatives();
 	}
 
-	@Override
-	public Object getNewData(double time, Object parameters) {
 
 
-		return null;
-	}
-
-	
 	@Override
 	public double getSimTime() {
-
-		return dataServer.getTime();
+		// TODO Auto-generated method stub
+		return 0;
 	}
-	
+
+
+
+	@Override
+	public void updateAction(Agent agent, String actionID, State state, Object[] parameters) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
