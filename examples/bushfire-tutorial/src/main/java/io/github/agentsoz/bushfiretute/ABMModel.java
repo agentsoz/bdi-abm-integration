@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfiretute.matsim;
+package io.github.agentsoz.bushfiretute;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,12 +43,12 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MatsimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MatsimPerceptList;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
-import io.github.agentsoz.bdimatsim.app.BDIApplicationInterface;
+import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
 
-public class BushfireMatsimModel implements BDIApplicationInterface {
+public class ABMModel implements MATSimApplicationInterface {
 
     final Logger logger = LoggerFactory.getLogger("");      
     

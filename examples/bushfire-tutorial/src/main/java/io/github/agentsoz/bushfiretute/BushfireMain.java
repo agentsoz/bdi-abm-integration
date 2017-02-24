@@ -36,7 +36,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.bushfiretute.matsim.BushfireMatsimModel;
 import io.github.agentsoz.dataInterface.DataServer;
 
 public class BushfireMain {
@@ -67,7 +66,7 @@ public class BushfireMain {
 		// Initialise the MATSim model
 		MATSimModel matsimManager = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
 		// Register this application (and any new actions/percepts) with MATSim
-		matsimManager.registerBDIApplication(new BushfireMatsimModel());
+		matsimManager.registerBDIApplication(new ABMModel());
 
 		// Finally, start the MATSim controller
 		String[] margs = { Config.getMatSimFile() };
