@@ -62,7 +62,7 @@ public class BushfireMain {
 		}
 
 		// Initialise and hook up the BDI side
-		BDIModel bdiModel = new scenarioTWO();
+		BDIModel bdiModel = new BDIModel();
 
 		// Initialise the MATSim model
 		MATSimModel matsimManager = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());

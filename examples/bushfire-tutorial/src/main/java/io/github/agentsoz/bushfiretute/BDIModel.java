@@ -1,5 +1,8 @@
 package io.github.agentsoz.bushfiretute;
 
+import java.util.Iterator;
+import java.util.Map;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -36,6 +39,7 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
 import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.bdi.BdiConnector;
+import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.dataInterface.DataClient;
 import io.github.agentsoz.dataInterface.DataServer;
@@ -79,21 +83,48 @@ public class BDIModel extends JACKModel {  //DataSource
 		
 		GlobalTime.increaseNewTime();
 		super.takeControl(adc);
+		
+		checkDepartureFromHome(adc);
 	}
 
 
+	public void checkDepartureFromHome(AgentDataContainer adc) { 
+		 Iterator it = this.agents.entrySet().iterator();
+		 while(it.hasNext()) { 
+			 Map.Entry agentEntry = (Map.Entry)it.next();
+			 String agentID = (String) agentEntry.getKey();
+			 EvacResident agent = (EvacResident) agentEntry.getValue();
+			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
+				 adc.getOrCreate(agentID).getPerceptContainer().put(DataTypes.LEAVENOW, " start departure");
+			 }
+		 }
+		
+	}
+	
 
 	@Override
 	public void setup(ABMServerInterface abmServer) {
-		bdiConnector = new BdiConnector(this); //passing this instance of the bushfire application
+		bdiConnector = new BdiConnector(this);
+		this.bdiConnector.print_S2JACKModelConfigs();
 	}
 
 	// Implemented here so we can cleanly close our log files.
 	@Override
 	public void finish() {
+		logger.debug("agents with kids: {}"
+				+ "| agents with Relatives: {}"
+				+ "| agents with schools: {}"
+				+ "| agents with kids but no schools: {}"
+				+ "| totPickups: {} | maxPickups: {}"
+				+ "", ScenarioTwoData.agentsWithKids,ScenarioTwoData.agentsWithRels,ScenarioTwoData.agentsWithSchools,ScenarioTwoData.agentsWithKidsNoSchools,ScenarioTwoData.totPickups, Config.getMaxPickUps());
+		
+		//store data
+		ScenarioTwoData.writeToFile();
+		ScenarioTwoData.writeConnectToDepTimesToFile();
+		
 		logger.info("shut down");
-//		EvacuationReport.close();
 	}
+	
 
 	@Override
 	public void packageAction(String agentID, String actionID,
@@ -172,31 +203,38 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	@Override
 	public Agent createAgent(String agentID, Object[] initData) {
-
 		logger.debug("agent {} initiated from bushfire application", agentID);
-		return new EvacResident(agentID, bdiConnector, this); //Test package agent
-
+		return new EvacResident(agentID, bdiConnector, this);
 	}
 
 	@Override
 	public void handlePercept(Agent agent, String perceptID, Object parameters) {
-		
-			if(perceptID.equals("Arrived"))
-			{
-				logger.debug(" received percept : Arrived for agent {} ", agent.getBasename() );
-			}
-			if(perceptID.equals("Arrived to final dest"))
-			{
-				logger.debug(" received percept : Arrived to final dest for agent {} ", agent.getBasename() );
-			}
-			if(perceptID.equals("arrived and picked up") )
-			{
-				logger.debug(" received percept : arrived and picked up for agent {} ", agent.getBasename());
-			}
-			if(perceptID.equals("picked up") )
-			{
-				logger.debug(" received percept : picked up for agent {} ", agent.getBasename());
-			}
+
+		EvacResident resident = (EvacResident) agent;
+		if (perceptID.equals(DataTypes.FIREALERT) && resident.fireResponse == false) {
+			// dataServer.publish(DataTypes.FIRE_ALERT, null);
+			logger.trace("agent posting EvacAlert goal...");
+			resident.postEvacAlert("fire started");
+			resident.fireResponse = true;
+		}
+		if (perceptID.equals(DataTypes.LEAVENOW)) {
+			logger.debug("recieved a LEAVENOW percept at time {}", GlobalTime.time.getTime());
+			resident.postLeaveGoal();
+			resident.waitAtHomeFlag = false;
+		}
+
+		if (perceptID.equals("Arrived")) {
+			logger.debug(" received percept : Arrived for agent {} ", agent.getBasename());
+		}
+		if (perceptID.equals("Arrived to final dest")) {
+			logger.debug(" received percept : Arrived to final dest for agent {} ", agent.getBasename());
+		}
+		if (perceptID.equals("arrived and picked up")) {
+			logger.debug(" received percept : arrived and picked up for agent {} ", agent.getBasename());
+		}
+		if (perceptID.equals("picked up")) {
+			logger.debug(" received percept : picked up for agent {} ", agent.getBasename());
+		}
 	}
 
 	public boolean getKids() {
@@ -217,10 +255,141 @@ public class BDIModel extends JACKModel {  //DataSource
 
 
 
+	// update agent action state within the JACK program
 	@Override
-	public void updateAction(Agent agent, String actionID, State state, Object[] parameters) {
-		// TODO Auto-generated method stub
+	public void updateAction(Agent agent, String actionID, State state,
+			Object[] parameters) {
+		try{
+		logger.debug("scenarioTWO-update action: actionID {} state {}",actionID, state.toString());
+					
+		//int currentLink = Integer.parseInt((String)parameters[0] );
+		//logger.debug(" parameters " + currentLink );
 		
+		//checking the target destination
+		String returnedState = state.toString();
+		String passed = state.PASSED.toString();
+		
+		//selecting action types which have a destination allocated
+		if(actionID.equals(ActionID.DRIVETO) || actionID.equals(ActionID.CONNECT_TO) || actionID.equals(ActionID.DRIVETO_AND_PICKUP) ) { 
+			
+			//if the action state is passed and the action type equals the last initiated action type 
+			if( returnedState.compareTo(passed) == 0 && actionID.equals(((EvacResident) agent).initiatedAction) ) {  //equals
+				
+				((EvacResident) agent).updateCurrentLocation(); //update current location of the agent
+				((EvacResident) agent).removeTargetDestination(); // reset the target attributes of the agent
+			}
+			else {
+				((EvacResident) agent).removeTargetDestination(); //remove target dest upon failure
+			}
+			
+			
+		}
+		
+		// first, updating current location of the agent, because, if this thread reach the next action earlier than the above
+		//code block, then agent attributes might be changed according to the new BDI action..
+		((EvacResident) agent).updateActionState(actionID, state, parameters);
+		
+		
+		}catch(NumberFormatException e) {
+			logger.debug("NumberFormatException : {}", e.getMessage());
+		}
+		
+
+	}
+
+
+	// listens for fire alerts, evac broadcasts and matsim agent updates
+	//@Override
+	public boolean dataUpdate(double time, String dataType, Object data) {
+
+		switch (dataType) {
+
+		case DataTypes.FIRE_ALERT: {
+
+			logger.debug("received fire alert");
+			return true;
+		}
+		// establish starting location and home region for each agent
+		case DataTypes.MATSIM_AGENT_UPDATES: {
+			logger.trace("received matsim agent updates");
+			for (SimpleMessage msg : (SimpleMessage[]) data) {
+
+				String id = (String) msg.params[0];
+				EvacResident agent = (EvacResident) agents.get(id);
+
+				//received from Utils.sendInitialPlanData()
+				if(msg.name.equals("initPlanData")) {
+					logger.debug("initial matsim plan data arrived");
+					
+					//1. assiging home link and depttime
+//					agent.depTime = (double)msg.params[1];  setDepTime
+					agent.setDepTime((double)msg.params[1]);
+				//	logger.debug("retreived deptime {} for agent {}",agent.depTime, id);
+					
+					//2.assigning coords of safe destination
+					double safeX = (double) msg.params[2];
+					double safeY = (double) msg.params[3];
+				agent.endLocation = new double[] { safeX, safeY };
+				logger.trace("agent {} end location is {},{}", id, agent.endLocation[0],agent.endLocation[1]);
+				
+				}
+					
+				//received from Utils.initialiseVisualisedAgents()
+				if (agent != null && agent.getStartLocation() == null) {
+
+					double lat = (double) msg.params[1];
+					double lon = (double) msg.params[2];
+					logger.trace("agent {} start location is {},{} at time {}", id, lon,
+							lat,getSimTime());
+
+					agent.startLocation = new double[] { lat, lon };
+					agent.currentLocation = "home"; // since each agent's start location is home
+					
+				//if  the totPickps havent exceeded the maxPickups limit	
+				if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
+					
+					//3. allocating kids and schools						
+					if(getKids() && !agent.relsNeedPickUp) {
+						ScenarioTwoData.agentsWithKids++;
+						double[] sclCords = Config.getRandomSchoolCoords(id,agent.startLocation);
+						if(sclCords != null) { 
+							agent.kidsNeedPickUp = true;  
+							agent.schoolLocation = sclCords;
+							agent.prepared_to_evac_flag = false;
+							ScenarioTwoData.totPickups++;
+							logger.debug("agent {} has kids |"
+									+ " school location: {} {} |", id, sclCords[0], sclCords[1]);
+						}
+						else{
+							logger.debug("no school found for agent {}  assigned with kids ", id);
+							ScenarioTwoData.agentsWithKidsNoSchools++;
+						}
+						
+					}
+
+					
+					//4. assign relatives
+					if(getRels() && !agent.kidsNeedPickUp) {
+						ScenarioTwoData.agentsWithRels++;
+						agent.relsNeedPickUp = true;
+						agent.prepared_to_evac_flag = false;
+						ScenarioTwoData.totPickups++;
+						logger.debug(" agent {} has rels", id);
+					}
+					
+				}
+					if(agent.kidsNeedPickUp && agent.relsNeedPickUp) { 
+						logger.warn("agent with TWO-PICKUPs found: {}", id);
+					}
+					
+				}
+				}
+				return true;
+			}
+		
+		}
+
+		return false;
 	}
 
 }
