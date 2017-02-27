@@ -27,11 +27,17 @@ import java.util.Iterator;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.framework.MobsimAgent;
+import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.slf4j.Logger;
@@ -45,16 +51,20 @@ import io.github.agentsoz.bdimatsim.MatsimPerceptList;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
+import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
+import scenarioTWO.agents.EvacResident;
 
 public class ABMModel implements MATSimApplicationInterface {
 
     final Logger logger = LoggerFactory.getLogger("");      
     final MATSimModel model;
+    final BDIModel bdiModel;
     
-	public ABMModel(MATSimModel model) {
-		this.model = model;
+	public ABMModel(BDIModel bdiModel, MATSimBDIParameterHandler matSimBDIParameterHandler) {
+		this.bdiModel = bdiModel;
+		this.model = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
 		model.registerPlugin(this);
 	}
 
@@ -71,15 +81,59 @@ public class ABMModel implements MATSimApplicationInterface {
 		// However, now that we have this hook back into the app, this info
 		// can be retrieved directly, and probably there is no longer a need
 		// to use the DataServer etc.
+		
+		Map<Id<Link>,? extends Link> links = model.getScenario().getNetwork().getLinks();
+		for (Id<Person> agentId : bdiAgentsIDs) {
+			MATSimAgent agent = model.getBDIAgent(agentId);
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+			if (bdiAgent == null) {
+				logger.warn("No BDI counterpart for MATSim agent '" + agentId
+					+ "'. Should not happen, but will keep going");
+				continue;
+			}
+			Plan plan = WithinDayAgentUtils.getModifiablePlan(model.getMobsimAgentMap().get(agentId));
+			List<PlanElement> planElements = plan.getPlanElements();
 
-		//Map<Id<Link>,? extends Link> links = model.getScenario().getNetwork().getLinks();
-		//for(Id<Person> agentId: model.getBDIAgentIDs()) {
-			//MATSimAgent agent = model.getBDIAgent(agentId);
-            //m.params = new Object[]{//agent.getId().toString(),links.get(agent.getCurrentLinkId()).getFromNode().getId().toString(),"T"};
-            //        agent.getId().toString(),
-            //        links.get(agent.getCurrentLinkId()).getFromNode().getCoord().getX(),
-            //        links.get(agent.getCurrentLinkId()).getFromNode().getCoord().getY()
-			//};
+			// Assign start location
+			double lat = links.get(model.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+			double lon = links.get(model.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			bdiAgent.startLocation = new double[] { lat, lon };
+			bdiAgent.currentLocation = "home"; // agents always start at home
+			logger.trace("agent {} is at home at location {},{}", 
+					agentId, lon, lat);
+
+			for (int i = 0; i < planElements.size(); i++) {
+				PlanElement element = planElements.get(i);
+				if (!(element instanceof Activity)) {
+					continue;
+				}
+				Activity act = (Activity) element;
+				// Get departure time
+				if (act.getType().equals("Evacuation")) {
+					PlanElement pe = plan.getPlanElements().get(i + 1);
+					if (!(pe instanceof Leg)) {
+						logger.error("Utils : selected plan element to get deptime is not a leg");
+						continue;
+					}
+					Leg depLeg = (Leg) pe;
+					double depTime = depLeg.getDepartureTime();
+					logger.trace("departure time of the depLeg : {}", depTime);
+					bdiAgent.setDepTime(depTime);
+
+				}
+				// Assign coords of safe destination
+				if (act.getType().equals("Safe")) {
+					double safeX = act.getCoord().getX();
+					double safeY = act.getCoord().getY();
+					bdiAgent.endLocation = new double[] { safeX, safeY };
+					logger.trace("agent {} end location is {},{}", 
+						agentId, bdiAgent.endLocation[0], bdiAgent.endLocation[1]);
+				}
+			}
+			
+			// Assugn dependet persons (to pick up before evacuating)
+			assignDependentPersons(bdiAgent);
+		}
 	}
 
 	@Override
@@ -266,5 +320,39 @@ public class ABMModel implements MATSimApplicationInterface {
 
 	public void run(String file, String[] args) {
 		model.run(file, args);
+	}
+	
+	private void assignDependentPersons(EvacResident agent) {
+		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
+		    double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
+		    pDependents = Util.normalise(pDependents);
+		    Random random = BushfireMain.getRandom();
+		    
+		    if (random.nextDouble() < pDependents[0]) {
+		    	// Allocate dependent children
+				ScenarioTwoData.agentsWithKids++;
+				double[] sclCords = Config.getRandomSchoolCoords(agent.getId(),agent.startLocation);
+				if(sclCords != null) { 
+					agent.kidsNeedPickUp = true;  
+					agent.schoolLocation = sclCords;
+					agent.prepared_to_evac_flag = false;
+					ScenarioTwoData.totPickups++;
+					logger.debug("agent {} has kids |"
+							+ " school location: {} {} |", agent.getId(), sclCords[0], sclCords[1]);
+				}
+				else{
+					logger.debug("no school found for agent {}  assigned with kids ", agent.getId());
+					ScenarioTwoData.agentsWithKidsNoSchools++;
+				}
+		    }
+		    if (random.nextDouble() < pDependents[1]) {
+		    	// Allocate dependent adults
+				ScenarioTwoData.agentsWithRels++;
+				agent.relsNeedPickUp = true;
+				agent.prepared_to_evac_flag = false;
+				ScenarioTwoData.totPickups++;
+				logger.debug(" agent {} has rels", agent.getId());
+		    }
+		}
 	}
 }

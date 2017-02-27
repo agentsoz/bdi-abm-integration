@@ -23,7 +23,7 @@ package io.github.agentsoz.bushfiretute;
  */
 
 import java.io.IOException;
-
+import java.util.Random;
 import java.util.StringTokenizer;
 
 import org.slf4j.LoggerFactory;
@@ -44,6 +44,10 @@ public class BushfireMain {
 	private static String logFile = BushfireMain.class.getSimpleName() + ".log";
 	private static Level logLevel = Level.INFO;
 	private static Logger logger = null;
+	
+	// all application code should use this same instance of Random
+    private static final Random random = new Random(); 
+    private static Long seed = null;
 
 	public static void main(final String[] args) throws IOException {
 		// TODO Auto-generated method stub
@@ -53,6 +57,9 @@ public class BushfireMain {
 
 		// Create the logger
 		logger = createLogger("", logFile);
+		
+	    // add seed to command line args if run replication needed
+		if (seed != null) random.setSeed(seed);
 
 		// Read in the configuration
 		if (!Config.readConfig()) {
@@ -64,7 +71,7 @@ public class BushfireMain {
 		BDIModel bdiModel = new BDIModel();
 
 		// Initialise the MATSim model
-		ABMModel abmModel = new ABMModel(new MATSimModel(bdiModel, new MATSimBDIParameterHandler()));
+		ABMModel abmModel = new ABMModel(bdiModel, new MATSimBDIParameterHandler());
 		// Finally, start the MATSim controller
 		String[] margs = { Config.getMatSimFile() };
 		String s = "starting matsim with args:";
@@ -152,6 +159,10 @@ public class BushfireMain {
 		logger.setAdditive(true); /* set to true if root should log too */
 
 		return logger;
+	}
+	
+	static Random getRandom() {
+		return random;
 	}
 
 }

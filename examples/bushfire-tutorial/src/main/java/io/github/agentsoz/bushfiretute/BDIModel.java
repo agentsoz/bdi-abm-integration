@@ -237,16 +237,6 @@ public class BDIModel extends JACKModel {  //DataSource
 		}
 	}
 
-	public boolean getKids() {
-		return new Random().nextDouble() < Config.getProportionWithKids();
-	}
-
-	public boolean getRels() {
-		return new Random().nextDouble() < Config.getProportionWithRelatives();
-	}
-
-
-
 	@Override
 	public double getSimTime() {
 		// TODO Auto-generated method stub
@@ -297,99 +287,8 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	}
 
-
-	// listens for fire alerts, evac broadcasts and matsim agent updates
-	//@Override
-	public boolean dataUpdate(double time, String dataType, Object data) {
-
-		switch (dataType) {
-
-		case DataTypes.FIRE_ALERT: {
-
-			logger.debug("received fire alert");
-			return true;
-		}
-		// establish starting location and home region for each agent
-		case DataTypes.MATSIM_AGENT_UPDATES: {
-			logger.trace("received matsim agent updates");
-			for (SimpleMessage msg : (SimpleMessage[]) data) {
-
-				String id = (String) msg.params[0];
-				EvacResident agent = (EvacResident) agents.get(id);
-
-				//received from Utils.sendInitialPlanData()
-				if(msg.name.equals("initPlanData")) {
-					logger.debug("initial matsim plan data arrived");
-					
-					//1. assiging home link and depttime
-//					agent.depTime = (double)msg.params[1];  setDepTime
-					agent.setDepTime((double)msg.params[1]);
-				//	logger.debug("retreived deptime {} for agent {}",agent.depTime, id);
-					
-					//2.assigning coords of safe destination
-					double safeX = (double) msg.params[2];
-					double safeY = (double) msg.params[3];
-				agent.endLocation = new double[] { safeX, safeY };
-				logger.trace("agent {} end location is {},{}", id, agent.endLocation[0],agent.endLocation[1]);
-				
-				}
-					
-				//received from Utils.initialiseVisualisedAgents()
-				if (agent != null && agent.getStartLocation() == null) {
-
-					double lat = (double) msg.params[1];
-					double lon = (double) msg.params[2];
-					logger.trace("agent {} start location is {},{} at time {}", id, lon,
-							lat,getSimTime());
-
-					agent.startLocation = new double[] { lat, lon };
-					agent.currentLocation = "home"; // since each agent's start location is home
-					
-				//if  the totPickps havent exceeded the maxPickups limit	
-				if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
-					
-					//3. allocating kids and schools						
-					if(getKids() && !agent.relsNeedPickUp) {
-						ScenarioTwoData.agentsWithKids++;
-						double[] sclCords = Config.getRandomSchoolCoords(id,agent.startLocation);
-						if(sclCords != null) { 
-							agent.kidsNeedPickUp = true;  
-							agent.schoolLocation = sclCords;
-							agent.prepared_to_evac_flag = false;
-							ScenarioTwoData.totPickups++;
-							logger.debug("agent {} has kids |"
-									+ " school location: {} {} |", id, sclCords[0], sclCords[1]);
-						}
-						else{
-							logger.debug("no school found for agent {}  assigned with kids ", id);
-							ScenarioTwoData.agentsWithKidsNoSchools++;
-						}
-						
-					}
-
-					
-					//4. assign relatives
-					if(getRels() && !agent.kidsNeedPickUp) {
-						ScenarioTwoData.agentsWithRels++;
-						agent.relsNeedPickUp = true;
-						agent.prepared_to_evac_flag = false;
-						ScenarioTwoData.totPickups++;
-						logger.debug(" agent {} has rels", id);
-					}
-					
-				}
-					if(agent.kidsNeedPickUp && agent.relsNeedPickUp) { 
-						logger.warn("agent with TWO-PICKUPs found: {}", id);
-					}
-					
-				}
-				}
-				return true;
-			}
-		
-		}
-
-		return false;
+	EvacResident getBDICounterpart(String id) {
+		return (EvacResident) agents.get(id);
 	}
 
 }
