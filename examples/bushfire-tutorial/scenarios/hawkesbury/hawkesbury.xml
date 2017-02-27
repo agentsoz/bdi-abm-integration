@@ -66,7 +66,7 @@ start location to relative's location-->
 
 
 <demographics
-	relatives="1.0"
+	relatives="0.0"
 	kids="1.0"
 	max_distance_to_school="20.0"
 	max_distance_to_relatives="1000"

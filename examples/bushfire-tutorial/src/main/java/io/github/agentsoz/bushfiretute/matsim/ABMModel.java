@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfiretute;
+package io.github.agentsoz.bushfiretute.matsim;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.framework.MobsimAgent;
+import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.utils.geometry.CoordImpl;
@@ -48,9 +49,15 @@ import io.github.agentsoz.bdimatsim.MATSimAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MatsimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MatsimPerceptList;
+import io.github.agentsoz.bdimatsim.Replanner;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
+import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.BushfireMain;
+import io.github.agentsoz.bushfiretute.Config;
+import io.github.agentsoz.bushfiretute.MATSimBDIParameterHandler;
+import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
@@ -61,11 +68,20 @@ public class ABMModel implements MATSimApplicationInterface {
     final Logger logger = LoggerFactory.getLogger("");      
     final MATSimModel model;
     final BDIModel bdiModel;
+    private Replanner replanner = null;;
     
 	public ABMModel(BDIModel bdiModel, MATSimBDIParameterHandler matSimBDIParameterHandler) {
 		this.bdiModel = bdiModel;
 		this.model = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
 		model.registerPlugin(this);
+	}
+	
+	@Override
+	public Replanner getReplanner(ActivityEndRescheduler activityEndRescheduler) {
+		if (replanner == null) {
+			replanner = new CustomReplanner(model, activityEndRescheduler);
+		}
+		return replanner;
 	}
 
 	@Override
@@ -74,13 +90,6 @@ public class ABMModel implements MATSimApplicationInterface {
 
 	@Override
 	public void notifyAfterCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
-		
-		// DSingh, 21/02/17: The code in hawkesbury branch Utils.sendInitialPlanData()
-		// can go here. It sends MATSIM_AGENT_UPDATES via the data server 
-		// which are then eventually picked up by ScenarioTWO.java.
-		// However, now that we have this hook back into the app, this info
-		// can be retrieved directly, and probably there is no longer a need
-		// to use the DataServer etc.
 		
 		Map<Id<Link>,? extends Link> links = model.getScenario().getNetwork().getLinks();
 		for (Id<Person> agentId : bdiAgentsIDs) {
@@ -131,7 +140,7 @@ public class ABMModel implements MATSimApplicationInterface {
 				}
 			}
 			
-			// Assugn dependet persons (to pick up before evacuating)
+			// Assign dependent persons (to pick up before evacuating)
 			assignDependentPersons(bdiAgent);
 		}
 	}
@@ -143,7 +152,7 @@ public class ABMModel implements MATSimApplicationInterface {
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
 				logger.debug("found DRIVETO action for agent : " + agentID);
-				// Get nearest link ID and calls the Replanner to map to MATSim.
+				// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 				Id<Link> newLinkId;
 				if (args[1] instanceof double[]) {
 					double[] coords = (double[]) args[1];
@@ -162,7 +171,7 @@ public class ABMModel implements MATSimApplicationInterface {
 				// this.matSimModel.getReplanner().addNewLegToPlan(
 				// Id.createPersonId( agentID ),newLinkId, destination);
 				
-				//FIXME dhi: model.getReplanner().addNewLegToPlan(Id.createPersonId(agentID), newLinkId, destination);
+				((CustomReplanner)model.getReplanner()).addNewLegToPlan(Id.createPersonId(agentID), newLinkId, destination);
 
 				// Saving actionValue (which for DRIVETO actions is the link id)
 				// We use this again in the AgentActivityEventHandler, to check
@@ -182,11 +191,12 @@ public class ABMModel implements MATSimApplicationInterface {
 				String destination = (String) args[1];
 				// connect To route replanner method
 				Id<Link> newLinkId = null;
-				//FIXME dhi: newLinkId = model.getReplanner().replanCurrentRoute(Id.createPersonId(agentID), destination);
+				((CustomReplanner)model.getReplanner()).replanCurrentRoute(Id.createPersonId(agentID), destination);
 				if (newLinkId == null) {
 					logger.debug("CONNECT_TO: returned a null link from the target activity");
 				}
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				agent.newDriveTo(newLinkId);
 				//FIXME dhi: agent.newConnectTo(newLinkId);
 				return true;
 			}
@@ -196,7 +206,7 @@ public class ABMModel implements MATSimApplicationInterface {
 		withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new BDIActionHandler() {
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				// Get nearest link ID and calls the Replanner to map to MATSim.
+				// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 				Id<Link> newLinkId;
 				if (args[1] instanceof double[]) {
 					double[] coords = (double[]) args[1];
@@ -211,10 +221,11 @@ public class ABMModel implements MATSimApplicationInterface {
 				}
 
 				int pickupTime = (int) args[3];
-				//FIXME dhi: model.getReplanner().addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, pickupTime);
-				logger.trace(" finished calling addLegAndActvityToNextIndex method in Replanner");
+				((CustomReplanner)model.getReplanner()).addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, pickupTime);
+				logger.trace(" finished calling addLegAndActvityToNextIndex method in CustomReplanner");
 
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				agent.newDriveTo(newLinkId);
 				// FIXME dhi: agent.newDriveToAndPickUp(newLinkId);
 				return true;
 			}
@@ -238,10 +249,11 @@ public class ABMModel implements MATSimApplicationInterface {
 				}
 
 				logger.debug("PICKUP: agentID {} | newLinkId: {} | pickupTime: {} ", agentID, newLinkId, pickupTime);
-				// FIXME dhi: model.getReplanner().addNewActivityToPlan(Id.createPersonId(agentID), pickupTime);
-				logger.trace(" finished calling addNewActivityToPlan method in Replanner");
+				((CustomReplanner)model.getReplanner()).addNewActivityToPlan(Id.createPersonId(agentID), pickupTime);
+				logger.trace(" finished calling addNewActivityToPlan method in CustomReplanner");
 
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				agent.newDriveTo(newLinkId);
 				//FIXME dhi: agent.newPickUp(newLinkId);
 
 				return true;
@@ -255,7 +267,7 @@ public class ABMModel implements MATSimApplicationInterface {
                 double newEndTime = (double) args[1];
                 String actType = (String) args[2];        
                 logger.debug("setDriveTime: agentID {} | actType  {} | delayTime {} ",agentID,actType,newEndTime);
-                //FIXME dhi: model.getReplanner().forceEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
+                ((CustomReplanner)model.getReplanner()).forceEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
                 return true;
 			}
 		});
@@ -284,6 +296,7 @@ public class ABMModel implements MATSimApplicationInterface {
                         Id<Link> action = it.next();
                         array[i++] = action.toString();
                 }
+                agent.clearPassedDriveToActions();
                 //FIXME dhi: agent.clearAllConnectToActions();
                 return array;
 			}
@@ -312,6 +325,7 @@ public class ABMModel implements MATSimApplicationInterface {
                         Id<Link> action = it.next();
                         array[i++] = action.toString();
                 }
+                agent.clearPassedDriveToActions();
                 //FIXME dhi: agent.clearPassedDriveToAndPickupActions();;
                 return array;
 			}

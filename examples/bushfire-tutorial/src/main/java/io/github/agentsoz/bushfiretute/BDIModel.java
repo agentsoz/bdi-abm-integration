@@ -287,7 +287,7 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	}
 
-	EvacResident getBDICounterpart(String id) {
+	public EvacResident getBDICounterpart(String id) {
 		return (EvacResident) agents.get(id);
 	}
 

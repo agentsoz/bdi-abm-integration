@@ -36,6 +36,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.Config;
+import io.github.agentsoz.bushfiretute.matsim.ABMModel;
 import io.github.agentsoz.dataInterface.DataServer;
 
 public class BushfireMain {
@@ -161,7 +162,7 @@ public class BushfireMain {
 		return logger;
 	}
 	
-	static Random getRandom() {
+	public static Random getRandom() {
 		return random;
 	}
 
