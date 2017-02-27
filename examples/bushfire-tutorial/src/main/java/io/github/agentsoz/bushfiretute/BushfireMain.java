@@ -66,7 +66,7 @@ public class BushfireMain {
 		// Initialise the MATSim model
 		MATSimModel matsimManager = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
 		// Register this application (and any new actions/percepts) with MATSim
-		matsimManager.registerBDIApplication(new ABMModel());
+		matsimManager.registerPlugin(new ABMModel());
 
 		// Finally, start the MATSim controller
 		String[] margs = { Config.getMatSimFile() };
