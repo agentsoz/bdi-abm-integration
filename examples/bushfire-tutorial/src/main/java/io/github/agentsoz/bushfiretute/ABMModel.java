@@ -51,7 +51,13 @@ import io.github.agentsoz.bushfiretute.shared.PerceptID;
 public class ABMModel implements MATSimApplicationInterface {
 
     final Logger logger = LoggerFactory.getLogger("");      
+    final MATSimModel model;
     
+	public ABMModel(MATSimModel model) {
+		this.model = model;
+		model.registerPlugin(this);
+	}
+
 	@Override
 	public void notifyBeforeCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
 	}
@@ -256,5 +262,9 @@ public class ABMModel implements MATSimApplicationInterface {
                 return array;
 			}
 		});
+	}
+
+	public void run(String file, String[] args) {
+		model.run(file, args);
 	}
 }

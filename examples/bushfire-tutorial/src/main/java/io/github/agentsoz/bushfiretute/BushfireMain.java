@@ -64,10 +64,7 @@ public class BushfireMain {
 		BDIModel bdiModel = new BDIModel();
 
 		// Initialise the MATSim model
-		MATSimModel matsimManager = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
-		// Register this application (and any new actions/percepts) with MATSim
-		matsimManager.registerPlugin(new ABMModel());
-
+		ABMModel abmModel = new ABMModel(new MATSimModel(bdiModel, new MATSimBDIParameterHandler()));
 		// Finally, start the MATSim controller
 		String[] margs = { Config.getMatSimFile() };
 		String s = "starting matsim with args:";
@@ -75,7 +72,7 @@ public class BushfireMain {
 			s += margs[i];
 		}
 		logger.info(s);
-		matsimManager.run(null, margs);
+		abmModel.run(null, margs);
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
