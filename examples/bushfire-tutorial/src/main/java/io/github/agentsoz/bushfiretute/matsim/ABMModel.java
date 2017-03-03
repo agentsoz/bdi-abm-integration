@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.imageio.spi.RegisterableService;
+
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -44,7 +47,10 @@ import org.matsim.core.utils.geometry.CoordImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
+import io.github.agentsoz.bdimatsim.MATSimActionList;
 import io.github.agentsoz.bdimatsim.MATSimAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MatsimPerceptHandler;
@@ -76,6 +82,9 @@ public class ABMModel implements MATSimApplicationInterface {
 		model.registerPlugin(this);
 	}
 	
+	/**
+	 * Provides a custom Replanner (extended) to use with MATSim.
+	 */
 	@Override
 	public Replanner getReplanner(ActivityEndRescheduler activityEndRescheduler) {
 		if (replanner == null) {
@@ -84,10 +93,22 @@ public class ABMModel implements MATSimApplicationInterface {
 		return replanner;
 	}
 
+	/**
+	 * Use this to pre-process the BDI agents list if needed. For instance, 
+	 * tasks like adding/removing specific agents, or renaming agents IDs, 
+	 * should be done here. This function is called just prior to the
+	 * BDI agent counterparts in MATSim being created.
+	 * 
+	 */
 	@Override
 	public void notifyBeforeCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
 	}
 
+	/**
+	 * Initialise the BDI agents with any application specific data. This 
+	 * function is just immediately after the MATSim counterparts have been 
+	 * created. 
+	 */
 	@Override
 	public void notifyAfterCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
 		
@@ -144,11 +165,28 @@ public class ABMModel implements MATSimApplicationInterface {
 			assignDependentPersons(bdiAgent);
 		}
 	}
+	
+	/**
+	 * This is where we register all application specific BDI actions, and/or
+	 * overwrite default ones (like {@link MATSimActionList#DRIVETO}). 
+	 * <p>
+	 * This is also the place to register action-dependent percepts. 
+	 * For instance, {@link MatsimPerceptList.ARRIVED} is conditional on the 
+	 * agent arriving at the network link in action 
+	 * {@link MATSimActionList.DRIVETO}, and so must be registered at the 
+	 * same time.
+	 * <p>
+	 * Action-independent percepts should be registered using
+	 * {@link this#registerNewBDIPercepts(MatsimPerceptHandler)}.
+	 * <p>
+	 * Note that actions/percepts are registered <strong>per agent</strong>,
+	 * i.e. handlers passed in belong to specific agents.
+	 */
 
 	@Override
 	public void registerNewBDIActions(MATSimActionHandler withHandler) {
 		// overwrite default DRIVETO
-		withHandler.registerBDIAction(ActionID.DRIVETO, new BDIActionHandler() {
+		withHandler.registerBDIAction(MATSimActionList.DRIVETO, new BDIActionHandler() {
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
 				logger.debug("found DRIVETO action for agent : " + agentID);
@@ -173,12 +211,23 @@ public class ABMModel implements MATSimApplicationInterface {
 				
 				((CustomReplanner)model.getReplanner()).addNewLegToPlan(Id.createPersonId(agentID), newLinkId, destination);
 
-				// Saving actionValue (which for DRIVETO actions is the link id)
-				// We use this again in the AgentActivityEventHandler, to check
-				// if the agent has arrived at this link, at which point we can
-				// mark this BDI-action as PASSED
+				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
-				agent.newDriveTo(newLinkId);
+				agent.getPerceptHandler().registerBDIPerceptHandler(
+						agent.getAgentID(), 
+						MonitoredEventType.ArrivedAtDestination, 
+						newLinkId,
+						new BDIPerceptHandler() {
+							@Override
+							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
+								MATSimAgent agent = model.getBDIAgent(agentId);
+								Object[] params = { linkId.toString() };
+								agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
+								agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
+								agent.getPerceptContainer().put(MatsimPerceptList.ARRIVED, params);
+								return true; //unregister this handler
+							}
+						});
 				return true;
 			}
 		});
@@ -190,14 +239,28 @@ public class ABMModel implements MATSimApplicationInterface {
 				logger.debug("found CONNECT_TO action for agent : " + agentID);
 				String destination = (String) args[1];
 				// connect To route replanner method
-				Id<Link> newLinkId = null;
-				((CustomReplanner)model.getReplanner()).replanCurrentRoute(Id.createPersonId(agentID), destination);
+				Id<Link> newLinkId = ((CustomReplanner)model.getReplanner()).replanCurrentRoute(Id.createPersonId(agentID), destination);
 				if (newLinkId == null) {
 					logger.debug("CONNECT_TO: returned a null link from the target activity");
+					return true;
 				}
+				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
-				agent.newDriveTo(newLinkId);
-				//FIXME dhi: agent.newConnectTo(newLinkId);
+				agent.getPerceptHandler().registerBDIPerceptHandler(
+						agent.getAgentID(), 
+						MonitoredEventType.ArrivedAtDestination, 
+						newLinkId,
+						new BDIPerceptHandler() {
+							@Override
+							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
+								MATSimAgent agent = model.getBDIAgent(agentId);
+								Object[] params = { linkId.toString() };
+								agent.getActionContainer().register(ActionID.CONNECT_TO, params);
+								agent.getActionContainer().get(ActionID.CONNECT_TO).setState(ActionContent.State.PASSED);
+								agent.getPerceptContainer().put(PerceptID.ARRIVED_CONNECT_TO, params);
+								return true; //unregister this handler
+							}
+						});
 				return true;
 			}
 		});
@@ -224,13 +287,29 @@ public class ABMModel implements MATSimApplicationInterface {
 				((CustomReplanner)model.getReplanner()).addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, pickupTime);
 				logger.trace(" finished calling addLegAndActvityToNextIndex method in CustomReplanner");
 
+				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
-				agent.newDriveTo(newLinkId);
-				// FIXME dhi: agent.newDriveToAndPickUp(newLinkId);
+				// Now register a event handler for when the agent arrives and finished picking up the destination
+				agent.getPerceptHandler().registerBDIPerceptHandler(
+						agent.getAgentID(), 
+						MonitoredEventType.EndedActivity, 
+						newLinkId,
+						new BDIPerceptHandler() {
+							@Override
+							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
+								MATSimAgent agent = model.getBDIAgent(agentId);
+								Object[] params = { linkId.toString() };
+								agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);
+								agent.getActionContainer().get(ActionID.DRIVETO_AND_PICKUP).setState(ActionContent.State.PASSED);
+								agent.getPerceptContainer().put(PerceptID.ARRIVED_AND_PICKED_UP, params);
+								return true; //unregister this handler
+							}
+						});
 				return true;
 			}
 		});
 
+		/*
 		// register new action
 		withHandler.registerBDIAction(ActionID.PICKUP, new BDIActionHandler() {
 			@Override
@@ -254,12 +333,13 @@ public class ABMModel implements MATSimApplicationInterface {
 
 				MATSimAgent agent = model.getBDIAgent(agentID);
 				agent.newDriveTo(newLinkId);
-				//FIXME dhi: agent.newPickUp(newLinkId);
+				agent.newPickUp(newLinkId);
 
 				return true;
 			}
 		});
-
+		*/
+		
 		// register new action
 		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new BDIActionHandler() {
 			@Override
@@ -268,74 +348,52 @@ public class ABMModel implements MATSimApplicationInterface {
                 String actType = (String) args[2];        
                 logger.debug("setDriveTime: agentID {} | actType  {} | delayTime {} ",agentID,actType,newEndTime);
                 ((CustomReplanner)model.getReplanner()).forceEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
+
+				// Now set the action to passed straight away
+				MATSimAgent agent = model.getBDIAgent(agentID);
+				Object[] params = {};
+				agent.getActionContainer().register(ActionID.SET_DRIVE_TIME, params);
+				agent.getActionContainer().get(ActionID.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
                 return true;
 			}
 		});
-
-
 	}
 
+	/**
+	 * Register any action-independent percepts here. Percepts that are
+	 * conditional on actions (such as {@link MatsimPerceptList#ARRIVED} that
+	 * is specific {@link ActionID#DRIVETO}
+	 */
 	@Override
 	public void registerNewBDIPercepts(MatsimPerceptHandler withHandler) {
-		// regsiter new percept
-		withHandler.registerBDIPercepts(PerceptID.ARRIVED_CONNECT_TO, new BDIPerceptHandler() {
-			@Override
-			public Object[] process(String agentID, String perceptID, MATSimModel model) {
-                logger.debug("inside processPercept method,  handling percepts of percept type CONNECT_TO of agent : " + agentID);
-                MATSimAgent agent = model.getBDIAgent( Id.createPersonId(agentID));
-                ArrayList<Id<Link>> passedActions = new ArrayList<Id<Link>>();
-                //FIXME dhi: passedActions = agent.getpassedConnectToActions();
-                if (passedActions.isEmpty()){
-                        return null;
-                }
-                logger.debug("number of passed final drive to actions : " + passedActions.size() );
-                String[] array=new String[passedActions.size()];
-                Iterator<Id<Link>> it = passedActions.iterator();
-                int i=0;
-                while (it.hasNext()){
-                        Id<Link> action = it.next();
-                        array[i++] = action.toString();
-                }
-                agent.clearPassedDriveToActions();
-                //FIXME dhi: agent.clearAllConnectToActions();
-                return array;
-			}
-		});
+		// TODO Auto-generated method stub
 		
-		// regsiter new percept
-		withHandler.registerBDIPercepts(PerceptID.ARRIVED_AND_PICKED_UP, new BDIPerceptHandler() {
-			@Override
-			public Object[] process(String agentID, String perceptID, MATSimModel model) {
-                /*
-                 * Returns all passed pick up actions held in the MatsimAgent object as an array
-                 * Designed to handle multiple arrivals in one percept
-                 */
-                logger.debug("inside processPercept method,  handling percepts of percept type ARRIVED_AND_PICKED_UP for agent : " + agentID);
-                MATSimAgent agent = model.getBDIAgent(agentID);
-                ArrayList<Id<Link>> passedActions = new ArrayList<Id<Link>>();
-                //FIXME dhi: passedActions = agent.getpassedDriveToAndPickUpActions();
-                if (passedActions.isEmpty()){
-                        return null;
-                }
-                logger.debug("number of passed driveToAndPickup  actions : " + passedActions.size() );
-                String[] array=new String[passedActions.size()];
-                Iterator<Id<Link>> it = passedActions.iterator();
-                int i=0;
-                while (it.hasNext()){
-                        Id<Link> action = it.next();
-                        array[i++] = action.toString();
-                }
-                agent.clearPassedDriveToActions();
-                //FIXME dhi: agent.clearPassedDriveToAndPickupActions();;
-                return array;
-			}
-		});
 	}
 
+	
 	public void run(String file, String[] args) {
 		model.run(file, args);
 	}
 	
+	/**
+	 * Randomly assign dependent persons to be picked up. Uses 
+	 * Pk ({@link Config#getProportionWithKids()}) and 
+	 * Pr ({@link Config#getProportionWithRelatives()) probabilities to calculate
+	 * normalised probabilities, and then allocate kids and/or relatives
+	 * with those probabilities. If both input probabilities are non-zero,
+	 * then all four allocations are possible (no kids or relatives, one or the
+	 * other, both kids and relatives). 
+	 * <p>
+	 * Some examples:
+	 * <ul> 
+	 * <li> Pk=0.0, Pr=0.0: results in always no kids or relatives</li>
+	 * <li> Pk=0.0, 0.0&lt;Pr&lt;1.0: results in always relatives</li>
+	 * <li> 0.0&lt;Pk&lt;1.0, Pr=0.0: results in always kids</li>
+	 * <li> 0.0&lt;Pk&lt;1.0, 0.0&lt;Pr&lt;1.0: results in all four combinations of kids and relatives</li>
+	 * </ul>
+	 * 
+	 * @param agent
+	 */
 	private void assignDependentPersons(EvacResident agent) {
 		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
 		    double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
@@ -369,4 +427,5 @@ public class ABMModel implements MATSimApplicationInterface {
 		    }
 		}
 	}
+
 }

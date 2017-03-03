@@ -419,7 +419,7 @@
 		<!-- Path to a file containing person attributes (required file format: ObjectAttributes). -->
 		<param name="inputPersonAttributesFile" value="null" />
 		<!--    out haw_pop_one  modifiedPopFile USE gzip'd pop files?-->
-		<param name="inputPlansFile" value="./scenarios/hawkesbury/haw_pop_one.xml.gz" />
+		<param name="inputPlansFile" value="./scenarios/hawkesbury/haw_pop_small.xml.gz" />
 
 		<!-- Defines how routes are stored in memory. Currently supported: LinkNetworkRoute, CompressedNetworkRoute. -->
 		 <param name="networkRouteType" value="LinkNetworkRoute" />

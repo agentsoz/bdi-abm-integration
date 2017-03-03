@@ -1,12 +1,6 @@
 package io.github.agentsoz.bushfiretute.shared;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import io.github.agentsoz.bushfiretute.Config;
-
+import io.github.agentsoz.bdimatsim.MATSimActionList;
 
 /*
  * #%L
@@ -31,21 +25,13 @@ import io.github.agentsoz.bushfiretute.Config;
  */
 /**
  *
- * @author Alex Lutman
+ * @author Dhirenda Singh
  *
  */
  public class ActionID {
-	 //An action that any Matsim Agent can carry out
-	 public static final String DRIVETO = "drive to";
-	 public static final String REQUESTLOCATION = "Request Location";
-
-    public static final String CONNECT_TO = "connect to";
-
-    public static final String PICKUP = "pick up";
-    public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
-    //An action that recieves a destination and a pick up
-
-    public static final String SET_DRIVE_TIME = "set drive time";
-    //An action that changes the currently executing activity
-
+	 public static final String DRIVETO = MATSimActionList.DRIVETO;
+	 public static final String CONNECT_TO = "connect to";
+	 public static final String PICKUP = "pick up";
+	 public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
+	 public static final String SET_DRIVE_TIME = "set drive time";
 }
