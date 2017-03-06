@@ -48,8 +48,8 @@ import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
 import io.github.agentsoz.bdimatsim.MATSimAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.MatsimPerceptHandler;
-import io.github.agentsoz.bdimatsim.MatsimPerceptList;
+import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
+import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.Replanner;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
@@ -167,13 +167,13 @@ public class ABMModel implements MATSimApplicationInterface {
 	 * overwrite default ones (like {@link MATSimActionList#DRIVETO}). 
 	 * <p>
 	 * This is also the place to register action-dependent percepts. 
-	 * For instance, {@link MatsimPerceptList.ARRIVED} is conditional on the 
+	 * For instance, {@link MATSimPerceptList.ARRIVED} is conditional on the 
 	 * agent arriving at the network link in action 
 	 * {@link MATSimActionList.DRIVETO}, and so must be registered at the 
 	 * same time.
 	 * <p>
 	 * Action-independent percepts should be registered using
-	 * {@link this#registerNewBDIPercepts(MatsimPerceptHandler)}.
+	 * {@link this#registerNewBDIPercepts(MATSimPerceptHandler)}.
 	 * <p>
 	 * Note that actions/percepts are registered <strong>per agent</strong>,
 	 * i.e. handlers passed in belong to specific agents.
@@ -220,7 +220,7 @@ public class ABMModel implements MATSimApplicationInterface {
 								Object[] params = { linkId.toString() };
 								agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
 								agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
-								agent.getPerceptContainer().put(MatsimPerceptList.ARRIVED, params);
+								agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
 								return true; //unregister this handler
 							}
 						});
@@ -357,11 +357,11 @@ public class ABMModel implements MATSimApplicationInterface {
 
 	/**
 	 * Register any action-independent percepts here. Percepts that are
-	 * conditional on actions (such as {@link MatsimPerceptList#ARRIVED} that
+	 * conditional on actions (such as {@link MATSimPerceptList#ARRIVED} that
 	 * is specific {@link ActionID#DRIVETO}
 	 */
 	@Override
-	public void registerNewBDIPercepts(MatsimPerceptHandler withHandler) {
+	public void registerNewBDIPercepts(MATSimPerceptHandler withHandler) {
 		// TODO Auto-generated method stub
 		
 	}
