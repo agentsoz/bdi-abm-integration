@@ -33,7 +33,6 @@ import java.util.Map;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -46,22 +45,7 @@ import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.AStarLandmarks;
-import org.matsim.core.router.DefaultTripRouterFactoryImpl;
-import org.matsim.core.router.Dijkstra;
-import org.matsim.core.router.RoutingContext;
-import org.matsim.core.router.RoutingContextImpl;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
-import org.matsim.core.router.util.FastAStarLandmarksFactory;
-import org.matsim.core.router.util.LeastCostPathCalculator;
-import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.router.util.TravelDisutilityUtils;
-import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.router.util.TravelTimeUtils;
-import org.matsim.vehicles.Vehicle;
 import org.matsim.withinday.utils.EditRoutes;
-import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -385,7 +369,7 @@ final class CustomReplanner extends Replanner{
 	
 	}
 	
-	final void reRouteCurrentLeg( MobsimAgent agent, double time ) {
+	protected final void reRouteCurrentLeg( MobsimAgent agent, double time ) {
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 		PlanElement pe = plan.getPlanElements().get( WithinDayAgentUtils.getCurrentPlanElementIndex(agent)) ;
 		if ( !(pe instanceof Leg) ) {
@@ -398,7 +382,7 @@ final class CustomReplanner extends Replanner{
 		WithinDayAgentUtils.resetCaches(agent);
 	}
 
-	final void attachNewActivityAtEndOfPlan(Id<Link> newActivityLinkId, Id<Person> agentId )
+	protected final void attachNewActivityAtEndOfPlan(Id<Link> newActivityLinkId, Id<Person> agentId )
 	{
 		// yyyy if the current activity is not already the last activity of the agent, this method may not behave as expected. kai, feb'14
 		
@@ -554,6 +538,7 @@ final class CustomReplanner extends Replanner{
 			for (Id<Link> lid : targetLinkIds) {
 
 				Link link = this.model.getScenario().getNetwork().getLinks().get(lid);
+				@SuppressWarnings("unused")
 				Node n = link.getFromNode();
 				
 				Leg leg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
@@ -568,7 +553,7 @@ final class CustomReplanner extends Replanner{
 			//find the link for the shortest distance
 			String connectLinkID=null;
 			Double minDist = Collections.min(routeDistances.values());
-			for(Map.Entry entry : routeDistances.entrySet()) {
+			for(Map.Entry<String, Double> entry : routeDistances.entrySet()) {
 				if(minDist == entry.getValue()) { 
 					connectLinkID = (String) entry.getKey();
 				}
@@ -672,7 +657,7 @@ final class CustomReplanner extends Replanner{
 		
 	}
 	
-	final boolean removeActivities(Id<Person> agentId)
+	protected final boolean removeActivities(Id<Person> agentId)
 	{
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 		MobsimAgent agent = mapping.get(agentId);

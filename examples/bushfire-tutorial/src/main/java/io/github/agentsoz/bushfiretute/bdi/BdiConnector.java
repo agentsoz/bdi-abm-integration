@@ -25,18 +25,14 @@ package io.github.agentsoz.bushfiretute.bdi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.agentsoz.bushfiretute.BDIModel;
 import io.github.agentsoz.bushfiretute.Config;
 
 
 public class BdiConnector implements IBdiConnector{
 
-    private BDIModel application; 
-
 	final Logger logger = LoggerFactory.getLogger("");
 	
-    public BdiConnector(BDIModel application){
-    	this.application = application;
+    public BdiConnector(){
     }
     
     public int getMaxDistanceToRelatives() { 

@@ -1,7 +1,6 @@
 package io.github.agentsoz.bushfiretute.matsim;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+
 
 /*
  * #%L
@@ -29,17 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.imageio.spi.RegisterableService;
-
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkImpl;
@@ -114,6 +109,7 @@ public class ABMModel implements MATSimApplicationInterface {
 		
 		Map<Id<Link>,? extends Link> links = model.getScenario().getNetwork().getLinks();
 		for (Id<Person> agentId : bdiAgentsIDs) {
+			@SuppressWarnings("unused")
 			MATSimAgent agent = model.getBDIAgent(agentId);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 			if (bdiAgent == null) {

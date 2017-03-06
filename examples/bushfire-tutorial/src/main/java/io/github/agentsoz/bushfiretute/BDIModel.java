@@ -1,7 +1,7 @@
 package io.github.agentsoz.bushfiretute;
 
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Map.Entry;
 
 /*
  * #%L
@@ -25,25 +25,18 @@ import java.util.Map;
  * #L%
  */
 
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.abmjack.JACKModel;
-import io.github.agentsoz.abmjack.shared.ActionManager;
 import io.github.agentsoz.abmjack.shared.GlobalTime;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
 import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.bdi.BdiConnector;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.dataInterface.DataClient;
-import io.github.agentsoz.dataInterface.DataServer;
-import io.github.agentsoz.dataInterface.DataSource;
 import aos.jack.jak.agent.Agent;
 //import test.EvacResident;
 import scenarioTWO.agents.EvacResident;
@@ -89,9 +82,9 @@ public class BDIModel extends JACKModel {  //DataSource
 
 
 	public void checkDepartureFromHome(AgentDataContainer adc) { 
-		 Iterator it = this.agents.entrySet().iterator();
+		 Iterator<Entry<String, Agent>> it = this.agents.entrySet().iterator();
 		 while(it.hasNext()) { 
-			 Map.Entry agentEntry = (Map.Entry)it.next();
+			 Entry<String, Agent> agentEntry = it.next();
 			 String agentID = (String) agentEntry.getKey();
 			 EvacResident agent = (EvacResident) agentEntry.getValue();
 			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
@@ -104,7 +97,7 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	@Override
 	public void setup(ABMServerInterface abmServer) {
-		bdiConnector = new BdiConnector(this);
+		bdiConnector = new BdiConnector();
 		this.bdiConnector.print_S2JACKModelConfigs();
 	}
 
@@ -257,7 +250,7 @@ public class BDIModel extends JACKModel {  //DataSource
 		
 		//checking the target destination
 		String returnedState = state.toString();
-		String passed = state.PASSED.toString();
+		String passed = State.PASSED.toString();
 		
 		//selecting action types which have a destination allocated
 		if(actionID.equals(ActionID.DRIVETO) || actionID.equals(ActionID.CONNECT_TO) || actionID.equals(ActionID.DRIVETO_AND_PICKUP) ) { 

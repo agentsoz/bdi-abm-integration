@@ -24,13 +24,10 @@ package io.github.agentsoz.bushfiretute;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -40,8 +37,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 import io.github.agentsoz.bushfiretute.datamodels.Location;
 import io.github.agentsoz.bushfiretute.datamodels.School;
@@ -70,6 +65,7 @@ public class Config {
 	private static String controllerFile = null;
 	private static boolean useGUI = false;
 	private static boolean bypassController = true;
+	@SuppressWarnings("unused")
 	private static boolean controllerUserInput = false;
 	private static boolean dieOnDisconnect = false;
 	private static int port = -1;
@@ -80,6 +76,7 @@ public class Config {
 	
 	private static double proportionWithRelatives = 0.0;
 	private static int maxDistanceToRelatives = 0 ;
+	@SuppressWarnings("unused")
 	private static int maxPickups = 0;
 	
 	private static int max_pickuptime = 0;
@@ -646,7 +643,7 @@ public class Config {
 	}
 
 	public static void  readSchoolFromList(HashMap<Double,Double> schoolLocs) {
-		for(Map.Entry entry : schoolLocs.entrySet()) {
+		for(Map.Entry<Double, Double> entry : schoolLocs.entrySet()) {
 			double east = (double) entry.getKey();
 			double north =  (double) entry.getValue();
 			
@@ -672,13 +669,12 @@ public class Config {
 	 * @return
 	 */
 	public static School getRandomSchool(String id,double[] agentLoc) {
-		 int schoolID;
 		 double distRange = maxDistanceToSchool;
 		 School selectedSchool=null;
 		 ArrayList<School> schoolsWithinDistance = new ArrayList<School> ();
 		 for(School school : schools.values()) {
 			 //distance is returned in km
-			 if(school.distance(agentLoc,school.getCoordinates()) <= distRange)
+			 if(Location.distance(agentLoc,school.getCoordinates()) <= distRange)
 			 {
 				 schoolsWithinDistance.add(school);
 			 }

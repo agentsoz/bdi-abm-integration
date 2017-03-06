@@ -220,13 +220,16 @@ public class CoordinateConversion
     double polarRadius = 6356752.314;
 
     // flattening
-    double flattening = 0.00335281066474748;// (equatorialRadius-polarRadius)/equatorialRadius;
+    @SuppressWarnings("unused")
+	double flattening = 0.00335281066474748;// (equatorialRadius-polarRadius)/equatorialRadius;
 
     // inverse flattening 1/flattening
-    double inverseFlattening = 298.257223563;// 1/flattening;
+    @SuppressWarnings("unused")
+	double inverseFlattening = 298.257223563;// 1/flattening;
 
     // Mean radius
-    double rm = POW(equatorialRadius * polarRadius, 1 / 2.0);
+    @SuppressWarnings("unused")
+	double rm = POW(equatorialRadius * polarRadius, 1 / 2.0);
 
     // scale factor
     double k0 = 0.9996;
@@ -236,11 +239,13 @@ public class CoordinateConversion
 
     double e1sq = e * e / (1 - e * e);
 
-    double n = (equatorialRadius - polarRadius)
+    @SuppressWarnings("unused")
+	double n = (equatorialRadius - polarRadius)
         / (equatorialRadius + polarRadius);
 
     // r curv 1
-    double rho = 6368573.744;
+    @SuppressWarnings("unused")
+	double rho = 6368573.744;
 
     // r curv 2
     double nu = 6389236.914;
@@ -276,7 +281,8 @@ public class CoordinateConversion
 
     double K5 = -2.995382942;
 
-    double A6 = -1.00541E-07;
+    @SuppressWarnings("unused")
+	double A6 = -1.00541E-07;
 
   }
 
@@ -543,7 +549,8 @@ public class CoordinateConversion
 
     double _a3;
 
-    double b = 6356752.314;
+    @SuppressWarnings("unused")
+	double b = 6356752.314;
 
     double a = 6378137;
 
@@ -557,9 +564,11 @@ public class CoordinateConversion
 
   private class Digraphs
   {
-    private Map digraph1 = new Hashtable();
+    @SuppressWarnings("rawtypes")
+	private Map digraph1 = new Hashtable();
 
-    private Map digraph2 = new Hashtable();
+    @SuppressWarnings("rawtypes")
+	private Map digraph2 = new Hashtable();
 
     private String[] digraph1Array = { "A", "B", "C", "D", "E", "F", "G", "H",
         "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
@@ -568,7 +577,8 @@ public class CoordinateConversion
     private String[] digraph2Array = { "V", "A", "B", "C", "D", "E", "F", "G",
         "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V" };
 
-    public Digraphs()
+    @SuppressWarnings("unchecked")
+	public Digraphs()
     {
       digraph1.put(new Integer(1), "A");
       digraph1.put(new Integer(2), "B");

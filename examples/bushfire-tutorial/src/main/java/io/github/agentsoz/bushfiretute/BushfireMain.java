@@ -24,8 +24,6 @@ package io.github.agentsoz.bushfiretute;
 
 import java.io.IOException;
 import java.util.Random;
-import java.util.StringTokenizer;
-
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -34,10 +32,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.matsim.ABMModel;
-import io.github.agentsoz.dataInterface.DataServer;
 
 public class BushfireMain {
 
