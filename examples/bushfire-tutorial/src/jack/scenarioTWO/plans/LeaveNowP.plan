@@ -50,7 +50,7 @@ Plan Name: LeaveNowP
 	body()
 	{
 		//logger.info("agent {} | current location {}  ", res.agentID, res.currentLocation);
-		logger.debug("agent: " + res.agentID + "| current location - " + res.currentLocation + "| time left to evac : " + res.getTimeLeftToEvac() + " | initiated LeaveNow plan ");
+		res.log("current location is " + res.currentLocation + "; time left to evac is " + res.getTimeLeftToEvac() + "; initiated LeaveNow plan");
 
 
 		res.initiatedAction=ActionID.CONNECT_TO;

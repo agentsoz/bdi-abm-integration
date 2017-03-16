@@ -43,40 +43,10 @@ Plan Name: KidsP
 	body()
 	{
 
-		logger.info("agent ID " + res.agentID + " is picking up kids..");
-
 		int pickuptime = res.bdiConnector.getPickupTime() * 60; // get a random pickup time in minutes and convert it to seconds
-		logger.debug("pickup time is" + pickuptime);
+		res.log("is picking up kids; pickup time is" + pickuptime);
 
-	/*
-		//1.driveTo action
-		res.initiatedAction=ActionID.DRIVETO;
-		res.targetDestination="Kids";
-
-		Object[] params = new Object[] { (Object)ActionID.DRIVETO, res.schoolLocation , res.targetDestination};
-		logger.debug(" Action : "+ActionID.DRIVETO + " school coords: " + res.schoolLocation[0] +" "+ res.schoolLocation[1]);
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO, params );
-		long startTime = res.getCurrentTime();
-		@subtask( gag );
-
-		logger.info("driveTo action returned, issuing pickup activity");
-
-		//2.pickup action
-		if(res.currentLocation.equals("Kids")) {
-			logger.debug("agent has reached the Kids school");
-			Object[] params = new Object[] { (Object)ActionID.PICKUP, pickuptime, res.schoolLocation};
-			logger.debug(" Action : "+ActionID.PICKUP + " pickup time: " + pickuptime);
-			GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.PICKUP, params );
-			@subtask( gag );
-		}
-
-		else
-		{
-			logger.error(" agent is not at the Kid's school, BDI action pickup failed !!");
-		}
-
-	*/
-		////DRIVETO_AND_PICKUP
+		//DRIVETO_AND_PICKUP
 		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
 		res.targetDestination="school";
 
@@ -91,9 +61,6 @@ Plan Name: KidsP
 		long endTime = res.getCurrentTime();
 		long tripTime = (endTime - pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
-		logger.debug(" trip time to pick up kids for agent {} is {}",res.agentID , (Object)tripTime);
-
-
-//		true;
+		res.log("trip time to pick up kids was " + tripTime);
 	}
 }

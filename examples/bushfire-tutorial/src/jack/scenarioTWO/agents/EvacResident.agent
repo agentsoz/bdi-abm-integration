@@ -15,8 +15,9 @@ import io.github.agentsoz.abmjack.env.UpdateAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import java.io.PrintStream;
 import java.util.Random;
+import java.lang.String;
 
 public agent EvacResident extends Agent /*implements InterfaceName*/
 {
@@ -69,6 +70,7 @@ Agent Name: EvacResident
 
 	Random rand =  new Random();
 
+	public PrintStream out;
 	public String agentID;
 	public ActionManager actionManager;
 	public IBdiConnector bdiConnector;
@@ -91,9 +93,13 @@ Agent Name: EvacResident
 
 
 	/* Constructor */
-	public EvacResident(String id, IBdiConnector ibdiConnector, ActionManager am)
+	public EvacResident(String id, 
+			IBdiConnector ibdiConnector, 
+			ActionManager am,
+			PrintStream out)
 	{
 			super(id);
+			this.out = out;
 			this.agentID = id ;
 			this.bdiConnector = ibdiConnector;
 			this.evac_started_flag = false;
@@ -211,5 +217,10 @@ Agent Name: EvacResident
 	public double getTravelTime()
 	{
 		return this.travelTime;
+	}
+	
+	public void log(String msg) {
+		Object[] o = {this.agentID, msg};
+		out.println(String.format("Agent %-5s: %s", o));
 	}
 }

@@ -23,6 +23,7 @@ package io.github.agentsoz.bushfiretute;
  */
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Random;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +40,11 @@ public class BushfireMain {
 
 	// Defaults
 	private static String logFile = BushfireMain.class.getSimpleName() + ".log";
+	private static String outFile = null;
 	private static Level logLevel = Level.INFO;
 	private static Logger logger = null;
+    public static PrintStream writer;
+
 	
 	// all application code should use this same instance of Random
     private static final Random random = new Random(); 
@@ -55,6 +59,17 @@ public class BushfireMain {
 		// Create the logger
 		logger = createLogger("", logFile);
 		
+        // Redirect the agent program output if specified
+        if (outFile != null) {
+        	try {
+        		writer = new PrintStream(outFile, "UTF-8");
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        } else {
+        	writer = System.out;
+        }
+
 	    // add seed to command line args if run replication needed
 		if (seed != null) random.setSeed(seed);
 
@@ -80,6 +95,8 @@ public class BushfireMain {
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
+		
+		writer.close();
 		System.exit(0);
 
 	}
@@ -114,16 +131,24 @@ public class BushfireMain {
 					}
 				}
 				break;
+			case "-outfile":
+				if (i + 1 < args.length) {
+					i++;
+					outFile = args[i];
+				}
+				break;
 			}
 		}
 	}
 
 	public static String usage() {
-		return "usage:\n" + "  -c <config_file>     simulation configuration file" + "\n"
-				+ "  -h                   print this help message and exit\n"
-				+ "  -l <logfile>         logging output file name (default is '" + logFile + "')\n"
-				+ "  -level <level>       log level; one of ERROR,WARN,INFO,DEBUG,TRACE (default is '" + logLevel
-				+ "')\n";
+		return "usage:\n" 
+				+ "  -c FILE            simulation configuration file" + "\n"
+				+ "  -h                 print this help message and exit\n"
+				+ "  -logfile FILE      logging output file name (default is '" + logFile + "')\n"
+				+ "  -loglevel LEVEL    log level; one of ERROR,WARN,INFO,DEBUG,TRACE (default is '" + logLevel + "')\n"
+				+ "  -outfile FILE      program output file name (default is system out)\n"
+				+ "\n";
 	}
 
 	private static void exit(String err) {

@@ -47,47 +47,15 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 
 	body()
 	{
-		logger.info("agent " + res.agentID + " initiated picking up relatives..");
-
 		double[] relCoords = getRandomCoordinate(); // 1. get a destination
 		int pickuptime = res.bdiConnector.getPickupTime() * 60; // 2. get a random pickup time in minutes and convert it to seconds
-
-	/*
-		//1.driveTo action
-		res.initiatedAction=ActionID.DRIVETO;
-		res.targetDestination="Relatives";
-
-		Object[] params = new Object[] { (Object)ActionID.DRIVETO, relCoords, res.targetDestination};
-		logger.debug(" Action : "+ActionID.DRIVETO + " relatives: coords: " + relCoords[0] +" "+ relCoords[1]);
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO, params );
-		long startTime = res.getCurrentTime();
-		@subtask( gag );
-
-		logger.info("driveTo action returned, issuing pickup activity");
-
-		//2.pickup action
-		if(res.currentLocation.equals("Relatives")) {
-			logger.debug("agent has reached the relatives destination");
-			Object[] params = new Object[] { (Object)ActionID.PICKUP, pickuptime, relCoords};
-			logger.debug(" Action : "+ActionID.PICKUP + " pickup time: " + pickuptime);
-			GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.PICKUP, params );
-			@subtask( gag );
-		}
-
-		else
-		{
-			logger.error(" agent is not at the relatives location, BDI action pickup failed !!");
-		}
-
-		*/
-
 
 		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
 		res.targetDestination="Relatives";
 
 		Object[] params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , relCoords, res.targetDestination, pickuptime};
 
-		logger.debug("agent " + res.agentID + " Action : "+ActionID.DRIVETO_AND_PICKUP + " relatives: coords: " + relCoords[0] +" "+ relCoords[1] + " pickup-time :  "+ pickuptime );
+		res.log("picking up relatives; action "+ActionID.DRIVETO_AND_PICKUP + "; relatives are at " + relCoords[0] +","+ relCoords[1] + "; pickup-time is "+ pickuptime );
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, params );
 		long startTime = res.getCurrentTime();
@@ -99,7 +67,7 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 		long endTime = res.getCurrentTime();
 		long tripTime = (endTime -pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
-		logger.debug(" Trip time to pick up relatives for agent {} is {}",res.agentID , (Object)tripTime);
+		res.log("trip time to pick up relatives was" + tripTime);
 
 	}
 

@@ -46,7 +46,7 @@ If not at home
 
 	body()
 	{
-		logger.info("initiated prepareP plan for agent " + evac_res.agentID  );
+		evac_res.log("initiated PrepareP plan");
 		if(evac_res.kidsNeedPickUp==true)
 		{
 
@@ -65,21 +65,11 @@ If not at home
 			
 		}
 		
-		logger.debug("total travel time : " + evac_res.getTravelTime());
+		evac_res.log("total travel time was " + evac_res.getTravelTime());
 		
 		//once all the picking up is completed, set prepared_to_evac_flag to true and post assesThreat goal
 		evac_res.setPreparedToEvacFlagTrue();
-		logger.debug("prepared to evac flag " + evac_res.getPreparedToEvacFlag());
-		
-		//by this time all agents should be prepared 
-		if (evac_res.getPreparedToEvacFlag() ==true)
-		{
-			@post(assessthreatg_p.assess());
-		}
-		else
-		{
-			logger.debug("ERROR : agent" + evac_res.agentID + " is attempting to post AssessThreat goal without  preparedToEvacFlag true");
-		}
+		@post(assessthreatg_p.assess());
 		
 	}
 }

@@ -63,6 +63,7 @@ import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import scenarioTWO.agents.EvacResident;
+import sun.management.resources.agent;
 
 public class ABMModel implements MATSimApplicationInterface {
 
@@ -125,8 +126,7 @@ public class ABMModel implements MATSimApplicationInterface {
 			double lon = links.get(model.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
 			bdiAgent.startLocation = new double[] { lat, lon };
 			bdiAgent.currentLocation = "home"; // agents always start at home
-			logger.trace("agent {} is at home at location {},{}", 
-					agentId, lon, lat);
+			bdiAgent.log("is at home at location "+lon+","+lat);
 
 			for (int i = 0; i < planElements.size(); i++) {
 				PlanElement element = planElements.get(i);
@@ -152,8 +152,7 @@ public class ABMModel implements MATSimApplicationInterface {
 					double safeX = act.getCoord().getX();
 					double safeY = act.getCoord().getY();
 					bdiAgent.endLocation = new double[] { safeX, safeY };
-					logger.trace("agent {} end location is {},{}", 
-						agentId, bdiAgent.endLocation[0], bdiAgent.endLocation[1]);
+					bdiAgent.log("safe location is at "+safeX+","+safeY);
 				}
 			}
 			
@@ -185,30 +184,23 @@ public class ABMModel implements MATSimApplicationInterface {
 		withHandler.registerBDIAction(MATSimActionList.DRIVETO, new BDIActionHandler() {
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				logger.debug("found DRIVETO action for agent : " + agentID);
 				// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 				Id<Link> newLinkId;
+				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
-					double[] coords = (double[]) args[1];
-					logger.debug("received coords for driveTo : " + coords[0] + " " + coords[1]);
 					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
 							.getNearestLinkExactly(new CoordImpl(coords[0], coords[1])).getId();
-					logger.debug("generated link Id for driveTo : " + newLinkId.toString());
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
 
-				String destination = (String) args[2];
-				// this.matSimModel.getReplanner().attachNewActivityAtEndOfPlan(
-				// newLinkId, Id.createPersonId( agentID ));
-
-				// this.matSimModel.getReplanner().addNewLegToPlan(
-				// Id.createPersonId( agentID ),newLinkId, destination);
-				
-				((CustomReplanner)model.getReplanner()).addNewLegToPlan(Id.createPersonId(agentID), newLinkId, destination);
+				((CustomReplanner)model.getReplanner()).addNewLegToPlan(Id.createPersonId(agentID), newLinkId, (String) args[2]);
 
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
+				bdiAgent.log("has started driving to coords "+coords[0] + "," + coords[1] 
+						+" i.e. link "+newLinkId.toString());
 				agent.getPerceptHandler().registerBDIPerceptHandler(
 						agent.getAgentID(), 
 						MonitoredEventType.ArrivedAtDestination, 
@@ -232,16 +224,17 @@ public class ABMModel implements MATSimApplicationInterface {
 		withHandler.registerBDIAction(ActionID.CONNECT_TO, new BDIActionHandler() {
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				logger.debug("found CONNECT_TO action for agent : " + agentID);
 				String destination = (String) args[1];
 				// connect To route replanner method
 				Id<Link> newLinkId = ((CustomReplanner)model.getReplanner()).replanCurrentRoute(Id.createPersonId(agentID), destination);
 				if (newLinkId == null) {
-					logger.debug("CONNECT_TO: returned a null link from the target activity");
+					logger.warn("CONNECT_TO: returned a null link from the target activity");
 					return true;
 				}
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
+				bdiAgent.log("replanned to drive to connecting link " + newLinkId.toString());
 				agent.getPerceptHandler().registerBDIPerceptHandler(
 						agent.getAgentID(), 
 						MonitoredEventType.ArrivedAtDestination, 
@@ -267,24 +260,22 @@ public class ABMModel implements MATSimApplicationInterface {
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
 				// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 				Id<Link> newLinkId;
+				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
-					double[] coords = (double[]) args[1];
-					logger.trace("received coords for driveToAndPickUp: " + coords[0] + " " + coords[1]);
-
 					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
 							.getNearestLinkExactly(new CoordImpl(coords[0], coords[1])).getId();
-					logger.debug("driveToAndPickUp: agentID {} | received coords - {} {} | generated link Id {} ",
-							agentID, coords[0], coords[1], newLinkId.toString());
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
 
-				int pickupTime = (int) args[3];
-				((CustomReplanner)model.getReplanner()).addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, pickupTime);
-				logger.trace(" finished calling addLegAndActvityToNextIndex method in CustomReplanner");
+				((CustomReplanner)model.getReplanner()).addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, (int) args[3]);
 
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
+				bdiAgent.log("will drive to pickup from coords "+coords[0] + "," + coords[1] 
+						+" i.e. link "+newLinkId.toString());
+
 				// Now register a event handler for when the agent arrives and finished picking up the destination
 				agent.getPerceptHandler().registerBDIPerceptHandler(
 						agent.getAgentID(), 
@@ -304,37 +295,6 @@ public class ABMModel implements MATSimApplicationInterface {
 				return true;
 			}
 		});
-
-		/*
-		// register new action
-		withHandler.registerBDIAction(ActionID.PICKUP, new BDIActionHandler() {
-			@Override
-			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				int pickupTime = (int) args[1];
-
-				Id<Link> newLinkId; // just to distinguish PICKUP actions when
-									// returning the action state
-				if (args[2] instanceof double[]) {
-					double[] coords = (double[]) args[2];
-					logger.trace("received coords for driveToAndPickUp: " + coords[0] + " " + coords[1]);
-					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
-							.getNearestLinkExactly(new CoordImpl(coords[0], coords[1])).getId();
-				} else {
-					throw new RuntimeException("Destination coordinates are not given");
-				}
-
-				logger.debug("PICKUP: agentID {} | newLinkId: {} | pickupTime: {} ", agentID, newLinkId, pickupTime);
-				((CustomReplanner)model.getReplanner()).addNewActivityToPlan(Id.createPersonId(agentID), pickupTime);
-				logger.trace(" finished calling addNewActivityToPlan method in CustomReplanner");
-
-				MATSimAgent agent = model.getBDIAgent(agentID);
-				agent.newDriveTo(newLinkId);
-				agent.newPickUp(newLinkId);
-
-				return true;
-			}
-		});
-		*/
 		
 		// register new action
 		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new BDIActionHandler() {
@@ -342,11 +302,13 @@ public class ABMModel implements MATSimApplicationInterface {
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
                 double newEndTime = (double) args[1];
                 String actType = (String) args[2];        
-                logger.debug("setDriveTime: agentID {} | actType  {} | delayTime {} ",agentID,actType,newEndTime);
+
                 ((CustomReplanner)model.getReplanner()).forceEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
 
 				// Now set the action to passed straight away
 				MATSimAgent agent = model.getBDIAgent(agentID);
+				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
+                bdiAgent.log("has set the drive time for activity " + actType + " to " + newEndTime);
 				Object[] params = {};
 				agent.getActionContainer().register(ActionID.SET_DRIVE_TIME, params);
 				agent.getActionContainer().get(ActionID.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
@@ -388,9 +350,9 @@ public class ABMModel implements MATSimApplicationInterface {
 	 * <li> 0.0&lt;Pk&lt;1.0, 0.0&lt;Pr&lt;1.0: results in all four combinations of kids and relatives</li>
 	 * </ul>
 	 * 
-	 * @param agent
+	 * @param bdiAgent
 	 */
-	private void assignDependentPersons(EvacResident agent) {
+	private void assignDependentPersons(EvacResident bdiAgent) {
 		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
 		    double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
 		    pDependents = Util.normalise(pDependents);
@@ -399,27 +361,30 @@ public class ABMModel implements MATSimApplicationInterface {
 		    if (random.nextDouble() < pDependents[0]) {
 		    	// Allocate dependent children
 				ScenarioTwoData.agentsWithKids++;
-				double[] sclCords = Config.getRandomSchoolCoords(agent.getId(),agent.startLocation);
+				double[] sclCords = Config.getRandomSchoolCoords(bdiAgent.getId(),bdiAgent.startLocation);
 				if(sclCords != null) { 
-					agent.kidsNeedPickUp = true;  
-					agent.schoolLocation = sclCords;
-					agent.prepared_to_evac_flag = false;
+					bdiAgent.kidsNeedPickUp = true;  
+					bdiAgent.schoolLocation = sclCords;
+					bdiAgent.prepared_to_evac_flag = false;
 					ScenarioTwoData.totPickups++;
-					logger.debug("agent {} has kids |"
-							+ " school location: {} {} |", agent.getId(), sclCords[0], sclCords[1]);
+					bdiAgent.log("has children at school coords " 
+							+ sclCords[0] + "," +sclCords[1]);
 				}
 				else{
-					logger.debug("no school found for agent {}  assigned with kids ", agent.getId());
+					bdiAgent.log("has children but there are no schools nearby");
 					ScenarioTwoData.agentsWithKidsNoSchools++;
 				}
 		    }
 		    if (random.nextDouble() < pDependents[1]) {
 		    	// Allocate dependent adults
 				ScenarioTwoData.agentsWithRels++;
-				agent.relsNeedPickUp = true;
-				agent.prepared_to_evac_flag = false;
+				bdiAgent.relsNeedPickUp = true;
+				bdiAgent.prepared_to_evac_flag = false;
 				ScenarioTwoData.totPickups++;
-				logger.debug(" agent {} has rels", agent.getId());
+				bdiAgent.log("has relatives");
+		    }
+		    if (!bdiAgent.relsNeedPickUp && !bdiAgent.kidsNeedPickUp) {
+				bdiAgent.log("has neither children nor relatives");
 		    }
 		}
 	}

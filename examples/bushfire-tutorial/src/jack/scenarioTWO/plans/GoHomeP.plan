@@ -54,11 +54,7 @@ Description: Set prepared_to_evac_flag = false
 
 	body()
 	{
-			logger.debug("agent: " + res.agentID + "| current location - " + res.currentLocation + "| time left to evac : " + res.getTimeLeftToEvac() + " | initiated goHome plan  ");
-
-
-	//	logger.info( " time left to evac : " + res.getTimeLeftToEvac() + " initiated goHome plan ");
-	//	logger.debug("current location of agent {} is : {} ", res.agentID, res.currentLocation);
+		res.log("current location is " + res.currentLocation + "; time left to evac is " + res.getTimeLeftToEvac() + ";  initiated goHome plan  ");
 
 		res.initiatedAction=ActionID.DRIVETO;
 		res.targetDestination="Home";
@@ -71,10 +67,9 @@ Description: Set prepared_to_evac_flag = false
 
 
 		res.waitAtHomeFlag = true;
-		logger.trace("updated agent {} waitAtHomeFlag to true", res.agentID);
 		ScenarioTwoData.goHome++;
 
-		logger.trace("GoHome plan returned at " + res.getCurrentTime() + " for agent " + res.agentID);
+		res.log("GoHome plan returned at " + res.getCurrentTime());
 
 	}
 }

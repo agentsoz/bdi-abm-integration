@@ -197,7 +197,7 @@ public class BDIModel extends JACKModel {  //DataSource
 	@Override
 	public Agent createAgent(String agentID, Object[] initData) {
 		logger.debug("agent {} initiated from bushfire application", agentID);
-		return new EvacResident(agentID, bdiConnector, this);
+		return new EvacResident(agentID, bdiConnector, this, BushfireMain.writer);
 	}
 
 	@Override

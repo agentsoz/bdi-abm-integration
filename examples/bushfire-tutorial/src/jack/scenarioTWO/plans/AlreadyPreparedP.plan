@@ -37,7 +37,7 @@ Description: This is plan where agents who have no kids or relatives to pick up 
 
 	body()
 	{
-				logger.debug("agent " + evac_res.agentID + " is already prepared to evacuate on departure time");
+			evac_res.log("already prepared to evacuate at departure time");
 
 	}
 }
