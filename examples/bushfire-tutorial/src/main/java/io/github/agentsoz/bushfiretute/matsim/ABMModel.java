@@ -24,55 +24,39 @@ package io.github.agentsoz.bushfiretute.matsim;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
+import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.*;
+import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
+import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
+import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
+import io.github.agentsoz.bushfiretute.*;
+import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
+import io.github.agentsoz.bushfiretute.shared.ActionID;
+import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.utils.geometry.CoordImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
-import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.MATSimActionHandler;
-import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
-import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
-import io.github.agentsoz.bdimatsim.MATSimPerceptList;
-import io.github.agentsoz.bdimatsim.Replanner;
-import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
-import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
-import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
-import io.github.agentsoz.bushfiretute.BDIModel;
-import io.github.agentsoz.bushfiretute.BushfireMain;
-import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.bushfiretute.MATSimBDIParameterHandler;
-import io.github.agentsoz.bushfiretute.Util;
-import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import scenarioTWO.agents.EvacResident;
-import sun.management.resources.agent;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class ABMModel implements MATSimApplicationInterface {
 
-    final Logger logger = LoggerFactory.getLogger("");      
-    final MATSimModel model;
-    final BDIModel bdiModel;
-    private Replanner replanner = null;;
+    private final Logger logger = LoggerFactory.getLogger("");
+	private final MATSimModel model;
+	private final BDIModel bdiModel;
+    private Replanner replanner = null;
     
-	public ABMModel(BDIModel bdiModel, MATSimBDIParameterHandler matSimBDIParameterHandler) {
+	public ABMModel(BDIModel bdiModel) {
 		this.bdiModel = bdiModel;
 		this.model = new MATSimModel(bdiModel, new MATSimBDIParameterHandler());
 		model.registerPlugin(this);
@@ -209,7 +193,8 @@ public class ABMModel implements MATSimApplicationInterface {
 							@Override
 							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
 								MATSimAgent agent = model.getBDIAgent(agentId);
-								Object[] params = { linkId.toString() };
+								EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+								Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 								agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
 								agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
 								agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
@@ -243,7 +228,8 @@ public class ABMModel implements MATSimApplicationInterface {
 							@Override
 							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
 								MATSimAgent agent = model.getBDIAgent(agentId);
-								Object[] params = { linkId.toString() };
+								EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+								Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 								agent.getActionContainer().register(ActionID.CONNECT_TO, params);
 								agent.getActionContainer().get(ActionID.CONNECT_TO).setState(ActionContent.State.PASSED);
 								agent.getPerceptContainer().put(PerceptID.ARRIVED_CONNECT_TO, params);
@@ -324,8 +310,34 @@ public class ABMModel implements MATSimApplicationInterface {
 	 */
 	@Override
 	public void registerNewBDIPercepts(MATSimPerceptHandler withHandler) {
-		// TODO Auto-generated method stub
-		
+		// For all agents, register a percept for when they arrive at the safe
+		// destination. We do this here, irrespective of whether there is any
+		// BDI reasoning involved, i.e., where the percept is not conditional
+		// on a BDI (drive) action. 
+		// Such as for MATSim agents that leave as
+		// planned (according to their MATSim plan). 
+		// FIXME: add Safe arrival percept for all agents (in a for loop)
+
+		for (Id<Person> agentID : model.getBDIAgentIDs()) {
+			MATSimAgent agent = model.getBDIAgent(agentID);
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
+			Id<Link> newLinkId;
+			newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
+					.getNearestLinkExactly(new CoordImpl(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
+
+			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
+					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
+						@Override
+						public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent,
+								MATSimModel model) {
+							MATSimAgent agent = model.getBDIAgent(agentId);
+							EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+							Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
+							agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
+							return true; // unregister this handler
+						}
+					});
+		}
 	}
 
 	

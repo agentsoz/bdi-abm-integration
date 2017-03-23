@@ -65,9 +65,9 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 
 		//after pick up rels calculations  | endtime should minus the pickup time to get the travel time
 		long endTime = res.getCurrentTime();
-		long tripTime = (endTime -pickuptime) - startTime;
+		long tripTime = (endTime - pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
-		res.log("trip time to pick up relatives was" + tripTime);
+		res.log("picked up relatives at time " + endTime);
 
 	}
 

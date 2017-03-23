@@ -33,10 +33,12 @@ import io.github.agentsoz.abmjack.shared.GlobalTime;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.bdi.BdiConnector;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
+import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import aos.jack.jak.agent.Agent;
 //import test.EvacResident;
 import scenarioTWO.agents.EvacResident;
@@ -201,32 +203,33 @@ public class BDIModel extends JACKModel {  //DataSource
 	}
 
 	@Override
-	public void handlePercept(Agent agent, String perceptID, Object parameters) {
+	public void handlePercept(Agent agent, String perceptID, Object params) {
 
 		EvacResident resident = (EvacResident) agent;
 		if (perceptID.equals(DataTypes.FIREALERT) && resident.fireResponse == false) {
 			// dataServer.publish(DataTypes.FIRE_ALERT, null);
-			logger.trace("agent posting EvacAlert goal...");
+			resident.log("received alert " + params);
 			resident.postEvacAlert("fire started");
 			resident.fireResponse = true;
 		}
-		if (perceptID.equals(DataTypes.LEAVENOW)) {
-			logger.debug("recieved a LEAVENOW percept at time {}", GlobalTime.time.getTime());
+		else if (perceptID.equals(DataTypes.LEAVENOW)) {
+			resident.log("recieved percept to leave now at time " + GlobalTime.time.getTime());
 			resident.postLeaveGoal();
 			resident.waitAtHomeFlag = false;
 		}
-
-		if (perceptID.equals("Arrived")) {
-			logger.debug(" received percept : Arrived for agent {} ", agent.getBasename());
+		else if (perceptID.equals(MATSimPerceptList.ARRIVED)) {
+			Object[] args = (Object[])params;
+			resident.log("reached " + args[0] + " at time " + args[1]);
 		}
-		if (perceptID.equals("Arrived to final dest")) {
-			logger.debug(" received percept : Arrived to final dest for agent {} ", agent.getBasename());
+		else if (perceptID.equals(PerceptID.ARRIVED_CONNECT_TO)) {
+			Object[] args = (Object[])params;
+			resident.log("arrived at conection link " + args[0] + " at time " + args[1]);
 		}
-		if (perceptID.equals("arrived and picked up")) {
-			logger.debug(" received percept : arrived and picked up for agent {} ", agent.getBasename());
+		else if (perceptID.equals(PerceptID.ARRIVED_AND_PICKED_UP)) {
+			resident.log("arrived and picked up from link " + ((Object[])params)[0]);
 		}
-		if (perceptID.equals("picked up")) {
-			logger.debug(" received percept : picked up for agent {} ", agent.getBasename());
+		else if (perceptID.equals(PerceptID.PICKED_UP)) {
+			resident.log("picked up " + params);
 		}
 	}
 
@@ -281,7 +284,10 @@ public class BDIModel extends JACKModel {  //DataSource
 	}
 
 	public EvacResident getBDICounterpart(String id) {
-		return (EvacResident) agents.get(id);
+		if (agents.containsKey(id)) { 
+			return (EvacResident) agents.get(id);
+		} 
+		return null;
 	}
 
 }

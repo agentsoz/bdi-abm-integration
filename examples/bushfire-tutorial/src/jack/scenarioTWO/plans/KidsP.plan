@@ -43,8 +43,9 @@ Plan Name: KidsP
 	body()
 	{
 
+		long startTime = res.getCurrentTime();
 		int pickuptime = res.bdiConnector.getPickupTime() * 60; // get a random pickup time in minutes and convert it to seconds
-		res.log("is picking up kids; pickup time is" + pickuptime);
+		res.log("will drive to and pick up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") ; pickup time is " + pickuptime + "; time now is " + startTime);
 
 		//DRIVETO_AND_PICKUP
 		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
@@ -53,7 +54,6 @@ Plan Name: KidsP
 		Object[] pickup_params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , res.schoolLocation , "Kids", pickuptime};
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, pickup_params );
-		long startTime = res.getCurrentTime();
 		@subtask( gag );
 
 
@@ -61,6 +61,6 @@ Plan Name: KidsP
 		long endTime = res.getCurrentTime();
 		long tripTime = (endTime - pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
-		res.log("trip time to pick up kids was " + tripTime);
+		res.log("finished picking up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") at time " + endTime);
 	}
 }

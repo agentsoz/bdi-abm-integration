@@ -33,7 +33,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.matsim.ABMModel;
 
 public class BushfireMain {
@@ -83,7 +82,7 @@ public class BushfireMain {
 		BDIModel bdiModel = new BDIModel();
 
 		// Initialise the MATSim model
-		ABMModel abmModel = new ABMModel(bdiModel, new MATSimBDIParameterHandler());
+		ABMModel abmModel = new ABMModel(bdiModel);
 		// Finally, start the MATSim controller
 		String[] margs = { Config.getMatSimFile() };
 		String s = "starting matsim with args:";

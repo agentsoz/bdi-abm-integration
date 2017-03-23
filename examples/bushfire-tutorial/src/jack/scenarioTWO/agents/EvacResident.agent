@@ -220,7 +220,7 @@ Agent Name: EvacResident
 	}
 	
 	public void log(String msg) {
-		Object[] o = {this.agentID, msg};
-		out.println(String.format("Agent %-5s: %s", o));
+		Object[] o = {Long.toString(getCurrentTime()), this.agentID, msg};
+		out.println(String.format("Time %-6s, Agent %-5s: %s", o));
 	}
 }

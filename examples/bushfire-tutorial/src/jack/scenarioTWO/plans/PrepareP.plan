@@ -46,7 +46,6 @@ If not at home
 
 	body()
 	{
-		evac_res.log("initiated PrepareP plan");
 		if(evac_res.kidsNeedPickUp==true)
 		{
 
@@ -65,7 +64,6 @@ If not at home
 			
 		}
 		
-		evac_res.log("total travel time was " + evac_res.getTravelTime());
 		
 		//once all the picking up is completed, set prepared_to_evac_flag to true and post assesThreat goal
 		evac_res.setPreparedToEvacFlagTrue();

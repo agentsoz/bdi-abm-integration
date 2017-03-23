@@ -65,6 +65,9 @@ Plan Name: LeaveNowP
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.CONNECT_TO, drive_params );
 		long startTime = res.getCurrentTime();
 		@subtask( gag );
+		long endTime = res.getCurrentTime();
+		long tripTime = endTime - startTime;
+		//res.log("reached "+ drive_params[1] + " at time " + endTime);
 
 	}
 }
