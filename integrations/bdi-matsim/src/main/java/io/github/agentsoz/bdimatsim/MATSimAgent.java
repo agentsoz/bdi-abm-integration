@@ -39,7 +39,7 @@ import org.matsim.api.core.v01.population.Person;
  */
 
 public class MATSimAgent {
-	private MatsimPerceptHandler perceptHandler;
+	private MATSimPerceptHandler perceptHandler;
 	private MATSimActionHandler actionHandler;
 	private Id<Person> agentID;
 	private String agentType;
@@ -50,11 +50,11 @@ public class MATSimAgent {
 	private ActionContainer actionContainer;
 	private PerceptContainer perceptContainer;
 
-	final Id<Person> getAgentID() {
+	public final Id<Person> getAgentID() {
 		return agentID;
 	}
 
-	final MatsimPerceptHandler getPerceptHandler() {
+	public final MATSimPerceptHandler getPerceptHandler() {
 		return perceptHandler;
 	}
 
@@ -66,11 +66,11 @@ public class MATSimAgent {
 		return passedDriveToActions;
 	}
 
-	final ActionContainer getActionContainer() {
+	public final ActionContainer getActionContainer() {
 		return this.actionContainer;
 	}
 
-	final PerceptContainer getPerceptContainer() {
+	public final PerceptContainer getPerceptContainer() {
 		return this.perceptContainer;
 	}
 
@@ -78,7 +78,7 @@ public class MATSimAgent {
 		this.perceptContainer = perceptContainer;
 	}
 
-	final void setPerceptHandler(MatsimPerceptHandler perceptHandler) {
+	final void setPerceptHandler(MATSimPerceptHandler perceptHandler) {
 		this.perceptHandler = perceptHandler;
 	}
 
@@ -88,7 +88,7 @@ public class MATSimAgent {
 	}
 
 	MATSimAgent(MATSimActionHandler actionHandler,
-			MatsimPerceptHandler perceptHandler, Id<Person> agentID,
+			MATSimPerceptHandler perceptHandler, Id<Person> agentID,
 			ActionContainer actionContainer, PerceptContainer perceptContainer) {
 		this.perceptHandler = perceptHandler;
 		this.actionHandler = actionHandler;
@@ -99,7 +99,7 @@ public class MATSimAgent {
 		driveToActions = new ArrayList<Id<Link>>();
 	}
 
-	final void newDriveTo(Id<Link> newAction) {
+	public final void newDriveTo(Id<Link> newAction) {
 		driveToActions.add(newAction);
 	}
 
@@ -112,7 +112,7 @@ public class MATSimAgent {
 		driveToActions.clear();
 	}
 
-	final void clearPassedDriveToActions() {
+	public final void clearPassedDriveToActions() {
 		passedDriveToActions.clear();
 	}
 

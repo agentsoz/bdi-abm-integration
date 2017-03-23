@@ -25,8 +25,6 @@ package io.github.agentsoz.bdiabm.data;
 
 import java.io.Serializable;
 import java.util.HashMap;
-
-import com.google.gson.Gson;
 /**
  * 2/20/2013
  * AgentDataContainer is a Map of 

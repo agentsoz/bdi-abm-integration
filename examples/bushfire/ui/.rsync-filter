@@ -1,0 +1,4 @@
+- /etc
+- /.project
+- /.rsync-filter
+- Makefile

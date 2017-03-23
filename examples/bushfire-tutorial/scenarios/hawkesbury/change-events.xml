@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<networkChangeEvents xmlns="http://www.matsim.org/files/dtd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.matsim.org/files/dtd http://www.matsim.org/files/dtd/networkChangeEvents.xsd">
+
+	<networkChangeEvent startTime="09:00:00">
+		<link refId="584"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="09:35:00">
+		<link refId="11"/>
+		<link refId="21"/>
+		<link refId="201"/>
+		<link refId="258"/>
+		<link refId="267"/>
+		<link refId="287"/>
+		<link refId="337"/>
+		<link refId="404"/>
+		<link refId="431"/>
+		<link refId="539"/>
+		<link refId="552"/>
+		<link refId="582"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="09:20:00">
+		<link refId="26"/>
+		<link refId="27"/>
+		<link refId="52"/>
+		<link refId="69"/>
+		<link refId="85"/>
+		<link refId="92"/>
+		<link refId="190"/>
+		<link refId="215"/>
+		<link refId="253"/>
+		<link refId="299"/>
+		<link refId="311"/>
+		<link refId="370"/>
+		<link refId="488"/>
+		<link refId="510"/>
+		<link refId="551"/>
+		<link refId="560"/>
+		<link refId="561"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="09:50:00">
+		<link refId="6"/>
+		<link refId="8"/>
+		<link refId="38"/>
+		<link refId="42"/>
+		<link refId="51"/>
+		<link refId="68"/>
+		<link refId="105"/>
+		<link refId="152"/>
+		<link refId="157"/>
+		<link refId="159"/>
+		<link refId="161"/>
+		<link refId="181"/>
+		<link refId="200"/>
+		<link refId="205"/>
+		<link refId="222"/>
+		<link refId="274"/>
+		<link refId="314"/>
+		<link refId="319"/>
+		<link refId="327"/>
+		<link refId="343"/>
+		<link refId="348"/>
+		<link refId="354"/>
+		<link refId="405"/>
+		<link refId="418"/>
+		<link refId="426"/>
+		<link refId="433"/>
+		<link refId="439"/>
+		<link refId="443"/>
+		<link refId="451"/>
+		<link refId="470"/>
+		<link refId="487"/>
+		<link refId="490"/>
+		<link refId="494"/>
+		<link refId="497"/>
+		<link refId="508"/>
+		<link refId="547"/>
+		<link refId="563"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="10:05:00">
+		<link refId="22"/>
+		<link refId="29"/>
+		<link refId="62"/>
+		<link refId="119"/>
+		<link refId="141"/>
+		<link refId="234"/>
+		<link refId="241"/>
+		<link refId="304"/>
+		<link refId="323"/>
+		<link refId="357"/>
+		<link refId="377"/>
+		<link refId="399"/>
+		<link refId="402"/>
+		<link refId="432"/>
+		<link refId="460"/>
+		<link refId="477"/>
+		<link refId="499"/>
+		<link refId="568"/>
+		<link refId="583"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="10:00:00">
+		<link refId="79"/>
+		<link refId="149"/>
+		<link refId="167"/>
+		<link refId="176"/>
+		<link refId="195"/>
+		<link refId="244"/>
+		<link refId="245"/>
+		<link refId="263"/>
+		<link refId="288"/>
+		<link refId="365"/>
+		<link refId="384"/>
+		<link refId="403"/>
+		<link refId="441"/>
+		<link refId="504"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:00:00">
+		<link refId="5"/>
+		<link refId="35"/>
+		<link refId="60"/>
+		<link refId="82"/>
+		<link refId="89"/>
+		<link refId="90"/>
+		<link refId="103"/>
+		<link refId="112"/>
+		<link refId="132"/>
+		<link refId="134"/>
+		<link refId="137"/>
+		<link refId="153"/>
+		<link refId="156"/>
+		<link refId="182"/>
+		<link refId="197"/>
+		<link refId="210"/>
+		<link refId="212"/>
+		<link refId="254"/>
+		<link refId="256"/>
+		<link refId="264"/>
+		<link refId="266"/>
+		<link refId="270"/>
+		<link refId="271"/>
+		<link refId="276"/>
+		<link refId="281"/>
+		<link refId="291"/>
+		<link refId="292"/>
+		<link refId="307"/>
+		<link refId="313"/>
+		<link refId="321"/>
+		<link refId="362"/>
+		<link refId="387"/>
+		<link refId="401"/>
+		<link refId="412"/>
+		<link refId="459"/>
+		<link refId="464"/>
+		<link refId="475"/>
+		<link refId="489"/>
+		<link refId="498"/>
+		<link refId="505"/>
+		<link refId="528"/>
+		<link refId="529"/>
+		<link refId="546"/>
+		<link refId="567"/>
+		<link refId="574"/>
+		<link refId="575"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="10:45:00">
+		<link refId="9"/>
+		<link refId="28"/>
+		<link refId="94"/>
+		<link refId="120"/>
+		<link refId="121"/>
+		<link refId="130"/>
+		<link refId="158"/>
+		<link refId="219"/>
+		<link refId="249"/>
+		<link refId="278"/>
+		<link refId="280"/>
+		<link refId="285"/>
+		<link refId="305"/>
+		<link refId="335"/>
+		<link refId="339"/>
+		<link refId="368"/>
+		<link refId="388"/>
+		<link refId="398"/>
+		<link refId="445"/>
+		<link refId="447"/>
+		<link refId="481"/>
+		<link refId="540"/>
+		<link refId="549"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:10:00">
+		<link refId="13"/>
+		<link refId="15"/>
+		<link refId="18"/>
+		<link refId="33"/>
+		<link refId="58"/>
+		<link refId="65"/>
+		<link refId="67"/>
+		<link refId="74"/>
+		<link refId="140"/>
+		<link refId="142"/>
+		<link refId="170"/>
+		<link refId="175"/>
+		<link refId="193"/>
+		<link refId="235"/>
+		<link refId="237"/>
+		<link refId="248"/>
+		<link refId="257"/>
+		<link refId="286"/>
+		<link refId="300"/>
+		<link refId="325"/>
+		<link refId="334"/>
+		<link refId="345"/>
+		<link refId="372"/>
+		<link refId="381"/>
+		<link refId="400"/>
+		<link refId="416"/>
+		<link refId="440"/>
+		<link refId="450"/>
+		<link refId="469"/>
+		<link refId="514"/>
+		<link refId="519"/>
+		<link refId="544"/>
+		<link refId="548"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:30:00">
+		<link refId="64"/>
+		<link refId="101"/>
+		<link refId="108"/>
+		<link refId="113"/>
+		<link refId="183"/>
+		<link refId="216"/>
+		<link refId="336"/>
+		<link refId="419"/>
+		<link refId="449"/>
+		<link refId="466"/>
+		<link refId="479"/>
+		<link refId="485"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:20:00">
+		<link refId="123"/>
+		<link refId="127"/>
+		<link refId="171"/>
+		<link refId="223"/>
+		<link refId="293"/>
+		<link refId="476"/>
+		<link refId="542"/>
+		<link refId="555"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:40:00">
+		<link refId="174"/>
+		<link refId="214"/>
+		<link refId="294"/>
+		<link refId="328"/>
+		<link refId="349"/>
+		<link refId="421"/>
+		<link refId="442"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="11:50:00">
+		<link refId="45"/>
+		<link refId="61"/>
+		<link refId="70"/>
+		<link refId="100"/>
+		<link refId="116"/>
+		<link refId="133"/>
+		<link refId="145"/>
+		<link refId="213"/>
+		<link refId="220"/>
+		<link refId="229"/>
+		<link refId="247"/>
+		<link refId="261"/>
+		<link refId="295"/>
+		<link refId="429"/>
+		<link refId="484"/>
+		<link refId="511"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="12:00:00">
+		<link refId="93"/>
+		<link refId="97"/>
+		<link refId="106"/>
+		<link refId="128"/>
+		<link refId="453"/>
+		<link refId="456"/>
+		<link refId="521"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="12:20:00">
+		<link refId="1"/>
+		<link refId="14"/>
+		<link refId="17"/>
+		<link refId="99"/>
+		<link refId="102"/>
+		<link refId="115"/>
+		<link refId="125"/>
+		<link refId="139"/>
+		<link refId="180"/>
+		<link refId="211"/>
+		<link refId="230"/>
+		<link refId="269"/>
+		<link refId="308"/>
+		<link refId="338"/>
+		<link refId="367"/>
+		<link refId="397"/>
+		<link refId="408"/>
+		<link refId="410"/>
+		<link refId="425"/>
+		<link refId="474"/>
+		<link refId="523"/>
+		<link refId="537"/>
+		<link refId="558"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="12:40:00">
+		<link refId="4"/>
+		<link refId="41"/>
+		<link refId="63"/>
+		<link refId="71"/>
+		<link refId="98"/>
+		<link refId="221"/>
+		<link refId="232"/>
+		<link refId="275"/>
+		<link refId="277"/>
+		<link refId="283"/>
+		<link refId="306"/>
+		<link refId="342"/>
+		<link refId="375"/>
+		<link refId="430"/>
+		<link refId="462"/>
+		<link refId="527"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="13:00:00">
+		<link refId="0"/>
+		<link refId="39"/>
+		<link refId="59"/>
+		<link refId="109"/>
+		<link refId="148"/>
+		<link refId="169"/>
+		<link refId="191"/>
+		<link refId="227"/>
+		<link refId="246"/>
+		<link refId="252"/>
+		<link refId="268"/>
+		<link refId="290"/>
+		<link refId="316"/>
+		<link refId="318"/>
+		<link refId="347"/>
+		<link refId="392"/>
+		<link refId="411"/>
+		<link refId="423"/>
+		<link refId="468"/>
+		<link refId="478"/>
+		<link refId="515"/>
+		<link refId="525"/>
+		<link refId="535"/>
+		<link refId="545"/>
+		<link refId="580"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="13:40:00">
+		<link refId="7"/>
+		<link refId="16"/>
+		<link refId="50"/>
+		<link refId="66"/>
+		<link refId="83"/>
+		<link refId="86"/>
+		<link refId="144"/>
+		<link refId="150"/>
+		<link refId="154"/>
+		<link refId="242"/>
+		<link refId="243"/>
+		<link refId="262"/>
+		<link refId="302"/>
+		<link refId="407"/>
+		<link refId="496"/>
+		<link refId="517"/>
+		<link refId="579"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="13:20:00">
+		<link refId="24"/>
+		<link refId="56"/>
+		<link refId="111"/>
+		<link refId="122"/>
+		<link refId="124"/>
+		<link refId="168"/>
+		<link refId="217"/>
+		<link refId="239"/>
+		<link refId="284"/>
+		<link refId="297"/>
+		<link refId="309"/>
+		<link refId="326"/>
+		<link refId="333"/>
+		<link refId="359"/>
+		<link refId="369"/>
+		<link refId="378"/>
+		<link refId="390"/>
+		<link refId="393"/>
+		<link refId="396"/>
+		<link refId="415"/>
+		<link refId="420"/>
+		<link refId="455"/>
+		<link refId="472"/>
+		<link refId="503"/>
+		<link refId="520"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+	<networkChangeEvent startTime="14:00:00">
+		<link refId="2"/>
+		<link refId="43"/>
+		<link refId="72"/>
+		<link refId="88"/>
+		<link refId="131"/>
+		<link refId="162"/>
+		<link refId="255"/>
+		<link refId="389"/>
+		<flowCapacity type="absolute" value="0.0"/>
+	</networkChangeEvent>
+
+</networkChangeEvents>

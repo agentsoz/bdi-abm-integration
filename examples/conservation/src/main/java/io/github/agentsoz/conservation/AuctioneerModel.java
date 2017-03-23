@@ -142,6 +142,7 @@ public class AuctioneerModel extends GAMSModel {
 		adc.getOrCreate("global").getPerceptContainer()
 				.put(Global.percepts.CALL_FOR_BIDS.toString(), Main.packages);
 		landholderModel.takeControl(adc);
+		this.takeControl(adc);
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -183,6 +184,7 @@ public class AuctioneerModel extends GAMSModel {
 		adc.getOrCreate("global").getPerceptContainer()
 				.put(Global.percepts.AUCTION_RESULTS.toString(), inputs);
 		landholderModel.takeControl(adc);
+		this.takeControl(adc);
 
 		try {
 			Thread.sleep(10);

@@ -25,12 +25,12 @@ package io.github.agentsoz.bdimatsim;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.BDIServerInterface;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
+import io.github.agentsoz.bdimatsim.app.StubPlugin;
 import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
 import io.github.agentsoz.dataInterface.DataServer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Provider;
 
 /**
- * @author QingyuChen, KaiNagel
+ * @author QingyuChen, KaiNagel, Dhi Singh
  */
 public final class MATSimModel implements ABMServerInterface {
 	final Logger logger = LoggerFactory.getLogger("");
@@ -75,43 +75,44 @@ public final class MATSimModel implements ABMServerInterface {
 	private Scenario scenario ;
 
 	private DataServer dataServer;
-	private List<SimpleMessage> newVisualiserMessages;
+	private List<SimpleMessage> agentsUpdateMessages;
 
 	private List<Id<Person>> bdiAgentIDs;
 
-	private double[] linkCoordsAsArray; //Locations of the links
-	private double[] boundingBox; 
 	private double time;
-	private boolean bdiResponse;
 
 	private final MatsimParameterHandler matSimParameterManager;
-	private MatsimAgentManager agentManager ;
+	private MATSimAgentManager agentManager ;
 	private MobsimDataProvider mobsimDataProvider = new MobsimDataProvider() ;
 
 	final BDIServerInterface bdiServer;
 
-	final Replanner getReplanner() {
+	private MATSimApplicationInterface plugin;
+
+	private AgentActivityEventHandler eventsHandler;
+
+	public final Replanner getReplanner() {
 		return agentManager.getReplanner() ;
 	}
 
-	final MatsimAgentManager getAgentManager() {
+	final MATSimAgentManager getAgentManager() {
 		return agentManager;
 	}
 	@Override
 	public final void takeControl(AgentDataContainer agentDataContainer){
-		/*Return Control to Matsim here*/
-		this.bdiResponse = true ;	
+		logger.trace("Received {}", agentManager.getAgentDataContainer());
+		agentManager.updateActions(agentManager.getAgentDataContainer());
 	}
 	final void setTime(double time) {
 		this.time = time;
 	}
 
-	final synchronized void addExternalEvent(@SuppressWarnings("unused") String type,SimpleMessage newEvent){
+	final synchronized void addExternalEvent(String type,SimpleMessage newEvent){
 		//This does mean that the visualiser should be registered very early or events may be thrown away
-		if(dataServer != null) newVisualiserMessages.add(newEvent);
+		if(dataServer != null) agentsUpdateMessages.add(newEvent);
 	}
 
-	final List<Id<Person>> getBDIAgentIDs(){
+	public final List<Id<Person>> getBDIAgentIDs(){
 		return bdiAgentIDs;
 	}
 
@@ -119,7 +120,7 @@ public final class MATSimModel implements ABMServerInterface {
 		return this.mobsimDataProvider.getAgents() ;
 	}
 
-	final Scenario getScenario() {
+	public final Scenario getScenario() {
 		return this.scenario ;
 	}
 
@@ -130,10 +131,15 @@ public final class MATSimModel implements ABMServerInterface {
 	public MATSimModel( BDIServerInterface bidServer, MatsimParameterHandler matsimParams) {
 		this.bdiServer = bidServer ;
 		this.matSimParameterManager = matsimParams ;
-		this.newVisualiserMessages = new ArrayList<SimpleMessage>();
-		this.agentManager = new MatsimAgentManager( this ) ;
+		this.agentsUpdateMessages = new ArrayList<SimpleMessage>();
+		this.agentManager = new MATSimAgentManager( this ) ;
+		this.registerPlugin(new StubPlugin());
 	}
 
+	public final void registerPlugin(MATSimApplicationInterface app) {
+		this.plugin = app;
+	}
+	
 	public final void run(String parameterFile,String[] args) {
 		// (this needs to be public)
 
@@ -159,13 +165,21 @@ public final class MATSimModel implements ABMServerInterface {
 
 		scenario = ScenarioUtils.loadScenario(config) ;
 
-		// this is some conversion of nice matsim objects into ugly conventional data structures :-):
-		final Collection<Id<Link>> allLinkIDs = this.getScenario().getNetwork().getLinks().keySet() ;
-		this.matSimParameterManager.setNETWORKIDS(Utils.createFlatLinkIDs(allLinkIDs)); //Link IDs in string[] format
-
+		// FIXME: Get rid of the matSimParameterManager altogether (dsingh, 25aug16)
+		// At the moment it is used in the default bushfire application, but has
+		// already been removed for the jill version (where it is initialised as null).
+		// Will need a way to get the #bdi agents from the config to here (needed to
+		// allow both BDI and MATSim agents to co exist).
+		// For now, if matSimParameterManager is null then all MATSim agents
+		// will have BDI counterparts
+		if (this.matSimParameterManager != null) {
+			// this is some conversion of nice matsim objects into ugly conventional data structures :-):
+			final Collection<Id<Link>> allLinkIDs = this.getScenario().getNetwork().getLinks().keySet() ;
+			this.matSimParameterManager.setNETWORKIDS(Utils.createFlatLinkIDs(allLinkIDs)); //Link IDs in string[] format
+		}
 		final Collection<? extends Link> links = this.getScenario().getNetwork().getLinks().values();
-		this.linkCoordsAsArray = Utils.generateLinkCoordsAsArray(links);
-		this.boundingBox = Utils.computeBoundingBox(links);
+		Utils.generateLinkCoordsAsArray(links);
+		Utils.computeBoundingBox(links);
 
 		this.bdiAgentIDs = Utils.getBDIAgentIDs( scenario, matSimParameterManager );
 
@@ -174,7 +188,8 @@ public final class MATSimModel implements ABMServerInterface {
 		final Controler controller = new Controler( scenario );
 
 		final EventsManager eventsManager = controller.getEvents();
-		eventsManager.addHandler(new AgentActivityEventHandler(MATSimModel.this));
+		eventsHandler = new AgentActivityEventHandler(MATSimModel.this);
+		eventsManager.addHandler(eventsHandler);
 
 		// having anonymous classes stuck into each other is not very pleasing to read, but it makes for short code and
 		// avoids going overboard with passing object references around. kai, mar'15  & may'15
@@ -192,29 +207,60 @@ public final class MATSimModel implements ABMServerInterface {
 							 * The most important method - called each time step during the iteration
 							 */		
 							@Override
-							public void notifyMobsimBeforeSimStep(MobsimBeforeSimStepEvent e) {
+							public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 								MATSimModel.this.setTime(e.getSimulationTime());
 								if(setupFlag) {
 									// should be possible to do the initialization in some other way ...
 									
-									//Set up agents
-									Utils.initialiseVisualisedAgents(MATSimModel.this) ;
+									//Utils.initialiseVisualisedAgents(MATSimModel.this) ;
 
+									// Allow the application to adjust the BDI agents list prior to creating agents
+									plugin.notifyBeforeCreatingBDICounterparts(MATSimModel.this.getBDIAgentIDs());
+									
 									for(Id<Person> agentId: MATSimModel.this.getBDIAgentIDs()) {
 										/*Important - add agent to agentManager */
 										MATSimModel.this.getAgentManager().createAndAddBDIAgent(agentId);
-										MATSimModel.this.getAgentManager().getReplanner().removeActivities(agentId);
+										//MATSimModel.this.getAgentManager().getReplanner().removeActivities(agentId);
 									}
+									
+									// Allow the application to configure the freshly baked agents
+									plugin.notifyAfterCreatingBDICounterparts(MATSimModel.this.getBDIAgentIDs());
+									
+									// Register new BDI actions and percepts from the application
+									// Must be done after the agents have been created since new 
+									// actions/percepts are registered with each BDI agent
+									MATSimModel.this.getAgentManager().registerApplicationActionsPercepts(plugin);
+									
+									// Flag that setup is done
 									setupFlag = false;
 								}
 								// the real work is done here:
-								MATSimModel.this.runBDIModule();
+								//MATSimModel.this.runBDIModule();
+								
+								// On 25 Aug 2016 dsingh said:
+								// The notifyMobsimBeforeSimStep(e) function essentially provides
+								// the simulation clock in any MATSim-BDI integration, since there
+								// is no external controller (MATSim acts as the controller).
+								// So this is where we control and synchronise all models
+								// (ABM, BDI, Fire, other) with respect to data transfer
+								//
+								// 1. First step the data server so that it can conduct
+								//    the data transfer between all connected models
+								publishDataToExternalListeners();
+								// 2. Next, call the BDI model that will populate the 
+								//    agent data container with any action/percepts per agent
+								MATSimModel.this.bdiServer.takeControl(agentManager.getAgentDataContainer());
+								// 3. Finally, call the MATSim model and process 
+								//    the BDI actions/percepts, and re-populate the 
+								//    agent data container, ready to pass to the BDI system in the 
+								//    next cycle.
+								MATSimModel.this.takeControl(agentManager.getAgentDataContainer());
 							}
 						} ) ; // end anonymous class MobsimListener
 						// ===
 						
 						// passes important matsim qsim functionality to the agent manager:
-						agentManager.setUpReplanner(qSim);
+						agentManager.setUpReplanner(plugin.getReplanner(qSim), qSim);
 						// yy "qSim" is too powerful an object here. kai, mar'15
 
 						// add stub agent to keep simulation alive:
@@ -233,6 +279,7 @@ public final class MATSimModel implements ABMServerInterface {
 
 		controller.getMobsimListeners().add(mobsimDataProvider);
 
+		// FIXME: dsingh, 25aug16: BDI init and start should be done outside of MATSim model 
 		this.bdiServer.init(this.agentManager.getAgentDataContainer(),
 				this.agentManager.getAgentStateList(), this,
 				Utils.getPersonIDsAsArray(this.bdiAgentIDs));
@@ -242,26 +289,22 @@ public final class MATSimModel implements ABMServerInterface {
 
 		controller.run();
 	}
-
-	final void runBDIModule(){
-		this.bdiResponse = false;
-		Calendar cal = Calendar.getInstance();
-		cal.getTime();
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss:SS");
-
-		if(dataServer != null){
-			synchronized(this) {
-				//visualiser.takeControl(null,newVisualiserMessages.toArray(sm));
+	
+	/**
+	 * Publish updates from this model to any connected listeners, such
+	 * as visualisers. Updates buffer is then flushed. 
+	 */
+	final void publishDataToExternalListeners() {
+		synchronized(this) {
+			if (dataServer != null) {
 				dataServer.stepTime();
-				dataServer.publish( "matsim_agent_updates", newVisualiserMessages.toArray(new SimpleMessage[newVisualiserMessages.size()]) );
-				newVisualiserMessages.clear();
+				dataServer.publish( "matsim_agent_updates", agentsUpdateMessages.toArray(new SimpleMessage[agentsUpdateMessages.size()]) );
 			}
+			agentsUpdateMessages.clear();
 		}
+	}
 
-		this.bdiServer.takeControl(agentManager.getAgentDataContainer());
-		// (give control to bdiServer)
-
-
+	final void setFreeSpeedExample(){
 		// example how to set the freespeed of some link to zero:
 		if ( this.time == 6.*3600. + 10.*60. ) {
 			NetworkChangeEventFactory cef = new NetworkChangeEventFactoryImpl() ;
@@ -276,27 +319,11 @@ public final class MATSimModel implements ABMServerInterface {
 				}
 			}
 		}
-
-		//Wait for Server to respond
-		while (!this.bdiResponse);
-		// (framework eventually says "MATSimModel.takeControl()", which sets this.bdiResponse to true)
-
-		logger.trace("Received {}", agentManager.getAgentDataContainer());
-		agentManager.updateActions(agentManager.getAgentDataContainer());
 	}
 
 	@Override
 	public final Object[] queryPercept(String agentID, String perceptID) {
-
-		if (perceptID == MatsimPerceptList.REQUESTLOCATION){
-			return agentManager.getLocation(agentID, perceptID);
-		}
-		else if (perceptID == MatsimPerceptList.SETUPPARAMETERS){
-			return new Object[] {matSimParameterManager.getNETWORKIDS(), linkCoordsAsArray, boundingBox };
-		}
-		else{
-			return null;
-		}
+		return this.getBDIAgent(agentID).getPerceptHandler().processPercept(agentID, perceptID);
 	}
 
 	public final void registerDataServer( DataServer server ) {
@@ -308,20 +335,24 @@ public final class MATSimModel implements ABMServerInterface {
 	// The former is a subset of the latter. But it is not so clear if this has to matter, i.e. should there really be two lists, or
 	// just one (like a centralized ldap server)? kai, mar'15
 
-	final MATSimAgent getBDIAgent(Id<Person> personId ) {
+	public final MATSimAgent getBDIAgent(Id<Person> personId ) {
 		return this.agentManager.getAgent( personId ) ;
 	}
 
-	final MATSimAgent getBDIAgent(String agentID) {
+	public final MATSimAgent getBDIAgent(String agentID) {
 		return this.agentManager.getAgent( agentID ) ;
 	}
 
-	final Map<Id<Person>, MobsimAgent> getMobsimAgentMap() {
+	public final Map<Id<Person>, MobsimAgent> getMobsimAgentMap() {
 		return this.mobsimDataProvider.getAgents() ;
 	}
 
-	double getTime() {
+	public double getTime() {
 		return time ;
+	}
+
+	AgentActivityEventHandler getEventHandler() {
+		return eventsHandler;
 	}
 
 }

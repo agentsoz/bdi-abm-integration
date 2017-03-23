@@ -1,0 +1,56 @@
+package scenarioTWO.data;
+import scenarioTWO.events.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public beliefset depTime extends ClosedWorld /*or OpenWorld*/
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+/*
+ * Beliefset Name: depTime
+ */
+
+	// Zero or more #key field declarations.
+	// These describe the key attributes of each belief.
+
+
+	// Zero of more #value field declarations.
+	// These describe the data attributes of each belief.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	final Logger logger = LoggerFactory.getLogger("");
+		
+	#key field String agentID;
+	#value field double deptime;
+	
+	#indexed query getDepTime(String agentID, logical double depTime);
+	
+	
+	public double getDepartureTime(String id)
+	{
+		double deptime= -1.0;
+			try{ 
+				deptime =getAgentDepTime(id);
+				
+			}
+				catch(java.lang.Exception e)
+			{
+				System.out.println("unable to get time left to evac, returning -1.0 " /* + bse.getMessage() */);
+			}
+			return deptime;
+	}
+
+
+
+	#function query double getAgentDepTime(String id)
+	{
+		logical double $dep;
+		Cursor c = getDepTime(id,$dep);
+		c.next();
+	//	System.out.println($dep.getValue());
+		return $dep.getValue();
+	}
+	
+	
+}

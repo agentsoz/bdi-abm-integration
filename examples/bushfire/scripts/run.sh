@@ -24,7 +24,11 @@
 
 DIR=`dirname "$0"`
 PROGRAM='java -cp bushfire-1.0.1-SNAPSHOT.jar io.github.agentsoz.bushfire.BushfireMain'
-DEFAULT_ARGS='-c scenarios/halls_gap/halls_gap.xml -l halls-gap.log -level INFO'
+#DEFAULT_ARGS='-c scenarios/halls_gap/halls_gap.xml -l halls-gap.log -level INFO'
+DEFAULT_ARGS='-c scenarios/maldon/maldon.xml -l maldon.log -level INFO'
+
+# java -cp bushfire-1.0.1-SNAPSHOT.jar io.github.agentsoz.bushfire.matsimjill.Main --config scenarios/maldon-simple/maldon.xml --logfile maldon.log --loglevel INFO --jillconfig "--config={agents:[{classname:io.github.agentsoz.bushfire.matsimjill.agents.Resident, args:null, count:700}],logLevel: WARN,logFile: Main.log,programOutputFile: Main.out}" 
+
 
 # Print usage
 $PROGRAM -h
@@ -33,13 +37,12 @@ $PROGRAM -h
 printf "default args:\n  $DEFAULT_ARGS\n\n"
 
 # print user args
-UARGS="none"
 USER_ARGS=""
 if [ $# -ne 0 ]; then
-  UARGS=$@
-  USER_ARGS="$UARGS"
+  USER_ARGS="$@"
+  DEFAULT_ARGS=""
 fi
-printf "user args (will override defaults):\n  $UARGS\n\n"
+printf "user args (will override defaults):\n  $USER_ARGS\n\n"
 
 # print full command
 CMD="$PROGRAM $DEFAULT_ARGS $USER_ARGS"
@@ -49,3 +52,5 @@ printf "$CMD\n  "
 $CMD >/dev/null 2>&1
 printf "finished on `date +"%B %d, %Y at %r"` \n\n"
 
+# To run the Maldon scenario with Jill agents, do:
+# java -cp target/bushfire-1.0.1-SNAPSHOT.jar io.github.agentsoz.bushfire.matsimjill.Main --config scenarios/maldon-simple/maldon.xml --logfile maldon.log --loglevel INFO --jillconfig "--config={agents:[{classname:io.github.agentsoz.bushfire.matsimjill.agents.Resident, args:null, count:700}],logLevel: WARN,logFile: Main.log,programOutputFile: Main.out}"

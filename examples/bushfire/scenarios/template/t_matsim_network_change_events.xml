@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<networkChangeEvents xmlns="http://www.matsim.org/files/dtd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.matsim.org/files/dtd http://www.matsim.org/files/dtd/networkChangeEvents.xsd">
+
+<networkChangeEvent startTime= "19:00:00" >
+
+<!--<link refId= "24307"/>-->
+<link refId= "dummy-linkid-that-should-never-match"/>
+<!--${matsim_network_change_events}-->
+<!--<freespeed type= "absolute" value= "5.5"/>--> <!-- In m/s: divide km/h by 3.6 -->
+<flowCapacity type= "scaleFactor" value= "0.25"/>
+</networkChangeEvent>
+</networkChangeEvents>
+
+

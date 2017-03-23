@@ -1,0 +1,73 @@
+package scenarioTWO.plans;
+import scenarioTWO.events.*;
+import scenarioTWO.data.*;
+import scenarioTWO.agents.EvacResident;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+	
+public plan PrepareP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: PrepareP
+Description: KidsG
+RelsG (with X% probability)
+If not at home
+   AssessG
+*/
+	//Events handled by the plan are declared here.
+	#posts event RelsG relsg_p;
+
+	#posts event AssessThreatG assessthreatg_p;
+
+	#posts event KidsG kidsg_p;
+
+	#handles event EvacAlert evacalert_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	#uses interface EvacResident evac_res;	
+	
+	final Logger logger = LoggerFactory.getLogger("");
+	
+	context()
+	{
+
+
+	evac_res.kidsNeedPickUp == true || evac_res.relsNeedPickUp == true; 
+	// agents who have kids or rels to pickup
+	//	true;
+	}
+
+	body()
+	{
+		if(evac_res.kidsNeedPickUp==true)
+		{
+
+			
+			KidsG kids = kidsg_p.pickUpKids();
+			@subtask(kids);
+			
+//			@post(kidsg_p.pickUpKids());
+			
+		}
+		if (evac_res.relsNeedPickUp==true)
+		{		
+			RelsG rels = relsg_p.pickUpRels();
+			@subtask(rels);		
+//			@post(relsg_p.pickUpRels());
+			
+		}
+		
+		
+		//once all the picking up is completed, set prepared_to_evac_flag to true and post assesThreat goal
+		evac_res.setPreparedToEvacFlagTrue();
+		@post(assessthreatg_p.assess());
+		
+	}
+}

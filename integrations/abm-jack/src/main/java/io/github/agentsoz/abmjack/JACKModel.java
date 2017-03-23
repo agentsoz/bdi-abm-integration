@@ -49,17 +49,10 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 	final Logger logger = LoggerFactory.getLogger("");
 
-	protected DataServer dataServer;
 	protected HashMap<String, Agent> agents = new HashMap<String, Agent>();
 	private ABMServerInterface abmServer;
 	private AgentDataContainer nextContainer;
 	public final String GLOBAL_AGENT = "global";
-
-	/*
-	 * public void setDataServer( DataServer server ) {
-	 * 
-	 * dataServer = server; }
-	 */
 
 	@Override
 	// set up connections and get any needed parameters from the ABM server
@@ -257,11 +250,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 				}
 			}
 		} while (allIdle == false);
-		try {
-			abmServer.takeControl(nextContainer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void createAgents(String[] agentIDs) {

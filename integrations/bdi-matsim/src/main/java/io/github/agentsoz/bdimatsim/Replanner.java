@@ -48,14 +48,14 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.router.util.TravelTimeUtils;
 import org.matsim.withinday.utils.EditRoutes;
 
-final class Replanner {
+public class Replanner {
 
-	private MATSimModel model;
-	private TripRouter tripRouter;
+	protected MATSimModel model;
+	protected TripRouter tripRouter;
 	
-	private ActivityEndRescheduler internalInterface ;
+	protected ActivityEndRescheduler internalInterface ;
 	
-	Replanner(MATSimModel model, ActivityEndRescheduler activityEndRescheduler)
+	protected Replanner(MATSimModel model, ActivityEndRescheduler activityEndRescheduler)
 	{
 		this.model = model;
 		this.internalInterface = activityEndRescheduler ;
@@ -71,7 +71,7 @@ final class Replanner {
 		tripRouter = factory.instantiateAndConfigureTripRouter(routingContext);
 	}
 	
-	final void reRouteCurrentLeg( MobsimAgent agent, double time ) {
+	protected void reRouteCurrentLeg( MobsimAgent agent, double time ) {
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 		PlanElement pe = plan.getPlanElements().get( WithinDayAgentUtils.getCurrentPlanElementIndex(agent)) ;
 		if ( !(pe instanceof Leg) ) {
@@ -84,7 +84,7 @@ final class Replanner {
 		WithinDayAgentUtils.resetCaches(agent);
 	}
 
-	final void attachNewActivityAtEndOfPlan(Id<Link> newActivityLinkId, Id<Person> agentId )
+	protected void attachNewActivityAtEndOfPlan(Id<Link> newActivityLinkId, Id<Person> agentId )
 	{
 		// yyyy if the current activity is not already the last activity of the agent, this method may not behave as expected. kai, feb'14
 		
@@ -135,7 +135,7 @@ final class Replanner {
 		
 	}
 	
-	final boolean removeActivities(Id<Person> agentId)
+	protected boolean removeActivities(Id<Person> agentId)
 	{
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 		MobsimAgent agent = mapping.get(agentId);
