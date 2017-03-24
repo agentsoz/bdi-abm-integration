@@ -94,9 +94,9 @@ public class JillModelTest {
 		// initialise the BDI and ABM system
 		init(nAgents, durationPerAction);
 		
-		// Run for at least durationPerAction steps plus 2 to make sure 
+		// Run for at least durationPerAction steps plus some to make sure 
 		// we are definitely finished
-		for (int i = 0; i < durationPerAction+2; i++) {
+		for (int i = 0; i < durationPerAction+10; i++) {
 			jillmodel.takeControl(adc);
 			abmstub.takeControl(adc);
 		}
