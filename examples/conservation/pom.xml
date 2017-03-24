@@ -3,13 +3,13 @@
   <parent>
     <groupId>io.github.agentsoz</groupId>
     <artifactId>bdi-abm-integration</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.0</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>conservation-ethics</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>2.0.0</version>
   <packaging>jar</packaging>
 
   <name>Conservation Ethics Example</name>
@@ -44,17 +44,17 @@
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>bdi-abm</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.0</version>
     </dependency>
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>abm-jill</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.0</version>
     </dependency>
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>bdi-gams</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.0</version>
     </dependency>
   </dependencies>
 
