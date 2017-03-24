@@ -18,15 +18,15 @@
     <developerConnection>scm:git:https://github.com/agentsoz/bdi-abm-integration.git</developerConnection>
     <url>https://github.com/agentsoz/bdi-abm-integration.git</url>
     <tag>HEAD</tag>
-  </scm> 
-  
+  </scm>
+
   <licenses>
     <license>
       <name>GNU General Lesser Public License, Version 3.0</name>
       <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <name>Dhirendra Singh</name>
@@ -41,7 +41,7 @@
       <organizationUrl>http://agentsoz.github.io</organizationUrl>
     </developer>
   </developers>
-  
+
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -60,10 +60,10 @@
     <module>integrations/abm-jack</module>
     <module>integrations/abm-jill</module>
     <module>integrations/abm-jadex</module>
-    <module>integrations/bdi-matsim</module>    
-    <module>examples/conservation</module> 
+    <module>integrations/bdi-matsim</module>
+    <module>examples/conservation</module>
     <module>examples/bushfire</module>
-    <module>examples/vaccination</module> 
+    <module>examples/vaccination</module>
   </modules>
 
   <build>
@@ -80,7 +80,7 @@
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>false</autoReleaseAfterClose>
       	</configuration>
-      </plugin> 
+      </plugin>
       <!-- Maven release plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -92,7 +92,7 @@
           <releaseProfiles>release</releaseProfiles>
           <goals>deploy</goals>
         </configuration>
-      </plugin>  
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
@@ -145,12 +145,12 @@
 
   <dependencies>
     <!-- logging framework -->
-    <dependency> 
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.0.13</version>
     </dependency>
-    <!-- for JSON-style toString() of objects --> 
+    <!-- for JSON-style toString() of objects -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -166,7 +166,7 @@
   </dependencies>
 
 <profiles>
-  <profile> 
+  <profile>
     <id>release</id>
     <build>
     <plugins>
@@ -193,6 +193,9 @@
 	  <goals>
 	    <goal>jar</goal>
 	  </goals>
+      <configuration> <!-- add this to disable checking -->
+        <additionalparam>-Xdoclint:none</additionalparam>
+      </configuration>
 	</execution>
       </executions>
     </plugin>
