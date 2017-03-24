@@ -23,7 +23,7 @@
 ###
 
 DIR=`dirname "$0"`
-PROGRAM='java -Xmx2g -Xms2g -cp bushfire-tutorial-1.0.0-SNAPSHOT.jar io.github.agentsoz.bushfiretute.BushfireMain'
+PROGRAM='java -Xmx2g -Xms2g -cp bushfire-tutorial-1.0.0.jar io.github.agentsoz.bushfiretute.BushfireMain'
 
 DEFAULT_ARGS='-c scenarios/hawkesbury/hawkesbury.xml -outfile hawkesbury.out -logfile hawkesbury.log -loglevel INFO'
 

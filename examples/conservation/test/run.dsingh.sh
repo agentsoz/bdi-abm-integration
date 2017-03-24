@@ -5,13 +5,13 @@ DIR=`dirname "$0"`
 ### Begin user config
 
 # logging verbosity (one of ERROR, WARN, INFO, DEBUG, TRACE)
-LOG_LEVEL=INFO
+LOG_LEVEL=TRACE
 
 # Set the following variable to point to the root of your GAMS installation, for instance,
 GAMS_DIR=
 # GAMS_DIR=/Applications/GAMS/gams24.4_osx_x64_64_sfx
- GAMS_DIR=/home/sewwandi/Documents/Apps/gams/gams24.4_linux_x64_64_sfx
-# GAMS_DIR=~/bin/gams
+# GAMS_DIR=/home/sewwandi/Documents/Apps/gams/gams24.4_linux_x64_64_sfx
+GAMS_DIR=~/bin/gams
 
 ### End user config
 
@@ -26,7 +26,7 @@ if [ "$GAMS_DIR" == "" ]; then
 	exit
 fi
 
-NUMAGENTS=100
+NUMAGENTS=10
 CFG='"{
 programOutputFile : \"conservation.landholder.out\",
 logFile : \"conservation.log\",
@@ -41,9 +41,9 @@ agents:
  ]
 }"'
 
-#CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 10 -p 26 -a ${NUMAGENTS} -log_level DEBUG --agent-class agentsoz.conservation.jill.agents.Landholder --num-agents 100 --outfile conservation.landholder.out --logfile conservation.log --debug-level DEBUG"
+#CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 10 -p 26 -a ${NUMAGENTS} -log_level DEBUG --agent-class agentsoz.conservation.jill.agents.Landholder --num-agents ${NUMAGENTS} --outfile conservation.landholder.out --logfile conservation.log --debug-level DEBUG"
 
-CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 10 -p 26 -a ${NUMAGENTS} -log_level DEBUG --config $CFG"
+CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 1 -p 5 -a ${NUMAGENTS} -log_level DEBUG --config $CFG"
 
 echo "Started at " `date`
 echo $CMD; eval $CMD
