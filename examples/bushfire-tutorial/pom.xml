@@ -1,16 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
     <groupId>io.github.agentsoz</groupId>
     <artifactId>bdi-abm-integration</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>bushfire-tutorial</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>2.0.1</version>
   <packaging>jar</packaging>
 
   <name>Bushfire Tutorial</name>
@@ -42,17 +41,17 @@
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>bdi-abm</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>abm-jack</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>io.github.agentsoz</groupId>
       <artifactId>bdi-matsim</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.1</version>
     </dependency>
     <!--
     <dependency>
@@ -116,17 +115,16 @@
             <phase>generate-sources</phase>
             <configuration>
               <tasks>
-                <mkdir dir="${project.build.directory}/classes"/>
-                <javac source="1.7" target="1.7" debug="true" includeantruntime="false" failonerror="true"
-                       destdir="${project.build.directory}/classes">
-                  <src path="${basedir}/src/main/java/"/>
-                  <include name="io/github/agentsoz/bushfiretute/bdi/IBdiConnector.java"/>
-                  <include name="io/github/agentsoz/bushfiretute/datacollection/ScenarioTwoData.java"/>
-                  <include name="io/github/agentsoz/bushfiretute/shared/ActionID.java"/>
-                  <classpath refid="maven.compile.classpath"/>
+                <mkdir dir="${project.build.directory}/classes" />
+                <javac source="1.7" target="1.7" debug="true" includeantruntime="false" failonerror="true" destdir="${project.build.directory}/classes">
+                  <src path="${basedir}/src/main/java/" />
+                  <include name="io/github/agentsoz/bushfiretute/bdi/IBdiConnector.java" />
+                  <include name="io/github/agentsoz/bushfiretute/datacollection/ScenarioTwoData.java" />
+                  <include name="io/github/agentsoz/bushfiretute/shared/ActionID.java" />
+                  <classpath refid="maven.compile.classpath" />
                 </javac>
                 <copy todir="${project.build.directory}/generated-sources/jack">
-                  <fileset dir="${basedir}/src/jack" includes="**/*.java"/>
+                  <fileset dir="${basedir}/src/jack" includes="**/*.java" />
                 </copy>
               </tasks>
             </configuration>
@@ -152,7 +150,7 @@
               <arguments>
                 <argument>-classpath</argument>
                 <!-- automatically creates the classpath using all project dependencies -->
-                <classpath/>
+                <classpath />
                 <argument>aos.main.JackBuild</argument>
                 <argument>-wd</argument>
                 <argument>src/jack</argument>
@@ -290,7 +288,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
