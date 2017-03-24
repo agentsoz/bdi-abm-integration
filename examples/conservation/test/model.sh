@@ -18,7 +18,7 @@ GAMS_DIR=
 
 GAMS_JAR=${GAMS_DIR}/apifiles/Java/api/GAMSJavaAPI.jar
 GAMS_MODEL=${PBS_O_WORKDIR}/../target/classes/gams/bid_selection_model.gms
-JAR_CONSERVATION=${PBS_O_WORKDIR}/../target/conservation-ethics-2.0.0-jar-with-dependencies.jar
+JAR_CONSERVATION=${PBS_O_WORKDIR}/../target/conservation-ethics-2.0.2-SNAPSHOTjar-with-dependencies.jar
 
 CP=${JAR_CONSERVATION}:${GAMS_JAR}
 
