@@ -15,9 +15,9 @@ cat $EXPERIMENT_DIR/samples.txt | while read x; do
 			mkdir -p "$PBS_O_WORKDIR/$dst"
 			cd $PBS_O_WORKDIR/$dst
 			$PBS_O_WORKDIR/model.sh $x $replicate || die_run
-			rm _gams*
-			rm conservation.in.*
-			rm conservation.out.*
+			rm -f _gams*
+			rm -f conservation.in.*
+			rm -f conservation.out.*
 			run=$(expr $run + 1)
 		done
 	fi

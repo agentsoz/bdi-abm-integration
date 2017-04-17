@@ -15,7 +15,7 @@ fi
 
 # decide what python interpretter to use
 # (important, because trifid is stuck on python2.7)
-PYTHON=""
+PYTHON="python"
 if test "$(hostname)" = "sewwandi-OptiPlex-9020"; then
 	PYTHON="python2.7"
 fi

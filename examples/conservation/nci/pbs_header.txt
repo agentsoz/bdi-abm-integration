@@ -1,0 +1,9 @@
+#PBS -P ij2
+#PBS -q express
+#PBS -l mem=512MB
+#PBS -l ncpus=2
+#PBS -l walltime=00:10:00
+#PBS -l wd
+#PBS -m abe
+#PBS -M dhirendra.singh@rmit.edu.au
+

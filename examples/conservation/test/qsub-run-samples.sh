@@ -4,7 +4,7 @@
 
 # sanity check
 file_samples=$(cat $EXPERIMENT_DIR/samples.txt | wc -l)
-test $SAMPLES -ne $file_samples && die "error: config SAMPLES value does does not match wc -l samples.txt"
+#test $SAMPLES -ne $file_samples && die "error: config SAMPLES value does not match wc -l samples.txt"
 
 submit(){
         qsub - << EOF
@@ -15,6 +15,7 @@ submit(){
 #PBS -m abe
 #PBS -l mem=2500mb
 #PBS -l walltime=24:00:00
+#_PBS_PLACEHOLDER
 cd \$PBS_O_WORKDIR
 ./run-samples.sh $*
 EOF
