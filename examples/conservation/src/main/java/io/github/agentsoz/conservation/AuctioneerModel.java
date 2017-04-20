@@ -217,7 +217,7 @@ public class AuctioneerModel extends GAMSModel {
 		opts.put("target_table", ConstantFileNames.getTargetFileName());
 		opts.put("csvInputFile", Main.GAMSInputFile());
 		opts.put("csvOutputFile", Main.GAMSOutputFile());
-		opts.put("numPackages", Integer.toString(Main.numPackages()));
+		opts.put("numPackages", Integer.toString(ConservationUtils.getNumberOfPackages()));
 		opts.put("numBidders", Integer.toString(Main.numLandholders()));
 
 		super.run(opts, bids, output);

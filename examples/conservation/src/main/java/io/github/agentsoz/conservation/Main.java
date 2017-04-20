@@ -84,11 +84,6 @@ public class Main {
 	private static String gamsDir = null;
 
 	/**
-	 * Number of packages used in the application
-	 */
-	private static int numPackages = 26;
-
-	/**
 	 * Log level
 	 */
 	private static Level logLevel = Level.INFO;
@@ -161,7 +156,6 @@ public class Main {
 	public static void main(String[] args) {
 		// parse command line arguments
 		parse(args);
-		ConservationUtils.init(numPackages);
 
 		// Initialise variables
 		auctioneerModel = new AuctioneerModel(gamsDir, gamsModel);
@@ -392,7 +386,7 @@ public class Main {
 	 */
 	public static void initialiseSimulation(String[] args) {
 		// generate the bid packages
-		packages = Package.getPackages(numPackages);
+		packages = Package.getPackages(ConservationUtils.getNumberOfPackages());
 
 		// initalise the agent data container
 		adc = new AgentDataContainer();
@@ -514,7 +508,7 @@ public class Main {
 				+ getMedProfitRangeMinMargin()
 				+ "\n"
 				+ "  -p <pacakges>                         number of conservation packages to use (default is "
-				+ numPackages
+				+ getNumberOfPackages()
 				+ "')\n"
 				+ "  -profitDifferenctial    			   the gap between low, medium and high profit percentage levels\n"
 				+ "										   (default is "
@@ -607,7 +601,7 @@ public class Main {
 				if (i + 1 < args.length) {
 					i++;
 					try {
-						numPackages = Integer.parseInt(args[i]);
+						ConservationUtils.setNumberOfPackages(Integer.parseInt(args[i]));
 					} catch (Exception e) {
 						exit("Could not parse numPackages value '" + args[i]
 								+ "'. Will use the default of '" + repeats
@@ -992,7 +986,7 @@ public class Main {
 			writer.append(",");
 			writer.append(Double.toString(getMedProfitRangeMinMargin()));
 			writer.append(",");
-			writer.append(Integer.toString(numPackages));
+			writer.append(Integer.toString(getNumberOfPackages()));
 			writer.append(",");
 			writer.append(Double.toString(getProfitDifferenctial()));
 			writer.append(",");
@@ -1054,15 +1048,6 @@ public class Main {
 	 */
 	public static String GAMSOutputFile() {
 		return csvOutputFile;
-	}
-
-	/**
-	 * Returns the number of packages used by the simulation.
-	 * 
-	 * @return
-	 */
-	public static int numPackages() {
-		return numPackages;
 	}
 
 	/**

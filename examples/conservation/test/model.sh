@@ -42,7 +42,7 @@ GLOBAL_SEED=$(expr ${5} + ${GLOBAL_SEED_START_VALUE})
 CFG='"{
 programOutputFile : \"conservation.landholder.out\",
 logFile : \"conservation.log\",
-logLevel : \"${LOG_LEVEL}\",
+logLevel : \"'${LOG_LEVEL}'\",
 agents:
  [
   {

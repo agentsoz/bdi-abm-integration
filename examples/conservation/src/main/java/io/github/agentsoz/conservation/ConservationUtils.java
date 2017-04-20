@@ -37,7 +37,8 @@ public class ConservationUtils {
 
 	private static Package referencePackage = null;
 
-	private static int numberOfPackages = 0;
+	// Default number of packages
+	private static int numberOfPackages = 26;
 
 	/**
 	 * This enum id used to store how agents change their level of conservation
@@ -236,7 +237,7 @@ public class ConservationUtils {
 	 */
 	private static long globalRandomSeed = 543219876;
 
-	public static void init(int numbOfPackages) {
+	public static void setNumberOfPackages(int numbOfPackages) {
 		numberOfPackages = numbOfPackages;
 	}
 
@@ -514,5 +515,9 @@ public class ConservationUtils {
 	public static void setGlobalRandomSeed(long globalRandomSeed) {
 		ConservationUtils.globalRandomSeed = globalRandomSeed;
 		setGlobalRandom(new Random(globalRandomSeed));
+	}
+	
+	public static int getNumberOfPackages() {
+		return numberOfPackages;
 	}
 }
