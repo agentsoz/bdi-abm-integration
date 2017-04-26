@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e # exit on any command failures
 
 . ./common.sh
 
@@ -23,7 +24,8 @@ EOF
 
 if test $REPLICATES -gt 1; then
 	# submit a job for each replicate
-	for replicate in $(seq $START_REPLICATE $STOP_REPLICATE); do
+	# for replicate in $(seq $START_REPLICATE $STOP_REPLICATE); do
+	for ((replicate=$START_REPLICATE; replicate<=$STOP_REPLICATE; replicate++)); do
 		echo -n "replicate $replicate: "
 		submit $EXPERIMENT_DIR --start-replicate=$replicate --stop-replicate=$replicate
 	done

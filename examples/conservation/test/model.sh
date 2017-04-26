@@ -11,9 +11,11 @@ NUMPACKAGES=26 # 26 packages, or set to 5 if running GAMS in demo mode
 
 # Set the following variable to point to the root of your GAMS installation, for instance,
 GAMS_DIR=
-# GAMS_DIR=/Applications/GAMS/gams24.4_osx_x64_64_sfx
-# GAMS_DIR=/home/sewwandi/Documents/Apps/gams/gams24.4_linux_x64_64_sfx
-# GAMS_DIR=~/bin/gams
+if [ -d /Applications/GAMS/gams24.4_osx_x64_64_sfx ]; then
+    GAMS_DIR=/Applications/GAMS/gams24.4_osx_x64_64_sfx
+elif [ -d ~/bin/gams ]; then
+    GAMS_DIR=~/bin/gams
+fi
 
 # logging verbosity (one of ERROR, WARN, INFO, DEBUG, TRACE)
 LOG_LEVEL=INFO
