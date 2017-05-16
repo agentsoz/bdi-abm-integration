@@ -31,6 +31,7 @@ import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 import io.github.agentsoz.conservation.jill.goals.AuctionResultGoal;
 import io.github.agentsoz.conservation.jill.goals.CallForBidsGoal;
+import io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal;
 import io.github.agentsoz.conservation.outputwriters.AuctionStatisticsWriter;
 import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.AgentInfo;
@@ -52,7 +53,9 @@ import com.google.gson.Gson;
 		"io.github.agentsoz.conservation.jill.goals.AuctionResultGoal",
 		"io.github.agentsoz.conservation.jill.goals.UpdateConservationEthicGoal",
 		"io.github.agentsoz.conservation.jill.goals.UpdateProfitMotivationGoal",
-		"io.github.agentsoz.conservation.jill.goals.SocialNormUpdateGoal" })
+		"io.github.agentsoz.conservation.jill.goals.SocialNormUpdateGoal",
+		"io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal"
+		})
 public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent {
 
 	/**
@@ -361,10 +364,11 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 */
 	@Override
 	public void handlePercept(String percept, Object params) {
+		Log.debug("Agent " + getName() + " received percept " + percept
+				+ ": " + new Gson().toJson(params));
 		if (percept.equals(Global.percepts.AUCTION_RESULTS.toString())) {
 			Object[] inputs = (Object[]) params;
 			AuctionResultSet ars = (AuctionResultSet) inputs[0];
-			Log.debug("Agent " + getName() + " received percept " + percept);
 			this.currentRound = history.registerAuctionRound(ars, getName());
 
 			// Update auction statistics
@@ -380,14 +384,14 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 
 		} else if (percept.equals(Global.percepts.CALL_FOR_BIDS.toString())) {
 			Package[] packages = (Package[]) params;
-			Log.debug("Agent " + getName() + " received percept " + percept
-					+ ": " + new Gson().toJson(packages));
 			boolean registered = history.registerPackages(packages);
 			if (registered) {
 				CallForBidsGoal callForBids = new CallForBidsGoal(percept);
 				callForBids.setPackages(packages);
 				post(callForBids);
 			}
+		} else if (percept.equals(Global.percepts.EXTENSION_OFFICER_VISIT.toString())) {
+			post(new MeetExtensionOfficerGoal(percept));
 		}
 	}
 

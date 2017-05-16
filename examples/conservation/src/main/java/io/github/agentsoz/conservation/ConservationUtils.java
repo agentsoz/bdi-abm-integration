@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
+import io.github.agentsoz.conservation.ExtensionOffice.Policy;
+
 /**
  * Store all configurable parameters with their default values and some utility
  * functions.
@@ -218,6 +220,17 @@ public class ConservationUtils {
 	private static double targetPercentage = 20;
 
 	/**
+	 * The visiting policy for extension officers. See {@link Policy}.
+	 */
+	private static Policy visitPolicy = ExtensionOffice.Policy.NEVER;
+	
+	/** 
+	 * The amount by which an landholders' conservation ethic value is boosted,
+	 * in absolute amount, by a visit from an extension officer.
+	 */
+	private static double visitConservationEthicBoostValue = 10.0;
+	
+	/**
 	 * The minimum margin of high profit range
 	 * 
 	 * Command line argument to set this value: -highProfitRangeMinMargin
@@ -263,6 +276,20 @@ public class ConservationUtils {
 
 	public static double getLowerThresholdP() {
 		return lowerThresholdP;
+	}
+	
+	public static Policy getVisitPolicy() {
+		return visitPolicy;
+	}
+	public static void setVisitPolicy(Policy p) {
+		visitPolicy = p;
+	}
+	public static String getVisitPolicyOptions() {
+		String opts = "";
+		for (Policy p : visitPolicy.values()) {
+			opts += p + " ";
+		}
+		return opts;
 	}
 
 	public static void setHighParticipationProbability(double value) {
@@ -520,4 +547,16 @@ public class ConservationUtils {
 	public static int getNumberOfPackages() {
 		return numberOfPackages;
 	}
+	
+	/**
+	 * See {@link #visitConservationEthicBoostValue}
+	 * @return
+	 */
+	public static double getVisitConservationEthicBoostValue() {
+		return visitConservationEthicBoostValue;
+	}
+	public static void setVisitConservationEthicBoostValue(double val) {
+		visitConservationEthicBoostValue = val;
+	}
+
 }

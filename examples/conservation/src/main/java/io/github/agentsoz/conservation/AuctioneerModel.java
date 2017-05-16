@@ -73,7 +73,7 @@ public class AuctioneerModel extends GAMSModel {
 	 * Different states of the auction
 	 */
 	public enum AuctionState {
-		NOT_STARTED, CALL_FOR_BIDS_SEND, RESULTS_SENT, ENDED,
+		NOT_STARTED, VISIT_BY_EXTENSION_OFFICER, CALL_FOR_BIDS_SEND, RESULTS_SENT, ENDED,
 	}
 
 	/**
@@ -119,6 +119,9 @@ public class AuctioneerModel extends GAMSModel {
 	public void takeControl(AgentDataContainer agentDataContainer) {
 		switch (auctionState) {
 		case NOT_STARTED:
+			auctionState = AuctionState.VISIT_BY_EXTENSION_OFFICER;
+			break;
+		case VISIT_BY_EXTENSION_OFFICER:
 			auctionState = AuctionState.CALL_FOR_BIDS_SEND;
 			break;
 		case CALL_FOR_BIDS_SEND:
@@ -138,6 +141,16 @@ public class AuctioneerModel extends GAMSModel {
 	 * results to land holders.
 	 */
 	public void conductAuction() {
+		auctionState = AuctionState.NOT_STARTED;
+		
+		// Handle any extension officer visits (added externally) first
+		landholderModel.takeControl(adc);
+		this.takeControl(adc);
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+		}
+		
 		// Send call for bids
 		adc.getOrCreate("global").getPerceptContainer()
 				.put(Global.percepts.CALL_FOR_BIDS.toString(), Main.packages);

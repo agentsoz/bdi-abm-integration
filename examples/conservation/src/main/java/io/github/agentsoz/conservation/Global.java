@@ -25,7 +25,9 @@ package io.github.agentsoz.conservation;
 public class Global {
 
 	public static enum percepts {
-		CALL_FOR_BIDS, AUCTION_RESULTS,
+		CALL_FOR_BIDS, 
+		AUCTION_RESULTS,
+		EXTENSION_OFFICER_VISIT
 	};
 
 	public static enum actions {

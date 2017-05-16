@@ -29,6 +29,7 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentState;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.bdiabm.data.PerceptContainer;
+import io.github.agentsoz.conservation.ExtensionOffice.Policy;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.AgentsProgressWriter;
 import io.github.agentsoz.conservation.outputwriters.AgentsStatisticsWriter;
@@ -129,6 +130,11 @@ public class Main {
 	private static LandholderModel landholderModel;
 
 	/**
+	 * Instance of {@link ExtensionOffice}
+	 */
+	private static ExtensionOffice extensionOffice;
+	
+	/**
 	 * The list of pakcages used in the application.
 	 */
 	public static Package[] packages;
@@ -160,6 +166,8 @@ public class Main {
 		// Initialise variables
 		auctioneerModel = new AuctioneerModel(gamsDir, gamsModel);
 		landholderModel = new LandholderModel();
+		extensionOffice = new ExtensionOffice();
+		extensionOffice.setPolicy(getVisitPolicy());
 		asl = new AgentStateList();
 		adc = new AgentDataContainer();
 
@@ -204,6 +212,9 @@ public class Main {
 				// set CSV file
 				Log.setCSV(csvInputFile);
 
+				// Conduct extension officer visits
+				extensionOffice.conductVisits(cycle);
+				
 				// Conduct the auction
 				auctioneerModel.conductAuction();
 
@@ -405,7 +416,7 @@ public class Main {
 		// connect the two systems and initialise
 		auctioneerModel.connect(landholderModel, adc, asl);
 		landholderModel.init(adc, asl, auctioneerModel, args);
-
+		extensionOffice.init(adc, agentIds);
 		// start the bdi system
 		landholderModel.start();
 	}
@@ -448,40 +459,40 @@ public class Main {
 				+ "  -a <agents>                           number of landholder agents (default is "
 				+ numLandholders
 				+ ")\n"
-				+ "  -bidAddon 							   the gap between defaultBids and increased bid number\n"
-				+ " 									   (default is "
+				+ "  -bidAddon                             the gap between defaultBids and increased bid number\n"
+				+ "                                        (default is "
 				+ getBidAddon()
 				+ ")\n"
 				+ "  -c <cycles>                           number of unique auctions to perform (default is "
 				+ cycles
 				+ ")\n"
-				+ "  -conservationEthicModifier 		   The factor used to increase and decrease conservation ethic barometer \n"
-				+ "										   of agents (default is "
+				+ "  -conservationEthicModifier            the factor used to increase and decrease conservation ethic barometer \n"
+				+ "                                        of agents (default is "
 				+ getConservationEthicModifier()
 				+ ")\n"
 				+ "  -conservationEthicSeed                seed value used when  generating conservation ethic barometer of agents\n"
-				+ "										   (default is "
+				+ "                                        (default is "
 				+ getConservationEthicSeed()
 				+ ")\n"
-				+ "  -defaultMaxNumberOfBids			   number of bids by default a normal agent make \n"
-				+ " 									   (default is "
+				+ "  -defaultMaxNumberOfBids               number of bids by default a normal agent make \n"
+				+ "                                        (default is "
 				+ getDefaultMaxNumberOfBids()
 				+ ")\n"
 				+ "  -gams_dir <dir>                       path to directory where GAMS is installed\n"
 				+ "  -gams_model <file>                    path to GAMS model to execute\n"
-				+ "  -globalRandomSeed					   seed of the global random variable used throughout the application\n"
-				+ " 									   (default is "
+				+ "  -globalRandomSeed                     seed of the global random variable used throughout the application\n"
+				+ "                                        (default is "
 				+ getGlobalRandomSeed()
 				+ ")\n"
 				+ "  -h                                    print this help message and exit\n"
-				+ "  -highCEAgentsPercentage			   percentage of agents having high conservation ethic \n"
-				+ " 									   (default is "
+				+ "  -highCEAgentsPercentage               percentage of agents having high conservation ethic \n"
+				+ "                                        (default is "
 				+ getHighCEAgentsPercentage()
 				+ ")\n"
 				+ "  -high_participation_prob              high participation probability (default is "
 				+ getHighParticipationProbability()
 				+ ")\n"
-				+ "  -highProfitRangeMinMargin 			   minimum margin of high profit percentage range (default is "
+				+ "  -highProfitRangeMinMargin             minimum margin of high profit percentage range (default is "
 				+ getHighProfitRangeMinMargin()
 				+ "\n"
 				+ "  -low_participation_prob               low participation probability (default is "
@@ -491,11 +502,11 @@ public class Main {
 				+ logLevel
 				+ ")\n"
 				+ "  -lower_threshold_c                    lower threshold for conservation ethic barometer to be low\n"
-				+ "										    (default is "
+				+ "                                        (default is "
 				+ getLowerThresholdC()
 				+ ")\n"
 				+ "  -lower_threshold_p                    lower threshold for profit motive barometer to be low (default is \n"
-				+ "										   "
+				+ "                                        "
 				+ getLowerThresholdP()
 				+ ")\n"
 				+ "  -max_c                                maximum value for conservation ethic barometer (default is "
@@ -504,26 +515,26 @@ public class Main {
 				+ "  -max_p                                maximum value for profit motivation barometer (default is "
 				+ getMaxProfitMotivation()
 				+ ")\n"
-				+ "  -medProfitRangeMinMargin			   minimum margin of medium profit range (default is "
+				+ "  -medProfitRangeMinMargin              minimum margin of medium profit range (default is "
 				+ getMedProfitRangeMinMargin()
 				+ "\n"
 				+ "  -p <pacakges>                         number of conservation packages to use (default is "
 				+ getNumberOfPackages()
 				+ "')\n"
-				+ "  -profitDifferenctial    			   the gap between low, medium and high profit percentage levels\n"
-				+ "										   (default is "
+				+ "  -profitDifferenctial                  the gap between low, medium and high profit percentage levels\n"
+				+ "                                        (default is "
 				+ getProfitDifferenctial()
 				+ ")\n"
-				+ "  -profitMotivationModifier	 		   The factor used to increase and decrease profit motive barometer \n"
-				+ "										   of agents (default is "
+				+ "  -profitMotivationModifier             the factor used to increase and decrease profit motive barometer \n"
+				+ "                                        of agents (default is "
 				+ getProfitMotivationModifier()
 				+ ")\n"
 				+ "  -profitMotivationSeed                 seed value used when  generating profit motive barometer of agents\n"
-				+ "										   (default is "
+				+ "                                        (default is "
 				+ getProfitMotivationSeed()
 				+ ")\n"
-				+ "  -profitVariability 				   the variability in low, medium and high profit ranges\n"
-				+ "										   (default is "
+				+ "  -profitVariability                    the variability in low, medium and high profit ranges\n"
+				+ "                                        (default is "
 				+ getProfitVariability()
 				+ ")\n"
 				+ "  -r <repeats>                          number of times to run the trading strategy (default is "
@@ -533,15 +544,24 @@ public class Main {
 				+ "                                        (default is "
 				+ getSocialNormUpdatePercentage()
 				+ ")\n"
-				+ "  -targetPercentage					   The percentage of maximum possible target (if all agents bid on the highest package)\n"
-				+ " 									   that should be assigned as the target (default is "
+				+ "  -targetPercentage                     The percentage of maximum possible target (if all agents bid on the highest package)\n"
+				+ "                                        that should be assigned as the target (default is "
 				+ getTargetPercentage()
+				+ ")\n"
+				+ "  -visitPolicy                          Extension office visiting policy\n"
+				+ "                                        one of: "+getVisitPolicyOptions()+"(default is "
+				+ getVisitPolicy()
+				+ ")\n"
+				+ "  -visitBoost                           Amount by which a landholder's conservation ethic is boosted (in absolute terms)\n"
+				+ "                                        by a visit from an extension officer (default is "
+				+ getVisitConservationEthicBoostValue()
 				+ ")\n"
 				+ "  -upper_threshold_c                    upper threshold for conservation ethic barometer to be high (default is "
 				+ getUpperThresholdC()
 				+ ")\n"
 				+ "  -upper_threshold_p                    upper threshold for profit motive barometer to be high (default is "
-				+ getUpperThresholdP() + ")\n";
+				+ getUpperThresholdP() + ")\n"
+				;
 	}
 
 	/**
@@ -925,6 +945,35 @@ public class Main {
 								+ "' is not in the format 'long'. Will "
 								+ "use the default of '"
 								+ getGlobalRandomSeed() + "'");
+					}
+				}
+				break;
+			case "-visitPolicy":
+				if (i + 1 < args.length) {
+					i++;
+					try {
+						setVisitPolicy(Policy.valueOf(args[i]));
+					} catch (Exception e) {
+						exit("Option value '"
+								+ args[i]
+								+ "' is not a valid visiting policy. Should be one of: "
+								+ getVisitPolicyOptions() + ". Will "
+								+ "use the default of '"
+								+ getVisitPolicy() + "'");
+					}
+				}
+				break;
+			case "-visitBoost":
+				if (i + 1 < args.length) {
+					i++;
+					try {
+						setVisitConservationEthicBoostValue(Double.parseDouble(args[i]));
+					} catch (Exception e) {
+						exit("Option value '"
+								+ args[i]
+								+ "' is not in the format 'double'. Will "
+								+ "use the default of '"
+								+ getVisitConservationEthicBoostValue() + "'");
 					}
 				}
 				break;
