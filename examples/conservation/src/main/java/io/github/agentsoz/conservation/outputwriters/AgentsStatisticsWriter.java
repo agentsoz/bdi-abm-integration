@@ -25,9 +25,13 @@ package io.github.agentsoz.conservation.outputwriters;
 import io.github.agentsoz.conservation.Log;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.TreeMap;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class writes statistics about agents to csv files. A separate file is
@@ -177,40 +181,39 @@ public class AgentsStatisticsWriter {
 	 */
 	public void flush() {
 		try {
-			FileWriter ceWriter = new FileWriter(
-					ConstantFileNames.getAgentsCEFileName(repeat));
+			GZIPOutputStream zip;
+			
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAgentsCEFileName(repeat)));
+			BufferedWriter ceWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(ceWriter, agentsCE);
 
-			FileWriter pmWriter = new FileWriter(
-					ConstantFileNames.getAgentsPmFile(repeat));
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAgentsPmFile(repeat)));
+			BufferedWriter pmWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(pmWriter, agentsPM);
 
-			FileWriter numOfBidsWriter = new FileWriter(
-					ConstantFileNames.getNumberOfBidsPerAgent(repeat));
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getNumberOfBidsPerAgent(repeat)));
+			BufferedWriter numOfBidsWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(numOfBidsWriter, numberOfBids);
 
-			FileWriter numOfSuccessBidsWriter = new FileWriter(
-					ConstantFileNames.getNumberOfSuccessfulBidsPerAgent(repeat));
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getNumberOfSuccessfulBidsPerAgent(repeat)));
+			BufferedWriter numOfSuccessBidsWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(numOfSuccessBidsWriter, numberOfSuccessfulBids);
 
-			FileWriter totalOpportunityCostWriter = new FileWriter(
-					ConstantFileNames.getTotalOpportunityCostPerAgent(repeat));
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getTotalOpportunityCostPerAgent(repeat)));
+			BufferedWriter totalOpportunityCostWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(totalOpportunityCostWriter, totalOpportunityCost);
 
-			FileWriter successOpportunityCostWriter = new FileWriter(
-					ConstantFileNames
-							.getSuccessfulOpportunityCostPerAgent(repeat));
-			writeAndClose(successOpportunityCostWriter,
-					totalOpportunityCostOfSuccessfulBids);
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getSuccessfulOpportunityCostPerAgent(repeat)));
+			BufferedWriter successOpportunityCostWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
+			writeAndClose(successOpportunityCostWriter, totalOpportunityCostOfSuccessfulBids);
 
-			FileWriter totalBidPricesWriter = new FileWriter(
-					ConstantFileNames.getTotalBidPricePerAgent(repeat));
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getTotalBidPricePerAgent(repeat)));
+			BufferedWriter totalBidPricesWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writeAndClose(totalBidPricesWriter, totalBidPrices);
 
-			FileWriter successBidPricesWriter = new FileWriter(
-					ConstantFileNames.getSuccessfulBidPricePerAgent(repeat));
-			writeAndClose(successBidPricesWriter,
-					totalBidPricesOfSuccessfulBids);
+			zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getSuccessfulBidPricePerAgent(repeat)));
+			BufferedWriter successBidPricesWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
+			writeAndClose(successBidPricesWriter, totalBidPricesOfSuccessfulBids);
 
 		} catch (IOException e) {
 			Log.error(e.getMessage());
@@ -225,7 +228,7 @@ public class AgentsStatisticsWriter {
 	 * @param writer
 	 * @param values
 	 */
-	private void writeAndClose(FileWriter writer,
+	private void writeAndClose(BufferedWriter writer,
 			TreeMap<Integer, TreeMap<String, Double>> values) {
 		try {
 			// append header

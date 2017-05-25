@@ -24,8 +24,12 @@ package io.github.agentsoz.conservation.outputwriters;
 
 import io.github.agentsoz.conservation.Log;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This output writer class is specially written to write information about the
@@ -37,7 +41,7 @@ public class LowCHighPStatistics {
 	/**
 	 * {@link FileWriter} instance
 	 */
-	private FileWriter writer;
+	private BufferedWriter writer;
 
 	/**
 	 * Current auction cycle number
@@ -71,8 +75,8 @@ public class LowCHighPStatistics {
 	 */
 	public void open(int repeat) {
 		try {
-			writer = new FileWriter(
-					ConstantFileNames.getLowCHighPStatFileName(repeat));
+			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getLowCHighPStatFileName(repeat)));
+			writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writer.append("agentId,cycle#,probability,totalNumberOfWinnings,totalNumberOfWinningsWithGoodProfit,goodProfit,participated\n");
 			writer.flush();
 

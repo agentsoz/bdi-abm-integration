@@ -64,8 +64,7 @@ public class ConstantFileNames {
 	private final static String SUCCESSFUL_BID_PRICE_PER_AGENT = "successful_bid_price_per_agent";
 
 	public static String getLowCHighPStatFileName(int repeatNumber) {
-		return LOWC_HIGHP_STAT_FILE + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return LOWC_HIGHP_STAT_FILE + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getConfigParametersFileName() {
@@ -73,27 +72,23 @@ public class ConstantFileNames {
 	}
 
 	public static String getAgentsProgressFileName(int repeatNumber) {
-		return AGENTS_PROGRESS_FILE_NAME + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return AGENTS_PROGRESS_FILE_NAME + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getAgentsStatsFileName(int repeatNumber) {
-		return AGENTS_STAT_FILE_NAME + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return AGENTS_STAT_FILE_NAME + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getAuctionStatsFileName(int repeatNumber) {
-		return AUCTIONS_STAT_FILE_NAME + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return AUCTIONS_STAT_FILE_NAME + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getInputParamsFileName(int repeatNumber) {
-		return INPUT_PARAMS_FILE_NAME + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return INPUT_PARAMS_FILE_NAME + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getBidsFileName(int repeatNumber) {
-		return BIDS_FILE_NAME + String.format("%03d", repeatNumber) + ".csv";
+		return BIDS_FILE_NAME + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getOutputLogFileName(int repeatNumber) {
@@ -106,40 +101,38 @@ public class ConstantFileNames {
 	}
 
 	public static String getAgentsCEFileName(int repeatNumber) {
-		return AGENTS_CE_FILE + String.format("%03d", repeatNumber) + ".csv";
+		return AGENTS_CE_FILE + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getAgentsPmFile(int repeatNumber) {
-		return AGENTS_PM_FILE + String.format("%03d", repeatNumber) + ".csv";
+		return AGENTS_PM_FILE + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getNumberOfBidsPerAgent(int repeatNumber) {
-		return NUMBER_OF_BIDS_PER_AGENT + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return NUMBER_OF_BIDS_PER_AGENT + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getNumberOfSuccessfulBidsPerAgent(int repeatNumber) {
 		return NUMBER_OF_SUCCESSFUL_BIDS_PER_AGENT
-				+ String.format("%03d", repeatNumber) + ".csv";
+				+ String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getTotalOpportunityCostPerAgent(int repeatNumber) {
 		return TOTAL_OPPORTUNITY_COST_PER_AGENT
-				+ String.format("%03d", repeatNumber) + ".csv";
+				+ String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getSuccessfulOpportunityCostPerAgent(int repeatNumber) {
 		return SUCCESSFUL_OPPORTUNITY_COST_PER_AGENT
-				+ String.format("%03d", repeatNumber) + ".csv";
+				+ String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getTotalBidPricePerAgent(int repeatNumber) {
-		return TOTAL_BID_PRICE_PER_AGENT + String.format("%03d", repeatNumber)
-				+ ".csv";
+		return TOTAL_BID_PRICE_PER_AGENT + String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 
 	public static String getSuccessfulBidPricePerAgent(int repeatNumber) {
 		return SUCCESSFUL_BID_PRICE_PER_AGENT
-				+ String.format("%03d", repeatNumber) + ".csv";
+				+ String.format("%03d", repeatNumber) + ".csv.gz";
 	}
 }

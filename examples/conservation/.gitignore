@@ -3,4 +3,6 @@ _gams_java_*
 *.csv
 *.log
 *.out
+*.csv.gz
+*.log.gz
 

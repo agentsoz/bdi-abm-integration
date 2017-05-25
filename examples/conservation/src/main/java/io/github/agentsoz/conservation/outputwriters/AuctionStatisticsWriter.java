@@ -28,14 +28,18 @@ import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.AuctionResultSet.AuctionResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Writes all statistics about each auction cycle to a output file named
@@ -69,7 +73,7 @@ public class AuctionStatisticsWriter {
 	/**
 	 * {@link FileWriter} instance
 	 */
-	private FileWriter auctionStatisticsWriter;
+	private BufferedWriter auctionStatisticsWriter;
 
 	/**
 	 * This is used allow some methods to be used by only by a single thread at
@@ -166,8 +170,8 @@ public class AuctionStatisticsWriter {
 	 */
 	public void open(int repeat, List<Landholder> agents) {
 		try {
-			auctionStatisticsWriter = new FileWriter(
-					ConstantFileNames.getAuctionStatsFileName(repeat));
+			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAuctionStatsFileName(repeat)));
+			auctionStatisticsWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			appendHeader();
 			addAuctionStatistics(0, null, agents, null, null, true);
 		} catch (IOException e) {

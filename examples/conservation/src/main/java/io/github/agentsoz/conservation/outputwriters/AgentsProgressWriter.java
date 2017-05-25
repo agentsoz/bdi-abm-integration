@@ -24,11 +24,15 @@ package io.github.agentsoz.conservation.outputwriters;
 
 import io.github.agentsoz.conservation.Log;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class generates an output file named "agents.progress.csv". The open
@@ -43,7 +47,7 @@ public class AgentsProgressWriter {
 	/**
 	 * {@link FileWriter} instance
 	 */
-	private FileWriter agentsInfoWriter;
+	private BufferedWriter agentsInfoWriter;
 
 	/**
 	 * All information about agents progress is stored in this TreeMap. Key
@@ -88,8 +92,8 @@ public class AgentsProgressWriter {
 	public void open(int repeat, int numberOfCycles) {
 		setNumberOfCycles(numberOfCycles);
 		try {
-			agentsInfoWriter = new FileWriter(
-					ConstantFileNames.getAgentsProgressFileName(repeat));
+			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAgentsProgressFileName(repeat)));
+			agentsInfoWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 		} catch (IOException e) {
 			Log.error(e.getMessage());
 		}

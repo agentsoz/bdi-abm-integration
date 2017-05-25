@@ -25,9 +25,13 @@ package io.github.agentsoz.conservation.outputwriters;
 import io.github.agentsoz.conservation.Log;
 import io.github.agentsoz.conservation.AuctionResultSet.AuctionResult;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Write a summary about;
@@ -44,12 +48,12 @@ public class AuctionSummaryWriter {
 	/**
 	 * {@link FileWriter} instance
 	 */
-	private FileWriter auctionSummary;
+	private BufferedWriter auctionSummary;
 
 	/**
 	 * Output file name
 	 */
-	private final String fileName = "auction.summary.log";
+	private final String fileName = "auction.summary.log.gz";
 
 	/**
 	 * Singleton instance of the class
@@ -68,7 +72,10 @@ public class AuctionSummaryWriter {
 	 */
 	private AuctionSummaryWriter() {
 		try {
-			auctionSummary = new FileWriter(fileName);
+			GZIPOutputStream zip = new GZIPOutputStream(
+		            new FileOutputStream(fileName));
+			auctionSummary = new BufferedWriter(
+					new OutputStreamWriter(zip, "UTF-8"));
 		} catch (IOException e) {
 			Log.error(e.getMessage());
 		}

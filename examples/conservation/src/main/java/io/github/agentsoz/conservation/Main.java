@@ -240,6 +240,7 @@ public class Main {
 			AuctionSummaryWriter.getInstance().close();
 			BidsWriter.getInstance().close();
 			LowCHighPStatistics.getInstance().close();
+			AuctionStatisticsWriter.getInstance().close();
 
 		} catch (Exception e) {
 			e.printStackTrace();

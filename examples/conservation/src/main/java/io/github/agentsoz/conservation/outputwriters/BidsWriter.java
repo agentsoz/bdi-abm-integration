@@ -25,11 +25,15 @@ package io.github.agentsoz.conservation.outputwriters;
 import io.github.agentsoz.conservation.Bid;
 import io.github.agentsoz.conservation.Log;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Write information about all bids to an output csv file named
@@ -42,7 +46,7 @@ public class BidsWriter {
 	/**
 	 * {@link FileWriter} instance
 	 */
-	private FileWriter writer;
+	private BufferedWriter writer;
 
 	/**
 	 * Current auction cycle number
@@ -82,7 +86,8 @@ public class BidsWriter {
 	public void init(int repeat) {
 		try {
 			cycleNumber = 0;
-			writer = new FileWriter(ConstantFileNames.getBidsFileName(repeat));
+			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getBidsFileName(repeat)));
+			writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			writer.append("agentId,cycle_number,bidNumber,packageId,bidPrice\n");
 			writer.flush();
 		} catch (IOException e) {
