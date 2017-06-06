@@ -25,17 +25,19 @@ package io.github.agentsoz.conservation.jill.agents;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.conservation.AuctionResultSet;
 import io.github.agentsoz.conservation.ConservationUtils;
+import io.github.agentsoz.conservation.ContractsList;
 import io.github.agentsoz.conservation.Global;
 import io.github.agentsoz.conservation.LandholderHistory;
 import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
+import io.github.agentsoz.conservation.LandholderHistory.BidResult;
+import io.github.agentsoz.conservation.Log;
 import io.github.agentsoz.conservation.jill.goals.AuctionResultGoal;
 import io.github.agentsoz.conservation.jill.goals.CallForBidsGoal;
 import io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal;
 import io.github.agentsoz.conservation.outputwriters.AuctionStatisticsWriter;
 import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.AgentInfo;
-import io.github.agentsoz.jill.util.Log;
 
 import java.io.PrintStream;
 
@@ -58,6 +60,11 @@ import com.google.gson.Gson;
 		})
 public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent {
 
+	/**
+	 * This agent's ID in the GAMS system
+	 */
+	private String gamsID;
+	
 	/**
 	 * Profit motive barometer of the land holder
 	 */
@@ -139,6 +146,11 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * number of successful, low profit bids made by the land holder
 	 */
 	private int lowProfitWinningBids;
+	
+	/**
+	 * list of all won contracts that this agent has ever had
+	 */
+	private ContractsList contracts;
 
 	/**
 	 * public constructor
@@ -147,7 +159,9 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 */
 	public Landholder(String name) {
 		super(name);
+		gamsID = name;
 		history = new LandholderHistory();
+		contracts = new ContractsList();
 		setMoveCEcategory(ConservationUtils.CategoryChanges.NONE);
 		setMovePMcategory(ConservationUtils.CategoryChanges.NONE);
 	}
@@ -160,7 +174,10 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * @param highCE
 	 */
 	public void init(double profitMotiveBarometer,
-			double conservationEthicBarometer, boolean highCE) {
+			double conservationEthicBarometer, boolean highCE, 
+			String bdiID, String gamsID) {
+		this.setName(bdiID);
+		this.gamsID = gamsID;
 		this.conservationEthicBarometer = conservationEthicBarometer;
 		this.profitMotiveBarometer = profitMotiveBarometer;
 		this.isConservationEthicHigh = highCE;
@@ -369,13 +386,21 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 		if (percept.equals(Global.percepts.AUCTION_RESULTS.toString())) {
 			Object[] inputs = (Object[]) params;
 			AuctionResultSet ars = (AuctionResultSet) inputs[0];
-			this.currentRound = history.registerAuctionRound(ars, getName());
+			this.currentRound = history.registerAuctionRound(ars, gamsID());
 
 			// Update auction statistics
 			if (currentRound.isWon()) {
 				AuctionStatisticsWriter.getInstance().addWinner(
 						isConservationEthicHigh(), isProfitMotivationHigh());
 			}
+			
+			// Record a new contract period if the agent has won
+			for(BidResult result : currentRound.getMyBids()) {
+				if (result.isWon()) {
+					contracts.addNew();
+				}
+			}
+
 
 			Log.debug("Agent " + getName() + " updated history: "
 					+ history.toString());
@@ -541,5 +566,17 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 */
 	public void increaseLowProfitWinningBids() {
 		this.lowProfitWinningBids++;
+	}
+	
+	/**
+	 * Returns this agent's list of contracts
+	 * @return
+	 */
+	public ContractsList getContracts() {
+		return contracts;
+	}
+	
+	public String gamsID() {
+		return gamsID;
 	}
 }

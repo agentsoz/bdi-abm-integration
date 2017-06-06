@@ -233,7 +233,7 @@ public class AgentsStatisticsWriter {
 		try {
 			// append header
 			writer.append("cycle_number");
-			for (int i = 1; i <= numOfAgents; i++) {
+			for (int i = 0; i < numOfAgents; i++) {
 				writer.append(",");
 				writer.append("agent" + i);
 			}
@@ -246,7 +246,7 @@ public class AgentsStatisticsWriter {
 
 				writer.append(Integer.toString(cycleNumber));
 
-				for (int i = 1; i <= numOfAgents; i++) {
+				for (int i = 0; i < numOfAgents; i++) {
 					writer.append(",");
 					writer.append(Double.toString(perAgentValues.get(Integer
 							.toString(i))));

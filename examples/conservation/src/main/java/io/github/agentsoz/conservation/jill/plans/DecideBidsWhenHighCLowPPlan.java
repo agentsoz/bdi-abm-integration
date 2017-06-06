@@ -133,27 +133,27 @@ public class DecideBidsWhenHighCLowPPlan extends Plan {
 
 					Bid bid = new Bid(packages[randomIndex].id, bidPrice);
 					selectedBids.add(bid);
-					Log.debug("Agent " + landholder.getName() + "(id:"
-							+ landholder.getId() + ") made a bid " + bid
+					Log.debug("Agent " + landholder.getName() + "(gams id:"
+							+ landholder.gamsID() + ") made a bid " + bid
 							+ ",opportunity cost:"
 							+ packages[randomIndex].opportunityCost
 							+ ",profit percentage" + profitPercentage);
 				}
 			}
 
-			Log.debug("Agent " + landholder.getName() + "(id:"
-					+ landholder.getId() + ") made " + selectedBids.size()
+			Log.debug("Agent " + landholder.getName() + "(gams id:"
+					+ landholder.gamsID() + ") made " + selectedBids.size()
 					+ " bids.");
 			// Update agent's progress info
 			AgentsProgressWriter.getInstance().addAgentsInfo(
 					landholder.getName(), "B");
 
 			// write bids to the output file
-			BidsWriter.getInstance().writeBids(landholder.getName(),
+			BidsWriter.getInstance().writeBids(landholder.gamsID(),
 					selectedBids);
 
 			// post the bids and wait for a response
-			post(new EnvironmentAction(Integer.toString(landholder.getId()),
+			post(new EnvironmentAction(landholder.getName(),
 					Global.actions.BID.toString(),
 					(Object[]) selectedBids.toArray()));
 

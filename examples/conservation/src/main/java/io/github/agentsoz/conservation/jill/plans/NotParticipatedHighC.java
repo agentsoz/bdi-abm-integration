@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Landholder's C is SLIGHTLY changed according to highest profit obtained by
  * winners.
@@ -50,6 +53,8 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class NotParticipatedHighC extends Plan {
+    final Logger logger = LoggerFactory.getLogger("conservation");
+
 	Landholder landholder;
 	UpdateConservationEthicGoal updateConservationEthicGoal;
 
@@ -100,7 +105,7 @@ public class NotParticipatedHighC extends Plan {
 				}
 
 				Collections.sort(profits);
-				Log.debug("Agent " + landholder.getName()
+				logger.debug("Agent " + landholder.getName()
 						+ "- highest profit which changes agents C is "
 						+ highestProfit + ", all profits:" + profits);
 
@@ -108,7 +113,7 @@ public class NotParticipatedHighC extends Plan {
 				double newC;
 				if (highestProfit > ConservationUtils
 						.getMediumProfitPercentage()) {
-					Log.debug("Agent " + landholder.getName()
+					logger.debug("Agent " + landholder.getName()
 							+ "Decrease agent's C since his highest profit ("
 							+ highestProfit
 							+ "%) is greater than medium profit percentage ("
@@ -122,7 +127,7 @@ public class NotParticipatedHighC extends Plan {
 					updateConsrvationEthicBarometer(newC, currentC);
 				} else {
 
-					Log.debug("Agent "
+					logger.debug("Agent "
 							+ landholder.getName()
 							+ "Did not change agent's C since his highest profit ("
 							+ highestProfit
@@ -140,7 +145,7 @@ public class NotParticipatedHighC extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		Log.debug("Agent " + landholder.getName() + " updated his C from "
+		logger.debug("Agent " + landholder.getName() + " updated his C from "
 				+ currentC + " to :" + newC + ", which is " + newStatus);
 	}
 }

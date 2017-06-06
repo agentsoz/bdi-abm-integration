@@ -44,7 +44,7 @@ public class Log {
 	
 	public static void open() {
 		// Create a new log file for this repeat
-		createLogger("", outFile);
+		createLogger("conservation", outFile);
 	}
 
 	public static void close() {

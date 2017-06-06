@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
+import io.github.agentsoz.conservation.jill.agents.Landholder;
 
 /**
  * Extension Office keeps track of its extension officers and their
@@ -99,12 +101,25 @@ public class ExtensionOffice {
 				" (policy is " + policy + "), so no visits conducted");
 			return;
 		}
-		Log.info("Extension office will conduct visits; cyle is "+ cycle + 
+		Log.info("Extension office will conduct visits; cycle is "+ cycle + 
 				" and policy is " + policy);
 
-		// Visit from extension officers
-		adc.getOrCreate("global").getPerceptContainer()
-		.put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), null);
+		// Winning and in-contract land holders will be visited by an extension officer
+		for (String name : visits.keySet()) {
+			// If the agent has at least one active contract]
+			Landholder agent = Main.getLandholder(name);
+			int active = agent.getContracts().activeCount(); 
+			if ( active > 0 ) {
+				Log.info("Agent "+name+" with contracts "+agent.getContracts()+" will be visited by extension officer" );
+				adc.getOrCreate(name).getPerceptContainer().put(
+						Global.percepts.EXTENSION_OFFICER_VISIT.toString(), 
+						null);
+				// Record the visit
+				visits.put(name, visits.get(name)+1);
+				// Decrement the contracts remaining time
+				agent.getContracts().decrementYearsLeftOnAllContracts();
+			}
+		}
 	}
 	
 	public void init(AgentDataContainer adc, String[] agents) {

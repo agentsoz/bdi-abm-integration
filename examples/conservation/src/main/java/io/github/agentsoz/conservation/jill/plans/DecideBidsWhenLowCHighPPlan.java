@@ -106,16 +106,16 @@ public class DecideBidsWhenLowCHighPPlan extends Plan {
 				if (profit >= referenceProfit) {
 					double bidPrice = profit + data[i].opportunityCost;
 					Bid bid = new Bid(data[i].id, bidPrice);
-					Log.debug("Agent " + landholder.getName() + "(id:"
-							+ landholder.getId() + ") made a bid " + bid
+					Log.debug("Agent " + landholder.getName() + "(gams id:"
+							+ landholder.gamsID() + ") made a bid " + bid
 							+ ",opportunity cost:" + data[i].opportunityCost
 							+ ",profit percentage" + profitPercentage);
 					selectedBids.add(bid);
 				}
 			}
 
-			Log.debug("Agent " + landholder.getName() + "(id:"
-					+ landholder.getId() + ") made " + selectedBids.size()
+			Log.debug("Agent " + landholder.getName() + "(gams id:"
+					+ landholder.gamsID() + ") made " + selectedBids.size()
 					+ " bids.");
 
 			// Update agent's progress info
@@ -123,11 +123,11 @@ public class DecideBidsWhenLowCHighPPlan extends Plan {
 					landholder.getName(), "C");
 
 			// write bids to the output file
-			BidsWriter.getInstance().writeBids(landholder.getName(),
+			BidsWriter.getInstance().writeBids(landholder.gamsID(),
 					selectedBids);
 
 			// post the bids and wait for a response
-			post(new EnvironmentAction(Integer.toString(landholder.getId()),
+			post(new EnvironmentAction(landholder.getName(),
 					Global.actions.BID.toString(),
 					(Object[]) selectedBids.toArray()));
 

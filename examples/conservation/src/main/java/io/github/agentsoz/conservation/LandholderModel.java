@@ -108,16 +108,21 @@ public class LandholderModel extends JillModel {
 
 		for (int i = 0; i < Main.numLandholders(); i++) {
 			Landholder landholder = (Landholder) getAgent(i);
-			landholder.setName(Integer.toString(i + 1));
 			if (highConsevationAgents > 0) {
 				landholder.init(randomPGenerator.nextDouble()
 						* ConservationUtils.getMaxProfitMotivation(),
-						getHighCoservationEthic(), true);
+						getHighCoservationEthic(), true, 
+						String.valueOf(i), // BDI Id
+						String.valueOf(i+1) // GAMS Id 
+						);
 				highConsevationAgents--;
 			} else {
 				landholder.init(randomPGenerator.nextDouble()
 						* ConservationUtils.getMaxProfitMotivation(),
-						getLowCoservationEthic(), false);
+						getLowCoservationEthic(), false, 
+						String.valueOf(i), // BDI Id
+						String.valueOf(i+1) // GAMS Id
+						);
 			}
 		}
 

@@ -123,8 +123,8 @@ public class DecideBidsWhenHighCHighPPlan extends Plan {
 							* (1 + profitPercentage / 100);
 					Bid bid = new Bid(data[randomIndex].id, bidPrice);
 
-					Log.debug("Agent " + landholder.getName() + "(id:"
-							+ landholder.getId() + ") made a bid " + bid
+					Log.debug("Agent " + landholder.getName() + "(gams id:"
+							+ landholder.gamsID() + ") made a bid " + bid
 							+ ",opportunity cost:"
 							+ data[randomIndex].opportunityCost
 							+ ",profit percentage" + profitPercentage);
@@ -133,8 +133,8 @@ public class DecideBidsWhenHighCHighPPlan extends Plan {
 				}
 			}
 
-			Log.debug("Agent " + landholder.getName() + "(id:"
-					+ landholder.getId() + ") made " + selectedBids.size()
+			Log.debug("Agent " + landholder.getName() + "(gams id:"
+					+ landholder.gamsID() + ") made " + selectedBids.size()
 					+ " bids.");
 
 			// Update agent's progress info
@@ -142,12 +142,13 @@ public class DecideBidsWhenHighCHighPPlan extends Plan {
 					landholder.getName(), "D");
 
 			// write bids to the output file
-			BidsWriter.getInstance().writeBids(landholder.getName(),
+			BidsWriter.getInstance().writeBids(landholder.gamsID(),
 					selectedBids);
 
 			// post the bids and wait for a response
-			post(new EnvironmentAction(Integer.toString(landholder.getId()),
-					Global.actions.BID.toString(), selectedBids.toArray()));
+			post(new EnvironmentAction(landholder.getName(),
+					Global.actions.BID.toString(), 
+					selectedBids.toArray()));
 
 			// Evaluate the response
 			Log.debug("Agent " + landholder.getName() + " finished action BID.");

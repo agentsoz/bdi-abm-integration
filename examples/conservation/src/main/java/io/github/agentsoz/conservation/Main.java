@@ -186,9 +186,9 @@ public class Main {
 
 			// save a reference to all agents
 			landholders = new ArrayList<Landholder>();
-			for (int i = 1; i <= numLandholders; i++) {
+			for (int i = 0; i < numLandholders; i++) {
 				landholders.add((Landholder) landholderModel
-						.getAgentByName(Integer.toString(i)));
+						.getAgent(i));
 			}
 
 			// set target
@@ -417,7 +417,10 @@ public class Main {
 		// connect the two systems and initialise
 		auctioneerModel.connect(landholderModel, adc, asl);
 		landholderModel.init(adc, asl, auctioneerModel, args);
+		
+		// initialise the extension office with the agents ids
 		extensionOffice.init(adc, agentIds);
+		
 		// start the bdi system
 		landholderModel.start();
 	}
@@ -1107,5 +1110,19 @@ public class Main {
 	 */
 	public static int numLandholders() {
 		return numLandholders;
+	}
+	
+	/**
+	 * Returns the landholder of the given name
+	 * @param name
+	 * @return
+	 */
+	protected static Landholder getLandholder(String name) {
+		for (Landholder agent : landholders) {
+			if (agent.getName().equals(name)) {
+				return agent;
+			}
+		}
+		return null;
 	}
 }
