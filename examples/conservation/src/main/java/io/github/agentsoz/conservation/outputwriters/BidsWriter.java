@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.outputwriters;
  */
 
 import io.github.agentsoz.conservation.Bid;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -35,6 +35,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Write information about all bids to an output csv file named
  * bids_<repeat>.csv
@@ -42,6 +45,8 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class BidsWriter {
+
+	final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	/**
 	 * {@link FileWriter} instance
@@ -91,7 +96,7 @@ public class BidsWriter {
 			writer.append("agentId,cycle_number,bidNumber,packageId,bidPrice\n");
 			writer.flush();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -120,7 +125,7 @@ public class BidsWriter {
 			writer.append(Double.toString(bid.price));
 			writer.append("\n");
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		} finally {
 			lock.unlock();
 		}
@@ -143,7 +148,7 @@ public class BidsWriter {
 		try {
 			writer.close();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 

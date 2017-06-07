@@ -24,7 +24,7 @@ package io.github.agentsoz.conservation.jill.plans;
 
 import io.github.agentsoz.conservation.ConservationUtils;
 import io.github.agentsoz.conservation.LandholderHistory;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.AgentsProgressWriter;
@@ -35,6 +35,9 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This plan is executed for land owners who have Low C and High P. Probability
@@ -48,6 +51,8 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class DecideParticipationWhenLowCHighPPlan extends Plan {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	Landholder landholder;
 
@@ -74,8 +79,6 @@ public class DecideParticipationWhenLowCHighPPlan extends Plan {
 			int totalNumberOfWinnings = 0;
 			int totalNumberOfGoodWinnings = 0;
 
-			Log.debug("Agent " + landholder.getName() + " Reference package:"
-					+ ConservationUtils.getReferencePackage());
 			double goodProfit = ConservationUtils.getReferencePackage().opportunityCost
 					* (ConservationUtils.getHighProfitPercentageRange()[0] / 100);
 
@@ -108,24 +111,13 @@ public class DecideParticipationWhenLowCHighPPlan extends Plan {
 				probability = 0;
 			}
 
-			Log.debug("Probability of agent " + landholder.getName()
-					+ " participate in auction is " + probability);
-
-			Log.debug("totalSuccessBids:" + totalNumberOfWinnings
-					+ " | withGoodProfit:" + totalNumberOfGoodWinnings
-					+ " | goodProfit:" + goodProfit + " | prob:" + probability);
-
 			if (ConservationUtils.getGlobalRandom().nextDouble() < probability) {
-				Log.debug("Agent " + landholder.getName()
-						+ " decided to participate in Auction");
 				landholder.setDecisionOnParticipation(true);
 				LowCHighPStatistics.getInstance().printEntry(
 						landholder.getName(), probability,
 						totalNumberOfWinnings, totalNumberOfGoodWinnings,
 						goodProfit, "yes");
 			} else {
-				Log.debug("Agent " + landholder.getName()
-						+ " decided *not* to participate in Auction");
 				landholder.setDecisionOnParticipation(false);
 				AgentsProgressWriter.getInstance().addAgentsInfo(
 						landholder.getName(), "C-np");
@@ -134,6 +126,16 @@ public class DecideParticipationWhenLowCHighPPlan extends Plan {
 						totalNumberOfWinnings, totalNumberOfGoodWinnings,
 						goodProfit, "no");
 			}
+
+			logger.debug(landholder.logprefix()
+					+ "reference package:" + ConservationUtils.getReferencePackage()
+					+ " totalSuccessBids:" + totalNumberOfWinnings
+					+ " withGoodProfit:" + totalNumberOfGoodWinnings
+					+ " goodProfit:" + goodProfit 
+					+ " participation probability:" + probability
+					+ " will participate?:"
+					+ landholder.getDecisionOnParticipation()
+					);
 		}
 	} };
 }

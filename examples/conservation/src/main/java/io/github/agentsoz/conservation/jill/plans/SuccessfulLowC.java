@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateConservationEthicGoal;
@@ -35,6 +35,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Land holder updates his C according to the profit he has gained.
@@ -54,6 +57,9 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class SuccessfulLowC extends Plan {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	UpdateConservationEthicGoal updateConservationEthicGoal;
 
@@ -103,7 +109,7 @@ public class SuccessfulLowC extends Plan {
 				}
 
 				Collections.sort(profits);
-				Log.debug("Agent " + landholder.getName()
+				logger.debug(landholder.logprefix()
 						+ "- highest profit which changes agents C is "
 						+ highestProfit + ", all profits:" + profits);
 
@@ -114,8 +120,7 @@ public class SuccessfulLowC extends Plan {
 
 				if (highestProfit > 0
 						&& highestProfit <= medProfitPercentageRange[1]) {
-					Log.debug("Agent "
-							+ landholder.getName()
+					logger.debug(landholder.logprefix()
 							+ " Decrease agent's C since his highest profit ("
 							+ highestProfit
 							+ "%) is greater than 0 and less than/equal the upper margin of medium profit percentage range ("
@@ -127,8 +132,7 @@ public class SuccessfulLowC extends Plan {
 											.getConservationEthicModifier());
 					updateConsrvationEthicBarometer(newC, currentC);
 				} else if (highestProfit > medProfitPercentageRange[1]) {
-					Log.debug("Agent "
-							+ landholder.getName()
+					logger.debug(landholder.logprefix()
 							+ " Increase agent's C since his highest profit ("
 							+ highestProfit
 							+ "%) is greater than the upper margin of medium profit percentage range ("
@@ -150,7 +154,7 @@ public class SuccessfulLowC extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		Log.debug("Agent " + landholder.getName() + " updated his C from "
-				+ currentC + " to :" + newC + ", which is " + newStatus);
+		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+				,landholder.logprefix(), currentC, newC, newStatus));
 	}
 }

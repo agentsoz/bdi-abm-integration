@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.outputwriters;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.AuctionResultSet.AuctionResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
@@ -40,6 +40,9 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writes all statistics about each auction cycle to a output file named
@@ -70,6 +73,9 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class AuctionStatisticsWriter {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * {@link FileWriter} instance
 	 */
@@ -175,7 +181,7 @@ public class AuctionStatisticsWriter {
 			appendHeader();
 			addAuctionStatistics(0, null, agents, null, null, true);
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -245,7 +251,7 @@ public class AuctionStatisticsWriter {
 			auctionStatisticsWriter.append("low_profit_winning_bids");
 			auctionStatisticsWriter.append("\n");
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -309,7 +315,7 @@ public class AuctionStatisticsWriter {
 						* 100 / totalOpportunityCostOfSuccessfulBids;
 			}
 
-			Log.debug("normalisedCost:" + normalizedCost
+			logger.debug("normalisedCost:" + normalizedCost
 					+ " | totalOppCostSuccBids:"
 					+ totalOpportunityCostOfSuccessfulBids
 					+ " | costOfSuccBids:" + costOfSuccessfulBids);
@@ -485,7 +491,7 @@ public class AuctionStatisticsWriter {
 				}
 
 			} else {
-				Log.warn("The agent " + agent + " is not a LandHolder.");
+				logger.warn("The agent " + agent + " is not a LandHolder.");
 			}
 		}
 
@@ -761,7 +767,7 @@ public class AuctionStatisticsWriter {
 			auctionStatisticsWriter.flush();
 
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 
 	}

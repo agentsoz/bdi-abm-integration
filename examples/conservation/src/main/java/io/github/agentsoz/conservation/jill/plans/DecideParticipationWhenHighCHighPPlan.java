@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.AgentsProgressWriter;
 import io.github.agentsoz.jill.lang.Agent;
@@ -33,6 +33,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This plan is executed for land owners who have High C and High P. The land
  * owners who come here have high probability of participating in auction. The
@@ -41,6 +44,9 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class DecideParticipationWhenHighCHighPPlan extends Plan {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 
 	public DecideParticipationWhenHighCHighPPlan(Agent agent, Goal goal,
@@ -64,23 +70,21 @@ public class DecideParticipationWhenHighCHighPPlan extends Plan {
 
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
-			Log.debug("Agent " + landholder.getName()
-					+ " Probability of agent " + landholder.getName()
-					+ " participate in auction is "
-					+ ConservationUtils.getHighParticipationProbability());
-
 			if (ConservationUtils.getGlobalRandom().nextDouble() < ConservationUtils
 					.getHighParticipationProbability()) {
-				Log.debug("Agent " + landholder.getName()
-						+ " decided to participate in Auction");
 				landholder.setDecisionOnParticipation(true);
 			} else {
-				Log.debug("Agent " + landholder.getName()
-						+ " decided *not* to participate in Auction");
 				landholder.setDecisionOnParticipation(false);
 				AgentsProgressWriter.getInstance().addAgentsInfo(
 						landholder.getName(), "D-np");
 			}
+			logger.debug(landholder.logprefix()
+					+ "participation probability:"
+					+ ConservationUtils.getHighParticipationProbability()
+					+ " will participate?:"
+					+ landholder.getDecisionOnParticipation()
+					);
+
 		}
 	} };
 }

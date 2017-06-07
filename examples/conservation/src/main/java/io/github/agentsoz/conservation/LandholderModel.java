@@ -29,6 +29,9 @@ import io.github.agentsoz.conservation.jill.agents.Landholder;
 
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.agentsoz.abmjill.JillModel;
 
 /**
@@ -37,7 +40,10 @@ import io.github.agentsoz.abmjill.JillModel;
  * @author Sewwandi Perera
  */
 public class LandholderModel extends JillModel {
-	/**
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
+    /**
 	 * This random generator is used when dicing each agent's Conservation Ethic
 	 * barometer.
 	 */
@@ -136,7 +142,7 @@ public class LandholderModel extends JillModel {
 		}
 		if (Math.round(ConservationUtils.getHighCEAgentsPercentage()
 				* Main.numLandholders() / 100) != numHighCEAgents) {
-			Log.error("High CE Agents Percentage is not correctly set. Configured:"
+			logger.error("High CE Agents Percentage is not correctly set. Configured:"
 					+ ConservationUtils.getHighCEAgentsPercentage()
 					+ " Found:"
 					+ numHighCEAgents);

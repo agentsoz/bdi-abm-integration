@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateConservationEthicGoal;
@@ -35,6 +35,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Land holder updates his C according to the profit he has gained.
@@ -55,7 +58,9 @@ import java.util.HashMap;
  */
 public class SuccessfulHighC extends Plan {
 
-	Landholder landholder;
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
+    Landholder landholder;
 	UpdateConservationEthicGoal updateConservationEthicGoal;
 
 	public SuccessfulHighC(Agent agent, Goal goal, String name) {
@@ -103,7 +108,7 @@ public class SuccessfulHighC extends Plan {
 				}
 
 				Collections.sort(profits);
-				Log.debug("Agent " + landholder.getName()
+				logger.debug(landholder.logprefix()
 						+ "- highest profit which changes agents C is "
 						+ highestProfit + ", all profits:" + profits);
 				double currentC = landholder.getConservationEthicBarometer();
@@ -113,7 +118,7 @@ public class SuccessfulHighC extends Plan {
 
 				if (highestProfit > 0
 						&& highestProfit <= medProfitPercentageRange[1]) {
-					Log.debug("Agent "
+					logger.debug("Agent "
 							+ landholder.getName()
 							+ " Decrease agent's C since his highest profit ("
 							+ highestProfit
@@ -126,7 +131,7 @@ public class SuccessfulHighC extends Plan {
 											.getConservationEthicModifier());
 					updateConsrvationEthicBarometer(newC, currentC);
 				} else if (highestProfit > medProfitPercentageRange[1]) {
-					Log.debug("Agent "
+					logger.debug("Agent "
 							+ landholder.getName()
 							+ " Increase agent's C since his highest profit ("
 							+ highestProfit
@@ -149,7 +154,7 @@ public class SuccessfulHighC extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		Log.debug("Agent " + landholder.getName() + " updated his C from "
+		logger.debug(landholder.logprefix() + " updated his C from "
 				+ currentC + " to :" + newC + ", which is " + newStatus);
 	}
 }

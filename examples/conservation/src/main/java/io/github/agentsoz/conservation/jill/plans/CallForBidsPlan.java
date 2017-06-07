@@ -24,10 +24,13 @@ package io.github.agentsoz.conservation.jill.plans;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.agentsoz.abmjill.genact.EnvironmentAction;
 import io.github.agentsoz.conservation.Bid;
 import io.github.agentsoz.conservation.Global;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.CallForBidsGoal;
 import io.github.agentsoz.conservation.jill.goals.DecideBidsGoal;
@@ -51,6 +54,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 		"io.github.agentsoz.conservation.jill.goals.DecideParticipationGoal",
 		"io.github.agentsoz.abmjill.genact.EnvironmentAction" })
 public class CallForBidsPlan extends Plan {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	CallForBidsGoal callForBidsGoal;
 
@@ -108,8 +114,7 @@ public class CallForBidsPlan extends Plan {
 						Global.actions.BID.toString(), new Bid[0]));
 
 				// Evaluate the response
-				Log.debug("Agent " + landholder.getName()
-						+ " finished action BID.");
+				logger.debug(landholder.logprefix() + "finished action BID.");
 			}
 		}
 	} };

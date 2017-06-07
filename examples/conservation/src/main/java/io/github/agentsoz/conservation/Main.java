@@ -44,7 +44,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.LoggerFactory;
+
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 
 /**
  * Main class of the conservation application
@@ -54,6 +61,14 @@ import ch.qos.logback.classic.Level;
 public class Main {
 
 	// Defaults
+
+	/**
+	 *  Logger details
+	 */
+	public final static String LOGGER_NAME = "conservation";
+	private static Level logLevel = Level.INFO;
+	private static Logger logger;
+	
 	/**
 	 * How many time the same serias of auction cycles should be ran. Here, one
 	 * test can have many repeats. One repeat can have many auction cycles.
@@ -83,11 +98,6 @@ public class Main {
 	 * command-line argument : "-gams_dir"
 	 */
 	private static String gamsDir = null;
-
-	/**
-	 * Log level
-	 */
-	private static Level logLevel = Level.INFO;
 
 	/**
 	 * This value is set based on the number of land holders and the
@@ -179,6 +189,7 @@ public class Main {
 		while (repeat < repeats) {
 			repeat++;
 			// init all output writers for the repeat
+			createLogger(repeat);
 			initOutputWriters(repeat);
 
 			// initialise the agents
@@ -199,8 +210,11 @@ public class Main {
 			AuctionStatisticsWriter.getInstance().open(repeat, landholders);
 
 			for (cycle = 1; cycle <= cycles; cycle++) {
-				Log.info("Started the auction cycle " + cycle
-						+ " in the repeat " + repeat);
+				logger.info("================================================");
+				logger.info("START auction cycle:" 
+						+ cycle
+						+ " repeat:" + repeat
+						);
 
 				// Set cycle number in output writers
 				BidsWriter.getInstance().setCycleNumber(cycle);
@@ -210,7 +224,7 @@ public class Main {
 				createGamsFiles(repeat, cycle);
 
 				// set CSV file
-				Log.setCSV(csvInputFile);
+				auctioneerModel.setGAMSInputFile(csvInputFile);
 
 				// Conduct extension officer visits
 				extensionOffice.conductVisits(cycle);
@@ -222,12 +236,7 @@ public class Main {
 				publishAuctionSummary(repeat, cycle);
 				publishAgentsStats(cycle);
 				publishAuctionStats(cycle);
-
-				Log.info("Completed the auction cycle " + cycle
-						+ " in the repeat " + repeat);
 			}
-			// Close the output file
-			Log.close();
 		}
 		t1 = System.currentTimeMillis();
 
@@ -247,7 +256,7 @@ public class Main {
 		}
 
 		// report how long the test took
-		Log.info("Finished running " + repeats + " repeats of " + cycles
+		logger.info("Finished running " + repeats + " repeats of " + cycles
 				+ " auctions (" + (t1 - t0) + " ms)");
 
 		System.exit(0);
@@ -260,10 +269,6 @@ public class Main {
 	 * @param repeat
 	 */
 	private static void initOutputWriters(int repeat) {
-		// Create a new log file for this repeat
-		Log.setLog(ConstantFileNames.getOutputLogFileName(repeat), logLevel);
-		Log.open();
-
 		// Output writers
 		AgentsStatisticsWriter.getInstance().open(repeat, numLandholders);
 		AgentsProgressWriter.getInstance().open(repeat, cycles);
@@ -296,7 +301,7 @@ public class Main {
 			AuctionSummaryWriter.getInstance().writeSummary(repeat, cycle,
 					auctioneerModel.getLatestAuctionResultSet().getResultSet());
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -355,7 +360,7 @@ public class Main {
 			}
 		}
 
-		Log.debug("Target percentage : " + getTargetPercentage());
+		logger.debug("Target percentage : " + getTargetPercentage());
 
 		maxMalleefowls = (int) (maxMalleefowls * numLandholders
 				* getTargetPercentage() / 100);
@@ -382,12 +387,12 @@ public class Main {
 			targetFileWriter.flush();
 			targetFileWriter.close();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 
 		target = maxMalleefowls + " " + maxPhascogales + " " + maxPythons;
 
-		Log.info("Target [mallefowls:" + maxMalleefowls + ", phascogales:"
+		logger.info("Target [mallefowls:" + maxMalleefowls + ", phascogales:"
 				+ maxPhascogales + ", pythons:" + maxPythons + "]");
 	}
 
@@ -1068,7 +1073,7 @@ public class Main {
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -1125,4 +1130,25 @@ public class Main {
 		}
 		return null;
 	}
+	
+	private static void createLogger(int repeat) {
+	       LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+	       PatternLayoutEncoder ple = new PatternLayoutEncoder();
+	       //ple.setPattern("%date %level [%thread] %logger{10} [%file:%line]%n%msg%n%n");
+	       ple.setPattern("%-5level  %thread  %file:%line || %msg%n");
+	       ple.setContext(lc);
+	       ple.start();
+	       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
+	       fileAppender.setFile(ConstantFileNames.getOutputLogFileName(repeat));
+	       fileAppender.setEncoder(ple);
+	       fileAppender.setAppend(false);
+	       fileAppender.setContext(lc);
+	       fileAppender.start();
+	       logger = (Logger) LoggerFactory.getLogger(LOGGER_NAME);
+	       logger.detachAndStopAllAppenders(); // detach console (doesn't seem to work)
+	       logger.addAppender(fileAppender); // attach file appender
+	       logger.setLevel(logLevel);
+	       logger.setAdditive(true); /* set to true if root should log too */
+	 }
+
 }

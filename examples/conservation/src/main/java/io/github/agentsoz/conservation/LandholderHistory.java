@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 
 /**
@@ -38,6 +41,8 @@ import com.google.gson.Gson;
  * @author Sewwandi Perera
  */
 public class LandholderHistory {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	/**
 	 * Maximum number of records that should be stored in the history. When
@@ -88,7 +93,7 @@ public class LandholderHistory {
 
 		if (newRound.winnersInfo.size() != 0) {
 
-			Log.debug("Has winners, saved the auction round in the history");
+			//slogger.debug("Agent " + agentName + " saved auction round: " + newRound);
 			// The new auction round is stored in to the history only if it is a
 			// successful auction round.
 			resultsHistory.add(newRound);
@@ -97,7 +102,7 @@ public class LandholderHistory {
 				packages.remove(0);
 			}
 		} else {
-			Log.debug("No winners, so not saved the auction round to the history");
+			logger.debug("Agent " + agentName + "did not save auction round as there were no winners");
 		}
 		return newRound;
 	}

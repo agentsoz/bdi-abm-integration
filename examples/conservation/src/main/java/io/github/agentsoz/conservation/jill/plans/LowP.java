@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateProfitMotivationGoal;
@@ -35,6 +35,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * After receiving the results of the auction, every land holder updates his
@@ -52,6 +55,9 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class LowP extends Plan {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	UpdateProfitMotivationGoal updateProfitMotivationGoal;
 
@@ -80,7 +86,7 @@ public class LowP extends Plan {
 			// used only for logging
 			ArrayList<Double> profits = new ArrayList<Double>();
 
-			if (null != winningBids) {
+			if (winningBids != null && !winningBids.isEmpty()) {
 				double highestProfit = 0;
 				double winningPrice = 0;
 
@@ -101,9 +107,9 @@ public class LowP extends Plan {
 				}
 
 				Collections.sort(profits);
-				Log.debug("Agent " + landholder.getName()
-						+ "- highest profit which changes agents C is "
-						+ highestProfit + ", all profits:" + profits);
+				logger.debug(landholder.logprefix()
+						+ "all profits:" + profits + ", highest:" 
+						+ highestProfit);
 
 				if (highestProfit >= ConservationUtils.getLowProfitPercentage() / 100) {
 					// agent’s P = P * (1 + |profit| * agentAttributeModifier);
@@ -120,9 +126,8 @@ public class LowP extends Plan {
 							.isProfitMotivationHigh(newP));
 					String newStatus = (landholder.isProfitMotivationHigh()) ? "high"
 							: "low";
-					Log.debug("Agent " + landholder.getName()
-							+ " updated his P from " + currentP + " to :"
-							+ newP + ", which is " + newStatus);
+					logger.debug(String.format("%supdated PM %.1f=>%.1f, which is %s"
+							,landholder.logprefix(), currentP, newP, newStatus));
 				}
 			}
 		}

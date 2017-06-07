@@ -30,10 +30,15 @@ import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.ConstantFileNames;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdigams.GAMSModel;
 
@@ -43,6 +48,8 @@ import io.github.agentsoz.bdigams.GAMSModel;
  * @author Sewwandi Perera
  */
 public class AuctioneerModel extends GAMSModel {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	/**
 	 * {@link LandholderModel} instance
@@ -75,6 +82,11 @@ public class AuctioneerModel extends GAMSModel {
 	public enum AuctionState {
 		NOT_STARTED, VISIT_BY_EXTENSION_OFFICER, CALL_FOR_BIDS_SEND, RESULTS_SENT, ENDED,
 	}
+
+	/**
+	 * Input CSV file for GAMS, used to send bids to the GAMS system
+	 */
+	private String gamsInputFile = null;
 
 	/**
 	 * Public Constructor
@@ -182,7 +194,7 @@ public class AuctioneerModel extends GAMSModel {
 		Object[] inputs = new Object[2];
 
 		if (bids.isEmpty()) {
-			Log.warn("No bids made for the auction round ");
+			logger.warn("No bids made for the auction round ");
 			latestResultSet = new AuctionResultSet(null);
 		} else {
 			// Call GAMS with the input
@@ -221,8 +233,8 @@ public class AuctioneerModel extends GAMSModel {
 		for (String bid : bids) {
 			bidstr += "\n" + bid.toString();
 		}
-		Log.debug("Running GAMS with input:\n" + bidstr);
-		Log.csvWrite(bidstr);
+		logger.debug("Running GAMS with input:\n" + bidstr);
+		writeGAMSInputFile(bidstr);
 
 		// Run GAMS here
 		ArrayList<String> output = new ArrayList<String>();
@@ -281,5 +293,20 @@ public class AuctioneerModel extends GAMSModel {
 	 */
 	public void setAsl(AgentStateList asl) {
 		this.asl = asl;
+	}
+
+
+	public void writeGAMSInputFile(String s) {
+		try {
+			PrintWriter csv = new PrintWriter(new FileWriter(gamsInputFile, false), true);
+			csv.println(s);
+			csv.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setGAMSInputFile(String file) {
+		gamsInputFile = file;
 	}
 }

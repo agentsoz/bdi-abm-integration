@@ -22,8 +22,6 @@ package io.github.agentsoz.conservation.outputwriters;
  * #L%
  */
 
-import io.github.agentsoz.conservation.Log;
-
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -33,6 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.github.agentsoz.conservation.Main;
 
 /**
  * This class generates an output file named "agents.progress.csv". The open
@@ -44,6 +47,9 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class AgentsProgressWriter {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * {@link FileWriter} instance
 	 */
@@ -95,7 +101,7 @@ public class AgentsProgressWriter {
 			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAgentsProgressFileName(repeat)));
 			agentsInfoWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -155,7 +161,7 @@ public class AgentsProgressWriter {
 			agentsInfoWriter.flush();
 			close();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -172,7 +178,7 @@ public class AgentsProgressWriter {
 
 			agentsInfoWriter.append("\n");
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -188,7 +194,7 @@ public class AgentsProgressWriter {
 			agentsInfoWriter.append("DecideBidsWhenHighCHighP,D\n");
 			agentsInfoWriter.append("Not Participated,np\n");
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 
 	}

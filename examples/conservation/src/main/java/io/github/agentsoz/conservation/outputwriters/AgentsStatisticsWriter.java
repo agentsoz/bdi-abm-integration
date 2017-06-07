@@ -1,5 +1,7 @@
 package io.github.agentsoz.conservation.outputwriters;
 
+import io.github.agentsoz.conservation.Main;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -22,7 +24,6 @@ package io.github.agentsoz.conservation.outputwriters;
  * #L%
  */
 
-import io.github.agentsoz.conservation.Log;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 
 import java.io.BufferedWriter;
@@ -32,6 +33,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class writes statistics about agents to csv files. A separate file is
@@ -65,6 +69,9 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class AgentsStatisticsWriter {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * Current repeat
 	 */
@@ -216,7 +223,7 @@ public class AgentsStatisticsWriter {
 			writeAndClose(successBidPricesWriter, totalBidPricesOfSuccessfulBids);
 
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 
 	}
@@ -258,7 +265,7 @@ public class AgentsStatisticsWriter {
 			writer.close();
 
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 
 	}

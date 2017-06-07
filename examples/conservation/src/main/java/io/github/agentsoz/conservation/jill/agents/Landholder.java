@@ -31,7 +31,7 @@ import io.github.agentsoz.conservation.LandholderHistory;
 import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.goals.AuctionResultGoal;
 import io.github.agentsoz.conservation.jill.goals.CallForBidsGoal;
 import io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal;
@@ -40,6 +40,9 @@ import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.AgentInfo;
 
 import java.io.PrintStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -59,6 +62,10 @@ import com.google.gson.Gson;
 		"io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal"
 		})
 public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent {
+
+    private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+    private String logprefix = "";
+
 
 	/**
 	 * This agent's ID in the GAMS system
@@ -176,6 +183,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	public void init(double profitMotiveBarometer,
 			double conservationEthicBarometer, boolean highCE, 
 			String bdiID, String gamsID) {
+	    logprefix = "Agent " + getName() + ": ";
 		this.setName(bdiID);
 		this.gamsID = gamsID;
 		this.conservationEthicBarometer = conservationEthicBarometer;
@@ -183,8 +191,10 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 		this.isConservationEthicHigh = highCE;
 		this.isProfitMotivationHigh = isProfitMotivationHigh(this.profitMotiveBarometer);
 		decisionOnParticipation = false;
-		Log.debug("Agent " + getName() + " initialised with C:"
-				+ conservationEthicBarometer + " P:" + profitMotiveBarometer);
+		logger.debug(String.format("%sinit CE:%.1f, PM:%.1f",
+				logprefix(),
+				conservationEthicBarometer, 
+				profitMotiveBarometer));
 	}
 
 	/**
@@ -381,7 +391,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 */
 	@Override
 	public void handlePercept(String percept, Object params) {
-		Log.debug("Agent " + getName() + " received percept " + percept
+		logger.debug(logprefix() + "received percept " + percept
 				+ ": " + new Gson().toJson(params));
 		if (percept.equals(Global.percepts.AUCTION_RESULTS.toString())) {
 			Object[] inputs = (Object[]) params;
@@ -402,7 +412,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 			}
 
 
-			Log.debug("Agent " + getName() + " updated history: "
+			logger.trace(logprefix() + " updated history: "
 					+ history.toString());
 			post(new AuctionResultGoal(percept, currentRound,
 					(double) inputs[1]));
@@ -578,5 +588,16 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	
 	public String gamsID() {
 		return gamsID;
+	}
+	
+	public String logprefix() {
+		return logprefix;
+	}
+	
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+	    logprefix = "Agent " + getName() + ": ";
+
 	}
 }

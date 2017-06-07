@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 
 /**
@@ -38,6 +41,8 @@ import com.google.gson.Gson;
  * @author Sewwandi Perera
  */
 public class AuctionResultSet {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	/**
 	 * This identifier is used when reading out.CSV file to skip the lines which
@@ -125,15 +130,15 @@ public class AuctionResultSet {
 			}
 
 		} catch (FileNotFoundException e) {
-			Log.error("ERROR:" + e.getMessage());
+			logger.error("ERROR:" + e.getMessage());
 		} catch (IOException e) {
-			Log.error("ERROR:" + e.getMessage());
+			logger.error("ERROR:" + e.getMessage());
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					Log.error("ERROR:" + e.getMessage());
+					logger.error("ERROR:" + e.getMessage());
 				}
 			}
 		}

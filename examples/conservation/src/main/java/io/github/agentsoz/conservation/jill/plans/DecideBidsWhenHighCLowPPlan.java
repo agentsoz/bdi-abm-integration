@@ -25,7 +25,7 @@ package io.github.agentsoz.conservation.jill.plans;
 import io.github.agentsoz.conservation.Bid;
 import io.github.agentsoz.conservation.ConservationUtils;
 import io.github.agentsoz.conservation.Global;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.Package;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.DecideBidsGoal;
@@ -41,6 +41,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.agentsoz.abmjill.genact.EnvironmentAction;
 
 /**
@@ -52,6 +55,9 @@ import io.github.agentsoz.abmjill.genact.EnvironmentAction;
  */
 @PlanInfo(postsGoals = { "io.github.agentsoz.abmjill.genact.EnvironmentAction" })
 public class DecideBidsWhenHighCLowPPlan extends Plan {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	DecideBidsGoal decideBidsGoal;
 
@@ -122,28 +128,22 @@ public class DecideBidsWhenHighCLowPPlan extends Plan {
 							+ (lowProfitPercentageRange[1] - lowProfitPercentageRange[0])
 							* ConservationUtils.getGlobalRandom().nextDouble();
 
-					Log.debug("Agent " + landholder.getName()
-							+ ":Low profit percentage range:["
-							+ lowProfitPercentageRange[0] + ","
-							+ lowProfitPercentageRange[1]
-							+ "], profitPercentage:" + profitPercentage);
-
 					double bidPrice = packages[randomIndex].opportunityCost
 							* (1 + profitPercentage / 100);
 
 					Bid bid = new Bid(packages[randomIndex].id, bidPrice);
+					logger.debug(landholder.logprefix()
+							+ "low profit% range:["
+							+ lowProfitPercentageRange[0] + ","
+							+ lowProfitPercentageRange[1] + "]" 
+							+ " selected%:" + String.format("%.1f",profitPercentage)
+							+ " prepared bid:" + bid
+							+ " opportunity cost:" + packages[randomIndex].opportunityCost
+							);
 					selectedBids.add(bid);
-					Log.debug("Agent " + landholder.getName() + "(gams id:"
-							+ landholder.gamsID() + ") made a bid " + bid
-							+ ",opportunity cost:"
-							+ packages[randomIndex].opportunityCost
-							+ ",profit percentage" + profitPercentage);
 				}
 			}
 
-			Log.debug("Agent " + landholder.getName() + "(gams id:"
-					+ landholder.gamsID() + ") made " + selectedBids.size()
-					+ " bids.");
 			// Update agent's progress info
 			AgentsProgressWriter.getInstance().addAgentsInfo(
 					landholder.getName(), "B");
@@ -152,13 +152,18 @@ public class DecideBidsWhenHighCLowPPlan extends Plan {
 			BidsWriter.getInstance().writeBids(landholder.gamsID(),
 					selectedBids);
 
+			logger.debug(landholder.logprefix() 
+					+ "(gams id:" + landholder.gamsID() + ")"
+					+ " submitted #bids:" + selectedBids.size()
+					+ " and waiting");
+
 			// post the bids and wait for a response
 			post(new EnvironmentAction(landholder.getName(),
 					Global.actions.BID.toString(),
 					(Object[]) selectedBids.toArray()));
 
 			// Evaluate the response
-			Log.debug("Agent " + landholder.getName() + " finished action BID.");
+			logger.debug(landholder.logprefix() + "finished action BID.");
 		}
 	} };
 

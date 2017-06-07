@@ -27,8 +27,11 @@ package io.github.agentsoz.conservation.jill.plans;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.MeetExtensionOfficerGoal;
 import io.github.agentsoz.jill.lang.Agent;
@@ -41,6 +44,8 @@ import io.github.agentsoz.jill.lang.PlanStep;
  *
  */
 public class MeetExtensionOfficerPlan extends Plan {
+
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	Landholder landholder;
 	MeetExtensionOfficerGoal meetExtensionOfficerGoal;
@@ -80,8 +85,8 @@ public class MeetExtensionOfficerPlan extends Plan {
 					.isConservationEthicHigh(newC));
 				String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 					: "low";
-				Log.warn("Agent " + landholder.getName() + " updated his C from "
-					+ currentC + " to :" + newC + ", which is " + newStatus);
+				logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+						,landholder.logprefix(), currentC, newC, newStatus));
 			}
 		} 
 	};

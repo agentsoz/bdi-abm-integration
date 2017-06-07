@@ -26,6 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
@@ -39,6 +42,8 @@ import io.github.agentsoz.conservation.jill.agents.Landholder;
  */
 public class ExtensionOffice {
 	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * Extension office visiting policy. The impact of a visit on a landholder
 	 * is an increase in her conservation ethics baromaeter value, as determined
@@ -84,7 +89,7 @@ public class ExtensionOffice {
 	public void setPolicy(int start, int frequency, int end) {
 		VisitPolicy p = new VisitPolicy(start, frequency, end); 
 		if (start < 0 || end < start || frequency < 1) {
-			Log.warn("Extension Office received invalid visits policy" + p + "; will ignore");
+			logger.warn("Extension Office received invalid visits policy" + p + "; will ignore");
 			return;
 		}
 		policy = p;
@@ -97,11 +102,11 @@ public class ExtensionOffice {
 				policy.getFrequency() == 0 || 
 				(cycle-policy.getStartCycle())%policy.getFrequency() != 0) 
 		{
-			Log.info("Cycle "+cycle+" not an extension office visit round" + 
+			logger.info("Cycle "+cycle+" not an extension office visit round" + 
 				" (policy is " + policy + "), so no visits conducted");
 			return;
 		}
-		Log.info("Extension office will conduct visits; cycle is "+ cycle + 
+		logger.info("Extension office will conduct visits; cycle is "+ cycle + 
 				" and policy is " + policy);
 
 		// Winning and in-contract land holders will be visited by an extension officer
@@ -110,7 +115,7 @@ public class ExtensionOffice {
 			Landholder agent = Main.getLandholder(name);
 			int active = agent.getContracts().activeCount(); 
 			if ( active > 0 ) {
-				Log.info("Agent "+name+" with contracts "+agent.getContracts()+" will be visited by extension officer" );
+				logger.info("Agent "+name+" with contracts "+agent.getContracts()+" will be visited by extension officer" );
 				adc.getOrCreate(name).getPerceptContainer().put(
 						Global.percepts.EXTENSION_OFFICER_VISIT.toString(), 
 						null);

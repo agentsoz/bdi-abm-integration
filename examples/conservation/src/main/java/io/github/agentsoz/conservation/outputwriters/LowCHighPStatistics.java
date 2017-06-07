@@ -22,7 +22,7 @@ package io.github.agentsoz.conservation.outputwriters;
  * #L%
  */
 
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.zip.GZIPOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This output writer class is specially written to write information about the
  * behaviour of LowCHighP category
@@ -38,6 +41,9 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class LowCHighPStatistics {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * {@link FileWriter} instance
 	 */
@@ -81,7 +87,7 @@ public class LowCHighPStatistics {
 			writer.flush();
 
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -129,7 +135,7 @@ public class LowCHighPStatistics {
 			writer.append(participated);
 			writer.append("\n");
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -140,7 +146,7 @@ public class LowCHighPStatistics {
 		try {
 			writer.close();
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 }

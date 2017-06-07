@@ -1,5 +1,7 @@
 package io.github.agentsoz.conservation.outputwriters;
 
+import io.github.agentsoz.conservation.Main;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -22,7 +24,6 @@ package io.github.agentsoz.conservation.outputwriters;
  * #L%
  */
 
-import io.github.agentsoz.conservation.Log;
 import io.github.agentsoz.conservation.AuctionResultSet.AuctionResult;
 
 import java.io.BufferedWriter;
@@ -32,6 +33,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.zip.GZIPOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Write a summary about;
@@ -45,6 +49,9 @@ import java.util.zip.GZIPOutputStream;
  * @author Sewwandi Perera
  */
 public class AuctionSummaryWriter {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	/**
 	 * {@link FileWriter} instance
 	 */
@@ -77,7 +84,7 @@ public class AuctionSummaryWriter {
 			auctionSummary = new BufferedWriter(
 					new OutputStreamWriter(zip, "UTF-8"));
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			logger.error(e.getMessage());
 		}
 	}
 

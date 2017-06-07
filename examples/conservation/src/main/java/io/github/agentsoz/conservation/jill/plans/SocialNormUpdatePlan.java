@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.SocialNormUpdateGoal;
 import io.github.agentsoz.jill.lang.Agent;
@@ -32,6 +32,9 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * All landholders executes this plan to adjust their conservation ethic
@@ -48,6 +51,9 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class SocialNormUpdatePlan extends Plan {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	SocialNormUpdateGoal socialNormUpdateGoal;
 
@@ -79,8 +85,9 @@ public class SocialNormUpdatePlan extends Plan {
 				newC = myC + (averageC - myC)
 						* ConservationUtils.getSocialNormUpdatePercentage()
 						/ 100;
-				Log.debug("avgCE:" + averageC + " | myC:" + myC + " | newC:"
-						+ newC + " | update%:"
+				logger.debug(landholder.logprefix() 
+						+ "average social CE:" + averageC 
+						+ " social norm update%:"
 						+ ConservationUtils.getSocialNormUpdatePercentage());
 				updateConsrvationEthicBarometer(newC, myC);
 			}
@@ -93,9 +100,8 @@ public class SocialNormUpdatePlan extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		Log.debug("SOCIAL NORM UPDATE: Agent " + landholder.getName()
-				+ " updated his C from " + currentC + " to :" + newC
-				+ ", which is " + newStatus);
+		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+				,landholder.logprefix(), currentC, newC, newStatus));
 	}
 
 }

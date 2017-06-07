@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Log;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateConservationEthicGoal;
@@ -35,6 +35,9 @@ import io.github.agentsoz.jill.lang.PlanStep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Landholder's C is decreased according to the highest profit obtained by
@@ -49,6 +52,9 @@ import java.util.HashMap;
  * @author Sewwandi Perera
  */
 public class NotParticipatedLowC extends Plan {
+	
+    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+
 	Landholder landholder;
 	UpdateConservationEthicGoal updateConservationEthicGoal;
 
@@ -78,7 +84,7 @@ public class NotParticipatedLowC extends Plan {
 			// This is used only for logging purposes
 			ArrayList<Double> profits = new ArrayList<Double>();
 
-			if (null != winningBids) {
+			if (winningBids != null && !winningBids.isEmpty()) {
 				double highestProfit = 0;
 				double winningPrice = 0;
 
@@ -99,27 +105,27 @@ public class NotParticipatedLowC extends Plan {
 				}
 
 				Collections.sort(profits);
-				Log.debug("Agent " + landholder.getName()
-						+ "- highest profit which changes agents C is "
-						+ highestProfit + ", all profits:" + profits);
+				logger.debug(landholder.logprefix()
+						+ "all profits:" + profits + ", highest:" 
+						+ highestProfit);
 
 				double currentC = landholder.getConservationEthicBarometer();
 				double newC;
 				if (highestProfit > 0) {
-					Log.debug("Agent " + landholder.getName()
-							+ " Decrease agent's C since his highest profit ("
-							+ highestProfit + "%) is greater than 0.");
-
 					newC = currentC
 							* (1 - (Math.abs(highestProfit) / 100)
 									* ConservationUtils
 											.getConservationEthicModifier());
 					updateConsrvationEthicBarometer(newC, currentC);
+					logger.debug(landholder.logprefix()
+							+ "CE decreased as highest profit% ("
+							+ String.format("%.1f", highestProfit)
+							+ ") is greater than 0.");
+
 				} else {
-					Log.debug("Agent "
-							+ landholder.getName()
-							+ " Did not change agent's C since his highest profit ("
-							+ highestProfit + "%) is not greater than 0.");
+					logger.debug(landholder.logprefix()
+							+ "CE unchanged as highest profit% ("
+							+ highestProfit + ") is not greater than 0");
 				}
 			}
 		}
@@ -131,8 +137,8 @@ public class NotParticipatedLowC extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		Log.debug("Agent " + landholder.getName() + " updated his C from "
-				+ currentC + " to :" + newC + ", which is " + newStatus);
+		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+				,landholder.logprefix(), currentC, newC, newStatus));
 	}
 
 }
