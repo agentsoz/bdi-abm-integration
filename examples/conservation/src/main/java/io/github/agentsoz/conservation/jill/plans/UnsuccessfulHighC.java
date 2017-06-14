@@ -115,24 +115,28 @@ public class UnsuccessfulHighC extends Plan {
 				double currentC = landholder.getConservationEthicBarometer();
 				double newC;
 				if (highestProfit < 0) {
-					logger.debug(landholder.logprefix()
-							+ " Decrease agent's C since his highest profit ("
-							+ highestProfit + ") is less than 0");
 					newC = currentC
 							- ConservationUtils
 									.getStaticConservationEthicModifier();
 
 					updateConsrvationEthicBarometer(newC, currentC);
-				} else {
 					logger.debug(landholder.logprefix()
-							+ " Decrease agent's C linearly since his highest profit ("
-							+ highestProfit + ") is not less than 0");
-
-					newC = currentC
-							* (1 - Math.abs(highestProfit / 100)
-									* ConservationUtils
-											.getConservationEthicModifier());
+							+ "CE decreased as highest profit% ("
+							+ String.format("%.1f", highestProfit)
+							+ ") is less than 0");
+				} else {
+					//newC = currentC
+					//		* (1 - Math.abs(highestProfit / 100)
+					//				* ConservationUtils
+					//						.getConservationEthicModifier());
+					double y = ConservationUtils.sigmoid_normalised_100(highestProfit);
+					double deltaCE = (currentC>=100.0) ? 0.1 : (100 - currentC) * y;
+					newC = currentC - deltaCE;
 					updateConsrvationEthicBarometer(newC, currentC);
+					logger.debug(landholder.logprefix()
+							+ "CE decreased as highest profit% ("
+							+ String.format("%.1f", highestProfit)
+							+ ") is not less than 0");
 				}
 			}
 		}

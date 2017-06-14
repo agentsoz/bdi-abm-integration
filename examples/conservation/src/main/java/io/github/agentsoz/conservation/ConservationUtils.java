@@ -559,4 +559,10 @@ public class ConservationUtils {
 		visitConservationEthicBoostValue = val;
 	}
 
+	public static double sigmoid_normalised_100(double x) {
+		final double a = 0.1;
+		final double c = 50;
+		return 1/(1 + Math.exp(-a*(x-c)));
+	}
+
 }
