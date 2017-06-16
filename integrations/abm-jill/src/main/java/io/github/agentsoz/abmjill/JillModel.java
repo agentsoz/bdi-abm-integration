@@ -37,10 +37,8 @@ import io.github.agentsoz.jill.core.GlobalState;
 import io.github.agentsoz.jill.util.Log;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -58,22 +56,9 @@ public abstract class JillModel implements BDIServerInterface {
 	public JillModel() {
 	}
 
-	public Agent getAgent(int id) {
+	public static Agent getAgent(int id) {
+		// FIXME: No contract that says returned object will be instanceof Agent
 		return (Agent) GlobalState.agents.get(id);
-	}
-
-	public Agent getAgentByName(String agentName) {
-		return (Agent) GlobalState.agents.find(agentName);
-	}
-
-	public List<Agent> getAllAgents() {
-		List<Agent> agents = new ArrayList<Agent>();
-
-		for (int i = 0; i < GlobalState.agents.size(); i++) {
-			agents.add((Agent) GlobalState.agents.get(i));
-		}
-
-		return agents;
 	}
 
 	@Override
@@ -110,7 +95,7 @@ public abstract class JillModel implements BDIServerInterface {
 	public static void packageAgentAction(String agentID, String actionID,
 			Object[] parameters) {
 		
-		((Agent) GlobalState.agents.get(Integer.valueOf(agentID))).packageAction(actionID, parameters);
+		getAgent(Integer.valueOf(agentID)).packageAction(actionID, parameters);
 
 		ActionContainer ac = nextContainer.getOrCreate(agentID)
 				.getActionContainer();
@@ -167,8 +152,7 @@ public abstract class JillModel implements BDIServerInterface {
 				String gPerceptID = gme.getKey();
 				Object gParameters = gme.getValue();
 				for (int i = 0; i < GlobalState.agents.size(); i++) {
-					((Agent) GlobalState.agents.get(i)).handlePercept(
-							gPerceptID, gParameters);
+					getAgent(i).handlePercept(gPerceptID, gParameters);
 				}
 			}
 		}
@@ -194,8 +178,7 @@ public abstract class JillModel implements BDIServerInterface {
 					Object parameters = pc.read(perceptID);
 					try {
 						int id = Integer.parseInt(entry.getKey());
-						((Agent) GlobalState.agents.get(id)).handlePercept(
-								perceptID, parameters);
+						getAgent(id).handlePercept(perceptID, parameters);
 					} catch (Exception e) {
 						Log.error("While sending percept to Agent "
 								+ entry.getKey() + ": " + e.getMessage());
@@ -219,8 +202,7 @@ public abstract class JillModel implements BDIServerInterface {
 					ActionContent content = new ActionContent(params, state, actionID);
 					try {
 						int id = Integer.parseInt(entry.getKey());
-						((Agent) GlobalState.agents.get(id)).updateAction(
-								actionID, content);
+						getAgent(id).updateAction(actionID, content);
 					} catch (Exception e) {
 						Log.error("While updating action status for Agent "
 								+ entry.getKey() + ": " + e.getMessage());
