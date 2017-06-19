@@ -9,6 +9,7 @@
 import sys
 import csv
 import sqlite3
+import gzip
 from common import opengz_maybe, gz_maybe   # common.py routines
 
 class MyArgs:
@@ -36,28 +37,28 @@ def extract(logpath):
 
 def mktables(curs, logpath):
 	for index, item in enumerate(filenames):
-        	f = open(logpath + item)
+        	f = gzip.open(logpath + item + ".gz")
 		row = f.readline()
 		cmd="CREATE TABLE " + tablenames[index] + " (sample,replicate," + row + ",PRIMARY KEY (sample,replicate" + primarykeycolumns[index] + "));"
 		curs.execute(cmd)
 
 def insert(curs, logpath, sample, replicate):
 	for index, item in enumerate(filenames):
-        	f = open(logpath + item)
+        	f = gzip.open(logpath + item + ".gz")
 		##skip the header row
 		f.readline();
 		reader = csv.reader(f)
 		for row in reader:
 			## Import row data into database
 			cmd="INSERT INTO " + tablenames[index] + " VALUES ('"  + str(sample) + "','" + str(replicate) + "','" + "','".join(row) + "')"
-			curs.execute(cmd)	
+			curs.execute(cmd)
 
 conn = sqlite3.connect(args.EXPERIMENT_DIR + '/output.db')
 curs = conn.cursor()
 
 for sample in range(1, SAMPLES + 1):
 	for replicate in range(1, REPLICATES + 1):
-		logpath= args.EXPERIMENT_DIR + '/log/archive-%(sample)i-%(replicate)i/'%{'sample':sample, 'replicate':replicate}		
+		logpath= args.EXPERIMENT_DIR + '/log/archive-%(sample)i-%(replicate)i/'%{'sample':sample, 'replicate':replicate}
 		if (sample == 1) and (replicate == 1) :
 			mktables(curs, logpath)
 		insert(curs, logpath, sample, replicate)
