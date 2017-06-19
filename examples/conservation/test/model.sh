@@ -55,7 +55,7 @@ agents:
  ]
 }"'
 
-CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 100 -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -conservationEthicModifier ${1} -profitMotivationModifier ${2} -socialNormUpdatePercentage ${3} -highCEAgentsPercentage ${4} -targetPercentage 12 -high_participation_prob 0.8 -low_participation_prob 0.3 -staticConservationEthicModifier 0.25 -staticProfitMotivationModifier 0.25 -conservationEthicSeed ${CE_SEED} -profitMotivationSeed ${PM_SEED} -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} --config ${CFG}"
+CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 30 -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -conservationEthicModifier ${1} -profitMotivationModifier ${2} -socialNormUpdatePercentage ${3} -highCEAgentsPercentage ${4} -targetPercentage 12 -high_participation_prob 0.8 -low_participation_prob 0.3 -staticConservationEthicModifier 0.25 -staticProfitMotivationModifier 0.25 -conservationEthicSeed ${CE_SEED} -profitMotivationSeed ${PM_SEED} -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} --config ${CFG}"
 
 echo "Started at " `date`
 echo $CMD; eval $CMD
