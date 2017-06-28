@@ -239,11 +239,7 @@ public class AgentsStatisticsWriter {
 			TreeMap<Integer, TreeMap<String, Double>> values) {
 		try {
 			// append header
-			writer.append("cycle_number");
-			for (int i = 0; i < numOfAgents; i++) {
-				writer.append(",");
-				writer.append("agent" + i);
-			}
+			writer.append("cycle_number,agentId,value");
 			writer.append("\n");
 
 			// append values
@@ -251,14 +247,11 @@ public class AgentsStatisticsWriter {
 				TreeMap<String, Double> perAgentValues = values
 						.get(cycleNumber);
 
-				writer.append(Integer.toString(cycleNumber));
-
+				String sCycle = Integer.toString(cycleNumber);
 				for (int i = 0; i < numOfAgents; i++) {
-					writer.append(",");
-					writer.append(Double.toString(perAgentValues.get(Integer
-							.toString(i))));
+					String sAgent = Integer.toString(i);
+					writer.append(String.format("%03d,%04d,%07.3f\n", cycleNumber, i, perAgentValues.get(sAgent)));
 				}
-				writer.append("\n");
 			}
 
 			writer.flush();
