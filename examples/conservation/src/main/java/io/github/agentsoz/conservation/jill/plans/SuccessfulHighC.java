@@ -113,19 +113,22 @@ public class SuccessfulHighC extends Plan {
 						+ highestProfit + ", all profits:" + profits);
 				double currentC = landholder.getConservationEthicBarometer();
 				double newC;
-				double y = ConservationUtils.sigmoid_normalised_100(highestProfit);
-				double deltaCE = (currentC>=100.0) ? 0.1 : (100 - currentC) * y;
-
+				double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+				
 				double[] medProfitPercentageRange = ConservationUtils
 						.getMediumProfitPercentageRange();
 
 				if (highestProfit > 0
 						&& highestProfit <= medProfitPercentageRange[1]) {
-					newC = currentC
-							* (1 - Math.abs(highestProfit/100)
-									* ConservationUtils
-											.getConservationEthicModifier());
-					newC = currentC - deltaCE;
+					//newC = currentC
+					//		* (1 - Math.abs(highestProfit/100)
+					//				* ConservationUtils
+					//						.getConservationEthicModifier());
+					//newC = currentC - deltaCE;
+					double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+					newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+
 					updateConsrvationEthicBarometer(newC, currentC);
 					logger.debug(landholder.logprefix()
 							+ "CE decreased as highest profit% ("
@@ -133,11 +136,14 @@ public class SuccessfulHighC extends Plan {
 							+ ") is greater than 0 and less than/equal the upper margin of medium profit% range ("
 							+ medProfitPercentageRange[1] + ")");
 				} else if (highestProfit > medProfitPercentageRange[1]) {
-					newC = currentC
-							* (1 + Math.abs(highestProfit/100)
-									* ConservationUtils
-											.getConservationEthicModifier());
-					newC = currentC + deltaCE;
+					//newC = currentC
+					//		* (1 + Math.abs(highestProfit/100)
+					//				* ConservationUtils
+					//						.getConservationEthicModifier());
+					//newC = currentC + deltaCE;
+					double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+					newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+					
 					updateConsrvationEthicBarometer(newC, currentC);
 					logger.debug(landholder.logprefix()
 							+ "CE increased as highest profit% ("
@@ -155,7 +161,8 @@ public class SuccessfulHighC extends Plan {
 				.isConservationEthicHigh(newC));
 		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 				: "low";
-		logger.debug(landholder.logprefix() + " updated his C from "
-				+ currentC + " to :" + newC + ", which is " + newStatus);
+		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+				,landholder.logprefix(), currentC, newC, newStatus));
+
 	}
 }

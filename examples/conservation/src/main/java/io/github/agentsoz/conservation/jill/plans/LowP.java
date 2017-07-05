@@ -114,10 +114,14 @@ public class LowP extends Plan {
 				if (highestProfit >= ConservationUtils.getLowProfitPercentage() / 100) {
 					// agent’s P = P * (1 + |profit| * agentAttributeModifier);
 					double currentP = landholder.getProfitMotiveBarometer();
-					double newP = currentP
-							* (1 + Math.abs(highestProfit)
-									* ConservationUtils
-											.getProfitMotivationModifier());
+					//double newP = currentP
+					//		* (1 + Math.abs(highestProfit)
+					//				* ConservationUtils
+					//						.getProfitMotivationModifier());
+					double deltaX = ConservationUtils.getSigmoidMaxStepX();
+					double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentP/100);
+					double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+					double newP = 100*ConservationUtils.sigmoid_normalised_100(newX);
 
 					// Finally, update land holder's P and recalculate whether
 					// his P is high or low.

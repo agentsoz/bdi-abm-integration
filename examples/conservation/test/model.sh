@@ -4,10 +4,13 @@
 
 
 ### Begin user config
-
-# Set number of agents and number of packages
-NUMAGENTS=${6} # 100 agents, or set to 10 if using GAMS in demo mode
+NUMAGENTS=${1} # 100 agents, or set to 10 if using GAMS in demo mode
+highCEAgentsPercentage=${2}
+targetPercentage=${3}
+sigmoidMaxStepX=${4}
 NUMPACKAGES=26 # 26 packages, or set to 5 if running GAMS in demo mode
+
+
 
 # Set the following variable to point to the root of your GAMS installation, for instance,
 GAMS_DIR=
@@ -55,7 +58,7 @@ agents:
  ]
 }"'
 
-CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 30 -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -conservationEthicModifier ${1} -profitMotivationModifier ${2} -socialNormUpdatePercentage ${3} -highCEAgentsPercentage ${4} -targetPercentage ${5} -high_participation_prob 0.8 -low_participation_prob 0.3 -staticConservationEthicModifier 0.25 -staticProfitMotivationModifier 0.25 -conservationEthicSeed ${CE_SEED} -profitMotivationSeed ${PM_SEED} -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} --config ${CFG}"
+CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c 30 -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -highCEAgentsPercentage ${highCEAgentsPercentage} -targetPercentage ${targetPercentage} -high_participation_prob 0.8 -low_participation_prob 0.3 -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} -visitPolicy NEVER -sigmoidMaxStepX ${sigmoidMaxStepX} -- --config ${CFG}"
 
 echo "Started at " `date`
 echo $CMD; eval $CMD

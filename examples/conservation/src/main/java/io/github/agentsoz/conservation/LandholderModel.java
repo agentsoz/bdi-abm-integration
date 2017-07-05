@@ -66,9 +66,9 @@ public class LandholderModel extends JillModel {
 	public LandholderModel() {
 		super();
 		randomCGenerator = new Random(
-				ConservationUtils.getConservationEthicSeed());
+				ConservationUtils.getGlobalRandomSeed());
 		randomPGenerator = new Random(
-				ConservationUtils.getProfitMotivationSeed());
+				ConservationUtils.getGlobalRandomSeed());
 		highConsevationAgents = -1;
 	}
 

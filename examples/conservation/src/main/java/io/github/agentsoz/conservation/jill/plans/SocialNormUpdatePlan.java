@@ -82,13 +82,19 @@ public class SocialNormUpdatePlan extends Plan {
 			double newC;
 
 			if (averageC > myC) {
-				newC = myC + (averageC - myC)
-						* ConservationUtils.getSocialNormUpdatePercentage()
-						/ 100;
-				logger.debug(landholder.logprefix() 
-						+ "average social CE:" + averageC 
-						+ " social norm update%:"
-						+ ConservationUtils.getSocialNormUpdatePercentage());
+				//newC = myC + (averageC - myC)
+				//		* ConservationUtils.getSocialNormUpdatePercentage()
+				//		/ 100;
+				double deltaX = (averageC/100) * ConservationUtils.getSigmoidMaxStepX();
+				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(myC/100);
+				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+				newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+				logger.debug(landholder.logprefix()
+						+ "CE increased as average social norm ("
+						+ String.format("%.1f", averageC)
+						+ ") is greater than agent's CE ("
+						+ String.format("%.1f", myC)
+						+ ")");
 				updateConsrvationEthicBarometer(newC, myC);
 			}
 		}

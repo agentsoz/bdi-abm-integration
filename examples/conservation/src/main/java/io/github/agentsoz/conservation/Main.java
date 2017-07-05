@@ -193,7 +193,9 @@ public class Main {
 			initOutputWriters(repeat);
 
 			// initialise the agents
-			initialiseSimulation(args);
+			String[] jillargs = new String[args.length-getJillArgsIndex()];
+			System.arraycopy(args, getJillArgsIndex(), jillargs, 0, jillargs.length);
+			initialiseSimulation(jillargs);
 
 			// save a reference to all agents
 			landholders = new ArrayList<Landholder>();
@@ -475,14 +477,6 @@ public class Main {
 				+ "  -c <cycles>                           number of unique auctions to perform (default is "
 				+ cycles
 				+ ")\n"
-				+ "  -conservationEthicModifier            the factor used to increase and decrease conservation ethic barometer \n"
-				+ "                                        of agents (default is "
-				+ getConservationEthicModifier()
-				+ ")\n"
-				+ "  -conservationEthicSeed                seed value used when  generating conservation ethic barometer of agents\n"
-				+ "                                        (default is "
-				+ getConservationEthicSeed()
-				+ ")\n"
 				+ "  -defaultMaxNumberOfBids               number of bids by default a normal agent make \n"
 				+ "                                        (default is "
 				+ getDefaultMaxNumberOfBids()
@@ -503,7 +497,7 @@ public class Main {
 				+ ")\n"
 				+ "  -highProfitRangeMinMargin             minimum margin of high profit percentage range (default is "
 				+ getHighProfitRangeMinMargin()
-				+ "\n"
+				+ ")\n"
 				+ "  -low_participation_prob               low participation probability (default is "
 				+ getLowParticipationProbability()
 				+ ")\n"
@@ -534,14 +528,6 @@ public class Main {
 				+ "                                        (default is "
 				+ getProfitDifferenctial()
 				+ ")\n"
-				+ "  -profitMotivationModifier             the factor used to increase and decrease profit motive barometer \n"
-				+ "                                        of agents (default is "
-				+ getProfitMotivationModifier()
-				+ ")\n"
-				+ "  -profitMotivationSeed                 seed value used when  generating profit motive barometer of agents\n"
-				+ "                                        (default is "
-				+ getProfitMotivationSeed()
-				+ ")\n"
 				+ "  -profitVariability                    the variability in low, medium and high profit ranges\n"
 				+ "                                        (default is "
 				+ getProfitVariability()
@@ -549,9 +535,9 @@ public class Main {
 				+ "  -r <repeats>                          number of times to run the trading strategy (default is "
 				+ repeats
 				+ ")\n"
-				+ "  -socialNormUpdatePercentage           the percentage increased in agents' CE as a result of social norm\n"
-				+ "                                        (default is "
-				+ getSocialNormUpdatePercentage()
+				+ "  -sigmoidMaxStepX                      Limits the amount by which the sigmoid function value can change in one step\n"
+				+ "                                        by limiting the max change in x by this vlue (default is "
+				+ getSigmoidMaxStepX()
 				+ ")\n"
 				+ "  -targetPercentage                     The percentage of maximum possible target (if all agents bid on the highest package)\n"
 				+ "                                        that should be assigned as the target (default is "
@@ -561,15 +547,15 @@ public class Main {
 				+ "                                        one of: "+getVisitPolicyOptions()+"(default is "
 				+ getVisitPolicy()
 				+ ")\n"
-				+ "  -visitBoost                           Amount by which a landholder's conservation ethic is boosted (in absolute terms)\n"
-				+ "                                        by a visit from an extension officer (default is "
-				+ getVisitConservationEthicBoostValue()
-				+ ")\n"
 				+ "  -upper_threshold_c                    upper threshold for conservation ethic barometer to be high (default is "
 				+ getUpperThresholdC()
 				+ ")\n"
 				+ "  -upper_threshold_p                    upper threshold for profit motive barometer to be high (default is "
-				+ getUpperThresholdP() + ")\n"
+				+ getUpperThresholdP() 
+				+ ")\n"
+				+ "  --                                    all arguments following '--' are passed to the Jill BDI engine"
+				+ getUpperThresholdP() 
+				+ "\n"
 				;
 	}
 
@@ -647,32 +633,6 @@ public class Main {
 						exit("Could not parse repeats value '" + args[i]
 								+ "'. Will use the default of '" + repeats
 								+ "'");
-					}
-				}
-				break;
-			case "-conservationEthicSeed":
-				if (i + 1 < args.length) {
-					i++;
-					try {
-						setConservationEthicSeed(Long.parseLong(args[i]));
-					} catch (Exception e) {
-						exit("Option value '" + args[i]
-								+ "' is not in the format 'int:int'. Will "
-								+ "use the default of '"
-								+ getConservationEthicSeed() + "'");
-					}
-				}
-				break;
-			case "-profitMotivationSeed":
-				if (i + 1 < args.length) {
-					i++;
-					try {
-						setProfitMotivationSeed(Long.parseLong(args[i]));
-					} catch (Exception e) {
-						exit("Option value '" + args[i]
-								+ "' is not in the format 'int:int'. Will "
-								+ "use the default of '"
-								+ getProfitMotivationSeed() + "'");
 					}
 				}
 				break;
@@ -804,21 +764,6 @@ public class Main {
 					}
 				}
 				break;
-			case "-socialNormUpdatePercentage":
-				if (i + 1 < args.length) {
-					i++;
-					try {
-						setSocialNormUpdatePercentage(Double
-								.parseDouble(args[i]));
-					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getSocialNormUpdatePercentage() + "'");
-					}
-				}
-				break;
 			case "-profitDifferenctial":
 				if (i + 1 < args.length) {
 					i++;
@@ -870,35 +815,6 @@ public class Main {
 								+ "' is not in the format 'double:double'. Will "
 								+ "use the default of '"
 								+ getProfitVariability() + "'");
-					}
-				}
-				break;
-			case "-conservationEthicModifier":
-				if (i + 1 < args.length) {
-					i++;
-					try {
-						setConservationEthicModifier(Double
-								.parseDouble(args[i]));
-					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getConservationEthicModifier() + "'");
-					}
-				}
-				break;
-			case "-profitMotivationModifier":
-				if (i + 1 < args.length) {
-					i++;
-					try {
-						setProfitMotivationModifier(Double.parseDouble(args[i]));
-					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getProfitMotivationModifier() + "'");
 					}
 				}
 				break;
@@ -972,22 +888,30 @@ public class Main {
 					}
 				}
 				break;
-			case "-visitBoost":
+			case "-sigmoidMaxStepX":
 				if (i + 1 < args.length) {
 					i++;
 					try {
-						setVisitConservationEthicBoostValue(Double.parseDouble(args[i]));
+						setSigmoidMaxStepX(Double.parseDouble(args[i]));
 					} catch (Exception e) {
 						exit("Option value '"
 								+ args[i]
 								+ "' is not in the format 'double'. Will "
 								+ "use the default of '"
-								+ getVisitConservationEthicBoostValue() + "'");
+								+ getSigmoidMaxStepX() + "'");
 					}
 				}
 				break;
+			case "--":
+				setJillArgsIndex(i);
+				// stop processing args any further
+				i = args.length;
+				break;
 			case "-h":
 				exit(null);
+			default:
+				exit("Unknown argument: " + args[i]);
+				break;
 			}
 
 			// print all configurable parameters to a output file
@@ -1011,11 +935,11 @@ public class Main {
 			FileWriter writer = new FileWriter(
 					ConstantFileNames.getConfigParametersFileName());
 			// header line
-			writer.append("a,bidAddon,c,conservationEthicModifier,defaultMaxNumberOfBids,"
+			writer.append("a,bidAddon,c,defaultMaxNumberOfBids,"
 					+ "high_participation_prob,highProfitRangeMinMargin,low_participation_prob,lower_threshold_c,"
 					+ "lower_threshold_p,max_c,max_p,medProfitRangeMinMargin,p,profitDifferenctial,"
-					+ "profitMotivationModifier,profitVariability,r,socialNormUpdatePercentage,"
-					+ "upper_threshold_c,upper_threshold_p,targetPercentage,CE_seed,PM_seed,Global_seed,"
+					+ "profitVariability,r,"
+					+ "upper_threshold_c,upper_threshold_p,targetPercentage,Global_seed,"
 					+ "highCEAgentsPercentage\n");
 			// table values
 			writer.append(Integer.toString(numLandholders));
@@ -1023,8 +947,6 @@ public class Main {
 			writer.append(Integer.toString(getBidAddon()));
 			writer.append(",");
 			writer.append(Integer.toString(cycles));
-			writer.append(",");
-			writer.append(Double.toString(getConservationEthicModifier()));
 			writer.append(",");
 			writer.append(Integer.toString(getDefaultMaxNumberOfBids()));
 			writer.append(",");
@@ -1048,23 +970,15 @@ public class Main {
 			writer.append(",");
 			writer.append(Double.toString(getProfitDifferenctial()));
 			writer.append(",");
-			writer.append(Double.toString(getProfitMotivationModifier()));
-			writer.append(",");
 			writer.append(Double.toString(getProfitVariability()));
 			writer.append(",");
 			writer.append(Integer.toString(repeats));
-			writer.append(",");
-			writer.append(Double.toString(getSocialNormUpdatePercentage()));
 			writer.append(",");
 			writer.append(Double.toString(getUpperThresholdC()));
 			writer.append(",");
 			writer.append(Double.toString(getUpperThresholdP()));
 			writer.append(",");
 			writer.append(Double.toString(getTargetPercentage()));
-			writer.append(",");
-			writer.append(Long.toString(getConservationEthicSeed()));
-			writer.append(",");
-			writer.append(Long.toString(getProfitMotivationSeed()));
 			writer.append(",");
 			writer.append(Long.toString(getGlobalRandomSeed()));
 			writer.append(",");

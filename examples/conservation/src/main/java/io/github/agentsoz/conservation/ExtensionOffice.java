@@ -22,15 +22,12 @@ package io.github.agentsoz.conservation;
  * #L%
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.conservation.LandholderHistory.AuctionRound;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 
 /**
@@ -65,13 +62,9 @@ public class ExtensionOffice {
 	// Keep track of visits per agent
 	private HashMap<String, Integer> visits;
 	
-	// Visitsig policy in use
+	// Visiting policy in use
 	private VisitPolicy policy = new VisitPolicy(0,0,0);
 	
-	// Restricts the number of visits (due to resource constraints) per round;
-	// expressed as a proportion of all agents
-	private final double visitQuota = 1.0;
-
 	public ExtensionOffice() {
 		visits = new HashMap<String, Integer>();
 	}
@@ -157,20 +150,11 @@ public class ExtensionOffice {
 		public int getStartCycle() {
 			return startCycle;
 		}
-		public void setStartCycle(int startCycle) {
-			this.startCycle = startCycle;
-		}
 		public int getFrequency() {
 			return frequency;
 		}
-		public void setFrequency(int frequency) {
-			this.frequency = frequency;
-		}
 		public int getEndCycle() {
 			return endCycle;
-		}
-		public void setEndCycle(int endCycle) {
-			this.endCycle = endCycle;
 		}
 		
 		public String toString() {

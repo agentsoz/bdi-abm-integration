@@ -117,9 +117,10 @@ public class NotParticipatedHighC extends Plan {
 					//		* (1 - Math.abs(highestProfit / 100)
 					//				* ConservationUtils
 					//						.getConservationEthicModifier());
-					double y = ConservationUtils.sigmoid_normalised_100(highestProfit);
-					double deltaCE = (currentC>=100.0) ? 0.1 : (100 - currentC) * y;
-					double newC = currentC - deltaCE;
+					double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+					double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+					double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+					double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
 					updateConsrvationEthicBarometer(newC, currentC);
 					logger.debug(landholder.logprefix()
 							+ "CE decreased as highest profit% ("

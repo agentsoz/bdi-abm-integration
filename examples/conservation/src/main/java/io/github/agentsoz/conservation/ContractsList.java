@@ -25,8 +25,6 @@ package io.github.agentsoz.conservation;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
-
 public class ContractsList {
 
 	private final int DEFAULT_CONTRACT_LENGTH = 3; // in rounds

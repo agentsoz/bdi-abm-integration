@@ -75,8 +75,11 @@ public class MeetExtensionOfficerPlan extends Plan {
 			public void step() {
 				
 				double currentC = landholder.getConservationEthicBarometer();
-				double newC = currentC + ConservationUtils.getVisitConservationEthicBoostValue();
-					//+ ConservationUtils.getStaticConservationEthicModifier();
+				double deltaX = ConservationUtils.getSigmoidMaxStepX();
+				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+				double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+
 
 				// Finally, update land holder's C and recalculate whether his C is
 				// high or low.
@@ -85,7 +88,7 @@ public class MeetExtensionOfficerPlan extends Plan {
 					.isConservationEthicHigh(newC));
 				String newStatus = (landholder.isConservationEthicHigh()) ? "high"
 					: "low";
-				logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+				logger.info(String.format("%supdated CE %.1f=>%.1f, which is %s"
 						,landholder.logprefix(), currentC, newC, newStatus));
 			}
 		} 

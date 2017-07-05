@@ -123,42 +123,19 @@ public class ConservationUtils {
 	private static double maxProfitMotivation = 100;
 
 	/**
-	 * This value is used, when updating individual conservation ethic barometer
-	 * according to social norm.
-	 * 
-	 * Command line argument to set this value: -socialNormUpdatePercentage
-	 */
-	private static double socialNormUpdatePercentage = 10;
-
-	/**
-	 * This seed is used when initializing conservation ethic barometer of each
-	 * agent
-	 * 
-	 * Command line argument to set this value: -conservationEthicSeed
-	 */
-	private static long conservationEthicSeed = 123456789;
-
-	/**
-	 * This seed is used when initializing profit motive barometer of each agent
-	 * 
-	 * Command line argument to set this value: -profitMotivationSeed
-	 */
-	private static long profitMotivationSeed = 987654321;
-
-	/**
 	 * This parameter represents the gap between low, medium and high profit
 	 * percentage levels.
 	 * 
 	 * Command line argument to set this value: -profitDifferenctial
 	 */
-	private static double profitDifferenctial = 20;
+	private static double profitDifferenctial = 40;
 
 	/**
 	 * The number of bids by default a normal agent make.
 	 * 
 	 * Command line argument to set this value: -defaultMaxNumberOfBids
 	 */
-	private static int defaultMaxNumberOfBids = 7;
+	private static int defaultMaxNumberOfBids = 8;
 
 	/**
 	 * The number of bids to be added to “defaultBids” parameter to get bid
@@ -173,29 +150,7 @@ public class ConservationUtils {
 	 * 
 	 * Command line argument to set this value: -profitVariability
 	 */
-	private static double profitVariability = 10;
-
-	/**
-	 * The factor used to increase and decrease conservation ethic barometer of
-	 * agents
-	 * 
-	 * Command line argument to set this value: -conservationEthicModifier
-	 */
-	private static double conservationEthicModifier = 0.2;
-
-	/**
-	 * The factor used to increase and decrease profit motive barometer of
-	 * agents
-	 * 
-	 * Command line argument to set this value: -profitMotivationModifier
-	 */
-	private static double profitMotivationModifier = 0.2;
-
-	/**
-	 * The factor used to linearly increase and decrease conservation ethic
-	 * barometer of agents
-	 */
-	private static double staticConservationEthicModifier = -1;
+	private static double profitVariability = 20;
 
 	/**
 	 * The minimum margin of medium profit range
@@ -217,18 +172,12 @@ public class ConservationUtils {
 	 * 
 	 * Command line argument to set this value: -targetPercentage
 	 */
-	private static double targetPercentage = 20;
+	private static double targetPercentage = 12;
 
 	/**
 	 * The visiting policy for extension officers. See {@link Policy}.
 	 */
 	private static Policy visitPolicy = ExtensionOffice.Policy.NEVER;
-	
-	/** 
-	 * The amount by which an landholders' conservation ethic value is boosted,
-	 * in absolute amount, by a visit from an extension officer.
-	 */
-	private static double visitConservationEthicBoostValue = 10.0;
 	
 	/**
 	 * The minimum margin of high profit range
@@ -250,6 +199,24 @@ public class ConservationUtils {
 	 */
 	private static long globalRandomSeed = 543219876;
 
+	/**
+	 * Parameters used for sigmoid function (do not change)
+	 */
+	private static final double sigmoid_a = 0.1;
+	private static final double sigmoid_c = 50;
+
+	/**
+	 * Used to limit the the sigmoid value y movement by limiting the x change
+	 * to this value.
+	 */
+	private static double sigmoidMaxStepX = 10;
+
+	/**
+	 * Command line args index at which Jill BDI arguments start
+	 */
+	private static int jillArgsIndex = 0;
+	
+	
 	public static void setNumberOfPackages(int numbOfPackages) {
 		numberOfPackages = numbOfPackages;
 	}
@@ -286,7 +253,7 @@ public class ConservationUtils {
 	}
 	public static String getVisitPolicyOptions() {
 		String opts = "";
-		for (Policy p : visitPolicy.values()) {
+		for (Policy p : Policy.values()) {
 			opts += p + " ";
 		}
 		return opts;
@@ -332,30 +299,6 @@ public class ConservationUtils {
 		ConservationUtils.maxProfitMotivation = value;
 	}
 
-	public static double getSocialNormUpdatePercentage() {
-		return socialNormUpdatePercentage;
-	}
-
-	public static void setSocialNormUpdatePercentage(double value) {
-		ConservationUtils.socialNormUpdatePercentage = value;
-	}
-
-	public static long getConservationEthicSeed() {
-		return conservationEthicSeed;
-	}
-
-	public static void setConservationEthicSeed(long conservationEthicSeed) {
-		ConservationUtils.conservationEthicSeed = conservationEthicSeed;
-	}
-
-	public static long getProfitMotivationSeed() {
-		return profitMotivationSeed;
-	}
-
-	public static void setProfitMotivationSeed(long profitMotivationSeed) {
-		ConservationUtils.profitMotivationSeed = profitMotivationSeed;
-	}
-
 	public static double getProfitDifferenctial() {
 		return profitDifferenctial;
 	}
@@ -387,29 +330,6 @@ public class ConservationUtils {
 
 	public static void setBidAddon(double bidAddon) {
 		ConservationUtils.bidAddon = (int) Math.round(bidAddon);
-	}
-
-	public static double getConservationEthicModifier() {
-		return conservationEthicModifier;
-	}
-
-	public static void setConservationEthicModifier(
-			double agentConservationEthicModifier) {
-		ConservationUtils.conservationEthicModifier = agentConservationEthicModifier;
-	}
-
-	public static double getStaticConservationEthicModifier() {
-		if (staticConservationEthicModifier == -1) {
-			setStaticConservationEthicModifier(getConservationEthicModifier()
-					* getLowProfitPercentageRange()[1] / 200);
-		}
-
-		return staticConservationEthicModifier;
-	}
-
-	public static void setStaticConservationEthicModifier(
-			double staticAgentAttributeModifier) {
-		ConservationUtils.staticConservationEthicModifier = staticAgentAttributeModifier;
 	}
 
 	public static double getLowProfitPercentage() {
@@ -499,15 +419,6 @@ public class ConservationUtils {
 		ConservationUtils.highProfitRangeMinMargin = highProfitRangeMinMargin;
 	}
 
-	public static double getProfitMotivationModifier() {
-		return profitMotivationModifier;
-	}
-
-	public static void setProfitMotivationModifier(
-			double profitMotivationModifier) {
-		ConservationUtils.profitMotivationModifier = profitMotivationModifier;
-	}
-
 	public static double getHighCEAgentsPercentage() {
 		return highCEAgentsPercentage;
 	}
@@ -548,21 +459,44 @@ public class ConservationUtils {
 		return numberOfPackages;
 	}
 	
+	public static int getJillArgsIndex() {
+		return jillArgsIndex;
+	}
+	public static void setJillArgsIndex(int val) {
+		jillArgsIndex = val;
+	}
+	
+	
+	public static double getSigmoidMaxStepX() {
+		return sigmoidMaxStepX;
+	}
+	public static void setSigmoidMaxStepX(double val) {
+		sigmoidMaxStepX = val;
+	}
+	
 	/**
-	 * See {@link #visitConservationEthicBoostValue}
+	 * Returns the value of the sigmoid function at x, where
+	 * y = 1 / [1  +  e^(-a(x-c))]
+	 * 
+	 * @param x must in range [0, 100]
 	 * @return
 	 */
-	public static double getVisitConservationEthicBoostValue() {
-		return visitConservationEthicBoostValue;
-	}
-	public static void setVisitConservationEthicBoostValue(double val) {
-		visitConservationEthicBoostValue = val;
-	}
-
 	public static double sigmoid_normalised_100(double x) {
-		final double a = 0.1;
-		final double c = 50;
-		return 1/(1 + Math.exp(-a*(x-c)));
+		return 1/(1 + Math.exp(-sigmoid_a*(x-sigmoid_c)));
 	}
 
+	/**
+	 * Returns the value x given the sigmoid function value is y. Here
+	 * x = c - [ ln((1/y)-1)) / a ]
+	 * 
+	 * @param y must be in range [0.0,1.0]
+	 * @return
+	 */
+	public static double sigmoid_normalised_100_inverse(double y) {
+		double x = sigmoid_c - (Math.log((1/y)-1)/sigmoid_a);
+		if (x == Double.POSITIVE_INFINITY) x = 100;
+		if (x == Double.NEGATIVE_INFINITY) x = 0;
+		return x;
+	}
+	
 }

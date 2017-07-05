@@ -82,8 +82,12 @@ public class UnsuccessfulLowC extends Plan {
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
 			double currentC = landholder.getConservationEthicBarometer();
-			double newC = currentC
-					- ConservationUtils.getStaticConservationEthicModifier();
+			//double newC = currentC
+			//		- ConservationUtils.getStaticConservationEthicModifier();
+			double deltaX = ConservationUtils.getSigmoidMaxStepX();
+			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+			double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+			double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
 
 			// Finally, update land holder's C and recalculate whether his C is
 			// high or low.
