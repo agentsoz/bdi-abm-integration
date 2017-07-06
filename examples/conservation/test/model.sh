@@ -8,8 +8,7 @@ NUMAGENTS=${1} # 100 agents, or set to 10 if using GAMS in demo mode
 highCEAgentsPercentage=${2}
 targetPercentage=${3}
 sigmoidMaxStepX=${4}
-NUMPACKAGES=26 # 26 packages, or set to 5 if running GAMS in demo mode
-
+NUMPACKAGES=${NUMPACKAGES:-26} # 26 packages, or set to 5 if running GAMS in demo mode
 
 
 # Set the following variable to point to the root of your GAMS installation, for instance,
