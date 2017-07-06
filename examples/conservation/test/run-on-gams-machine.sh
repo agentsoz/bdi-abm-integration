@@ -14,5 +14,11 @@ rsync --delete -avz  $DIR/RScripts $SERVER:$DESTDIR/test/
 rsync --delete -avz $DIR/output/ $SERVER:$DESTDIR/test/output/ --exclude="/log" --delete-excluded
 
 
-ssh $SERVER "cd $DESTDIR/test; ./qsub-run-samples.sh --local ./output > log.out 2>&1 < /dev/null &"
+# If no parmas given. then run the samples
+if [ "$1" == "" ] ; then
+	ssh $SERVER "cd $DESTDIR/test; ./qsub-run-samples.sh --local ./output > log.out 2>&1 < /dev/null &"
+	exit
+fi
 
+# Else run the given command in the test dir saving outputs to log.out
+ssh $SERVER "cd $DESTDIR/test; $1 > log.out 2>&1 < /dev/null &"

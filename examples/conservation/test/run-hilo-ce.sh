@@ -22,7 +22,11 @@ SIGMOID_MAX_STEP_X=10
 
 
 #-------------------------------------------------------------------------
-function run() {
+realpath() {
+	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+run() {
 OUTDIR=$1
 mkdir $OUTDIR
 
