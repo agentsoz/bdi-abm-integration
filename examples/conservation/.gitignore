@@ -7,4 +7,4 @@ _gams_java_*
 *.log.gz
 *~
 *pyc
-test/run-hilo-ce.sh.output*
+test/run-hi*.output*
