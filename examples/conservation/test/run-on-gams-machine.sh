@@ -9,10 +9,10 @@ DESTDIR=./testing # directory on server (will be created if needed, and contents
 ssh $SERVER "mkdir -p $DESTDIR/target/classes/gams/"
 rsync --delete -avz $DIR/../target/conservation-ethics-2.0.2-SNAPSHOT-jar-with-dependencies.jar $SERVER:$DESTDIR/target/
 rsync --delete -avz $DIR/../target/classes/gams/bid_selection_model.gms $SERVER:$DESTDIR/target/classes/gams/
-rsync --delete -avz  $DIR/*{.sh,.py} $SERVER:$DESTDIR/test/ --exclude=`basename $0`
-rsync --delete -avz  $DIR/RScripts $SERVER:$DESTDIR/test/
-rsync --delete -avz $DIR/output/ $SERVER:$DESTDIR/test/output/ --exclude="/log" --delete-excluded
-
+#rsync --delete -avz  $DIR/*{.sh,.py} $SERVER:$DESTDIR/test/ --exclude=`basename $0`
+#rsync --delete -avz  $DIR/RScripts $SERVER:$DESTDIR/test/
+#rsync --delete -avz $DIR/output/ $SERVER:$DESTDIR/test/output/ --exclude="/log" --delete-excluded
+rsync --delete -avz $DIR/ $SERVER:$DESTDIR/test/ --exclude="*/log/" --exclude=`basename $0` --delete-excluded
 
 # If no parmas given. then run the samples
 if [ "$1" == "" ] ; then

@@ -11,8 +11,9 @@ set -e  # exit of failures
 
 NUMAGENTS=${NUMAGENTS:-100} # 100 agents, or set to 10 if using GAMS in demo mode
 PACKAGES=${PACKAGES:-26} # 26 packages, or set to 5 if using GAMS in demo mode
-REPEATS=${REPEATS:-30}
-TARGET_PERCENTAGE=12
+REPEATS=${REPEATS:-20}
+CYCLES=${CYCLES:-50}
+TARGET_PERCENTAGE=20
 SIGMOID_MAX_STEP_X=10
 
 #-------------------------------------------------------------------------
@@ -46,7 +47,7 @@ cat $OUTDIR/samples.txt | while read x; do
 	for ((replicate=1; replicate<=REPLICATES; replicate++)); do
  		dst="$OUTDIR/log/archive-$sample-$replicate"
 		mkdir -p "$dst"
-		CMD="cd $dst && NUMPACKAGES=$PACKAGES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $replicate > model.out"
+		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $replicate > model.out"
 		echo $CMD
 		eval $CMD
 		rm -f _gams*
