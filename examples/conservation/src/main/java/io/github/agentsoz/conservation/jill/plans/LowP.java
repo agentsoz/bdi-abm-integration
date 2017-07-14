@@ -33,24 +33,14 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * After receiving the results of the auction, every land holder updates his
- * profit motive barometer. This plan is used by all land holders who have low
- * profit motivation.
- * 
- * In this plan, it is not considered whether the land holder has participated
- * or successful in the auction. Instead, he checks whether at least one person
- * has gained any profit by winning the auction. The land holder does not bother
- * about the amount of profit. If somebody has gained any profit, he slightly
- * increase his profit motive barometer. The factor
- * ConservationUtils.increaseFactorForPWhenLowP is used to increase land
- * holder's profit motive barometer.
+ * If Land holder's CE is high, then PM remains unchanged,
+ * else PM increases by a fixed amount
  * 
  * @author Sewwandi Perera
  */
@@ -80,61 +70,40 @@ public class LowP extends Plan {
 
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
-			ArrayList<BidResult> winningBids = updateProfitMotivationGoal
-					.getMyResults().getWinnersInfo();
+			
+			// If high CE then PM does not change
+			if (landholder.isConservationEthicHigh()) {
+				logger.debug(String.format("%shas high CE (%.1f), so no change to PM (%.1f)",
+						landholder.logprefix(), 
+						landholder.getConservationEthicBarometer(),
+						landholder.getProfitMotiveBarometer()));
+				return;
+			}
 
-			// used only for logging
-			ArrayList<Double> profits = new ArrayList<Double>();
-
-			if (winningBids != null && !winningBids.isEmpty()) {
-				double highestProfit = 0;
-				double winningPrice = 0;
-
-				for (int i = 0; i < winningBids.size(); i++) {
-					BidResult bid = (BidResult) winningBids.get(i);
-					winningPrice = bid.getBidPrice();
-
-					if (winningPrice > 0) { // If somebody has won the package
-						double tempProfit = (winningPrice - bid
-								.getOpportunityCost())
-								/ bid.getOpportunityCost();
-						profits.add(tempProfit);
-
-						if (highestProfit < tempProfit) {
-							highestProfit = tempProfit;
-						}
-					}
-				}
-
-				Collections.sort(profits);
+			ArrayList<BidResult> winningBids = updateProfitMotivationGoal.getMyResults().getWinnersInfo();
+			double highestProfit = landholder.getHighestProfitPercent(winningBids);
+			if (Double.isNaN(highestProfit)) {
+				logger.debug(landholder.logprefix() + "no winning bids");
+				return;
+			}
+			if (highestProfit > 0) {
+				double currentP = landholder.getProfitMotiveBarometer();
+				double deltaX = 0.05 * ConservationUtils.getSigmoidMaxStepX();
+				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentP/100);
+				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+				double newP = 100*ConservationUtils.sigmoid_normalised_100(newX);
+				newP = landholder.setProfitMotiveBarometer(newP);
+				String newStatus = (landholder.isProfitMotivationHigh()) ? "high" : "low";
+				logger.debug(String.format("%supdated PM %.1f=>%.1f, which is %s"
+						,landholder.logprefix(), currentP, newP, newStatus));
+			} else {
 				logger.debug(landholder.logprefix()
-						+ "all profits:" + profits + ", highest:" 
-						+ highestProfit);
-
-				if (highestProfit >= ConservationUtils.getLowProfitPercentage() / 100) {
-					// agent’s P = P * (1 + |profit| * agentAttributeModifier);
-					double currentP = landholder.getProfitMotiveBarometer();
-					//double newP = currentP
-					//		* (1 + Math.abs(highestProfit)
-					//				* ConservationUtils
-					//						.getProfitMotivationModifier());
-					double deltaX = ConservationUtils.getSigmoidMaxStepX();
-					double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentP/100);
-					double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
-					double newP = 100*ConservationUtils.sigmoid_normalised_100(newX);
-
-					// Finally, update land holder's P and recalculate whether
-					// his P is high or low.
-					newP = landholder.setProfitMotiveBarometer(newP);
-					landholder.setProfitMotivationHigh(landholder
-							.isProfitMotivationHigh(newP));
-					String newStatus = (landholder.isProfitMotivationHigh()) ? "high"
-							: "low";
-					logger.debug(String.format("%supdated PM %.1f=>%.1f, which is %s"
-							,landholder.logprefix(), currentP, newP, newStatus));
-				}
+						+ "CE unchanged as highest profit% ("
+						+ String.format("%.1f", highestProfit)
+						+ ") is not greater than 0");
 			}
 		}
+			
 	} };
 
 }

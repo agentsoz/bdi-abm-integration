@@ -37,19 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Landholder's C is SLIGHTLY decreased proportional to the profit obtained by
- * the winner.
- * 
- * In some situations, land holder has made multiple bids and he has been
- * unsuccessful in all of them. Some of they may have won by other land holders,
- * and some of them may have not won by any. It was assumed that, if no one has
- * won, there is no effect to the land holder's Conservation Ethic. So, the
- * unsuccessful bid, which has given the highest profit to the winner is used
- * for the calculation.
- * 
- * Land holder's C is decreased proportional to the profit the winner has
- * obtained and using the factor
- * ConservationUtils.decreaseFactorForCWhenUnsuccessAndLowC.
+ * Landholder's CE is SLIGHTLY decreased by a fixed amount.
  * 
  * @author Sewwandi Perera
  */
@@ -82,20 +70,12 @@ public class UnsuccessfulLowC extends Plan {
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
 			double currentC = landholder.getConservationEthicBarometer();
-			//double newC = currentC
-			//		- ConservationUtils.getStaticConservationEthicModifier();
-			double deltaX = ConservationUtils.getSigmoidMaxStepX();
+			double deltaX = 0.05 * ConservationUtils.getSigmoidMaxStepX();
 			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
 			double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
 			double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
-
-			// Finally, update land holder's C and recalculate whether his C is
-			// high or low.
 			newC = landholder.setConservationEthicBarometer(newC);
-			landholder.setConservationEthicHigh(landholder
-					.isConservationEthicHigh(newC));
-			String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-					: "low";
+			String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
 			logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
 					,landholder.logprefix(), currentC, newC, newStatus));
 		}

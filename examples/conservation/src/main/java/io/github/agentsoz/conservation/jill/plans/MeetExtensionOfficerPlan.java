@@ -84,10 +84,7 @@ public class MeetExtensionOfficerPlan extends Plan {
 				// Finally, update land holder's C and recalculate whether his C is
 				// high or low.
 				newC = landholder.setConservationEthicBarometer(newC);
-				landholder.setConservationEthicHigh(landholder
-					.isConservationEthicHigh(newC));
-				String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-					: "low";
+				String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
 				logger.info(String.format("%supdated CE %.1f=>%.1f, which is %s"
 						,landholder.logprefix(), currentC, newC, newStatus));
 			}

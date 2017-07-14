@@ -40,6 +40,8 @@ import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.AgentInfo;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,15 +183,14 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * @param highCE
 	 */
 	public void init(double profitMotiveBarometer,
-			double conservationEthicBarometer, boolean highCE, 
+			double conservationEthicBarometer, boolean highCE,
 			String bdiID, String gamsID) {
 	    logprefix = "Agent " + getName() + ": ";
 		this.setName(bdiID);
 		this.gamsID = gamsID;
-		this.conservationEthicBarometer = conservationEthicBarometer;
-		this.profitMotiveBarometer = profitMotiveBarometer;
-		this.isConservationEthicHigh = highCE;
-		this.isProfitMotivationHigh = isProfitMotivationHigh(this.profitMotiveBarometer);
+		setConservationEthicBarometer(conservationEthicBarometer);
+		setProfitMotiveBarometer(profitMotiveBarometer);
+		isConservationEthicHigh = highCE; // force given value
 		decisionOnParticipation = false;
 		logger.debug(String.format("%sinit CE:%.1f, PM:%.1f",
 				logprefix(),
@@ -253,6 +254,8 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * given value is out of the range of profit motive barometer, the nearest
 	 * margin is assigned.
 	 * 
+	 * Also updates the class to High or Low usingh {@link #chooseProfitMotivationHighLow()}
+	 * 
 	 * @param value
 	 *            the given value
 	 * @return the assigned value
@@ -268,6 +271,8 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 			profitMotiveBarometer = value;
 		}
 
+		chooseProfitMotivationHighLow();
+		
 		return profitMotiveBarometer;
 	}
 
@@ -276,6 +281,8 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * the given value is out of the range of conservation ethic barometer, the
 	 * nearest margin is assigned.
 	 * 
+	 * Also updates the class to High or Low usingh {@link #chooseConservationEthicHighLow()}
+
 	 * @param value
 	 *            the given value
 	 * @return the assigned value
@@ -292,6 +299,8 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 			conservationEthicBarometer = value;
 		}
 
+		chooseConservationEthicHighLow();
+		
 		return conservationEthicBarometer;
 	}
 
@@ -335,23 +344,24 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * @param c
 	 * @return
 	 */
-	public boolean isConservationEthicHigh(double c) {
-
+	private void chooseConservationEthicHighLow() {
+		double c = getConservationEthicBarometer();
 		double upperThresholdC = ConservationUtils.getUpperThresholdC();
 		double lowerThresholdC = ConservationUtils.getLowerThresholdC();
-
+		boolean value = false;
 		if (c > upperThresholdC) {
-			return true;
+			value = true;
 		} else if (c < lowerThresholdC) {
-			return false;
+			value = false;
 		} else {
 			double probability = 1 - (((upperThresholdC - c) * 1.0) / (upperThresholdC - lowerThresholdC));
 			if (ConservationUtils.getGlobalRandom().nextDouble() < probability) {
-				return true;
+				value = true;
 			} else {
-				return false;
+				value = false;
 			}
 		}
+		setConservationEthicHigh(value);
 	}
 
 	/**
@@ -360,22 +370,24 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * @param p
 	 * @return
 	 */
-	public boolean isProfitMotivationHigh(double p) {
+	private void chooseProfitMotivationHighLow() {
+		double p = getProfitMotiveBarometer();
 		double upperThresholdP = ConservationUtils.getUpperThresholdP();
 		double lowerThresholdP = ConservationUtils.getLowerThresholdP();
-
+		boolean value = false;
 		if (p > upperThresholdP) {
-			return true;
+			value = true;
 		} else if (p < lowerThresholdP) {
-			return false;
+			value = false;
 		} else {
 			double probability = 1 - (((upperThresholdP - p) * 1.0) / (upperThresholdP - lowerThresholdP));
 			if (ConservationUtils.getGlobalRandom().nextDouble() < probability) {
-				return true;
+				value = true;
 			} else {
-				return false;
+				value = false;
 			}
 		}
+		setProfitMotivationHigh(value);
 	}
 
 	/**
@@ -598,6 +610,32 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	public void setName(String name) {
 		super.setName(name);
 	    logprefix = "Agent " + getName() + ": ";
+
+	}
+	
+	public double getHighestProfitPercent(ArrayList<BidResult> winningBids) {
+		if (winningBids==null || winningBids.isEmpty()) {
+			return Double.NaN;
+		}
+		ArrayList<Double> profits = new ArrayList<Double>();
+		double highestPercent = Double.NEGATIVE_INFINITY;
+		for (int i = 0; i < winningBids.size(); i++) {
+			BidResult bid = (BidResult) winningBids.get(i);
+			if (bid.isWon()) {
+				double cost = bid.getOpportunityCost();
+				double profit = bid.getBidPrice() - cost;
+				double profitPercent = (profit/cost)*100;
+				profits.add(profitPercent);
+				if (highestPercent < profitPercent) {
+					highestPercent = profitPercent;
+				}
+			}
+		}
+		Collections.sort(profits);
+		logger.debug(logprefix()
+				+ "all profits:" + profits + ", highest:" 
+				+ highestPercent);
+		return highestPercent;
 
 	}
 }

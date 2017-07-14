@@ -33,22 +33,21 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Landholder's C is SLIGHTLY changed according to highest profit obtained by
- * winners.
+ * Landholder's CE is decreased proportional to the profit obtained by
+ * the winner.
  * 
- * This plan will be triggered for all land holders who have high C, but have
- * not participated in auction. Here, the highest profit obtained by any winner
- * is calculated and if this profit is greater than the threshold
- * ConservationUtils.profitThresholdNotParticipatedHighC, the land holder
- * slightly decreases his C. The land holder uses the factor
- * ConservationUtils.decreaseFactorForCNotParticipatedHighC to decrease his C.
+ * In some situations, land holder has made multiple bids and he is unsuccessful
+ * in all of them. Some of they may have won by other land holders, and some of
+ * them may have not won by any. It was assumed that, if no one has won, there
+ * is no effect to the land holder's Conservation Ethic. So, the unsuccessful
+ * bid, which has given the highest profit to the winner is used for the
+ * calculation.
  * 
  * @author Sewwandi Perera
  */
@@ -79,75 +78,21 @@ public class NotParticipatedHighC extends Plan {
 
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
-			ArrayList<BidResult> winningBids = updateConservationEthicGoal
-					.getMyResults().getWinnersInfo();
-
-			// This is used only for logging purposes
-			ArrayList<Double> profits = new ArrayList<Double>();
-
-			if (null != winningBids) {
-				double highestProfit = 0;
-				double winningPrice = 0;
-
-				for (int i = 0; i < winningBids.size(); i++) {
-					BidResult bid = (BidResult) winningBids.get(i);
-					winningPrice = bid.getBidPrice();
-
-					if (winningPrice > 0) { // If somebody has won the package
-						double tempProfit = ((winningPrice - bid
-								.getOpportunityCost()) / bid
-								.getOpportunityCost()) * 100;
-						profits.add(tempProfit);
-
-						if (highestProfit < tempProfit) {
-							highestProfit = tempProfit;
-						}
-					}
-				}
-
-				Collections.sort(profits);
-				logger.debug(landholder.logprefix()
-						+ "all profits:" + profits + ", highest:" 
-						+ highestProfit);
-
-				double currentC = landholder.getConservationEthicBarometer();
-				if (highestProfit > ConservationUtils
-						.getMediumProfitPercentage()) {
-					//double newC = currentC
-					//		* (1 - Math.abs(highestProfit / 100)
-					//				* ConservationUtils
-					//						.getConservationEthicModifier());
-					double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
-					double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
-					double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
-					double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
-					updateConsrvationEthicBarometer(newC, currentC);
-					logger.debug(landholder.logprefix()
-							+ "CE decreased as highest profit% ("
-							+ String.format("%.1f", highestProfit)
-							+ ") is greater than medium profit% ("
-							+ ConservationUtils.getMediumProfitPercentage()
-							+ ")");
-				} else {
-
-					logger.debug(landholder.logprefix()
-							+ "CE unchanged as highest profit ("
-							+ highestProfit
-							+ "%) is less than medium profit percentage ("
-							+ ConservationUtils.getMediumProfitPercentage()
-							+ ")");
-				}
+			ArrayList<BidResult> winningBids = updateConservationEthicGoal.getMyResults().getWinnersInfo();
+			double highestProfit = landholder.getHighestProfitPercent(winningBids);
+			if (Double.isNaN(highestProfit)) {
+				logger.debug(landholder.logprefix() + "no winning bids");
+				return;
 			}
+			double currentC = landholder.getConservationEthicBarometer();
+			double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+			double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+			double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+			newC = landholder.setConservationEthicBarometer(newC);
+			String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
+			logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+					,landholder.logprefix(), currentC, newC, newStatus));
 		}
 	} };
-
-	public void updateConsrvationEthicBarometer(double newC, double currentC) {
-		newC = landholder.setConservationEthicBarometer(newC);
-		landholder.setConservationEthicHigh(landholder
-				.isConservationEthicHigh(newC));
-		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-				: "low";
-		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
-				,landholder.logprefix(), currentC, newC, newStatus));
-	}
 }

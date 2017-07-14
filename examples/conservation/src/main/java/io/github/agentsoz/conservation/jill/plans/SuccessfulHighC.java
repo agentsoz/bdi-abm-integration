@@ -33,26 +33,14 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Land holder updates his C according to the profit he has gained.
- * 
- * In some situations, land holder selects multiple bids and he wins more than
- * one of them. In this kind of scenarios, only the mostly profitable successful
- * bid is used for calculations.
- * 
- * If the profit is below the threshold defined in
- * ConservationUtils.profitThresholdForSuccessfulHighC, the land holder's C is
- * decreased slightly using the factor
- * ConservationUtils.decreaseFactorForCWhenSuccessAndHighC. Else if land
- * holder's C is greater than the threshold, his C is increased using the factor
- * ConservationUtils.increaseFactorForCWhenSuccessAndHighC. Any of these changes
- * are NOT proportional to the profit he gained.
+ * When successful, if Land holder's profit is low to medium, then CE decreases
+ * proportional to the profit, else CE increases proportional to the profit.
  * 
  * @author Sewwandi Perera
  */
@@ -85,82 +73,46 @@ public class SuccessfulHighC extends Plan {
 		public void step() {
 			ArrayList<BidResult> bids = updateConservationEthicGoal
 					.getMyResults().getMyBids();
+			double highestProfit = landholder.getHighestProfitPercent(bids);
+			if (Double.isNaN(highestProfit)) {
+				logger.debug(landholder.logprefix() + "no winning bids");
+				return;
+			}
+			double currentC = landholder.getConservationEthicBarometer();
+			double newC;
+			double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+			
+			double[] medProfitPercentageRange = ConservationUtils
+					.getMediumProfitPercentageRange();
 
-			// This is used only for logging purposes
-			ArrayList<Double> profits = new ArrayList<Double>();
+			if (highestProfit > 0 && highestProfit <= medProfitPercentageRange[1]) {
+				double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+				newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
 
-			if (null != bids) {
-				double highestProfit = 0;
-
-				for (int i = 0; i < bids.size(); i++) {
-					BidResult bid = (BidResult) bids.get(i);
-
-					if (bid.isWon()) {
-						// If the and holder has won
-						double tempProfit = ((bid.getBidPrice() - bid
-								.getOpportunityCost()) / bid
-								.getOpportunityCost()) * 100;
-						profits.add(tempProfit);
-						if (highestProfit < tempProfit) {
-							highestProfit = tempProfit;
-						}
-					}
-				}
-
-				Collections.sort(profits);
+				updateConservationEthicBarometer(newC, currentC);
 				logger.debug(landholder.logprefix()
-						+ "- highest profit which changes agents C is "
-						+ highestProfit + ", all profits:" + profits);
-				double currentC = landholder.getConservationEthicBarometer();
-				double newC;
-				double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
-				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+						+ "CE decreased as highest profit% ("
+						+ String.format("%.1f", highestProfit)
+						+ ") is greater than 0 and less than/equal the upper margin of medium profit% range ("
+						+ medProfitPercentageRange[1] + ")");
+			} else if (highestProfit > medProfitPercentageRange[1]) {
+				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
+				newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
 				
-				double[] medProfitPercentageRange = ConservationUtils
-						.getMediumProfitPercentageRange();
-
-				if (highestProfit > 0
-						&& highestProfit <= medProfitPercentageRange[1]) {
-					//newC = currentC
-					//		* (1 - Math.abs(highestProfit/100)
-					//				* ConservationUtils
-					//						.getConservationEthicModifier());
-					//newC = currentC - deltaCE;
-					double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
-					newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
-
-					updateConsrvationEthicBarometer(newC, currentC);
-					logger.debug(landholder.logprefix()
-							+ "CE decreased as highest profit% ("
-							+ String.format("%.1f", highestProfit)
-							+ ") is greater than 0 and less than/equal the upper margin of medium profit% range ("
-							+ medProfitPercentageRange[1] + ")");
-				} else if (highestProfit > medProfitPercentageRange[1]) {
-					//newC = currentC
-					//		* (1 + Math.abs(highestProfit/100)
-					//				* ConservationUtils
-					//						.getConservationEthicModifier());
-					//newC = currentC + deltaCE;
-					double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
-					newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
-					
-					updateConsrvationEthicBarometer(newC, currentC);
-					logger.debug(landholder.logprefix()
-							+ "CE increased as highest profit% ("
-							+ String.format("%.1f", highestProfit)
-							+ ") is greater than the upper margin of medium profit% range ("
-							+ medProfitPercentageRange[1] + ")");
-				}
+				updateConservationEthicBarometer(newC, currentC);
+				logger.debug(landholder.logprefix()
+						+ "CE increased as highest profit% ("
+						+ String.format("%.1f", highestProfit)
+						+ ") is greater than the upper margin of medium profit% range ("
+						+ medProfitPercentageRange[1] + ")");
 			}
 		}
 	} };
 
-	public void updateConsrvationEthicBarometer(double newC, double currentC) {
+	public void updateConservationEthicBarometer(double newC, double currentC) {
 		newC = landholder.setConservationEthicBarometer(newC);
-		landholder.setConservationEthicHigh(landholder
-				.isConservationEthicHigh(newC));
-		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-				: "low";
+		String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
 		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
 				,landholder.logprefix(), currentC, newC, newStatus));
 

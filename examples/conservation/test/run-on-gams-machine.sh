@@ -21,4 +21,4 @@ if [ "$1" == "" ] ; then
 fi
 
 # Else run the given command in the test dir saving outputs to log.out
-ssh $SERVER "cd $DESTDIR/test; $1 > log.out 2>&1 < /dev/null &"
+ssh $SERVER "cd $DESTDIR/test; "$*" > log.out 2>&1 < /dev/null &"

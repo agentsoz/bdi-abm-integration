@@ -13,8 +13,8 @@ NUMAGENTS=${NUMAGENTS:-100} # 100 agents, or set to 10 if using GAMS in demo mod
 PACKAGES=${PACKAGES:-26} # 26 packages, or set to 5 if using GAMS in demo mode
 REPEATS=${REPEATS:-20}
 CYCLES=${CYCLES:-50}
-TARGET_PERCENTAGE=20
-SIGMOID_MAX_STEP_X=10
+TARGET_PERCENTAGE=${TARGET_PERCENTAGE:-12}
+SIGMOID_MAX_STEP_X=${SIGMOID_MAX_STEP_X:-15}
 
 #-------------------------------------------------------------------------
 # End USER CONFIG
@@ -29,6 +29,7 @@ realpath() {
 
 run() {
 OUTDIR=$1
+rm -rf $OUTDIR
 mkdir $OUTDIR
 
 # Create the config file which is also needed by post processing scripts

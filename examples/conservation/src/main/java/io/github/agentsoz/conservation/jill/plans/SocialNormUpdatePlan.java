@@ -37,16 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * All landholders executes this plan to adjust their conservation ethic
- * barometer(C) according to social norm. Calculations are done as follow;
- * Firstly, the average C of the population is calculated and identified where
- * it lies in the sigmoid function. Here the sigmoid function is shifted to the
- * range of C by modifying it as below;
- * 
- * f(c) = = 1/(1+e^(-1*(c-maxC/2))
- * 
- * If all landholders average C is greater than
- * ConservationUtils.getSocialNormThreshold()
+ * All landholders executes this plan to adjust their CE if it is below the 
+ * average CE of the population (the social norm).
  * 
  * @author Sewwandi Perera
  */
@@ -82,11 +74,11 @@ public class SocialNormUpdatePlan extends Plan {
 			double newC;
 
 			if (averageC > myC) {
-				//newC = myC + (averageC - myC)
-				//		* ConservationUtils.getSocialNormUpdatePercentage()
-				//		/ 100;
-				double deltaX = (averageC/100) * ConservationUtils.getSigmoidMaxStepX();
 				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(myC/100);
+				double deltaX = ConservationUtils.sigmoid_normalised_100_inverse(averageC/100) - oldX;
+				if (deltaX > ConservationUtils.getSigmoidMaxStepX()) {
+					deltaX = ConservationUtils.getSigmoidMaxStepX();
+				}
 				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
 				newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
 				logger.debug(landholder.logprefix()
@@ -95,19 +87,15 @@ public class SocialNormUpdatePlan extends Plan {
 						+ ") is greater than agent's CE ("
 						+ String.format("%.1f", myC)
 						+ ")");
-				updateConsrvationEthicBarometer(newC, myC);
+				newC = landholder.setConservationEthicBarometer(newC);
+				String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
+				logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+						,landholder.logprefix(), myC, newC, newStatus));
 			}
 		}
 	} };
 
-	public void updateConsrvationEthicBarometer(double newC, double currentC) {
-		newC = landholder.setConservationEthicBarometer(newC);
-		landholder.setConservationEthicHigh(landholder
-				.isConservationEthicHigh(newC));
-		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-				: "low";
-		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
-				,landholder.logprefix(), currentC, newC, newStatus));
+	public void updateConservationEthicBarometer(double newC, double currentC) {
 	}
 
 }

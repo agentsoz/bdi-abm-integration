@@ -33,14 +33,13 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Landholder's C is SLIGHTLY decreased proportional to the profit obtained by
+ * Landholder's CE is decreased proportional to the profit obtained by
  * the winner.
  * 
  * In some situations, land holder has made multiple bids and he is unsuccessful
@@ -81,76 +80,21 @@ public class UnsuccessfulHighC extends Plan {
 
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
-			ArrayList<BidResult> winningBids = updateConservationEthicGoal
-					.getMyResults().getWinnersInfo();
-
-			// This is used only for logging purposes
-			ArrayList<Double> profits = new ArrayList<Double>();
-
-			if (null != winningBids) {
-				double highestProfit = 0;
-				double winningPrice = 0;
-
-				for (int i = 0; i < winningBids.size(); i++) {
-					BidResult bid = (BidResult) winningBids.get(i);
-					winningPrice = bid.getBidPrice();
-
-					if (winningPrice > 0) { // If somebody has won the package
-						double tempProfit = ((winningPrice - bid
-								.getOpportunityCost()) / bid
-								.getOpportunityCost()) * 100;
-						profits.add(tempProfit);
-
-						if (highestProfit < tempProfit) {
-							highestProfit = tempProfit;
-						}
-					}
-				}
-
-				Collections.sort(profits);
-				logger.debug(landholder.logprefix()
-						+ "- highest profit which changes agents C is "
-						+ highestProfit + ", all profits:" + profits);
-
-				double currentC = landholder.getConservationEthicBarometer();
-				double newC;
-				//if (highestProfit < 0) {
-				//	newC = currentC
-				//			- ConservationUtils
-				//					.getStaticConservationEthicModifier();
-
-				//	updateConsrvationEthicBarometer(newC, currentC);
-				//	logger.debug(landholder.logprefix()
-				//			+ "CE decreased as highest profit% ("
-				//			+ String.format("%.1f", highestProfit)
-				//			+ ") is less than 0");
-				//} else {
-					//newC = currentC
-					//		* (1 - Math.abs(highestProfit / 100)
-					//				* ConservationUtils
-					//						.getConservationEthicModifier());
-					double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
-					double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
-					double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
-					newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
-					updateConsrvationEthicBarometer(newC, currentC);
-					logger.debug(landholder.logprefix()
-							+ "CE decreased as highest profit% ("
-							+ String.format("%.1f", highestProfit)
-							+ ") is not less than 0");
-				//}
+			ArrayList<BidResult> winningBids = updateConservationEthicGoal.getMyResults().getWinnersInfo();
+			double highestProfit = landholder.getHighestProfitPercent(winningBids);
+			if (Double.isNaN(highestProfit)) {
+				logger.debug(landholder.logprefix() + "no winning bids");
+				return;
 			}
+			double currentC = landholder.getConservationEthicBarometer();
+			double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentC/100);
+			double newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
+			double newC = 100*ConservationUtils.sigmoid_normalised_100(newX);
+			newC = landholder.setConservationEthicBarometer(newC);
+			String newStatus = (landholder.isConservationEthicHigh()) ? "high" : "low";
+			logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
+					,landholder.logprefix(), currentC, newC, newStatus));
 		}
 	} };
-
-	private void updateConsrvationEthicBarometer(double newC, double currentC) {
-		newC = landholder.setConservationEthicBarometer(newC);
-		landholder.setConservationEthicHigh(landholder
-				.isConservationEthicHigh(newC));
-		String newStatus = (landholder.isConservationEthicHigh()) ? "high"
-				: "low";
-		logger.debug(String.format("%supdated CE %.1f=>%.1f, which is %s"
-				,landholder.logprefix(), currentC, newC, newStatus));
-	}
-
 }
