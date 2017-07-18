@@ -12,10 +12,11 @@ set -e  # exit of failures
 NUMAGENTS=${NUMAGENTS:-100} # 100 agents, or set to 10 if using GAMS in demo mode
 PACKAGES=${PACKAGES:-26} # 26 packages, or set to 5 if using GAMS in demo mode
 REPEATS=${REPEATS:-20}
-CYCLES=${CYCLES:-50}
+CYCLES=${CYCLES:-30}
 TARGET_PERCENTAGE=${TARGET_PERCENTAGE:-12}
-SIGMOID_MAX_STEP_X=${SIGMOID_MAX_STEP_X:-15}
-
+SIGMOID_MAX_STEP_X=${SIGMOID_MAX_STEP_X:-20}
+PROFIT_MOTIVE_UPDATE_MULTIPLIER=${PROFIT_MOTIVE_UPDATE_MULTIPLIER:-0.1}
+SOCIAL_NORM_UPDATE_MULTIPLIER=${SOCIAL_NORM_UPDATE_MULTIPLIER:-0.1}
 #-------------------------------------------------------------------------
 # End USER CONFIG
 #-------------------------------------------------------------------------
@@ -48,7 +49,7 @@ cat $OUTDIR/samples.txt | while read x; do
 	for ((replicate=1; replicate<=REPLICATES; replicate++)); do
  		dst="$OUTDIR/log/archive-$sample-$replicate"
 		mkdir -p "$dst"
-		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $replicate > model.out"
+		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $PROFIT_MOTIVE_UPDATE_MULTIPLIER $SOCIAL_NORM_UPDATE_MULTIPLIER $replicate > model.out"
 		echo $CMD
 		eval $CMD
 		rm -f _gams*

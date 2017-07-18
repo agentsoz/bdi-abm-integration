@@ -613,6 +613,12 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 
 	}
 	
+	/**
+	 * Returns the highest profit percentage w.r.t. opportunity cost 
+	 * from the list of winning bids. 
+	 * @param winningBids
+	 * @return profit percentage (can be negative)
+	 */
 	public double getHighestProfitPercent(ArrayList<BidResult> winningBids) {
 		if (winningBids==null || winningBids.isEmpty()) {
 			return Double.NaN;

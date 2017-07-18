@@ -212,6 +212,17 @@ public class ConservationUtils {
 	private static double sigmoidMaxStepX = 10;
 
 	/**
+	 * Social norm update multiplier, as a factor of {@link ConservationUtils#sigmoidMaxStepX}
+	 */
+	private static double socialNormUpdateMultiplier = 0.1;
+
+	/**
+	 * Profit motive update multiplier, as a factor of {@link ConservationUtils#sigmoidMaxStepX}
+	 */
+	private static double profitMotiveUpdateMultiplier = 0.1;
+
+	
+	/**
 	 * Command line args index at which Jill BDI arguments start
 	 */
 	private static int jillArgsIndex = 0;
@@ -499,4 +510,28 @@ public class ConservationUtils {
 		return x;
 	}
 	
+	/**
+	 * Returns the social norm update multiplier
+	 * @return multiplier in range [0.0,1.0]
+	 */
+	public static double getSocialNormUpdateMultiplier() {
+		return socialNormUpdateMultiplier;
+	}
+
+	public static void setSocialNormUpdateMultiplier(double val) {
+		socialNormUpdateMultiplier = val;
+	}
+
+	
+	/**
+	 * Returns the profit motive update multiplier
+	 * @return multiplier in range [0.0,1.0]
+	 */
+	public static double getProfitMotiveUpdateMultiplier() {
+		return profitMotiveUpdateMultiplier;
+	}
+
+	public static void setProfitMotiveUpdateMultiplier(double val) {
+		profitMotiveUpdateMultiplier = val;
+	}
 }

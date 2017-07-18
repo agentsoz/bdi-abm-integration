@@ -39,10 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * If highest profit% is greater than the medium profit%, then PM increases
- * proportional to the highest profit, else PM decreases by a fixed amount.
+ * PM increases proportional to highest profit.
+ * (Will cause PM to decrease if highest profit is negative which can happen
+ * sometimes.)
  * 
- * @author Sewwandi Perera
+ * @author Sewwandi Perera, Dhi Singh
  */
 public class HighP extends Plan {
 	
@@ -76,20 +77,10 @@ public class HighP extends Plan {
 				logger.debug(landholder.logprefix() + "no winning bids");
 				return;
 			}
-			
 			double currentP = landholder.getProfitMotiveBarometer();
 			double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentP/100);
-			double newX = 0.0;
-			
-			double medProfit = ConservationUtils.getMediumProfitPercentage();
-
-			if (highestProfit <= medProfit) {
-				double deltaX = 0.05 * ConservationUtils.getSigmoidMaxStepX();
-				newX = (oldX <= deltaX) ? 0.0 : oldX - deltaX;
-			} else if (highestProfit > medProfit) {
-				double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
-				newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
-			}
+			double deltaX = (highestProfit/100) * ConservationUtils.getSigmoidMaxStepX();
+			double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
 			double newP = 100*ConservationUtils.sigmoid_normalised_100(newX);
 			newP = landholder.setProfitMotiveBarometer(newP);
 			String newStatus = (landholder.isProfitMotivationHigh()) ? "high" : "low";

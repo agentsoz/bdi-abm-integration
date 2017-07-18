@@ -76,8 +76,9 @@ public class SocialNormUpdatePlan extends Plan {
 			if (averageC > myC) {
 				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(myC/100);
 				double deltaX = ConservationUtils.sigmoid_normalised_100_inverse(averageC/100) - oldX;
-				if (deltaX > ConservationUtils.getSigmoidMaxStepX()) {
-					deltaX = ConservationUtils.getSigmoidMaxStepX();
+				double stepSize = ConservationUtils.getSocialNormUpdateMultiplier() * ConservationUtils.getSigmoidMaxStepX();
+				if (deltaX > stepSize) {
+					deltaX = stepSize;
 				}
 				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
 				newC = 100*ConservationUtils.sigmoid_normalised_100(newX);

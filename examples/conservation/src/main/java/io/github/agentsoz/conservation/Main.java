@@ -520,13 +520,17 @@ public class Main {
 				+ ")\n"
 				+ "  -medProfitRangeMinMargin              minimum margin of medium profit range (default is "
 				+ getMedProfitRangeMinMargin()
-				+ "\n"
+				+ ")\n"
 				+ "  -p <pacakges>                         number of conservation packages to use (default is "
 				+ getNumberOfPackages()
-				+ "')\n"
+				+ ")\n"
 				+ "  -profitDifferenctial                  the gap between low, medium and high profit percentage levels\n"
 				+ "                                        (default is "
 				+ getProfitDifferenctial()
+				+ ")\n"
+				+ "  -profitMotiveUpdateMultiplier         Multiplier in range [0.0,1.0] applied to sigmoidMaxStepX\n"
+				+ "                                        to calculate an agent's profit motive change (default is "
+				+ getProfitMotiveUpdateMultiplier()
 				+ ")\n"
 				+ "  -profitVariability                    the variability in low, medium and high profit ranges\n"
 				+ "                                        (default is "
@@ -538,6 +542,10 @@ public class Main {
 				+ "  -sigmoidMaxStepX                      Limits the amount by which the sigmoid function value can change in one step\n"
 				+ "                                        by limiting the max change in x by this vlue (default is "
 				+ getSigmoidMaxStepX()
+				+ ")\n"
+				+ "  -socialNormUpdateMultiplier           Multiplier in range [0.0,1.0] applied to sigmoidMaxStepX\n"
+				+ "                                        to control how quickly an agent's CE gravitates towards the social norm (default is "
+				+ getSocialNormUpdateMultiplier()
 				+ ")\n"
 				+ "  -targetPercentage                     The percentage of maximum possible target (if all agents bid on the highest package)\n"
 				+ "                                        that should be assigned as the target (default is "
@@ -554,7 +562,6 @@ public class Main {
 				+ getUpperThresholdP() 
 				+ ")\n"
 				+ "  --                                    all arguments following '--' are passed to the Jill BDI engine"
-				+ getUpperThresholdP() 
 				+ "\n"
 				;
 	}
@@ -574,8 +581,7 @@ public class Main {
 						try {
 							numLandholders = Integer.parseInt(args[i]);
 						} catch (Exception e) {
-							exit("Option value '" + args[i]
-									+ "' is not a number");
+							exit("-a value '" + args[i] + "' is not an integer");
 						}
 					}
 					break;
@@ -587,8 +593,7 @@ public class Main {
 						try {
 							cycles = Integer.parseInt(args[i]);
 						} catch (Exception e) {
-							exit("Option value '" + args[i]
-									+ "' is not a number");
+							exit("-c value '" + args[i] + "' is not an integer");
 						}
 					}
 					break;
@@ -618,9 +623,7 @@ public class Main {
 					try {
 						ConservationUtils.setNumberOfPackages(Integer.parseInt(args[i]));
 					} catch (Exception e) {
-						exit("Could not parse numPackages value '" + args[i]
-								+ "'. Will use the default of '" + repeats
-								+ "'");
+						exit("-p value '" + args[i] + "' is not an integer");
 					}
 				}
 				break;
@@ -630,9 +633,7 @@ public class Main {
 					try {
 						repeats = Integer.parseInt(args[i]);
 					} catch (Exception e) {
-						exit("Could not parse repeats value '" + args[i]
-								+ "'. Will use the default of '" + repeats
-								+ "'");
+						exit("-r value '" + args[i] + "' is not an integer");
 					}
 				}
 				break;
@@ -642,11 +643,7 @@ public class Main {
 					try {
 						setHighCEAgentsPercentage(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getHighCEAgentsPercentage() + "'");
+						exit("-highCEAgentsPercentage value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -654,14 +651,9 @@ public class Main {
 				if (i + 1 < args.length) {
 					i++;
 					try {
-						setHighParticipationProbability(Double
-								.parseDouble(args[i]));
+						setHighParticipationProbability(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getHighParticipationProbability() + "'");
+						exit("-high_participation_prob value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -669,14 +661,9 @@ public class Main {
 				if (i + 1 < args.length) {
 					i++;
 					try {
-						setLowParticipationProbability(Double
-								.parseDouble(args[i]));
+						setLowParticipationProbability(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getLowParticipationProbability() + "'");
+						exit("-low_participation_prob value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -686,11 +673,7 @@ public class Main {
 					try {
 						setUpperThresholdP(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '" + getUpperThresholdC()
-								+ "'");
+						exit("-upper_threshold_c value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -700,11 +683,7 @@ public class Main {
 					try {
 						setLowerThresholdC(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '" + getLowerThresholdC()
-								+ "'");
+						exit("-lower_threshold_c value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -714,11 +693,7 @@ public class Main {
 					try {
 						setUpperThresholdP(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '" + getUpperThresholdP()
-								+ "'");
+						exit("-upper_threshold_p value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -728,11 +703,7 @@ public class Main {
 					try {
 						setLowerThresholdP(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '" + getLowerThresholdP()
-								+ "'");
+						exit("-lower_threshold_p value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -742,11 +713,7 @@ public class Main {
 					try {
 						setMaxConservationEthic(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getMaxConservationEthic() + "'");
+						exit("-max_c value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -756,11 +723,7 @@ public class Main {
 					try {
 						setMaxProfitMotivation(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getMaxProfitMotivation() + "'");
+						exit("-max_p value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -770,11 +733,7 @@ public class Main {
 					try {
 						setProfitDifferenctial(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getProfitDifferenctial() + "'");
+						exit("-profitDifferenctial value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -784,10 +743,7 @@ public class Main {
 					try {
 						setDefaultMaxNumberOfBids(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '" + args[i]
-								+ "' is not in the format 'int:int'. Will "
-								+ "use the default of '"
-								+ getDefaultMaxNumberOfBids() + "'");
+						exit("-defaultMaxNumberOfBids value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -797,10 +753,7 @@ public class Main {
 					try {
 						setBidAddon(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '" + getBidAddon() + "'");
+						exit("-bidAddon value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -810,11 +763,7 @@ public class Main {
 					try {
 						setProfitVariability(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getProfitVariability() + "'");
+						exit("-profitVariability value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -824,11 +773,7 @@ public class Main {
 					try {
 						setMedProfitRangeMinMargin(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getMedProfitRangeMinMargin() + "'");
+						exit("-medProfitRangeMinMargin value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -838,11 +783,7 @@ public class Main {
 					try {
 						setHighProfitRangeMinMargin(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getHighProfitRangeMinMargin() + "'");
+						exit("-highProfitRangeMinMargin value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -852,11 +793,7 @@ public class Main {
 					try {
 						setTargetPercentage(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double:double'. Will "
-								+ "use the default of '"
-								+ getTargetPercentage() + "'");
+						exit("-targetPercentage value '" + args[i] + "' is not a double");
 					}
 				}
 				break;
@@ -866,10 +803,7 @@ public class Main {
 					try {
 						setGlobalRandomSeed(Long.parseLong(args[i]));
 					} catch (Exception e) {
-						exit("Option value '" + args[i]
-								+ "' is not in the format 'long'. Will "
-								+ "use the default of '"
-								+ getGlobalRandomSeed() + "'");
+						exit("-globalRandomSeed value '" + args[i] + "' is not a long");
 					}
 				}
 				break;
@@ -879,12 +813,7 @@ public class Main {
 					try {
 						setVisitPolicy(Policy.valueOf(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not a valid visiting policy. Should be one of: "
-								+ getVisitPolicyOptions() + ". Will "
-								+ "use the default of '"
-								+ getVisitPolicy() + "'");
+						exit("-visitPolicy value '" + args[i] + "' is not a Policy");
 					}
 				}
 				break;
@@ -894,11 +823,27 @@ public class Main {
 					try {
 						setSigmoidMaxStepX(Double.parseDouble(args[i]));
 					} catch (Exception e) {
-						exit("Option value '"
-								+ args[i]
-								+ "' is not in the format 'double'. Will "
-								+ "use the default of '"
-								+ getSigmoidMaxStepX() + "'");
+						exit("-sigmoidMaxStepX value '" + args[i] + "' is not a double");
+					}
+				}
+				break;
+			case "-socialNormUpdateMultiplier":
+				if (i + 1 < args.length) {
+					i++;
+					try {
+						setSocialNormUpdateMultiplier(Double.parseDouble(args[i]));
+					} catch (Exception e) {
+						exit("-socialNormUpdateMultiplier value '" + args[i] + "' is not a double");
+					}
+				}
+				break;
+			case "-profitMotiveUpdateMultiplier":
+				if (i + 1 < args.length) {
+					i++;
+					try {
+						setProfitMotiveUpdateMultiplier(Double.parseDouble(args[i]));
+					} catch (Exception e) {
+						exit("-profitMotiveUpdateMultiplier value '" + args[i] + "' is not a double");
 					}
 				}
 				break;

@@ -24,7 +24,6 @@ package io.github.agentsoz.conservation.jill.plans;
 
 import io.github.agentsoz.conservation.ConservationUtils;
 import io.github.agentsoz.conservation.Main;
-import io.github.agentsoz.conservation.LandholderHistory.BidResult;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateProfitMotivationGoal;
 import io.github.agentsoz.jill.lang.Agent;
@@ -32,15 +31,13 @@ import io.github.agentsoz.jill.lang.Goal;
 import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * If Land holder's CE is high, then PM remains unchanged,
- * else PM increases by a fixed amount
+ * If Land holder participated, then PM increases by a fixed amount
  * 
  * @author Sewwandi Perera
  */
@@ -70,25 +67,9 @@ public class LowP extends Plan {
 
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
-			
-			// If high CE then PM does not change
-			if (landholder.isConservationEthicHigh()) {
-				logger.debug(String.format("%shas high CE (%.1f), so no change to PM (%.1f)",
-						landholder.logprefix(), 
-						landholder.getConservationEthicBarometer(),
-						landholder.getProfitMotiveBarometer()));
-				return;
-			}
-
-			ArrayList<BidResult> winningBids = updateProfitMotivationGoal.getMyResults().getWinnersInfo();
-			double highestProfit = landholder.getHighestProfitPercent(winningBids);
-			if (Double.isNaN(highestProfit)) {
-				logger.debug(landholder.logprefix() + "no winning bids");
-				return;
-			}
-			if (highestProfit > 0) {
+			if (landholder.getCurrentAuctionRound().isParticipated()) {
 				double currentP = landholder.getProfitMotiveBarometer();
-				double deltaX = 0.05 * ConservationUtils.getSigmoidMaxStepX();
+				double deltaX = ConservationUtils.getProfitMotiveUpdateMultiplier() * ConservationUtils.getSigmoidMaxStepX();
 				double oldX = ConservationUtils.sigmoid_normalised_100_inverse(currentP/100);
 				double newX = (oldX + deltaX >= 100) ? 100.0 : oldX + deltaX;
 				double newP = 100*ConservationUtils.sigmoid_normalised_100(newX);
@@ -97,10 +78,7 @@ public class LowP extends Plan {
 				logger.debug(String.format("%supdated PM %.1f=>%.1f, which is %s"
 						,landholder.logprefix(), currentP, newP, newStatus));
 			} else {
-				logger.debug(landholder.logprefix()
-						+ "CE unchanged as highest profit% ("
-						+ String.format("%.1f", highestProfit)
-						+ ") is not greater than 0");
+				logger.debug(landholder.logprefix() + "CE unchanged as agent did not participate");
 			}
 		}
 			
