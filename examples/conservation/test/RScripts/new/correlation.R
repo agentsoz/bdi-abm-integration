@@ -14,7 +14,7 @@ suppressMessages(library(psych))
 args <- commandArgs(trailingOnly = TRUE)
 experiment_dir=args[1]
 cycles=args[2]
-input_names = c('numAgents','highCEAgentsPercentage', 'targetPercentage', 'sigmoidMaxStepX')
+input_names = c('numAgents','highCEAgentsPercentage', 'targetPercentage', 'sigmoidMaxStepX', 'profitMotiveUpdateMultiplier', 'socialNormUpdateMultiplier')
 output_names = c('number of cycles with winners','HC agents in last cycle', 'HP agents in last cycle', 'HC agents in final winning cycle', 'HP agents in final winning cycle', 'normalized cost of final round with winners', "average CE at last cycle - initial average CE", "average CE at last winning cycle - initial average CE", "accumulated LCLP participants at last winning cycle", "accumulated HCLP participants at last winning cycle", "accumulated LCHP participants at last winning cycle", "accumulated HCHP participants at last winning cycle", "accumulated LCLP winners at last winning cycle", "accumulated HCLP winners at last winning cycle", "accumulated LCHP winners at last winning cycle", "accumulated HCHP winners at last winning cycle", "number of agents changed groups (CE)", "number of agents changed groups (PM)")
 
 # read config file
