@@ -29,7 +29,7 @@ plot_pair <- function(all) {
 	y_label <- sprintf('HC_agents(blue), HP_agents(red)')
         plot(all[,c(x_axis_param,y_axis_params[1])],col="blue", xlab=x_axis_param, ylab=y_label, ylim=range(c(0,100)))
 	points(all[,c(x_axis_param,y_axis_params[2])],col="red")
-        title("linear scatter:number of agents in each category")
+        title(paste("Sample", all[1,c("Sample")]))
 }
 
 
@@ -54,11 +54,13 @@ analysis <- function(db) {
 
 		result = result/REPLICATES
 
-		output <- matrix(ncol=3, nrow=nrow(result))
-		colnames(output) <- c("cycle_number", "HC_agents", "HP_agents")
+		output <- matrix(ncol=4, nrow=nrow(result))
+		colnames(output) <- c(x_axis_param, y_axis_params, "Sample")
 		output[,1] = result[,1]
 		output[,2] = result[,2]+result[,4]
 		output[,3] = result[,3]+result[,4]
+		output[,4] = paste(samples[i,],collapse=" ")
+		#print(output)
 		plot_pair(output)
 	}
 

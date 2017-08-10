@@ -27,11 +27,11 @@ y_axis_params <- c("LCLP_agents", "HCLP_agents", "LCHP_agents", "HCHP_agents")
 
 plot_pair <- function(all) {
 	y_label <- sprintf('LCLP(orange), HCLP(green), LCHP(red), HCHP(blue)')
-        plot(all[,c(x_axis_param,y_axis_params[1])],col="orange", xlab=x_axis_param, ylab=y_label, ylim=range(c(0,100)))
+	plot(all[,c(x_axis_param,y_axis_params[1])],col="orange", xlab=x_axis_param, ylab=y_label, ylim=range(c(0,100)))
 	points(all[,c(x_axis_param,y_axis_params[2])],col="green")
 	points(all[,c(x_axis_param,y_axis_params[3])],col="red")
 	points(all[,c(x_axis_param,y_axis_params[4])],col="blue")
-        title("linear scatter:number of agents in each category")
+	title(paste("Sample", all[1,c("Sample")]))
 }
 
 
@@ -55,7 +55,17 @@ analysis <- function(db) {
 
 
 		result = result/REPLICATES
-		plot_pair(result)
+
+		output <- matrix(ncol=6, nrow=nrow(result))
+		colnames(output) <- c(x_axis_param, y_axis_params, "Sample")
+		output[,1] = result[,1]
+		output[,2] = result[,2]
+		output[,3] = result[,3]
+		output[,4] = result[,4]
+		output[,5] = result[,5]
+		output[,6] = paste(samples[i,],collapse=" ")
+		print(output)
+		plot_pair(output)
 	}
 
 	graphics.off()
