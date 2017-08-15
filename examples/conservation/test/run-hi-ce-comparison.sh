@@ -49,7 +49,7 @@ cat $OUTDIR/samples.txt | while read x; do
 	for ((replicate=1; replicate<=REPLICATES; replicate++)); do
  		dst="$OUTDIR/log/archive-$sample-$replicate"
 		mkdir -p "$dst"
-		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $PROFIT_MOTIVE_UPDATE_MULTIPLIER $SOCIAL_NORM_UPDATE_MULTIPLIER $replicate > model.out"
+		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && VISITPOLICY=$VISITPOLICY && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $PROFIT_MOTIVE_UPDATE_MULTIPLIER $SOCIAL_NORM_UPDATE_MULTIPLIER $replicate > model.out"
 		echo $CMD
 		eval $CMD
 		rm -f _gams*
@@ -71,6 +71,8 @@ PBS_O_WORKDIR=`realpath $DIR`
 export PBS_O_WORKDIR=$PBS_O_WORKDIR
 
 
-HI_CE_AGENTS_PERCENTAGE=25 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25
-HI_CE_AGENTS_PERCENTAGE=75 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75
+HI_CE_AGENTS_PERCENTAGE=25 && VISITPOLICY=1 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25.visit
+HI_CE_AGENTS_PERCENTAGE=75 && VISITPOLICY=1 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75.visit
+HI_CE_AGENTS_PERCENTAGE=25 && VISITPOLICY=0 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25
+HI_CE_AGENTS_PERCENTAGE=75 && VISITPOLICY=0 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75
 
