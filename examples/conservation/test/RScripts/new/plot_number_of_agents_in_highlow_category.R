@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 suppressMessages(library(sqldf))
+library(ggplot2)
+library(reshape2)
 
 
 #
@@ -21,15 +23,29 @@ samples_file_path <- sprintf('%ssamples.txt', experiment_dir)
 samples = read.csv(samples_file_path, header = FALSE, sep='	')
 sampleCount <- nrow(samples)
 x_axis_param="cycle_number"
-y_axis_params <- c("HC_agents", "HP_agents")
+y_axis_params <- c("HP_agents", "HC_agents")
 
 # process database
 
-plot_pair <- function(all) {
-	y_label <- sprintf('HC_agents(blue), HP_agents(red)')
-        plot(all[,c(x_axis_param,y_axis_params[1])],col="blue", xlab=x_axis_param, ylab=y_label, ylim=range(c(0,100)))
-	points(all[,c(x_axis_param,y_axis_params[2])],col="red")
-        title(paste("Sample", all[1,c("Sample")]))
+plot_pair <- function(all, labels) {
+	melted = melt(all, id.vars="cycle_number")
+	gg <- ggplot(data=melted, aes(x=cycle_number, y=value, group=variable, shape=variable, color=variable)) + 
+		geom_line() +
+		geom_point(size=3) +
+		ylim(0,100) +
+		theme_bw() +
+  		theme(
+			legend.title=element_text(size=12,face="bold"),
+        	axis.title=element_text(size=12,face="bold"), 
+			plot.title=element_text(size=12,face="bold",hjust=0.5),
+        	aspect.ratio=5/5
+			) +
+  		xlab("auction cycle") +
+  		ylab("number of agents") +
+		ggtitle(paste("Sample:", labels)) +
+  		guides(colour=guide_legend(title="")) +
+  		guides(shape=guide_legend(title=""))
+	show(gg)
 }
 
 
@@ -40,7 +56,7 @@ analysis <- function(db) {
 	for (i in 1:sampleCount ) {
 		for(k in 1:REPLICATES){
 			query_last_part <- sprintf('where replicate = "%s" and sample="%s" ORDER BY %s', k, i, x_axis_param)
-			query_first_part <- sprintf('select cycle_number, HCLP_agents, LCHP_agents, HCHP_agents from')
+			query_first_part <- sprintf('select cycle_number, HCLP_agents, LCHP_agents, HCHP_agents, LCLP_agents from')
 			df = dbGetQuery(db, paste(query_first_part, "auction_statistics", query_last_part))
 			
 			if(k==1){
@@ -50,18 +66,20 @@ analysis <- function(db) {
 				result = result + data.matrix(df)
 			}
 		}
-
-
 		result = result/REPLICATES
 
-		output <- matrix(ncol=4, nrow=nrow(result))
-		colnames(output) <- c(x_axis_param, y_axis_params, "Sample")
+		output <- matrix(ncol=3, nrow=nrow(result))
+		slabels <- matrix(ncol=1, nrow=nrow(result))
+		colnames(output) <- c(x_axis_param, y_axis_params)
+		colnames(slabels) <- c("Sample")
 		output[,1] = result[,1]
-		output[,2] = result[,2]+result[,4]
-		output[,3] = result[,3]+result[,4]
-		output[,4] = paste(samples[i,],collapse=" ")
-		#print(output)
-		plot_pair(output)
+		output[,2] = result[,3]+result[,4]
+		output[,3] = result[,2]+result[,4]
+		output = output[order(output[,"cycle_number"]),]
+		print(output)
+
+		slabels[,1] = paste(samples[i,],collapse=" ")
+		plot_pair(as.data.frame(output), slabels)
 	}
 
 	graphics.off()
