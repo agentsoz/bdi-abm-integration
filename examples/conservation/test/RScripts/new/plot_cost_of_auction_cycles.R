@@ -55,9 +55,9 @@ plot_pair <- function(all, labels) {
 
 
 analysis <- function(db) {
+	plot_file_path <- sprintf('%scost_of_auction_cycles.pdf', experiment_dir)
+	pdf(plot_file_path)
 	for (i in 1:sampleCount ) {
-		plot_file_path <- sprintf('%scost_of_auction_cycles.pdf', experiment_dir)
-		pdf(plot_file_path)
 
 		final_result <- matrix(nrow=numCycles,ncol=length(output_names))
 		colnames(final_result) <- output_names
