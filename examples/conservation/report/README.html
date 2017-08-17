@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="./github-pandoc.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<nav id="TOC">
+<ul>
+<li><a href="#conservation-ethics-experiments">Conservation Ethics Experiments</a><ul>
+<li><a href="#steps-to-run-the-experiments">Steps to run the experiments</a><ul>
+<li><a href="#build-the-distribution">Build the distribution</a></li>
+<li><a href="#run-the-experiments">Run the experiments</a></li>
+<li><a href="#analyse-the-results">Analyse the results</a></li>
+</ul></li>
+<li><a href="#about-this-report">About this report</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="conservation-ethics-experiments">Conservation Ethics Experiments</h1>
+<h2 id="steps-to-run-the-experiments">Steps to run the experiments</h2>
+<h3 id="build-the-distribution">Build the distribution</h3>
+<p>For instructions on how to build the distribution see the conservation <a href="../README.md">README.md</a>.</p>
+<h3 id="run-the-experiments">Run the experiments</h3>
+<p>The experiments can only be run on Sarah's old Macbook Pro (MBP) laptop at the moment. That is because the GAMS license we have is tied to that machine. To make running tests easier, we have a script that can launch the tests remotely so that we do not need physical access to the machine. The script assumes that you have SSH configured so that you can login to the machine without a password, or in other words the command <code>ssh gams-machine</code> should get you in. You will want to set that up first. Once you have done that, the experiments can be launched from any remote machine.</p>
+<ul>
+<li><em>NOTE: the scripts are not configured to allow experiments to run in parallel, so don't try that!</em> Run one experiment at a time, then download all the results (instructions on this further below) before running the next experiment.</li>
+</ul>
+<h4 id="sensitivity-analysis">Sensitivity Analysis</h4>
+<p>Sensitivity Analysis (SA) samples are generated using the Nearly Othogonal Latin Hypercube (NOLH) method. If you wish to add new parameters to the latin hypercube, edit the <a href="../test/NOLHdesigns_v5.xls">NOLH spreadsheet</a> and then cut and paste the samples that the spreadsheet generates into <a href="../test/output/samples.txt">samples.txt</a> (<em>note that the separator is the TAB character, and not spaces</em>). You will also have to update the number of samples in <a href="../test/output/config">config</a>.</p>
+<p>As of commit <a href="https://github.com/agentsoz/bdi-abm-integration/commit/5c3a824f836c46e75b4c7424df1c27fd3282a7c8">5c3a824</a>, the SA experiments are configured with the following six parameters:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 93%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>numberOfAgents</code></td>
+<td style="text-align: left;">number of landholder agents in the simulation</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>highCEAgentsPercentage</code></td>
+<td style="text-align: left;">Percentage of agents with high conservation ethic</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>targetPercentage</code></td>
+<td style="text-align: left;">Percentage of maximum possible target (if all agents bid on the highest package) that should be assigned as the target</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sigmoidMaxStepX</code></td>
+<td style="text-align: left;">Limits the amount by which the sigmoid function value can change in one step by limiting the max change in x by this value</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>profitMotiveUpdateMultiplier</code></td>
+<td style="text-align: left;">Multiplier in range [0.0,1.0] applied to <code>sigmoidMaxStepX</code> to calculate an agent's profit motive change</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>socialNormUpdateMultiplier</code></td>
+<td style="text-align: left;">Multiplier in range [0.0,1.0] applied to <code>sigmoidMaxStepX</code> to control how quickly an agent's CE gravitates towards the social norm</td>
+</tr>
+</tbody>
+</table>
+<p>To run the SA experiments, change to the <a href="examples/conservation/test">test</a> directory and do the following:</p>
+<pre><code>./run-on-gams-machine</code></pre>
+<p>This will SSH to the GAMS MBP and launch the tests there. The run may take a couple of hours depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.</p>
+<h4 id="two-scenario-high-conservation-ethics-scenarios">Two-scenario High Conservation Ethics Scenarios</h4>
+<p>These experiments compare the outcomes when we have very different starting proportions of High Conservation (HC) agents in the population, and keeping the proportion of High Profit (HP) agents constant. The two populations we compare are as follows:</p>
+<ul>
+<li>25% HC agents and 50% HP agents</li>
+<li>75% HC agents and 50% HP agents</li>
+</ul>
+<p>To run these experiments, change to the <a href="examples/conservation/test">test</a> directory and do the following:</p>
+<pre><code>./run-on-gams-machine ./run-hi-ce-comparison.sh</code></pre>
+<p>These experiments take about one hour to run.</p>
+<h3 id="analyse-the-results">Analyse the results</h3>
+<ol>
+<li><p>Download all the results from the GAMS MBP onto your machine. To do that, create a directory to save the results in (name it something meaningful such as <code>testing-20170801-f5acd62-sa</code> so that you know what code version the experiments correspond to). Then do something like:</p>
+<pre><code>rsync -avz gams-macbook:testing/ testing-20170801-f5acd62-sa/</code></pre></li>
+<li><p>Now we will post process our results into a database, to make further analysis and plotting easier. To to that, change to the <a href="examples/conservation/test">test</a> directory and run the <code>postproc.sh</code> script, pointing it to the test results directory that contains the <code>samples.txt</code> file. For example, if the directory structure is <code>./testing-20170801-f5acd62-sa/test/output/samples.txt</code>, then you would do something like:</p>
+<pre><code>./postproc.sh ./testing-20170801-f5acd62-sa/test/output/</code></pre>
+<p>For the two-scenario experiments, you might have to do all of the following:</p>
+<pre><code>./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/</code></pre></li>
+</ol>
+<h2 id="about-this-report">About this report</h2>
+<p><a href="./README.md">This report</a> is written in <a href="https://daringfireball.net/projects/markdown/">Markdown</a>. The HTML version of this report was produced using <a href="http://pandoc.org">Pandoc</a> with the following command:</p>
+<pre><code>pandoc -s --toc -f markdown_github -t html5 -c ./github-pandoc.css README.md  &gt; README.html </code></pre>
+</body>
+</html>

@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 suppressMessages(library(sqldf))
+library(ggplot2)
+library(reshape2)
 
 
 #
@@ -26,14 +28,37 @@ output_names <- c("cycle_number", "cost_of_successful_bids")
 
 # process database
 
-plot_pair <- function(a, b, all) {
-        plot(all[,c(a,b)])
-        title(main=paste("linear scatter:", a, "/", b))
+#plot_pair <- function(a, b, all) {
+#        plot(all[,c(a,b)])
+#        title(main=paste("linear scatter:", a, "/", b))
+#}
+plot_pair <- function(all, labels) {
+	melted = melt(all, id.vars="cycle_number")
+	gg <- ggplot(data=melted, aes(x=cycle_number, y=value, group=variable, shape=variable, color=variable)) + 
+		geom_line() +
+		geom_point(size=3) +
+		#ylim(0,100) +
+		theme_bw() +
+  		theme(
+			legend.title=element_text(size=12,face="bold"),
+        	axis.title=element_text(size=12,face="bold"), 
+			plot.title=element_text(size=12,face="bold",hjust=0.5),
+        	aspect.ratio=5/5
+			) +
+  		xlab("auction cycle") +
+  		ylab("number of agents") +
+		ggtitle(paste("Sample:", labels)) +
+  		guides(colour=guide_legend(title="")) +
+  		guides(shape=guide_legend(title=""))
+	show(gg)
 }
 
 
 analysis <- function(db) {
 	for (i in 1:sampleCount ) {
+		plot_file_path <- sprintf('%scost_of_auction_cycles.pdf', experiment_dir)
+		pdf(plot_file_path)
+
 		final_result <- matrix(nrow=numCycles,ncol=length(output_names))
 		colnames(final_result) <- output_names
 
@@ -49,15 +74,18 @@ analysis <- function(db) {
 				final_result[c,] = c(c,mean(result[,1]))
 			}
 		}
-		#print(final_result)
-		plot_pair(output_names[1], output_names[2], final_result)
-	}
+		print(final_result)
+		#plot_pair(output_names[1], output_names[2], final_result)
+		slabels <- matrix(ncol=1, nrow=nrow(final_result))
+		slabels[,1] = paste(samples[i,],collapse=" ")
+		plot_pair(as.data.frame(final_result), slabels)
 
+
+	}
+	graphics.off()
 }
 
-plot_file_path <- sprintf('%svariation_of_cost.pdf', experiment_dir)
-pdf(plot_file_path)
 db_path <- sprintf('%soutput.db', experiment_dir)
 db <- dbConnect(SQLite(), dbname=db_path)
 analysis(db)
-graphics.off()
+
