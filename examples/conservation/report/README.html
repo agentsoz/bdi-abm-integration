@@ -15,25 +15,69 @@
 <nav id="TOC">
 <ul>
 <li><a href="#conservation-ethics-experiments-report">Conservation Ethics Experiments Report</a></li>
-<li><a href="#about-the-experiments">About the Experiments</a><ul>
-<li><a href="#build-the-distribution">Build the distribution</a></li>
-<li><a href="#run-the-experiments">Run the experiments</a><ul>
-<li><a href="#sensitivity-analysis">Sensitivity Analysis</a></li>
-<li><a href="#two-scenario-high-conservation-ethics-scenarios">Two-scenario High Conservation Ethics Scenarios</a></li>
+<li><a href="#experiments">Experiments</a><ul>
+<li><a href="#results-for-starting-populations-with-25-and-75-hc-agents">Results for starting populations with 25% and 75% HC agents</a></li>
 </ul></li>
-<li><a href="#analyse-the-results">Analyse the results</a></li>
+<li><a href="#about-the-experiments">About the Experiments</a><ul>
+<li><a href="#building-the-distribution">Building the distribution</a></li>
+<li><a href="#running-the-experiments">Running the experiments</a><ul>
+<li><a href="#sensitivity-analysis">Sensitivity Analysis</a></li>
+<li><a href="#high-conservation-ethics-two-scenarios">High Conservation Ethics: Two Scenarios</a></li>
+</ul></li>
+<li><a href="#analysing-the-results">Analysing the results</a></li>
 </ul></li>
 <li><a href="#about-this-report">About this report</a></li>
 </ul>
 </nav>
 <h1 id="conservation-ethics-experiments-report">Conservation Ethics Experiments Report</h1>
-<p>...</p>
+<h1 id="experiments">Experiments</h1>
+<h2 id="results-for-starting-populations-with-25-and-75-hc-agents">Results for starting populations with 25% and 75% HC agents</h2>
+<p>Our first set of simulation results show the emergence of motivational crowding out, where monetary reward (profit) can negatively impact the intrinsic motivation to conserve (conservation ethic). The figure below shows how the percentage of high-conservation (HC) and high-profit (HP) agents changes over successive auctions, in two different initial populations:</p>
+<ul>
+<li><strong>HC25</strong> that starts with 25% HC agents and has 50% HP agents, and</li>
+<li><strong>HC75</strong> that starts with 75% HC agents and also has 50% HP agents.</li>
+</ul>
+<p>In HC25, the relatively higher starting proportion of HP agents leads to greater profit chasing and overall the conservation ethic in the population declines, from a combination of unsuccessful bids leading to lower participation in the HC group, and the negative effect on CE from observed profits of others. In contrast, for HC75 where the relative proportion of HC agents in the population is high to start with, the population as a whole establishes a high conservation ethic, largely from the pull towards the established (higher) conservation norm in the society.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">HC25</th>
+<th style="text-align: center;">HC75</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents_in_highlow_categories.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents_in_highlow_categories.pdf.p0.png" alt="b" /></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents_in_each_category.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents_in_each_category.pdf.p0.png" alt="b" /></td>
+</tr>
+</tbody>
+</table>
+<p>[<strong>STILL TO DO</strong>] <em>We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and quickly rises and settles at ~80%, the change representative of the increasing participation from HC landholders. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing to ~20% by 100 auctions, driven predominantly by HP landholders gradually getting more involved.</em></p>
+<p>Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The Figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency steadily increases over successive auction rounds. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more landholders with high CE, who tend to bid with moderate to low profit margins. <em>At the end of 30 auction rounds, the cost of auctions for HC25 is more than double that of HC75.</em></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">HC25</th>
+<th style="text-align: center;">HC75</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+</tr>
+</tbody>
+</table>
 <h1 id="about-the-experiments">About the Experiments</h1>
 <p>The experiments can only be run on Sarah's old Macbook Pro (MBP) laptop at the moment. That is because the GAMS license we have is tied to that machine. To make running tests easier, we have a script that can launch the tests remotely so that we do not need physical access to the machine. The script assumes that you have SSH configured so that you can login to the machine without a password, or in other words the command <code>ssh gams-machine</code> should get you in. You will want to set that up first. Once you have done that, the experiments can be launched from any remote machine.</p>
 <p>The following sections describe the steps involved in running the experiments.</p>
-<h2 id="build-the-distribution">Build the distribution</h2>
+<h2 id="building-the-distribution">Building the distribution</h2>
 <p>For instructions on how to build the distribution see the conservation <a href="../README.md">README.md</a>.</p>
-<h2 id="run-the-experiments">Run the experiments</h2>
+<h2 id="running-the-experiments">Running the experiments</h2>
 <ul>
 <li><em>NOTE: the scripts are not configured to allow experiments to run in parallel, so don't try that!</em> Run one experiment at a time, then download all the results (instructions on this further below) before running the next experiment.</li>
 </ul>
@@ -81,7 +125,7 @@
 <p>To run the SA experiments, change to the <a href="../test">test</a> directory and do the following:</p>
 <pre><code>./run-on-gams-machine</code></pre>
 <p>This will SSH to the GAMS MBP and launch the tests there. The run may take a couple of hours depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.</p>
-<h3 id="two-scenario-high-conservation-ethics-scenarios">Two-scenario High Conservation Ethics Scenarios</h3>
+<h3 id="high-conservation-ethics-two-scenarios">High Conservation Ethics: Two Scenarios</h3>
 <p>These experiments compare the outcomes when we have very different starting proportions of High Conservation (HC) agents in the population, and keeping the proportion of High Profit (HP) agents constant. The two populations we compare are as follows:</p>
 <ul>
 <li>25% HC agents and 50% HP agents</li>
@@ -90,7 +134,7 @@
 <p>To run these experiments, change to the <a href="../test">test</a> directory and do the following:</p>
 <pre><code>./run-on-gams-machine ./run-hi-ce-comparison.sh</code></pre>
 <p>These experiments take about one hour to run.</p>
-<h2 id="analyse-the-results">Analyse the results</h2>
+<h2 id="analysing-the-results">Analysing the results</h2>
 <ol>
 <li><p>Download all the results from the GAMS MBP onto your machine. To do that, create a directory to save the results in (name it something meaningful such as <code>testing-20170801-f5acd62-sa</code> so that you know what code version the experiments correspond to). Then do something like:</p>
 <pre><code>rsync -avz gams-macbook:testing/ testing-20170801-f5acd62-sa/</code></pre></li>
