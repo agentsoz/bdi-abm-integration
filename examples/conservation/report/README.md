@@ -5,6 +5,8 @@ This report is valid for commit [5c3a824](https://github.com/agentsoz/bdi-abm-in
 
 # Experiments
 
+All experiments were repeated 20 times. Each data point on the graphs below represents the average value from 20 runs.
+
 ## Sensitivity Analysis (SA)
 
 
@@ -24,7 +26,7 @@ The SA experiments are configured with the following six parameters:
 ![](testing-20170801-f5acd62-sa/test/output/correlation_diagram.pdf.p0.png)
 
 
-## Results for starting populations with 25% and 75% HC agents  
+## Comparing starting populations with 25% and 75% HC agents  
 
 Our first set of simulation results show the emergence of motivational crowding out, where monetary reward (profit) can negatively impact the intrinsic motivation to conserve (conservation ethic). The figure below shows how the percentage of high-conservation (HC) and high-profit (HP) agents changes over successive auctions, in two different initial populations: 
 * **HC25** that starts with 25% HC agents and has 50% HP agents, and 
@@ -32,24 +34,48 @@ Our first set of simulation results show the emergence of motivational crowding 
 
 In HC25, the relatively higher starting proportion of HP agents leads to greater profit chasing and overall the conservation ethic in the population declines, from a combination of unsuccessful bids leading to lower participation in the HC group, and the negative effect on CE from observed profits of others. In contrast, for HC75 where the relative proportion of HC agents in the population is high to start with, the population as a whole establishes a high conservation ethic, largely from the pull towards the established (higher) conservation norm in the society.
 
-| HC25 | HC75 |
+| HC25: types of agents over time | HC75: types of agents over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
 
 We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%, following a similat increasing in the number of HC agents that have higher participation rates than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is ~5 times that of HC25 and by 30 rounds the difference is still ~2 times.
 
-| HC25 | HC75 |
+| HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png) |
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png) |
 
-Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is 73% higher than HC75. This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.
+Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is 73% higher than HC75 (up from 171 to 295). This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.
 
-| HC25 | HC75 |
+| HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png) |
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png) |
 
 
-[**TO DO**] *Finally, we explored the impact of social cohesion–the degree to which the CE of a landholder is influenced by the conservation norm. To do this, we created two versions each of our HC25 and HC75 populations—one with low social cohesion and one with high–giving us four populations, and repeated our experiments. Figure 3 shows how social cohesion impacts cost. Compared to the experiment in Figure 2–where the social cohesion was moderate–we find that an increase in social cohesion leads to an overall increase in HC landholders due to the stronger influence from the conservation norm. This in turn results in overall costs being substantially less than in the earlier case with moderate social cohesion.*
+[**OLD TEXT. RESULT NOT VERIFIED YET**] *Finally, we explored the impact of social cohesion–the degree to which the CE of a landholder is influenced by the conservation norm. To do this, we created two versions each of our HC25 and HC75 populations—one with low social cohesion and one with high–giving us four populations, and repeated our experiments. Figure 3 shows how social cohesion impacts cost. Compared to the experiment in Figure 2–where the social cohesion was moderate–we find that an increase in social cohesion leads to an overall increase in HC landholders due to the stronger influence from the conservation norm. This in turn results in overall costs being substantially less than in the earlier case with moderate social cohesion.*
+
+## Understanding the impact of Extension Officers visits (Phase 1)
+
+This experiment introduces the notion of extension offcier visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visiting once per round. The impact of the visit on the landholder is a boost in their conservation ethic (along the S-curve).
+
+The types of agents over time for HC75 with visits is very similar to HC75 without visits. For HC25 though, we see an interesting effect from the visits. In the early rounds, as expected, the number of HC agents increases due to the boost in conservation ethics from the visits. However, after around 10 rounds, we find that the HC population as a whole stays fairly constant. However within the HC population, those with high profit motive (HCHP) continue to increase in numbers, while those with low profit motive (HCLP) start to decrease. The overall impact is that by round 30, almost all landholders in the population have a high profit motive!
+
+| HC25: types of agents over time | HC75: types of agents over time |
+| :---: | :---: | 
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_agents.pdf.p0.png) |
+
+Participation rates for HC75 with or without visits are very similar. Hoever, for HC25 with visits we no longer see a drop in participation as we did for HC25 without visits and the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who have a high likelihood of participation.
+
+ 
+| HC25: participation over time | HC75: participation over time |
+| :---: | :---: | 
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_participants.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_participants.pdf.p0.png) |
+
+After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that almost half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservatin ethics (HPLC) who dominate the original setting. 
+
+| HC25: cost of auctions over time | HC75: cost of auctions over time |
+| :---: | :---: | 
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/cost_of_auction_cycles.pdf.p0.png) |
+
 
 # About the Experiments
 
@@ -77,12 +103,7 @@ To run the SA experiments, change to the [test](../test) directory and do the fo
 ```
 This will SSH to the GAMS MBP and launch the tests there. The run may take a couple of hours depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.  
 
-### High Conservation Ethics: Two Scenarios
-
-These experiments compare the outcomes when we have very different starting proportions of High Conservation (HC) agents in the population, and keeping the proportion of High Profit (HP) agents constant. The two populations we compare are as follows:
-
-* 25% HC agents and 50% HP agents
-* 75% HC agents and 50% HP agents 
+### Running HC25/HC75 experiments
 
 To run these experiments, change to the [test](../test) directory and do the following:
 ```
@@ -114,10 +135,13 @@ You have to do this for each scenario that was run. For instance, for the two-sc
 3. Finally, you can plot the results. To do that, change to the [new RScripts](../test/RScripts/new) directory and try the following kinds of commands to plot various results (they all get saved in the same directory as the `output.db` database):
 ```
 ./correlation.R ../../testing-20170801-f5acd62-sa/test/output/ 30
-./plot_number_of_agents_in_each_category.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/ 30
-./plot_number_of_agents_in_highlow_category.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice25/ 30
+./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/ 30
 ```
 Here the parameter `30` refers to the number of auction cycles that were run.
+
+# About the model
+
+[**DESCRIBE HOW THE SIGMOID (S-CURVE) IS USED IN THE MODEL**]
 
 # About this report
 
