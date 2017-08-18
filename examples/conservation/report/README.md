@@ -29,8 +29,8 @@ The SA experiments are configured with the following six parameters:
 ## Comparing starting populations with 25% and 75% HC agents  
 
 Our first set of simulation results show the emergence of motivational crowding out, where monetary reward (profit) can negatively impact the intrinsic motivation to conserve (conservation ethic). The figure below shows how the percentage of high-conservation (HC) and high-profit (HP) agents changes over successive auctions, in two different initial populations: 
-* **HC25** that starts with 25% HC agents and has 50% HP agents, and 
-* **HC75** that starts with 75% HC agents and also has 50% HP agents. 
+* **HC25** that starts with 25% HC agents and 50% HP agents, and 
+* **HC75** that starts with 75% HC agents and 50% HP agents. 
 
 In HC25, the relatively higher starting proportion of HP agents leads to greater profit chasing and overall the conservation ethic in the population declines, from a combination of unsuccessful bids leading to lower participation in the HC group, and the negative effect on CE from observed profits of others. In contrast, for HC75 where the relative proportion of HC agents in the population is high to start with, the population as a whole establishes a high conservation ethic, largely from the pull towards the established (higher) conservation norm in the society.
 
@@ -38,7 +38,7 @@ In HC25, the relatively higher starting proportion of HP agents leads to greater
 | :---: | :---: | 
 | ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
 
-We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%, following a similat increasing in the number of HC agents that have higher participation rates than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is ~5 times that of HC25 and by 30 rounds the difference is still ~2 times.
+We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%. This is due to a corresponding increase in the number of HC agents, who tend to participate more than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is five times that of HC25, and by 30 rounds it is twice that of HC25.
 
 | HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
@@ -55,22 +55,22 @@ Next we look at the difference in cost to the agency between the two sample popu
 
 ## Understanding the impact of Extension Officers visits (Phase 1)
 
-This experiment introduces the notion of extension offcier visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visiting once per round. The impact of the visit on the landholder is a boost in their conservation ethic (along the S-curve).
+This experiment introduces the notion of extension offcier visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visited once per round. The impact of a visit on a landholder is a boost in her conservation ethic (along the S-curve).
 
-The types of agents over time for HC75 with visits is very similar to HC75 without visits. For HC25 though, we see an interesting effect from the visits. In the early rounds, as expected, the number of HC agents increases due to the boost in conservation ethics from the visits. However, after around 10 rounds, we find that the HC population as a whole stays fairly constant. However within the HC population, those with high profit motive (HCHP) continue to increase in numbers, while those with low profit motive (HCLP) start to decrease. The overall impact is that by round 30, almost all landholders in the population have a high profit motive!
+The types of agents over time for HC75 is very similar with or without visits. For HC25 though, we see an interesting effect from the visits. In the early rounds, the number of HC agents increases due to the boost in conservation ethics from the visits. However, after around 10 rounds, we find that the HC population as a whole stays fairly constant. Within the HC population, those with high profit motive (HCHP) continue to increase in numbers, while those with low profit motive (HCLP) start to decrease. The overall impact is that by round 30, almost all landholders in the population have a high profit motive!
 
 | HC25: types of agents over time | HC75: types of agents over time |
 | :---: | :---: | 
 | ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_agents.pdf.p0.png) |
 
-Participation rates for HC75 with or without visits are very similar. Hoever, for HC25 with visits we no longer see a drop in participation as we did for HC25 without visits and the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who have a high likelihood of participation.
+Participation rates for HC75 with or without visits are very similar. Hoever, for HC25 with visits we no longer see a drop in participation as we did for the original setting without visits. Now the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who tend to participate more.
 
  
 | HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
 | ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_participants.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_participants.pdf.p0.png) |
 
-After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that almost half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservatin ethics (HPLC) who dominate the original setting. 
+After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that about half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservatin ethics (HPLC) who dominate the original setting. 
 
 | HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
@@ -124,8 +124,7 @@ rsync -avz gams-macbook:testing/ testing-20170801-f5acd62-sa/
 ```
 ./postproc.sh ./testing-20170801-f5acd62-sa/test/output/
 ```
-This will create the database `./testing-20170801-f5acd62-sa/test/output/output.db`
-You have to do this for each scenario that was run. For instance, for the two-scenario experiments, you will have to do all of the following:
+This will create the database `./testing-20170801-f5acd62-sa/test/output/output.db`. You have to do this for each scenario that was run. For instance, for the HC25/HC75 experiments, you will have to do all of the following:
 ```
 ./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/
 ./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/
@@ -137,7 +136,13 @@ You have to do this for each scenario that was run. For instance, for the two-sc
 ./correlation.R ../../testing-20170801-f5acd62-sa/test/output/ 30
 ./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/ 30
 ```
-Here the parameter `30` refers to the number of auction cycles that were run.
+Here the parameter `30` refers to the number of auction cycles that were run. All plots are saved as PDFs in the same directory as the corresponding `output.db`. 
+
+The figures included in this report were converted from PDF to PNG format. Guess what, there's a script for that :smiley: In the same directory as this report, do something like the following:
+```
+./collate-results.sh ../testing-20170801-f5acd62-sa/ ./testing-20170801-f5acd62-sa
+```
+This will search in the `../testing-20170801-f5acd62-sa/` input directory recursively for all PDFs, and copy them over to the new directory `./testing-20170801-f5acd62-sa` (it maintains the original directory structure), and then converts all PDFs to PNGs. Any multipage PDFs will be converted to several PNG files, one per page. The output image files will be placed alongside the copied PDFs. 
 
 # About the model
 
