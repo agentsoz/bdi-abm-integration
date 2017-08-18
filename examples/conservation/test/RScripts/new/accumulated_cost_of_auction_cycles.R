@@ -1,5 +1,5 @@
 #!/usr/bin/Rscript
-library(sqldf)
+suppressMessages(library(sqldf))
 
 
 #
@@ -37,7 +37,7 @@ analysis <- function(db) {
 			result <- data.matrix(df)
 			final_result[c,] = c(c,mean(result[,1]))
 		}
-
+		print(final_result)
 		print(sprintf("sample number:%s, accumulated cost:%s", i, as.numeric(colSums(final_result)[2])))
 	}
 
