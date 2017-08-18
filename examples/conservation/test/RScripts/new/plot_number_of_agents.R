@@ -23,7 +23,7 @@ samples_file_path <- sprintf('%ssamples.txt', experiment_dir)
 samples = read.csv(samples_file_path, header = FALSE, sep='	')
 sampleCount <- nrow(samples)
 x_axis_param="cycle_number"
-y_axis_params <- c("LCHP_agents", "HCHP_agents", "LCLP_agents", "HCLP_agents")
+y_axis_params <- c("LCHP_agents", "HCHP_agents", "LCLP_agents", "HCLP_agents","HP_agents", "HC_agents")
 
 # process database
 
@@ -33,7 +33,7 @@ plot_pair <- function(all, labels) {
 		geom_line() +
 		geom_point(size=3) +
 		ylim(0,100) +
-		scale_shape_manual(values = c(15, 17, 19, 8)) +
+		scale_shape_manual(values = c(15, 17, 19, 8, 0, 2, 5)) +
 		theme_bw() +
   		theme(
 			legend.title=element_text(size=12,face="bold"),
@@ -52,7 +52,7 @@ plot_pair <- function(all, labels) {
 
 
 analysis <- function(db) {
-	plot_file_path <- sprintf('%snumber_of_agents_in_each_category.pdf', experiment_dir)
+	plot_file_path <- sprintf('%snumber_of_agents.pdf', experiment_dir)
 	pdf(plot_file_path)
 
 	for (i in 1:sampleCount ) {
@@ -70,7 +70,7 @@ analysis <- function(db) {
 		}
 		result = result/REPLICATES
 
-		output <- matrix(ncol=5, nrow=nrow(result))
+		output <- matrix(ncol=7, nrow=nrow(result))
 		slabels <- matrix(ncol=1, nrow=nrow(result))
 		colnames(output) <- c(x_axis_param, y_axis_params)
 		colnames(slabels) <- c("Sample")
@@ -79,6 +79,8 @@ analysis <- function(db) {
 		output[,3] = result[,3]
 		output[,4] = result[,4]
 		output[,5] = result[,5]
+		output[,6] = result[,2]+result[,3]
+		output[,7] = result[,3]+result[,5]
 		output = output[order(output[,"cycle_number"]),]
 		print(output)
 

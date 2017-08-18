@@ -75,7 +75,8 @@ analysis <- function(db) {
 			}
 		}
 		print(final_result)
-		#plot_pair(output_names[1], output_names[2], final_result)
+		print(sprintf("sample number:%s, accumulated cost:%s", i, as.numeric(colSums(final_result)[2])))
+
 		slabels <- matrix(ncol=1, nrow=nrow(final_result))
 		slabels[,1] = paste(samples[i,],collapse=" ")
 		plot_pair(as.data.frame(final_result), slabels)
