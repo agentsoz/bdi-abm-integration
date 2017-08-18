@@ -34,12 +34,15 @@ In HC25, the relatively higher starting proportion of HP agents leads to greater
 
 | HC25 | HC75 |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents_in_highlow_categories.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents_in_highlow_categories.pdf.p0.png) |
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents_in_each_category.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents_in_each_category.pdf.p0.png) |
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
 
-[**TO DO**] *We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and quickly rises and settles at ~80%, the change representative of the increasing participation from HC landholders. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing to ~20% by 100 auctions, driven predominantly by HP landholders gradually getting more involved.*
+We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%, following a similat increasing in the number of HC agents that have higher participation rates than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is ~5 times that of HC25 and by 30 rounds the difference is still ~2 times.
 
-Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The Figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency steadily increases over successive auction rounds. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more landholders  with high CE, who tend to bid with moderate to low profit margins. *At the end of 30 auction rounds, the cost of auctions for HC25 is more than double that of HC75.*
+| HC25 | HC75 |
+| :---: | :---: | 
+| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png)| ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png) |
+
+Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is 73% higher than HC75. This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.
 
 | HC25 | HC75 |
 | :---: | :---: | 

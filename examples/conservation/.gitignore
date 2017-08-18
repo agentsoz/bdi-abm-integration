@@ -1,4 +1,5 @@
 /target/
+/testing-*/
 _gams_java_*
 *.csv
 *.log
