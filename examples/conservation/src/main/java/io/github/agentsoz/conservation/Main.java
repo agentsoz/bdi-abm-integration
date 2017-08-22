@@ -29,7 +29,6 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentState;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.bdiabm.data.PerceptContainer;
-import io.github.agentsoz.conservation.ExtensionOffice.Policy;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.AgentsProgressWriter;
 import io.github.agentsoz.conservation.outputwriters.AgentsStatisticsWriter;
@@ -177,7 +176,6 @@ public class Main {
 		auctioneerModel = new AuctioneerModel(gamsDir, gamsModel);
 		landholderModel = new LandholderModel();
 		extensionOffice = new ExtensionOffice();
-		extensionOffice.setPolicy(getVisitPolicy());
 		asl = new AgentStateList();
 		adc = new AgentDataContainer();
 
@@ -551,9 +549,14 @@ public class Main {
 				+ "                                        that should be assigned as the target (default is "
 				+ getTargetPercentage()
 				+ ")\n"
-				+ "  -visitPolicy                          Extension office visiting policy\n"
-				+ "                                        one of: "+getVisitPolicyOptions()+"(default is "
-				+ getVisitPolicy()
+                + "  -visitType                            Types of landholders visited by extension office\n"
+                + "                                        one of 0 (none) 1 (successful only), 2 (successful and unsuccessful only), 3 (all)\n"
+                + "                                        (default is "
+                + ExtensionOffice.getCoverageType()
+                + ")\n"
+				+ "  -visitPercentage                      Percentage of landholders (selected by -visitType) visited by extension office "
+				+ "                                        (default is "
+				+ ExtensionOffice.getVisitPercentage()
 				+ ")\n"
 				+ "  -upper_threshold_c                    upper threshold for conservation ethic barometer to be high (default is "
 				+ getUpperThresholdC()
@@ -807,16 +810,26 @@ public class Main {
 					}
 				}
 				break;
-			case "-visitPolicy":
+			case "-visitType":
 				if (i + 1 < args.length) {
 					i++;
 					try {
-						setVisitPolicy(Policy.valueOf(args[i]));
+                        ExtensionOffice.setCoverageType(Integer.parseInt(args[i]));
 					} catch (Exception e) {
-						exit("-visitPolicy value '" + args[i] + "' is not a Policy");
+						exit("-visitType value '" + args[i] + "' is not an integer");
 					}
 				}
 				break;
+            case "-visitPercentage":
+              if (i + 1 < args.length) {
+                  i++;
+                  try {
+                    ExtensionOffice.setVisitPercentage(Double.parseDouble(args[i]));
+                  } catch (Exception e) {
+                      exit("-visitPercentage value '" + args[i] + "' is not a double");
+                  }
+              }
+              break;
 			case "-sigmoidMaxStepX":
 				if (i + 1 < args.length) {
 					i++;

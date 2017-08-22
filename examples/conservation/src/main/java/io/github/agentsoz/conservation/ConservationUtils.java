@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
-import io.github.agentsoz.conservation.ExtensionOffice.Policy;
-
 /**
  * Store all configurable parameters with their default values and some utility
  * functions.
@@ -173,12 +171,7 @@ public class ConservationUtils {
 	 * Command line argument to set this value: -targetPercentage
 	 */
 	private static double targetPercentage = 12;
-
-	/**
-	 * The visiting policy for extension officers. See {@link Policy}.
-	 */
-	private static Policy visitPolicy = ExtensionOffice.Policy.NEVER;
-	
+		
 	/**
 	 * The minimum margin of high profit range
 	 * 
@@ -256,20 +249,6 @@ public class ConservationUtils {
 		return lowerThresholdP;
 	}
 	
-	public static Policy getVisitPolicy() {
-		return visitPolicy;
-	}
-	public static void setVisitPolicy(Policy p) {
-		visitPolicy = p;
-	}
-	public static String getVisitPolicyOptions() {
-		String opts = "";
-		for (Policy p : Policy.values()) {
-			opts += p + " ";
-		}
-		return opts;
-	}
-
 	public static void setHighParticipationProbability(double value) {
 		highParticipationProbability = value;
 	}

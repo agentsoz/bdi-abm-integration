@@ -10,14 +10,13 @@ targetPercentage=${3}
 sigmoidMaxStepX=${4}
 profitMotiveUpdateMultiplier=${5}
 socialNormUpdateMultiplier=${6} 
-GLOBAL_SEED=${7}
 NUMPACKAGES=${NUMPACKAGES:-26} # 26 packages, or set to 5 if running GAMS in demo mode
 CYCLES=${CYCLES:-30}
-VISITPOLICY=${VISITPOLICY:-0} # 0 NEVER, 1 ALWAYS
-VPOLICY="NEVER"
-if [ "${VISITPOLICY}" == "1" ] ; then
-	VPOLICY="ALWAYS"
-fi
+VISITTYPE=${7} # 0 NONE, 1 SUCCESSFUL ONLY, 2 SUCCESSFUL+UNSUCCCESSFUL ONLY, 3 ALL
+VISITPERCENT=${8} # In range [0.0,100.0]
+
+GLOBAL_SEED=${9} # always the last param
+
 
 # Set the following variable to point to the root of your GAMS installation, for instance,
 GAMS_DIR=
@@ -57,7 +56,7 @@ agents:
  ]
 }"'
 
-CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c $CYCLES -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -highCEAgentsPercentage ${highCEAgentsPercentage} -targetPercentage ${targetPercentage} -high_participation_prob 0.8 -low_participation_prob 0.3 -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} -visitPolicy ${VPOLICY} -sigmoidMaxStepX ${sigmoidMaxStepX} -socialNormUpdateMultiplier ${socialNormUpdateMultiplier} -profitMotiveUpdateMultiplier ${profitMotiveUpdateMultiplier} -- --config ${CFG}"
+CMD="java -cp ${CP} io.github.agentsoz.conservation.Main -gams_dir ${GAMS_DIR} -gams_model ${GAMS_MODEL} -r 1 -c $CYCLES -p ${NUMPACKAGES} -a ${NUMAGENTS} -profitDifferenctial 40 -profitVariability 20 -defaultMaxNumberOfBids 8 -bidAddon 5 -highCEAgentsPercentage ${highCEAgentsPercentage} -targetPercentage ${targetPercentage} -high_participation_prob 0.8 -low_participation_prob 0.3 -globalRandomSeed ${GLOBAL_SEED} -log_level ${LOG_LEVEL} -visitPercentage ${VISITPERCENT} -visitType ${VISITTYPE} -sigmoidMaxStepX ${sigmoidMaxStepX} -socialNormUpdateMultiplier ${socialNormUpdateMultiplier} -profitMotiveUpdateMultiplier ${profitMotiveUpdateMultiplier} -- --config ${CFG}"
 
 echo "Started at " `date`
 echo $CMD; eval $CMD

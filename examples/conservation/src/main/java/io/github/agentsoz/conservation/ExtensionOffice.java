@@ -1,25 +1,17 @@
 package io.github.agentsoz.conservation;
 
 /*
- * #%L
- * BDI-ABM Integration Package
- * %%
- * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * #%L BDI-ABM Integration Package %% Copyright (C) 2014 - 2017 by its authors. See AUTHORS file. %%
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Lesser Public License for more details.
  * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
+ * You should have received a copy of the GNU General Lesser Public License along with this program.
+ * If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>. #L%
  */
 
 import java.util.HashMap;
@@ -31,138 +23,126 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 
 /**
- * Extension Office keeps track of its extension officers and their
- * visits to the landholders given constraints/policies.
+ * Extension Office keeps track of its extension officers and their visits to the landholders given
+ * constraints/policies.
  * 
  * @author dsingh
  *
  */
 public class ExtensionOffice {
-	
-    final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
-	/**
-	 * Extension office visiting policy. The impact of a visit on a landholder
-	 * is an increase in her conservation ethics baromaeter value, as determined
-	 * by the config parameter {@link ConservationUtils#getVisitConservationEthicBoostValue()}:
-	 * <ul>
-	 * <li> NEVER: No visits are ever conducted
-	 * <li> ALWAYS: Landholders are visited prior to every auction
-	 * </ul>
-	 * 
-	 */
-	public enum Policy {
-		NEVER,
-		ALWAYS
-	}
-	
-	// Handle to the global agent data container
-	private AgentDataContainer adc;
-	
-	// Keep track of visits per agent
-	private HashMap<String, Integer> visits;
-	
-	// Visiting policy in use
-	private VisitPolicy policy = new VisitPolicy(0,0,0);
-	
-	public ExtensionOffice() {
-		visits = new HashMap<String, Integer>();
-	}
-	
-	public void setPolicy(Policy policy) {
-		switch (policy) {
-		case NEVER:
-			setPolicy(0,0,0);
-			break;
-		case ALWAYS:
-			setPolicy(0, 1, Integer.MAX_VALUE);
-		}
-	}
-	
-	public void setPolicy(int start, int frequency, int end) {
-		VisitPolicy p = new VisitPolicy(start, frequency, end); 
-		if (start < 0 || end < start || frequency < 1) {
-			logger.warn("Extension Office received invalid visits policy" + p + "; will ignore");
-			return;
-		}
-		policy = p;
-	}
-	
-	public void conductVisits(int cycle) {
-		// Check if the current cycle falls in the visiting policy
-		if (cycle < policy.getStartCycle() || 
-				cycle > policy.getEndCycle() || 
-				policy.getFrequency() == 0 || 
-				(cycle-policy.getStartCycle())%policy.getFrequency() != 0) 
-		{
-			logger.info("Cycle "+cycle+" not an extension office visit round" + 
-				" (policy is " + policy + "), so no visits conducted");
-			return;
-		}
-		logger.info("Extension office will conduct visits; cycle is "+ cycle + 
-				" and policy is " + policy);
+  final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
-		// Winning and in-contract land holders will be visited by an extension officer
-		for (String name : visits.keySet()) {
-			// If the agent has at least one active contract]
-			Landholder agent = Main.getLandholder(name);
-			int active = agent.getContracts().activeCount(); 
-			if ( active > 0 ) {
-				logger.info("Agent "+name+" with contracts "+agent.getContracts()+" will be visited by extension officer" );
-				adc.getOrCreate(name).getPerceptContainer().put(
-						Global.percepts.EXTENSION_OFFICER_VISIT.toString(), 
-						null);
-				// Record the visit
-				visits.put(name, visits.get(name)+1);
-				// Decrement the contracts remaining time
-				agent.getContracts().decrementYearsLeftOnAllContracts();
-			}
-		}
-	}
-	
-	public void init(AgentDataContainer adc, String[] agents) {
-		this.adc = adc;
+  /**
+   * The types of landholders that will be coverd by extension officer visits. <ul> <li> NONE: No
+   * visits are ever conducted <li >SUCCESSFUL_ONLY: Only landholders with active contracts are
+   * visited <li> SUCCESSFUL_AND_UNSUCCESSFUL_ONLY: Only landholders with active contracts and those
+   * who were unsuccessful in the last round are visited <li> ALL: All landholders are visited </ul>
+   *
+   */
+  public enum CoverageType {
+    NONE, SUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, ALL,
+  }
 
-		// Nothing else to do if no agents were given
-		if (agents == null || agents.length == 0) {
-			return;
-		}
-		// Initialise visits to all agents 
-		for (String agent : agents) {
-			visits.put(agent, 0);
-		}
-	}
+  // Handle to the global agent data container
+  private AgentDataContainer adc;
+
+  // Keep track of visits per agent
+  private HashMap<String, Integer> visits;
+  
+  private static CoverageType coverageType = CoverageType.NONE;
+  private static double visitPercentage = 0.0;
+
+  public ExtensionOffice() {
+    visits = new HashMap<String, Integer>();
+  }
+
+  /**
+   * Sets the percentage of the population that should be visited (probabilistically). This
+   * percentage is applied to the set of agents first seleted by the {@link #setCoverageType(int)}
+   * filter.
+   * 
+   * @param visitPercentage value in range {@code [0.0, 1.0]}
+   */
+  public static void setVisitPercentage(double visitCoveragePercentage) {
+    visitPercentage = visitCoveragePercentage;
+  }
+
+  public static double getVisitPercentage() {
+    return visitPercentage;
+  }
+
+  /**
+   * Sets the coverage type for visits using the given type index in {@link CoverageType}. The value
+   * is un changed if the index is invalid.
+   * 
+   * @param typeIndex value in range {@code [0, CoverageType.values().length]}
+   */
+  public static void setCoverageType(int typeIndex) {
+    CoverageType[] types = CoverageType.values();
+    if (typeIndex > 0 && typeIndex < types.length) {
+      coverageType = types[typeIndex];
+    }
+  }
+
+  public static int getCoverageType() {
+    return coverageType.ordinal();
+  }
+  
+  
+  public void conductVisits(int cycle) {
+    logger.debug("Will conduct visits to {}% of landholders of type {}", visitPercentage,
+        coverageType);
+
+    // Winning and in-contract land holders will be visited by an extension officer
+    for (String name : visits.keySet()) {
+      Landholder agent = Main.getLandholder(name);
+      int active = agent.getContracts().activeCount(); // count active contracts for this agent
+      boolean willVisit = false;
+      if (coverageType == CoverageType.ALL) {
+        willVisit = true;
+      } else if (coverageType == CoverageType.SUCCESSFUL_ONLY && active > 0) {
+        willVisit = true;
+      } else if (coverageType == CoverageType.SUCCESSFUL_AND_UNSUCCESSFUL_ONLY) {
+        if (active > 0) { 
+          // cover the successful ones
+          willVisit = true;
+        } else if (agent.getCurrentAuctionRound() != null &&
+            agent.getCurrentAuctionRound().isParticipated() && 
+            !agent.getCurrentAuctionRound().isWon()) {
+          // cover the unsuccessful ones
+          willVisit = true;
+        }
+        // TODO: cover the unsuccessful ones
+      }
+      if (willVisit) {
+        logger.info("Agent " + name + " with contracts " + agent.getContracts()
+            + " will be visited by extension officer");
+        adc.getOrCreate(name).getPerceptContainer()
+            .put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), null);
+        // Record the visit
+        visits.put(name, visits.get(name) + 1);
+      }
+      // Update the contracts
+      if (active > 0) {
+        // Decrement the contracts remaining time
+        agent.getContracts().decrementYearsLeftOnAllContracts();
+      }
+    }
+  }
+
+  public void init(AgentDataContainer adc, String[] agents) {
+    this.adc = adc;
+
+    // Nothing else to do if no agents were given
+    if (agents == null || agents.length == 0) {
+      return;
+    }
+    // Initialise visits to all agents
+    for (String agent : agents) {
+      visits.put(agent, 0);
+    }
+  }
 
 
-	private class VisitPolicy {
-		private int startCycle;
-		private int frequency;
-		private int endCycle;
-		
-		
-		public VisitPolicy(int startCycle, int frequency, int endCycle) {
-			super();
-			this.startCycle = startCycle;
-			this.frequency = frequency;
-			this.endCycle = endCycle;
-		}
-		
-		public int getStartCycle() {
-			return startCycle;
-		}
-		public int getFrequency() {
-			return frequency;
-		}
-		public int getEndCycle() {
-			return endCycle;
-		}
-		
-		public String toString() {
-			return "[" + 
-					startCycle + "," + 
-					frequency + "," + 
-					endCycle + 
-					"]";
-		}
-	}
 }
