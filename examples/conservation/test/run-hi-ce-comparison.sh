@@ -17,6 +17,8 @@ TARGET_PERCENTAGE=${TARGET_PERCENTAGE:-12}
 SIGMOID_MAX_STEP_X=${SIGMOID_MAX_STEP_X:-20}
 PROFIT_MOTIVE_UPDATE_MULTIPLIER=${PROFIT_MOTIVE_UPDATE_MULTIPLIER:-0.1}
 SOCIAL_NORM_UPDATE_MULTIPLIER=${SOCIAL_NORM_UPDATE_MULTIPLIER:-0.1}
+VISIT_TYPE=${VISIT_TYPE:-0}
+VISIT_PERCENTAGE=${TARGET_PERCENTAGE:-100}
 #-------------------------------------------------------------------------
 # End USER CONFIG
 #-------------------------------------------------------------------------
@@ -33,11 +35,12 @@ OUTDIR=$1
 rm -rf $OUTDIR
 mkdir $OUTDIR
 
-# Create the config file which is also needed by post processing scripts
+# Create the samples header file (note that the delimiter is the TAB character)
 cat << EOF > $OUTDIR/samples.txt
-$NUMAGENTS	$HI_CE_AGENTS_PERCENTAGE	$TARGET_PERCENTAGE	$SIGMOID_MAX_STEP_X
+$NUMAGENTS	$HI_CE_AGENTS_PERCENTAGE	$TARGET_PERCENTAGE	$SIGMOID_MAX_STEP_X	$PROFIT_MOTIVE_UPDATE_MULTIPLIER	$SOCIAL_NORM_UPDATE_MULTIPLIER	$VISIT_TYPE	$VISIT_PERCENTAGE
 EOF
 
+# Create the config file which is also needed by post processing scripts
 cat << EOF > $OUTDIR/config
 SAMPLES=1
 REPLICATES=$REPEATS
@@ -49,7 +52,7 @@ cat $OUTDIR/samples.txt | while read x; do
 	for ((replicate=1; replicate<=REPLICATES; replicate++)); do
  		dst="$OUTDIR/log/archive-$sample-$replicate"
 		mkdir -p "$dst"
-		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && VISITPOLICY=$VISITPOLICY && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $PROFIT_MOTIVE_UPDATE_MULTIPLIER $SOCIAL_NORM_UPDATE_MULTIPLIER $replicate > model.out"
+		CMD="cd $dst && NUMPACKAGES=$PACKAGES && CYCLES=$CYCLES && . $PBS_O_WORKDIR/model.sh $NUMAGENTS $HI_CE_AGENTS_PERCENTAGE $TARGET_PERCENTAGE $SIGMOID_MAX_STEP_X $PROFIT_MOTIVE_UPDATE_MULTIPLIER $SOCIAL_NORM_UPDATE_MULTIPLIER $VISIT_TYPE	$VISIT_PERCENTAGE $replicate > model.out"
 		echo $CMD
 		eval $CMD
 		rm -f _gams*
@@ -71,8 +74,10 @@ PBS_O_WORKDIR=`realpath $DIR`
 export PBS_O_WORKDIR=$PBS_O_WORKDIR
 
 
-HI_CE_AGENTS_PERCENTAGE=25 && VISITPOLICY=1 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25.visit
-HI_CE_AGENTS_PERCENTAGE=75 && VISITPOLICY=1 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75.visit
-HI_CE_AGENTS_PERCENTAGE=25 && VISITPOLICY=0 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25
-HI_CE_AGENTS_PERCENTAGE=75 && VISITPOLICY=0 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75
+HI_CE_AGENTS_PERCENTAGE=25 && VISIT_TYPE=1 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25.visit.t1p100
+HI_CE_AGENTS_PERCENTAGE=75 && VISIT_TYPE=1 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75.visit.t1p100
+HI_CE_AGENTS_PERCENTAGE=25 && VISIT_TYPE=2 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25.visit.t2p100
+HI_CE_AGENTS_PERCENTAGE=75 && VISIT_TYPE=2 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75.visit.t2p100
+HI_CE_AGENTS_PERCENTAGE=25 && VISIT_TYPE=0 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice25
+HI_CE_AGENTS_PERCENTAGE=75 && VISIT_TYPE=0 && VISIT_PERCENTAGE=100 && run $PBS_O_WORKDIR/`basename "$0"`.output.hice75
 
