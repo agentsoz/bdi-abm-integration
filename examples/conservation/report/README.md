@@ -1,29 +1,38 @@
 # Conservation Ethics Experiments Report
 
-This report is valid for commit [5c3a824](https://github.com/agentsoz/bdi-abm-integration/commit/5c3a824f836c46e75b4c7424df1c27fd3282a7c8).
+This report is valid for commit [6bc7fc2](https://github.com/agentsoz/bdi-abm-integration/commit/6bc7fc2b5852145db81b1bd0cf571cbe335010b6).
 
 
 # Experiments
 
-All experiments were repeated 20 times. Each data point on the graphs below represents the average value from 20 runs.
+All experiments were repeated 20 times and each data point on the graphs below represents the average value from those runs.
 
 ## Sensitivity Analysis (SA)
 
 
-The SA experiments are configured with the following six parameters:
+Sensitivity Analysis involves building an understanding of how sensitive outputs of the model are to changes in its inputs. Input parameter values for this experiment were generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. The method works by taking samples of each input variable from even sized buckets across its range just like in Latin Hypercube Sampling, but then combining those orthogonally (nearly), thus giving improved space-filling properties to the experiment design. The SA experiment used samples built from the following input parameters:
 
 | Parameter | Description | 
 | :--- | :------------------------------------------------------------------- |
 | `numberOfAgents` |  number of landholder agents in the simulation |
-| `highCEAgentsPercentage` | Percentage of agents with high conservation ethic |
-| `targetPercentage` | Percentage of maximum possible target (if all agents bid on the highest package) that should be assigned as the target  |
-| `sigmoidMaxStepX` | Limits the amount by which the sigmoid function value can change in one step by limiting the max change in x by this value |
+| `highCEAgentsPercentage` | Percentage of agents with high conservation ethic; value in range [0,100] |
+| `targetPercentage` | Percentage of maximum possible target (if all agents bid on the highest package) that should be assigned as the target; value in range [0,100]  |
+| `sigmoidMaxStepX` | Limits the amount by which the sigmoid function value can change in one step by limiting the max change in x by this value; value in range [0,100] |
 | `profitMotiveUpdateMultiplier` | Multiplier in range [0.0,1.0] applied to `sigmoidMaxStepX` to calculate an agent's profit motive change|
 | `socialNormUpdateMultiplier` | Multiplier in range [0.0,1.0] applied to `sigmoidMaxStepX` to control how quickly an agent's CE gravitates towards the social norm|
+| `visitType` | Types of landholders visited by extension office; 0 (none) 1 (successful only), 2 (successful and unsuccessful only), 3 (all); increasing numbers represent an increasing proportion of landholders visited |
+| `visitPercentage` | Percentage of landholders (selected by `visitType`) visited by extension office; value in range [0,100] |
 
-[**TO DO**] *Explain SA and the results.* The following figure shows the correlation results:
 
-![](testing-20170801-f5acd62-sa/test/output/correlation_diagram.pdf.p0.png)
+The following figure gives the correlation results, and was generated using 33 input configuration samples, each run 20 times. The rows represent selected inputs, while the columns represent various outputs. Cells with numbers repsent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a higly negatively correlated pair. 
+
+![](testing-20170825-6bc7fc2-sa/test/output/correlation_diagram.pdf.p0.png)
+
+As one would expect, we see a positive correlation between the `numAgents` input parameter and the absolute counts of agents in various classes at the end of the simulation. We can also see that increasing `targetPercentage` tends to lower the number of winners overall and in various categories and is an artifcat of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to `numberOfAgents=100` and `targetPercentage=12`. Model outputs are insensitive to the parameters that control how quickly the profit motive and social norm values are updated, i.e., `profitMotiveUpdateMultiplier` and `socialNormUpdateMultiplier` respectively. This just means that while they influence the rate of change of those variables *during* the simulation, they do not change the outcomes at the *end* of the simulation.
+
+With respect to the visiting policy `visitType` for extension officers (remembering that higher visiting policy numbers represent a higher proportion of landholders visited), we find a positive correlation with the change in social norm (average CE), and a negative correlation with the number of low CE landholders at the end of the simulation. This reflects the fact that visits from extension officers increase the CE of landholders being visited.
+
+**FIXME**: *The percentage of agents visited by extension officers `visitPercentage` does not seem to influence the outputs. That would be because the code to implement the proportional choice is not implemented. Doh!*
 
 
 ## Comparing starting populations with 25% and 75% HC agents  
@@ -36,19 +45,19 @@ In HC25, the relatively higher starting proportion of HP agents leads to greater
 
 | HC25: types of agents over time | HC75: types of agents over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png) |
 
 We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%. This is due to a corresponding increase in the number of HC agents, who tend to participate more than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is five times that of HC25, and by 30 rounds it is twice that of HC25.
 
 | HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png) |
 
 Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is 73% higher than HC75 (up from 171 to 295). This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.
 
 | HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png) |
 
 
 [**OLD TEXT. RESULT NOT VERIFIED YET**] *Finally, we explored the impact of social cohesion–the degree to which the CE of a landholder is influenced by the conservation norm. To do this, we created two versions each of our HC25 and HC75 populations—one with low social cohesion and one with high–giving us four populations, and repeated our experiments. Figure 3 shows how social cohesion impacts cost. Compared to the experiment in Figure 2–where the social cohesion was moderate–we find that an increase in social cohesion leads to an overall increase in HC landholders due to the stronger influence from the conservation norm. This in turn results in overall costs being substantially less than in the earlier case with moderate social cohesion.*
@@ -61,20 +70,20 @@ The types of agents over time for HC75 is very similar with or without visits. F
 
 | HC25: types of agents over time | HC75: types of agents over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_agents.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_agents.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_agents.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_agents.pdf.p0.png) |
 
 Participation rates for HC75 with or without visits are very similar. Hoever, for HC25 with visits we no longer see a drop in participation as we did for the original setting without visits. Now the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who tend to participate more.
 
  
 | HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_participants.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_participants.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_participants.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_participants.pdf.p0.png) |
 
 After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that about half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservatin ethics (HPLC) who dominate the original setting. 
 
 | HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
-| ![a](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/cost_of_auction_cycles.pdf.p0.png) |
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/cost_of_auction_cycles.pdf.p0.png) |
 
 
 # About the Experiments
@@ -101,7 +110,7 @@ To run the SA experiments, change to the [test](../test) directory and do the fo
 ```
 ./run-on-gams-machine
 ```
-This will SSH to the GAMS MBP and launch the tests there. The run may take a couple of hours depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.  
+This will SSH to the GAMS MBP and launch the tests there. The run may take a while depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.  
 
 ### Running HC25/HC75 experiments
 
@@ -127,18 +136,21 @@ rsync -avz gams-macbook:testing/ testing-20170801-f5acd62-sa/
 This will create the database `./testing-20170801-f5acd62-sa/test/output/output.db`. You have to do this for each scenario that was run. For instance, for the HC25/HC75 experiments, you will have to do all of the following:
 ```
 ./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/
-./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/
 ./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/
-./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/
 ```
-3. Finally, you can plot the results. To do that, change to the [new RScripts](../test/RScripts/new) directory and try the following kinds of commands to plot various results (they all get saved in the same directory as the `output.db` database):
+3. Finally, you can plot the results. To do that, change to the [new scripts directory](../test/new) and try the following kinds of commands to plot various results (they all get saved in the same directory as the `output.db` database):
 ```
 ./correlation.R ../../testing-20170801-f5acd62-sa/test/output/ 30
-./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/ 30
+./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/output/ 30
+./plot_hi_ce_comparison.sh
 ```
 Here the parameter `30` refers to the number of auction cycles that were run. All plots are saved as PDFs in the same directory as the corresponding `output.db`. 
 
-The figures included in this report were converted from PDF to PNG format. Guess what, there's a script for that :smiley: In the same directory as this report, do something like the following:
+The figures included in this report were converted from PDF to PNG format. Yes, there's a script for that :smiley:. In the same directory as this report, do something like the following:
 ```
 ./collate-results.sh ../testing-20170801-f5acd62-sa/ ./testing-20170801-f5acd62-sa
 ```
@@ -146,7 +158,7 @@ This will search in the `../testing-20170801-f5acd62-sa/` input directory recurs
 
 # About the model
 
-[**DESCRIBE HOW THE SIGMOID (S-CURVE) IS USED IN THE MODEL**]
+[**TO DO**] *Describe how the sigmoid (S-curve) is used in the model.*
 
 # About this report
 

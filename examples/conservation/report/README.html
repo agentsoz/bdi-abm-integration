@@ -33,11 +33,11 @@
 </ul>
 </nav>
 <h1 id="conservation-ethics-experiments-report">Conservation Ethics Experiments Report</h1>
-<p>This report is valid for commit <a href="https://github.com/agentsoz/bdi-abm-integration/commit/5c3a824f836c46e75b4c7424df1c27fd3282a7c8">5c3a824</a>.</p>
+<p>This report is valid for commit <a href="https://github.com/agentsoz/bdi-abm-integration/commit/6bc7fc2b5852145db81b1bd0cf571cbe335010b6">6bc7fc2</a>.</p>
 <h1 id="experiments">Experiments</h1>
-<p>All experiments were repeated 20 times. Each data point on the graphs below represents the average value from 20 runs.</p>
+<p>All experiments were repeated 20 times and each data point on the graphs below represents the average value from those runs.</p>
 <h2 id="sensitivity-analysis-sa">Sensitivity Analysis (SA)</h2>
-<p>The SA experiments are configured with the following six parameters:</p>
+<p>Sensitivity Analysis involves building an understanding of how sensitive outputs of the model are to changes in its inputs. Input parameter values for this experiment were generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. The method works by taking samples of each input variable from even sized buckets across its range just like in Latin Hypercube Sampling, but then combining those orthogonally (nearly), thus giving improved space-filling properties to the experiment design. The SA experiment used samples built from the following input parameters:</p>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 6%" />
@@ -56,15 +56,15 @@
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>highCEAgentsPercentage</code></td>
-<td style="text-align: left;">Percentage of agents with high conservation ethic</td>
+<td style="text-align: left;">Percentage of agents with high conservation ethic; value in range [0,100]</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>targetPercentage</code></td>
-<td style="text-align: left;">Percentage of maximum possible target (if all agents bid on the highest package) that should be assigned as the target</td>
+<td style="text-align: left;">Percentage of maximum possible target (if all agents bid on the highest package) that should be assigned as the target; value in range [0,100]</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>sigmoidMaxStepX</code></td>
-<td style="text-align: left;">Limits the amount by which the sigmoid function value can change in one step by limiting the max change in x by this value</td>
+<td style="text-align: left;">Limits the amount by which the sigmoid function value can change in one step by limiting the max change in x by this value; value in range [0,100]</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>profitMotiveUpdateMultiplier</code></td>
@@ -74,10 +74,21 @@
 <td style="text-align: left;"><code>socialNormUpdateMultiplier</code></td>
 <td style="text-align: left;">Multiplier in range [0.0,1.0] applied to <code>sigmoidMaxStepX</code> to control how quickly an agent's CE gravitates towards the social norm</td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><code>visitType</code></td>
+<td style="text-align: left;">Types of landholders visited by extension office; 0 (none) 1 (successful only), 2 (successful and unsuccessful only), 3 (all); increasing numbers represent an increasing proportion of landholders visited</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>visitPercentage</code></td>
+<td style="text-align: left;">Percentage of landholders (selected by <code>visitType</code>) visited by extension office; value in range [0,100]</td>
+</tr>
 </tbody>
 </table>
-<p>[<strong>TO DO</strong>] <em>Explain SA and the results.</em> The following figure shows the correlation results:</p>
-<p><img src="testing-20170801-f5acd62-sa/test/output/correlation_diagram.pdf.p0.png" /></p>
+<p>The following figure gives the correlation results, and was generated using 33 input configuration samples, each run 20 times. The rows represent selected inputs, while the columns represent various outputs. Cells with numbers repsent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a higly negatively correlated pair.</p>
+<p><img src="testing-20170825-6bc7fc2-sa/test/output/correlation_diagram.pdf.p0.png" /></p>
+<p>As one would expect, we see a positive correlation between the <code>numAgents</code> input parameter and the absolute counts of agents in various classes at the end of the simulation. We can also see that increasing <code>targetPercentage</code> tends to lower the number of winners overall and in various categories and is an artifcat of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to <code>numberOfAgents=100</code> and <code>targetPercentage=12</code>. Model outputs are insensitive to the parameters that control how quickly the profit motive and social norm values are updated, i.e., <code>profitMotiveUpdateMultiplier</code> and <code>socialNormUpdateMultiplier</code> respectively. This just means that while they influence the rate of change of those variables <em>during</em> the simulation, they do not change the outcomes at the <em>end</em> of the simulation.</p>
+<p>With respect to the visiting policy <code>visitType</code> for extension officers (remembering that higher visiting policy numbers represent a higher proportion of landholders visited), we find a positive correlation with the change in social norm (average CE), and a negative correlation with the number of low CE landholders at the end of the simulation. This reflects the fact that visits from extension officers increase the CE of landholders being visited.</p>
+<p><strong>FIXME</strong>: <em>The percentage of agents visited by extension officers <code>visitPercentage</code> does not seem to influence the outputs. That would be because the code to implement the proportional choice is not implemented. Doh!</em></p>
 <h2 id="comparing-starting-populations-with-25-and-75-hc-agents">Comparing starting populations with 25% and 75% HC agents</h2>
 <p>Our first set of simulation results show the emergence of motivational crowding out, where monetary reward (profit) can negatively impact the intrinsic motivation to conserve (conservation ethic). The figure below shows how the percentage of high-conservation (HC) and high-profit (HP) agents changes over successive auctions, in two different initial populations:</p>
 <ul>
@@ -94,8 +105,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -109,8 +120,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -124,8 +135,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -142,8 +153,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_agents.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_agents.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_agents.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_agents.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -157,8 +168,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/number_of_participants.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/number_of_participants.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_participants.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_participants.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -172,8 +183,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -190,7 +201,7 @@
 <p>Sensitivity Analysis (SA) samples are generated using the Nearly Othogonal Latin Hypercube (NOLH) method. If you wish to add new parameters to the latin hypercube, edit the <a href="../test/NOLHdesigns_v5.xls">NOLH spreadsheet</a> and then cut and paste the samples that the spreadsheet generates into <a href="../test/output/samples.txt">samples.txt</a> (<em>note that the separator is the TAB character, and not spaces</em>). You will also have to update the number of samples in <a href="../test/output/config">config</a>.</p>
 <p>To run the SA experiments, change to the <a href="../test">test</a> directory and do the following:</p>
 <pre><code>./run-on-gams-machine</code></pre>
-<p>This will SSH to the GAMS MBP and launch the tests there. The run may take a couple of hours depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.</p>
+<p>This will SSH to the GAMS MBP and launch the tests there. The run may take a while depending on the number of samples, and the number of replicates (repeats) per sample. Roughly, each run takes about a minute, so if you have 17 samples running 20 replicates each, then you'll be looking at something in the order of 17*20 minutes for the experiments to complete.</p>
 <h3 id="running-hc25hc75-experiments">Running HC25/HC75 experiments</h3>
 <p>To run these experiments, change to the <a href="../test">test</a> directory and do the following:</p>
 <pre><code>./run-on-gams-machine ./run-hi-ce-comparison.sh</code></pre>
@@ -203,19 +214,22 @@
 <pre><code>./postproc.sh ./testing-20170801-f5acd62-sa/test/output/</code></pre>
 <p>This will create the database <code>./testing-20170801-f5acd62-sa/test/output/output.db</code>. You have to do this for each scenario that was run. For instance, for the HC25/HC75 experiments, you will have to do all of the following:</p>
 <pre><code>./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/
-./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/
 ./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/
-./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/</code></pre></li>
-<li><p>Finally, you can plot the results. To do that, change to the <a href="../test/RScripts/new">new RScripts</a> directory and try the following kinds of commands to plot various results (they all get saved in the same directory as the <code>output.db</code> database):</p>
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/</code></pre></li>
+<li><p>Finally, you can plot the results. To do that, change to the <a href="../test/new">new scripts directory</a> and try the following kinds of commands to plot various results (they all get saved in the same directory as the <code>output.db</code> database):</p>
 <pre><code>./correlation.R ../../testing-20170801-f5acd62-sa/test/output/ 30
-./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/run-hi-ce-comparison.sh.output.hice75.visit/ 30</code></pre>
+./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/output/ 30
+./plot_hi_ce_comparison.sh</code></pre>
 <p>Here the parameter <code>30</code> refers to the number of auction cycles that were run. All plots are saved as PDFs in the same directory as the corresponding <code>output.db</code>.</p></li>
 </ol>
-<p>The figures included in this report were converted from PDF to PNG format. Guess what, there's a script for that 😃 In the same directory as this report, do something like the following:</p>
+<p>The figures included in this report were converted from PDF to PNG format. Yes, there's a script for that 😃. In the same directory as this report, do something like the following:</p>
 <pre><code>./collate-results.sh ../testing-20170801-f5acd62-sa/ ./testing-20170801-f5acd62-sa</code></pre>
 <p>This will search in the <code>../testing-20170801-f5acd62-sa/</code> input directory recursively for all PDFs, and copy them over to the new directory <code>./testing-20170801-f5acd62-sa</code> (it maintains the original directory structure), and then converts all PDFs to PNGs. Any multipage PDFs will be converted to several PNG files, one per page. The output image files will be placed alongside the copied PDFs.</p>
 <h1 id="about-the-model">About the model</h1>
-<p>[<strong>DESCRIBE HOW THE SIGMOID (S-CURVE) IS USED IN THE MODEL</strong>]</p>
+<p>[<strong>TO DO</strong>] <em>Describe how the sigmoid (S-curve) is used in the model.</em></p>
 <h1 id="about-this-report">About this report</h1>
 <p><a href="./README.md">This report</a> is written in <a href="https://daringfireball.net/projects/markdown/">Markdown</a>. The <a href="http://htmlpreview.github.io/?https://github.com/agentsoz/bdi-abm-integration/blob/master/examples/conservation/report/README.html">HTML version of this report</a> was produced using <a href="http://pandoc.org">Pandoc</a> with the following command:</p>
 <pre><code>pandoc -s --toc -f markdown_github -t html5 -c ./github-pandoc.css README.md  &gt; README.html </code></pre>
