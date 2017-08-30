@@ -62,9 +62,9 @@ Next we look at the difference in cost to the agency between the two sample popu
 
 [**OLD TEXT. RESULT NOT VERIFIED YET**] *Finally, we explored the impact of social cohesion–the degree to which the CE of a landholder is influenced by the conservation norm. To do this, we created two versions each of our HC25 and HC75 populations—one with low social cohesion and one with high–giving us four populations, and repeated our experiments. Figure 3 shows how social cohesion impacts cost. Compared to the experiment in Figure 2–where the social cohesion was moderate–we find that an increase in social cohesion leads to an overall increase in HC landholders due to the stronger influence from the conservation norm. This in turn results in overall costs being substantially less than in the earlier case with moderate social cohesion.*
 
-## Understanding the impact of Extension Officers visits (Phase 1)
+## Understanding the impact of Extension Officers visits (Case 1)
 
-This experiment introduces the notion of extension officer visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visited once per round. The impact of a visit on a landholder is a boost in her conservation ethic (along the S-curve).
+This experiment introduces the notion of extension officer visits. In this setting, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visited once per round. The impact of a visit on a landholder is a boost in her conservation ethic (along the S-curve).
 
 The types of agents over time for HC75 is very similar with or without visits. For HC25 though, we see an interesting effect from the visits. In the early rounds, the number of HC agents increases due to the boost in conservation ethics from the visits. However, after around 10 rounds, we find that the HC population as a whole stays fairly constant. Within the HC population, those with high profit motive (HCHP) continue to increase in numbers, while those with low profit motive (HCLP) start to decrease. The overall impact is that by round 30, almost all landholders in the population have a high profit motive!
 
@@ -84,6 +84,24 @@ After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in 
 | HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
 | ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/cost_of_auction_cycles.pdf.p0.png) |
+
+## Understanding the impact of Extension Officers visits (Case 2)
+
+While in Case 1, the extension officer visits were restricted to successful landholders with active contracts only, in this setting we look at the impact of increasing the visits to also include unsuccessful bidders from the latest auction round. 
+
+The results are plotted in the figures below. In Case 2, we see no significant difference in the HC75 population from the increased visits, i.e., the types of agents over time, their participation, and the cost to the agency is comparable to Case 1. In the HC25 population however, we see quite interesting results. First, the extra visits have tipped the balance with respect to the makeup of the final population: whereas in Case 1 in the final population almost all landholders had high profit motive, now they all have a high CE! The participation rate for HC25 has also almost doubled to ~75%. Finally, the cost to the agency has a slightly downward trajectory in contract to Case 1 where the cost while lower than without visits, was still trending upwards. The cumulative cost in Case 2 is 14% lower than Case 1 (down from 214 to 185). 
+
+| HC25: types of agents over time | HC75: types of agents over time |
+| :---: | :---: | 
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/number_of_agents.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/number_of_agents.pdf.p0.png) |
+
+| HC25: participation over time | HC75: participation over time |
+| :---: | :---: | 
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/number_of_participants.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/number_of_participants.pdf.p0.png) |
+
+| HC25: cost of auctions over time | HC75: cost of auctions over time |
+| :---: | :---: | 
+| ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/cost_of_auction_cycles.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/cost_of_auction_cycles.pdf.p0.png) |
 
 
 # About the Experiments
