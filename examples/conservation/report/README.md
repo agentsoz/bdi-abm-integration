@@ -10,7 +10,7 @@ All experiments were repeated 20 times and each data point on the graphs below r
 ## Sensitivity Analysis (SA)
 
 
-Sensitivity Analysis involves building an understanding of how sensitive outputs of the model are to changes in its inputs. Input parameter values for this experiment were generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. The method works by taking samples of each input variable from even sized buckets across its range just like in Latin Hypercube Sampling, but then combining those orthogonally (nearly), thus giving improved space-filling properties to the experiment design. The SA experiment used samples built from the following input parameters:
+Sensitivity Analysis involves building an understanding of how sensitive outputs of the model are to changes in its inputs. Input parameter values for this experiment were generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. This method works by taking samples of each input variable from even sized buckets across its range just like in Latin Hypercube Sampling, but then combining those orthogonally (nearly), thus giving improved space-filling properties to the experiment design. The SA experiment uses samples built from the following input parameters:
 
 | Parameter | Description | 
 | :--- | :------------------------------------------------------------------- |
@@ -24,11 +24,11 @@ Sensitivity Analysis involves building an understanding of how sensitive outputs
 | `visitPercentage` | Percentage of landholders (selected by `visitType`) visited by extension office; value in range [0,100] |
 
 
-The following figure gives the correlation results, and was generated using 33 input configuration samples, each run 20 times. The rows represent selected inputs, while the columns represent various outputs. Cells with numbers repsent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a higly negatively correlated pair. 
+The following figure gives the correlation results, and was generated using 33 input configuration samples, each run 20 times. The rows represent selected inputs, while the columns represent various outputs. Cells with numbers represent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a highly negatively correlated pair. 
 
 ![](testing-20170825-6bc7fc2-sa/test/output/correlation_diagram.pdf.p0.png)
 
-As one would expect, we see a positive correlation between the `numAgents` input parameter and the absolute counts of agents in various classes at the end of the simulation. We can also see that increasing `targetPercentage` tends to lower the number of winners overall and in various categories and is an artifcat of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to `numberOfAgents=100` and `targetPercentage=12`. Model outputs are insensitive to the parameters that control how quickly the profit motive and social norm values are updated, i.e., `profitMotiveUpdateMultiplier` and `socialNormUpdateMultiplier` respectively. This just means that while they influence the rate of change of those variables *during* the simulation, they do not change the outcomes at the *end* of the simulation.
+As one would expect, we see a positive correlation between the `numAgents` input parameter and the absolute counts of agents in various classes at the end of the simulation. We can also see that increasing `targetPercentage` tends to lower the number of winners overall and in various categories and is an artifact of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to `numberOfAgents=100` and `targetPercentage=12`. Model outputs are insensitive to the parameters that control how quickly the profit motive and social norm values are updated, i.e., `profitMotiveUpdateMultiplier` and `socialNormUpdateMultiplier` respectively. This just means that while they influence the rate of change of those variables *during* the simulation, they do not change the outcomes at the *end* of the simulation.
 
 With respect to the visiting policy `visitType` for extension officers (remembering that higher visiting policy numbers represent a higher proportion of landholders visited), we find a positive correlation with the change in social norm (average CE), and a negative correlation with the number of low CE landholders at the end of the simulation. This reflects the fact that visits from extension officers increase the CE of landholders being visited.
 
@@ -64,7 +64,7 @@ Next we look at the difference in cost to the agency between the two sample popu
 
 ## Understanding the impact of Extension Officers visits (Phase 1)
 
-This experiment introduces the notion of extension offcier visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visited once per round. The impact of a visit on a landholder is a boost in her conservation ethic (along the S-curve).
+This experiment introduces the notion of extension officer visits. In this phase, it is assumed that the extension office has sufficient funds to support officer visits to each landholder that has an active contract. Won contracts stay active for 3 years in the model, and all landholders with active contracts are visited once per round. The impact of a visit on a landholder is a boost in her conservation ethic (along the S-curve).
 
 The types of agents over time for HC75 is very similar with or without visits. For HC25 though, we see an interesting effect from the visits. In the early rounds, the number of HC agents increases due to the boost in conservation ethics from the visits. However, after around 10 rounds, we find that the HC population as a whole stays fairly constant. Within the HC population, those with high profit motive (HCHP) continue to increase in numbers, while those with low profit motive (HCLP) start to decrease. The overall impact is that by round 30, almost all landholders in the population have a high profit motive!
 
@@ -72,14 +72,14 @@ The types of agents over time for HC75 is very similar with or without visits. F
 | :---: | :---: | 
 | ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_agents.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_agents.pdf.p0.png) |
 
-Participation rates for HC75 with or without visits are very similar. Hoever, for HC25 with visits we no longer see a drop in participation as we did for the original setting without visits. Now the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who tend to participate more.
+Participation rates for HC75 with or without visits are very similar. However, for HC25 with visits we no longer see a drop in participation as we did for the original setting without visits. Now the participation rate stays fairly constant over time. So visits have resulted in an overall increase in participation in the HC25 population. This is due to the overall increase in the HCHP agents who tend to participate more.
 
  
 | HC25: participation over time | HC75: participation over time |
 | :---: | :---: | 
 | ![a](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_participants.pdf.p0.png) | ![b](testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_participants.pdf.p0.png) |
 
-After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that about half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservatin ethics (HPLC) who dominate the original setting. 
+After 30 rounds, the cumulative cost over all rounds for HC75 is the same as in the case without visits, as shown below. However, for HC25 the accumulated cost with visits is 27% lower than when there were no visits (down from 295 to 214). This is interesting, given that the entire population almost exclusively has high motive profit. The reason why the costs are lower though is that about half of those agents also have high conservation ethics (HPHC) and tend to place bids with moderate profit margins compared to those with high profit and low conservation ethics (HPLC) who dominate the original setting. 
 
 | HC25: cost of auctions over time | HC75: cost of auctions over time |
 | :---: | :---: | 
@@ -103,7 +103,7 @@ For instructions on how to build the distribution see the conservation [README.m
 
 ### Sensitivity Analysis
 
-Sensitivity Analysis (SA) samples are generated using the Nearly Othogonal Latin Hypercube (NOLH) method. If you wish to add new parameters to the latin hypercube, edit the [NOLH spreadsheet](../test/NOLHdesigns_v5.xls) and then cut and paste the samples that the spreadsheet generates into [samples.txt](../test/output/samples.txt) (*note that the separator is the TAB character, and not spaces*). You will also have to update the number of samples in [config](../test/output/config).
+Sensitivity Analysis (SA) samples are generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. If you wish to add new parameters to the Latin Hypercube, edit the [NOLH spreadsheet](../test/NOLHdesigns_v5.xls) and then cut and paste the samples that the spreadsheet generates into [samples.txt](../test/output/samples.txt) (*note that the separator is the TAB character, and not spaces*). You will also have to update the number of samples in [config](../test/output/config).
 
 
 To run the SA experiments, change to the [test](../test) directory and do the following:
