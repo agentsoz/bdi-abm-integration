@@ -285,7 +285,8 @@ public class Main {
 	private static void publishAuctionStats(int cycle) {
 		AuctionStatisticsWriter.getInstance().addAuctionStatistics(cycle,
 				auctioneerModel.getLatestAuctionResultSet().getResultSet(),
-				landholders, target, packages, cycle == 0);
+				landholders, target, packages, extensionOffice.getVisitsLastCycle(), 
+				cycle == 0);
 	}
 
 	/**

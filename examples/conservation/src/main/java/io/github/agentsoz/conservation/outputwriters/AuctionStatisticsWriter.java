@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * LCHP_winners_accumulated_percentage, auctionStatisticsWriter,
  * HCHP_winners_accumulated_percentage, MovedUpCE, MovedDownCE, MovedUpPM,
  * MovedDownPM, high_profit_winning_bids, med_profit_winning_bids,
- * low_profit_winning_bids
+ * low_profit_winning_bids, number_of_visits
  * 
  * @author Sewwandi Perera
  */
@@ -179,7 +179,7 @@ public class AuctionStatisticsWriter {
 			GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(ConstantFileNames.getAuctionStatsFileName(repeat)));
 			auctionStatisticsWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));			
 			appendHeader();
-			addAuctionStatistics(0, null, agents, null, null, true);
+			addAuctionStatistics(0, null, agents, null, null, 0, true);
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 		}
@@ -248,7 +248,8 @@ public class AuctionStatisticsWriter {
 			auctionStatisticsWriter.append("MovedDownPM,");
 			auctionStatisticsWriter.append("high_profit_winning_bids,");
 			auctionStatisticsWriter.append("med_profit_winning_bids,");
-			auctionStatisticsWriter.append("low_profit_winning_bids");
+			auctionStatisticsWriter.append("low_profit_winning_bids,");
+			auctionStatisticsWriter.append("number_of_visits");
 			auctionStatisticsWriter.append("\n");
 		} catch (IOException e) {
 			logger.error(e.getMessage());
@@ -274,7 +275,7 @@ public class AuctionStatisticsWriter {
 	 */
 	public void addAuctionStatistics(int cycleNumber,
 			HashMap<Integer, AuctionResult> resultSet, List<Landholder> agents,
-			String target, Package[] packages, boolean init) {
+			String target, Package[] packages, int visits, boolean init) {
 
 		if (!init) {
 			Object[] results = resultSet == null ? new Object[0] : resultSet
@@ -457,7 +458,7 @@ public class AuctionStatisticsWriter {
 					LCLPwinnersPercentage, HCLPwinnersPercentage,
 					LCHPwinnersPercentage, HCHPwinnersPercentage, movedUpCE,
 					movedDownCE, movedUpPM, movedDownPM, highProfWinningBids,
-					medProfWinningBids, lowProfWinningBids);
+					medProfWinningBids, lowProfWinningBids, visits);
 		}
 
 		// Calculate average Conservation Ethic and Average Profit Motivation
@@ -635,7 +636,7 @@ public class AuctionStatisticsWriter {
 			double LCHP_winners_percentage, double HCHP_winners_percentage,
 			int movedUpCE, int movedDownCE, int movedUpPM, int movedDownPM,
 			int highProfWinningBids, int medProfWinningBids,
-			int lowProfWinningBids) {
+			int lowProfWinningBids, int numberOfVisits) {
 		try {
 			auctionStatisticsWriter.append(Integer.toString(cycleNumber));
 			auctionStatisticsWriter.append(",");
@@ -763,6 +764,9 @@ public class AuctionStatisticsWriter {
 			auctionStatisticsWriter.append(",");
 			auctionStatisticsWriter
 					.append(Integer.toString(lowProfWinningBids));
+		    auctionStatisticsWriter.append(",");
+		    auctionStatisticsWriter
+		            .append(Integer.toString(numberOfVisits));
 			auctionStatisticsWriter.append("\n");
 			auctionStatisticsWriter.flush();
 

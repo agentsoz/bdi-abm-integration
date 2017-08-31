@@ -50,6 +50,9 @@ public class ExtensionOffice {
   // Keep track of visits per agent
   private HashMap<String, Integer> visits;
   
+  // Keeps count of total number of visits in the last round (for 
+  private int visitsLastCycle = 0;
+
   private static CoverageType coverageType = CoverageType.NONE;
   private static double visitPercentage = 0.0;
 
@@ -89,8 +92,12 @@ public class ExtensionOffice {
     return coverageType.ordinal();
   }
   
+  public int getVisitsLastCycle() {
+    return visitsLastCycle;
+  }
   
   public void conductVisits(int cycle) {
+    visitsLastCycle = 0;
     logger.debug("Will conduct visits to {}% of landholders of type {}", visitPercentage,
         coverageType);
 
@@ -115,13 +122,14 @@ public class ExtensionOffice {
         }
         // TODO: cover the unsuccessful ones
       }
-      if (willVisit) {
-        logger.info("Agent " + name + " with contracts " + agent.getContracts()
+      if (willVisit && visitPercentage >= ConservationUtils.getGlobalRandom().nextDouble()*100) {
+        logger.debug("Agent " + name + " with contracts " + agent.getContracts()
             + " will be visited by extension officer");
         adc.getOrCreate(name).getPerceptContainer()
             .put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), null);
         // Record the visit
         visits.put(name, visits.get(name) + 1);
+        visitsLastCycle++;
       }
       // Update the contracts
       if (active > 0) {
