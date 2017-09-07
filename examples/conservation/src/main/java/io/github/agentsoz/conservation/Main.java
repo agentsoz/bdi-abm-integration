@@ -557,8 +557,12 @@ public class Main {
                 + ")\n"
 				+ "  -visitPercentage                      Percentage of landholders (selected by -visitType) visited by extension office "
 				+ "                                        (default is "
-				+ ExtensionOffice.getVisitPercentage()
+				+ ExtensionOffice.getVisitPercentageOfEligibleLandholders()
 				+ ")\n"
+			    + "  -visitPercentagePerLandholder         Restricts the number of visits per landholder per round to a percentage of the maximum "
+                + "                                        (default is "
+                + ExtensionOffice.getVisitPercentagePerLandholder()
+                + ")\n"
 				+ "  -upper_threshold_c                    upper threshold for conservation ethic barometer to be high (default is "
 				+ getUpperThresholdC()
 				+ ")\n"
@@ -825,9 +829,19 @@ public class Main {
               if (i + 1 < args.length) {
                   i++;
                   try {
-                    ExtensionOffice.setVisitPercentage(Double.parseDouble(args[i]));
+                    ExtensionOffice.setVisitPercentageOfEligibleLandholders(Double.parseDouble(args[i]));
                   } catch (Exception e) {
                       exit("-visitPercentage value '" + args[i] + "' is not a double");
+                  }
+              }
+              break;
+            case "-visitPercentagePerLandholder":
+              if (i + 1 < args.length) {
+                  i++;
+                  try {
+                    ExtensionOffice.setVisitPercentagePerLandholder(Double.parseDouble(args[i]));
+                  } catch (Exception e) {
+                      exit("-visitPercentagePerLandholder value '" + args[i] + "' is not a double");
                   }
               }
               break;
