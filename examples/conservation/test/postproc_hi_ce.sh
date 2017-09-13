@@ -10,8 +10,8 @@ run() {
 }
 
 # check the args
-if [ "$#" -ne 2 ]; then
-	echo "usage: $0 DIR CYCLES"
+if [ "$#" -ne 1 ]; then
+	echo "usage: $0 DIR"
 	exit
 fi
 
@@ -21,9 +21,6 @@ cycles=$2
 
 # now plot
 for test in $(find $testdir -name "run-hi-ce-comparison.sh.output.*" -print); do
-	run "$DIR/plot_cost_of_auction_cycles.R $test/ $cycles"
-	run "$DIR/plot_number_of_participants.R $test/ $cycles"
-	run "$DIR/plot_number_of_agents.R $test/ $cycles"
-	run "$DIR/plot_visits.R $test/ $cycles"
+	run "$DIR/postproc.sh $test"
 done
 
