@@ -141,7 +141,7 @@ public class ExtensionOffice {
       }
       boolean willVisit = shouldVisit && visitPercentageOfEligibleLandholders >= ConservationUtils.getGlobalRandom().nextDouble()*100;
       int numVisits = (int) (Math.round((getVisitPercentagePerLandholder()/100.0) * maxVisitsPerLandholderPerRound));
-      numVisits = (numVisits == 0) ? 0 : ConservationUtils.getGlobalRandom().nextInt(numVisits);
+      //numVisits = (numVisits == 0) ? 0 : ConservationUtils.getGlobalRandom().nextInt(numVisits);
       
       if (willVisit && numVisits > 0) {
         logger.debug("Agent " + name + " with contracts " + agent.getContracts()
