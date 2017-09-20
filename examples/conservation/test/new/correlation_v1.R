@@ -38,8 +38,8 @@ sampleCount <- nrow(samples)
 draw_correlation_graph <- function(input, output){
 	print(input)
 	print(output)
-	Msplit=corr.test(input, output, method="spearman", adjust="none") # use something like input[,1:3] to restrict what is plotted
-	plot_file_path <- sprintf('%scorrelation_diagram.pdf', experiment_dir)
+	Msplit=corr.test(input[,1:6], output[,1:11], method="spearman", adjust="none") # use something like input[,1:3] to restrict what is plotted
+	plot_file_path <- sprintf('%scorrelation_diagram_v1.pdf', experiment_dir)
 	pdf(plot_file_path,width=11.7, height=8.3) # A4 landscape
 	corrplot(Msplit$r, 
 		p.mat = Msplit$p, 

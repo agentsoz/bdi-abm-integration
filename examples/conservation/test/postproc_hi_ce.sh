@@ -21,6 +21,7 @@ cycles=$2
 
 # now plot
 for test in $(find $testdir -name "run-hi-ce-comparison.sh.output.*" -print); do
+	run "rm -f $test/output.db"
 	run "$DIR/postproc.sh $test"
 done
 
