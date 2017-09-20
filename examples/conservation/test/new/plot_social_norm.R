@@ -24,7 +24,7 @@ source(config_file_path, local = TRUE)
 samples_file_path <- sprintf('%ssamples.txt', experiment_dir)
 samples = read.csv(samples_file_path, header = FALSE, sep='	')
 sampleCount <- nrow(samples)
-output_names <- c("cycle_number", "cost_of_successful_bids")
+output_names <- c("cycle_number", "average_CE")
 
 # process database
 
@@ -37,7 +37,7 @@ plot_pair <- function(all, labels) {
 	gg <- ggplot(data=melted, aes(x=cycle_number, y=value, group=variable, shape=variable, color=variable)) + 
 		geom_line() +
 		geom_point(size=3) +
-		ylim(0,15) +
+		#ylim(0,100) +
 		theme_bw() +
   		theme(
 			legend.title=element_text(size=12,face="bold"),
@@ -46,7 +46,7 @@ plot_pair <- function(all, labels) {
         	aspect.ratio=5/5
 			) +
   		xlab("auction cycle") +
-  		ylab("cost of successful bids") +
+  		ylab("social norm") +
 		ggtitle(paste("Sample:", labels)) +
   		guides(colour=guide_legend(title="")) +
   		guides(shape=guide_legend(title=""))
@@ -55,7 +55,7 @@ plot_pair <- function(all, labels) {
 
 
 analysis <- function(db) {
-	plot_file_path <- sprintf('%scost_of_auction_cycles.pdf', experiment_dir)
+	plot_file_path <- sprintf('%ssocial_norm.pdf', experiment_dir)
 	pdf(plot_file_path)
 	for (i in 1:sampleCount ) {
 
@@ -63,7 +63,7 @@ analysis <- function(db) {
 		colnames(final_result) <- output_names
 
 		for( c in 1:numCycles){
-			query_last_part <- sprintf('where sample="%s" and cycle_number="%s" and number_of_successful_bids != "0" ', i, c)
+			query_last_part <- sprintf('where sample="%s" and cycle_number="%s" ', i, c)
 			query_first_part <- sprintf('select %s from', output_names[2])
 			query <- paste(query_first_part, "auction_statistics", query_last_part)
 			df = dbGetQuery(db, query)
@@ -75,7 +75,7 @@ analysis <- function(db) {
 			}
 		}
 		print(final_result)
-		print(sprintf("sample number:%s, accumulated cost:%s", i, as.numeric(colSums(final_result)[2])))
+		print(sprintf("sample number:%s, accumulated visits:%s", i, as.numeric(colSums(final_result)[2])))
 
 		slabels <- matrix(ncol=1, nrow=nrow(final_result))
 		slabels[,1] = paste(samples[i,],collapse=" ")

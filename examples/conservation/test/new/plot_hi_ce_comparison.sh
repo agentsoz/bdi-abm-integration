@@ -25,5 +25,6 @@ for test in $(find $testdir -name "run-hi-ce-comparison.sh.output.*" -print); do
 	run "$DIR/plot_number_of_participants.R $test/ $cycles"
 	run "$DIR/plot_number_of_agents.R $test/ $cycles"
 	run "$DIR/plot_visits.R $test/ $cycles"
+	run "$DIR/plot_social_norm.R $test/ $cycles"
 done
 
