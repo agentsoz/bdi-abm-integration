@@ -90,7 +90,7 @@ public class BushfireMain {
 			s += margs[i];
 		}
 		logger.info(s);
-		abmModel.run(null, margs);
+		abmModel.run(margs);
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
