@@ -14,10 +14,11 @@ suppressMessages(library(psych))
 args <- commandArgs(trailingOnly = TRUE)
 experiment_dir=args[1]
 cycles=args[2]
-input_names = c('numAgents','highCEAgentsPercentage', 'targetPercentage', 'sigmoidMaxStepX', 'profitMotiveUpdateMultiplier', 'socialNormUpdateMultiplier', 'visitType', 'visitPercentage', 'visitPercentagePerLandholder')
+#input_names = c('numAgents','highCEAgentsPercentage', 'targetPercentage', 'sigmoidMaxStepX', 'profitMotiveUpdateMultiplier', 'socialNormUpdateMultiplier', 'visitType', 'visitPercentage', 'visitPercentagePerLandholder')
+input_names = c('Number-landholders','High-conservation-ethic-landholders%', 'Target-percentage', 'Speed-of-change', 'Profit-motive-update-constant', 'Social-norm-update-constant', 'visitType', 'visitPercentage', 'visitPercentagePerLandholder')
 output_names = c(
-	"LCHP % at simulation end", "HCHP % at simulation end", "LCLP % at simulation end", "HCLP % at simulation end",
-	"LCHP % over all rounds", "HCHP % over all rounds", "LCLP % over all rounds", "HCLP % over all rounds",
+	"LCHP landholders % at simulation end", "HCHP landholders % at simulation end", "LCLP landholders % at simulation end", "HCLP landholders % at simulation end",
+	"LCHP landholders % over all rounds", "HCHP landholders % over all rounds", "LCLP landholders % over all rounds", "HCLP landholders % over all rounds",
     "Participation % over all rounds",
     "Cost per agent over all rounds",
 	"CE social norm change",
