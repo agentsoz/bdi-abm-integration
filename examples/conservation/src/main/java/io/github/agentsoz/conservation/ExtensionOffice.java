@@ -41,7 +41,7 @@ public class ExtensionOffice {
    *
    */
   public enum CoverageType {
-    NONE, SUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, ALL,
+    NONE, SUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND, ALL, 
   }
 
   private static final int maxVisitsPerLandholderPerRound = 5;
@@ -124,6 +124,48 @@ public class ExtensionOffice {
       Landholder agent = Main.getLandholder(name);
       int active = agent.getContracts().activeCount(); // count active contracts for this agent
       boolean shouldVisit = false;
+      switch(coverageType) {
+        case ALL:
+          shouldVisit = true;
+          break;
+        case SUCCESSFUL_ONLY:
+          shouldVisit = active > 0;
+          break;
+        case SUCCESSFUL_AND_UNSUCCESSFUL_ONLY:
+          if (active > 0) { 
+            // cover the successful ones
+            shouldVisit = true;
+          } else if (agent.getCurrentAuctionRound() != null &&
+              agent.getCurrentAuctionRound().isParticipated() && 
+              !agent.getCurrentAuctionRound().isWon()) {
+            // cover the unsuccessful ones
+            shouldVisit = true;
+          }
+          break;
+        case SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND:
+          if (active > 0) { 
+            // cover the successful ones
+            shouldVisit = true;
+          } else if (agent.getCurrentAuctionRound() != null &&
+              agent.getCurrentAuctionRound().isParticipated() && 
+              !agent.getCurrentAuctionRound().isWon()) {
+            // cover the unsuccessful ones
+            shouldVisit = true;
+          }
+          if (shouldVisit) {
+            // Direct visits to landholders in the middle band of the S-curve.
+            // We do this by calculating how far they are from the mid point of 50. 
+            // Then the closer they are to 50, the more likely they are to be visited.
+            double visitLikelihood = (50 - Math.abs(50 - agent.getConservationEthicBarometer()))/50.0;
+            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
+              shouldVisit = false;
+            }
+          }
+          break;
+        default:
+          break;
+      }
+      /*
       if (coverageType == CoverageType.ALL) {
         shouldVisit = true;
       } else if (coverageType == CoverageType.SUCCESSFUL_ONLY && active > 0) {
@@ -139,6 +181,7 @@ public class ExtensionOffice {
           shouldVisit = true;
         }
       }
+      */
       boolean willVisit = shouldVisit && visitPercentageOfEligibleLandholders >= ConservationUtils.getGlobalRandom().nextDouble()*100;
       int numVisits = (int) (Math.round((getVisitPercentagePerLandholder()/100.0) * maxVisitsPerLandholderPerRound));
       //numVisits = (numVisits == 0) ? 0 : ConservationUtils.getGlobalRandom().nextInt(numVisits);
