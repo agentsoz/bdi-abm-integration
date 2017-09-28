@@ -43,7 +43,7 @@ plot_pair <- function(all, labels) {
         	aspect.ratio=5/5
 			) +
   		xlab("auction cycle") +
-  		ylab("number of agents") +
+  		ylab("number of participants") +
 		ggtitle(paste("Sample:", labels)) +
   		guides(colour=guide_legend(title="")) +
   		guides(shape=guide_legend(title=""))
