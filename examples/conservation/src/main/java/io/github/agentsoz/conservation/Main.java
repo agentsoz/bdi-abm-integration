@@ -552,7 +552,7 @@ public class Main {
 				+ ")\n"
                 + "  -visitType                            Types of landholders visited by extension office\n"
                 + "                                        one of 0 (none) 1 (successful only), 2 (successful and unsuccessful only)\n"
-                + "                                        3 (successful and unsuccessful directed towards undecided), 4 (all)\n"
+                + "                                        3 (successful and unsuccessful directed towards CE=50), 4(successful and unsuccessful directed towards CE=0), 5 (all)\n"
                 + "                                        (default is "
                 + ExtensionOffice.getCoverageType()
                 + ")\n"

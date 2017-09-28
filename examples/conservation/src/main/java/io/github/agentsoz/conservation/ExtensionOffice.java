@@ -34,14 +34,26 @@ public class ExtensionOffice {
   final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
   /**
-   * The types of landholders that will be coverd by extension officer visits. <ul> <li> NONE: No
-   * visits are ever conducted <li >SUCCESSFUL_ONLY: Only landholders with active contracts are
-   * visited <li> SUCCESSFUL_AND_UNSUCCESSFUL_ONLY: Only landholders with active contracts and those
-   * who were unsuccessful in the last round are visited <li> ALL: All landholders are visited </ul>
+   * The types of landholders that will be coverd by extension officer visits. 
+   * <ul> 
+   *   <li> NONE: No visits are ever conducted 
+   *   <li >SUCCESSFUL_ONLY: Only landholders with active contracts are visited 
+   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_ONLY: Only landholders with active contracts and those 
+   *        who were unsuccessful in the last round are visited 
+   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND: Same as SUCCESSFUL_AND_UNSUCCESSFUL_ONLY but 
+   *        probabilistically preferring those with conservation ethic closer to 50 (mid point). 
+   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND: Same as SUCCESSFUL_AND_UNSUCCESSFUL_ONLY but 
+   *        probabilistically preferring those with conservation ethic closer to 0 (lowest point). 
+   *   <li> ALL: All landholders are visited </ul>
    *
    */
   public enum CoverageType {
-    NONE, SUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND, ALL, 
+    NONE, 
+    SUCCESSFUL_ONLY, 
+    SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, 
+    SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND, 
+    SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND, 
+    ALL, 
   }
 
   private static final int maxVisitsPerLandholderPerRound = 5;
@@ -157,6 +169,26 @@ public class ExtensionOffice {
             // We do this by calculating how far they are from the mid point of 50. 
             // Then the closer they are to 50, the more likely they are to be visited.
             double visitLikelihood = (50 - Math.abs(50 - agent.getConservationEthicBarometer()))/50.0;
+            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
+              shouldVisit = false;
+            }
+          }
+          break;
+        case SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND:
+          if (active > 0) { 
+            // cover the successful ones
+            shouldVisit = true;
+          } else if (agent.getCurrentAuctionRound() != null &&
+              agent.getCurrentAuctionRound().isParticipated() && 
+              !agent.getCurrentAuctionRound().isWon()) {
+            // cover the unsuccessful ones
+            shouldVisit = true;
+          }
+          if (shouldVisit) {
+            // Direct visits to landholders in the low band of the S-curve.
+            // We do this by calculating how far they are from the lowest point 0. 
+            // Then the closer they are to 0, the more likely they are to be visited.
+            double visitLikelihood = (100 - agent.getConservationEthicBarometer())/100;
             if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
               shouldVisit = false;
             }
