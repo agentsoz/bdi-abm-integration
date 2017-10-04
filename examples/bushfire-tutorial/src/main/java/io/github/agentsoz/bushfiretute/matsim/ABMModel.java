@@ -49,17 +49,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class ABMModel implements MATSimApplicationInterface {
+public final class ABMModel implements MATSimApplicationInterface {
 
 	private final Logger logger = LoggerFactory.getLogger("");
-	private final MATSimModel model;
+	private final MATSimModel matsimModel;
 	private final BDIModel bdiModel;
 	private Replanner replanner = null;
 
 	public ABMModel(BDIModel bdiModel) {
 		this.bdiModel = bdiModel;
-		this.model = new MATSimModel(bdiModel);
-		model.registerPlugin(this);
+		this.matsimModel = new MATSimModel(bdiModel);
+		matsimModel.registerPlugin(this);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class ABMModel implements MATSimApplicationInterface {
 	@Override
 	public Replanner getReplanner(ActivityEndRescheduler activityEndRescheduler) {
 		if (replanner == null) {
-			replanner = new CustomReplanner(model, activityEndRescheduler);
+			replanner = new CustomReplanner(matsimModel, activityEndRescheduler);
 		}
 		return replanner;
 	}
@@ -92,22 +92,22 @@ public class ABMModel implements MATSimApplicationInterface {
 	@Override
 	public void notifyAfterCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
 
-		Map<Id<Link>,? extends Link> links = model.getScenario().getNetwork().getLinks();
+		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
 		for (Id<Person> agentId : bdiAgentsIDs) {
 			@SuppressWarnings("unused")
-			MATSimAgent agent = model.getBDIAgent(agentId);
+			MATSimAgent agent = matsimModel.getBDIAgent(agentId);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 			if (bdiAgent == null) {
 				logger.warn("No BDI counterpart for MATSim agent '" + agentId
 						+ "'. Should not happen, but will keep going");
 				continue;
 			}
-			Plan plan = WithinDayAgentUtils.getModifiablePlan(model.getMobsimAgentMap().get(agentId));
+			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
 			List<PlanElement> planElements = plan.getPlanElements();
 
 			// Assign start location
-			double lat = links.get(model.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
-			double lon = links.get(model.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
 			bdiAgent.startLocation = new double[] { lat, lon };
 			bdiAgent.currentLocation = "home"; // agents always start at home
 			bdiAgent.log("is at home at location "+lon+","+lat);
@@ -318,11 +318,11 @@ public class ABMModel implements MATSimApplicationInterface {
 		// planned (according to their MATSim plan). 
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
-		for (Id<Person> agentID : model.getBDIAgentIDs()) {
-			MATSimAgent agent = model.getBDIAgent(agentID);
+		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
+			MATSimAgent agent = matsimModel.getBDIAgent(agentID);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Id<Link> newLinkId;
-			newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
+			newLinkId = ((NetworkImpl) matsimModel.getScenario().getNetwork())
 					.getNearestLinkExactly(new CoordImpl(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
 
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
@@ -342,7 +342,7 @@ public class ABMModel implements MATSimApplicationInterface {
 
 	@Override
 	public void run(String[] args) {
-		model.run(args);
+		matsimModel.run(args);
 	}
 
 	/**

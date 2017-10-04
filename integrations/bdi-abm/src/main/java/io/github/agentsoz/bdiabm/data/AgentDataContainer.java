@@ -24,7 +24,7 @@ package io.github.agentsoz.bdiabm.data;
 
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 /**
  * 2/20/2013
  * AgentDataContainer is a Map of 
@@ -37,7 +37,7 @@ import java.util.HashMap;
  * @author Andreas
  *
  */
-public class AgentDataContainer extends HashMap <String, ActionPerceptContainer> implements Serializable
+public class AgentDataContainer extends LinkedHashMap <String, ActionPerceptContainer> implements Serializable
 {	 
 	/**
 	 * 

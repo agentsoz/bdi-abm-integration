@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -467,7 +467,7 @@ final class CustomReplanner extends Replanner{
 				//logger.debug("travel cost from basenode to node {} : {}",n,path.travelCost);
 
 		 */
-		HashMap<String,Double> routeDistances =  new HashMap<String,Double>();
+		LinkedHashMap<String,Double> routeDistances =  new LinkedHashMap<String,Double>();
 
 
 		for (Id<Link> lid : targetLinkIds) {

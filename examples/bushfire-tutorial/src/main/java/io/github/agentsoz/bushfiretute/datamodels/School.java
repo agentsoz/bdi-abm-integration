@@ -23,13 +23,13 @@ package io.github.agentsoz.bushfiretute.datamodels;
  */
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class School extends Location{
 
-	public HashMap<Integer,School> schools = new HashMap<Integer,School>();
+	public LinkedHashMap<Integer,School> schools = new LinkedHashMap<Integer,School>();
 
 	final Logger logger = LoggerFactory.getLogger("");
 	public int ID;

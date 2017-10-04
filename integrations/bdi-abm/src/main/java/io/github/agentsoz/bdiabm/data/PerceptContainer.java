@@ -23,7 +23,7 @@ package io.github.agentsoz.bdiabm.data;
  */
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -35,11 +35,11 @@ public class PerceptContainer implements Serializable {
 	private static final long serialVersionUID = -6502115824895738388L;
 
 	/**
-	 * {@link HashMap} where all the actions are stored. Key field is the
+	 * {@link LinkedHashMap} where all the actions are stored. Key field is the
 	 * percept's id, value field is the instance of{@link PerceptContent}, in
 	 * which all information about the percept is stored.
 	 */
-	private HashMap<String, PerceptContent> container;
+	private LinkedHashMap<String, PerceptContent> container;
 
 	/**
 	 * @return Returns true if there are no percepts are stored in the container
@@ -52,17 +52,17 @@ public class PerceptContainer implements Serializable {
 	 * Public constructor
 	 */
 	public PerceptContainer() {
-		this(new HashMap<String, PerceptContent>());
+		this(new LinkedHashMap<String, PerceptContent>());
 	}
 
 	/**
 	 * Public constructor
 	 * 
 	 * @param container
-	 *            is a {@link HashMap} where information about all percepts are
+	 *            is a {@link LinkedHashMap} where information about all percepts are
 	 *            stored
 	 */
-	public PerceptContainer(HashMap<String, PerceptContent> container) {
+	public PerceptContainer(LinkedHashMap<String, PerceptContent> container) {
 		this.container = container;
 	}
 

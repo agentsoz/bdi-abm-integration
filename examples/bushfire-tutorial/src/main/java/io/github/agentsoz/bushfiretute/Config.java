@@ -24,7 +24,7 @@ package io.github.agentsoz.bushfiretute;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -109,15 +109,13 @@ public class Config {
 	private static double low_panic = 0.0 ;
 	
 	
-	private static HashMap<Integer, School> schools = new HashMap<Integer, School>();
+	private static LinkedHashMap<Integer, School> schools = new LinkedHashMap<Integer, School>();
 	private static ArrayList<String> agentsWithoutSchools =  new ArrayList<String>();
 	
 	private static Image image = new Image();
 	private static String fireFireCoordinateSystem = "longlat";
 	private static String coordinate_system = "longlat";
 	private static int schoolCount = 0; //to set a inique int ID to each school
-	
-	static Random rand =  new Random();
 	
 	public static class Image {
 		public String file;
@@ -140,7 +138,7 @@ public class Config {
 		return agentsWithoutSchools.size();
 	}
 	
-	public static HashMap<Integer,School> getSchools() { 
+	public static LinkedHashMap<Integer,School> getSchools() { 
 		return schools;
 	}
 	
@@ -642,7 +640,7 @@ public class Config {
 		return result;
 	}
 
-	public static void  readSchoolFromList(HashMap<Double,Double> schoolLocs) {
+	public static void  readSchoolFromList(LinkedHashMap<Double,Double> schoolLocs) {
 		for(Map.Entry<Double, Double> entry : schoolLocs.entrySet()) {
 			double east = (double) entry.getKey();
 			double north =  (double) entry.getValue();
@@ -680,10 +678,9 @@ public class Config {
 			 }
 		 }
 		 if(!schoolsWithinDistance.isEmpty()) {
-			 Random rand =  new Random();
 			 logger.debug("number of schools within the range : {}", schoolsWithinDistance.size());
 			 logger.debug(" selected school array : {}",schoolsWithinDistance.toString());
-			 int num = rand.nextInt(schoolsWithinDistance.size());
+			 int num = BushfireMain.getRandom().nextInt(schoolsWithinDistance.size());
 			 selectedSchool= schoolsWithinDistance.get(num);
 			 logger.debug("selected school ID : " + selectedSchool.getID());
 			 

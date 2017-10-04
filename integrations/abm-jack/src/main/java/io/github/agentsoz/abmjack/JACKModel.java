@@ -49,7 +49,9 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 	final Logger logger = LoggerFactory.getLogger("");
 
-	protected HashMap<String, Agent> agents = new HashMap<String, Agent>();
+	protected Map<String, Agent> agents = new LinkedHashMap<>();
+	// need deterministically sorted map for testing.  kai, oct'17
+	
 	private ABMServerInterface abmServer;
 	private AgentDataContainer nextContainer;
 	public final String GLOBAL_AGENT = "global";
@@ -130,7 +132,8 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		}
 		
 		boolean global = false;
-		HashMap<String, Object> globalPercepts = new HashMap<String, Object>();
+		Map<String, Object> globalPercepts = new LinkedHashMap<>();
+		// need deterministically sorted map for testing.  kai, oct'17
 
 		try {
 			PerceptContainer gPC = agentDataContainer.get(GLOBAL_AGENT)
@@ -156,8 +159,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		// starts
 		if (global) {
 
-			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
-					.entrySet().iterator();
+			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts .entrySet().iterator();
 
 			while (globalEntries.hasNext()) {
 
@@ -165,22 +167,26 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 				String gPerceptID = gme.getKey();
 				Object gParameters = gme.getValue();
 				
-				List<String> agentIds = new ArrayList<String>(agents.keySet());
-
-				Comparator<String> agentIDSort = new Comparator<String>() {
-					@Override
-					public int compare(String o1, String o2) {
-						int id1 = Integer.parseInt(o1);
-						int id2 = Integer.parseInt(o2);
-
-						return id1 - id2;
-					}
-				};
-
-				Collections.sort(agentIds, agentIDSort);
-				for (String agentID : agentIds) {
-					Agent agent = agents.get(agentID);
+//				List<String> agentIds = new ArrayList<String>(agents.keySet());
+//
+//				Comparator<String> agentIDSort = new Comparator<String>() {
+//					@Override
+//					public int compare(String o1, String o2) {
+//						int id1 = Integer.parseInt(o1);
+//						int id2 = Integer.parseInt(o2);
+//
+//						return id1 - id2;
+//					}
+//				};
+//
+//				Collections.sort(agentIds, agentIDSort);
+//				for (String agentID : agentIds) {
+//					Agent agent = agents.get(agentID);
+				// (agents is a deterministic data structure, and I don't see why it needs to be sorted.  kai, oct'17)
+				
+				for( Agent agent : agents.values() ) {
 					handlePercept(agent, gPerceptID, gParameters);
+					waitUntilIdle(); // yyyyyy try to get code deterministic
 				}
 			}
 		}
@@ -189,8 +195,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 				.entrySet().iterator();
 		// For each ActionPercept (one for each agent)
 		while (i.hasNext()) {
-			Map.Entry<String, ActionPerceptContainer> entry = (Map.Entry<String, ActionPerceptContainer>) i
-					.next();
+			Map.Entry<String, ActionPerceptContainer> entry = i .next();
 			if (entry.getKey().equals(GLOBAL_AGENT)) {
 				continue;
 			}
@@ -206,6 +211,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
 					handlePercept(agents.get(entry.getKey()), perceptID, parameters);
+					waitUntilIdle(); // yyyyyy try to get code deterministic
 				}
 				// now remove the percepts
 				pc.clear();
@@ -223,6 +229,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					Object[] params = ac.get(actionID).getParameters();
 					updateAction(agents.get(entry.getKey()), actionID, state,
 							params);
+					waitUntilIdle(); // yyyyyy try to get code deterministic
 
 					// remove completed states
 					if (!(state.equals(State.INITIATED) || state
@@ -237,7 +244,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 	// wait until all JACK agents have finished processing before returning
 	// control to ABM system
-	private void waitUntilIdle() {
+	/*private*/ protected void waitUntilIdle() {
 
 		boolean allIdle = true;
 		do {
@@ -259,6 +266,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void createAgents(String[] agentIDs, Object initData) {
 		for (int i = 0; i < agentIDs.length; i++) {
 			Agent agent = createAgent(agentIDs[i], new Object[] { initData });
+			waitUntilIdle(); // yyyyyy try to get code deterministic
 			agents.put(agentIDs[i], agent);
 		}
 		logger.debug("created agents: {}", new Gson().toJson(agentIDs));
@@ -289,6 +297,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 		for (int i = 0; i < ar1.length; i++) {
 			ar2[i] = ar1[i].getBasename();
+			waitUntilIdle(); // yyyyyy try to get code deterministic
 		}
 		killAgents(ar2);
 	}

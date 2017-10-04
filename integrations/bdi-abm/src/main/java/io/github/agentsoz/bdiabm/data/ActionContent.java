@@ -61,7 +61,7 @@ public class ActionContent implements Serializable {
 
 	/**
 	 * Type of the action. This is same as the key string used in
-	 * {@link ActionContainer}'s HashMap
+	 * {@link ActionContainer}'s LinkedHashMap
 	 */
 	private String action_type;
 
