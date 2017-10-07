@@ -94,8 +94,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
 		for (Id<Person> agentId : bdiAgentsIDs) {
-			@SuppressWarnings("unused")
-			MATSimAgent agent = matsimModel.getBDIAgent(agentId);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 			if (bdiAgent == null) {
 				logger.warn("No BDI counterpart for MATSim agent '" + agentId
@@ -364,7 +362,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * 
 	 * @param bdiAgent
 	 */
-	private void assignDependentPersons(EvacResident bdiAgent) {
+	private static void assignDependentPersons(EvacResident bdiAgent) {
 		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
 			double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
 			pDependents = Util.normalise(pDependents);

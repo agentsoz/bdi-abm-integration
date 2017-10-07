@@ -83,11 +83,9 @@ public class BDIModel extends JACKModel {  //DataSource
 	}
 
 
-	public void checkDepartureFromHome(AgentDataContainer adc) { 
-		 Iterator<Entry<String, Agent>> it = this.agents.entrySet().iterator();
-		 while(it.hasNext()) { 
-			 Entry<String, Agent> agentEntry = it.next();
-			 String agentID = (String) agentEntry.getKey();
+	private void checkDepartureFromHome(AgentDataContainer adc) { 
+		for ( Entry<String,Agent> agentEntry : this.agents.entrySet() ) {
+			 String agentID = agentEntry.getKey();
 			 EvacResident agent = (EvacResident) agentEntry.getValue();
 			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
 				 adc.getOrCreate(agentID).getPerceptContainer().put(DataTypes.LEAVENOW, " start departure");
@@ -174,7 +172,7 @@ public class BDIModel extends JACKModel {  //DataSource
 		
 	}
 	
-	protected void startDriving(String agentID,
+	private void startDriving(String agentID,
 			Object[] parameters){
 
 		String action = (String) parameters[0];
@@ -192,7 +190,7 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	}
 //	
-	protected void callSuperPackageAction(String agentID, String action, Object[] parameters){
+	private void callSuperPackageAction(String agentID, String action, Object[] parameters){
 		super.packageAction(agentID, action, parameters);
 	}
 
