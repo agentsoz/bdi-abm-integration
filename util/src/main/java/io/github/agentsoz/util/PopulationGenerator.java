@@ -127,7 +127,7 @@ public class PopulationGenerator {
 			Coordinates coordsOfAct, double actEndTime, Scenario scenario) {
 		PopulationFactory populationFactory = scenario.getPopulation()
 				.getFactory();
-		Coord matSimCoord = scenario.createCoord(coordsOfAct.getLongitude(),
+		Coord matSimCoord = new Coord(coordsOfAct.getLongitude(),
 				coordsOfAct.getLatitude());
 
 		// Create a new plan

@@ -56,15 +56,15 @@
   <modules>
     <module>util</module>
     <module>integrations/bdi-abm</module>
-    <module>integrations/bdi-gams</module>
+    <!--<module>integrations/bdi-gams</module>-->
     <module>integrations/abm-jack</module>
-    <module>integrations/abm-jill</module>
-    <module>integrations/abm-jadex</module>
+    <!--<module>integrations/abm-jill</module>-->
+    <!--<module>integrations/abm-jadex</module>-->
     <module>integrations/bdi-matsim</module>
-    <module>examples/conservation</module>
-    <module>examples/bushfire</module>
+    <!--<module>examples/conservation</module>-->
+    <!--<module>examples/bushfire</module>-->
     <module>examples/bushfire-tutorial</module>
-    <module>examples/vaccination</module>
+    <!--<module>examples/vaccination</module>-->
   </modules>
 
   <build>
