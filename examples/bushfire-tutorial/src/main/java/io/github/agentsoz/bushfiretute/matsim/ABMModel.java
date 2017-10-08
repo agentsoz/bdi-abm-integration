@@ -2,6 +2,24 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 
 
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
+import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
+import org.matsim.core.network.NetworkImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -26,28 +44,24 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
-import io.github.agentsoz.bdimatsim.*;
+import io.github.agentsoz.bdimatsim.MATSimActionHandler;
+import io.github.agentsoz.bdimatsim.MATSimActionList;
+import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.MATSimModel;
+import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
+import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.bdimatsim.Replanner;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
-import io.github.agentsoz.bushfiretute.*;
+import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.BushfireMain;
+import io.github.agentsoz.bushfiretute.Config;
+import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
-import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.matsim.core.network.NetworkImpl;
-import org.matsim.core.utils.geometry.CoordImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import scenarioTWO.agents.EvacResident;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 public final class ABMModel implements MATSimApplicationInterface {
 
@@ -171,7 +185,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
 					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
-							.getNearestLinkExactly(new CoordImpl(coords[0], coords[1])).getId();
+							.getNearestLinkExactly(new Coord(coords[0], coords[1])).getId();
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
@@ -247,7 +261,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
 					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
-							.getNearestLinkExactly(new CoordImpl(coords[0], coords[1])).getId();
+							.getNearestLinkExactly(new Coord(coords[0], coords[1])).getId();
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
@@ -321,7 +335,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Id<Link> newLinkId;
 			newLinkId = ((NetworkImpl) matsimModel.getScenario().getNetwork())
-					.getNearestLinkExactly(new CoordImpl(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
+					.getNearestLinkExactly(new Coord(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
 
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
 					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
