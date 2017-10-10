@@ -16,7 +16,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.matsim.core.network.NetworkImpl;
+import org.matsim.core.network.SearchableNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +184,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				Id<Link> newLinkId;
 				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
-					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
+					newLinkId = ((SearchableNetwork) model.getScenario().getNetwork())
 							.getNearestLinkExactly(new Coord(coords[0], coords[1])).getId();
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
@@ -260,7 +260,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				Id<Link> newLinkId;
 				double[] coords = (double[]) args[1];
 				if (args[1] instanceof double[]) {
-					newLinkId = ((NetworkImpl) model.getScenario().getNetwork())
+					newLinkId = ((SearchableNetwork) model.getScenario().getNetwork())
 							.getNearestLinkExactly(new Coord(coords[0], coords[1])).getId();
 				} else {
 					throw new RuntimeException("Destination coordinates are not given");
@@ -334,7 +334,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			MATSimAgent agent = matsimModel.getBDIAgent(agentID);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Id<Link> newLinkId;
-			newLinkId = ((NetworkImpl) matsimModel.getScenario().getNetwork())
+			newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
 					.getNearestLinkExactly(new Coord(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
 
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
