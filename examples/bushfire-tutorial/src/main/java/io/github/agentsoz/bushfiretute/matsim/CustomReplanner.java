@@ -39,6 +39,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.mobsim.framework.HasPerson;
 import org.matsim.core.mobsim.framework.MobsimAgent;
@@ -59,7 +60,7 @@ final class CustomReplanner extends Replanner{
 		super(model, activityEndRescheduler);
 	}
 
-	final void addNewLegAndActvityToPlan(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime )
+	final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime )
 	{
 		logger.debug("starting addNewLegAndActvityToPlan method..");
 		double now = model.getTime() ; 
@@ -67,64 +68,58 @@ final class CustomReplanner extends Replanner{
 
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 
-		List<PlanElement> planElements = plan.getPlanElements() ;
-
 		int currentPlanIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
 
-		logger.trace("number of plan elements: " + planElements.size());
+		logger.trace("number of plan elements: " + plan.getPlanElements().size());
 		logger.trace("current plan index : " + currentPlanIndex);
 
-		//ending the current activity if its a Wait activity
-		PlanElement currentPE = planElements.get(currentPlanIndex);
-		if(currentPE instanceof Activity) { 
-			Activity currentAct = (Activity) currentPE;
-			if(currentAct.getType().equals("Wait")) {
-				logger.debug("Wait/Current activity ending now:  {}", now);
-				currentAct.setEndTime(now);
-			}
-
-			Leg newLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-			//newLeg.setDepartureTime(10);	
-			this.editRoutes.relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
-			logger.debug(" added leg to plan..");
-			planElements.add(currentPlanIndex+1,newLeg);
-
-			//ADDING Pickup ACTIVITY
-			Activity pickupAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId("Pickup", newActivityLinkId ) ;
-			pickupAct.setMaximumDuration(pickupTime);
-			logger.debug(" added {} type activity",pickupAct.getType());
-			planElements.add(currentPlanIndex+2,pickupAct);
-
-			//ADDING Wait ACTIVITY
-			Activity waitAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId("Wait", newActivityLinkId ) ;
-			waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
-			//			waitAct.setEndTime( pickupTime ) ;
-			//			waitAct.setMaximumDuration(10) ;
-			logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
-			planElements.add(currentPlanIndex+3,waitAct);
-
-			//			WithinDayAgentUtils.resetCaches(agent);
-			//			this.internalInterface.rescheduleActivityEnd(agent);
-
-			//rerouting the leg after wait activity
-			logger.debug("reRouting the leg after wait activity");
-			Leg nextLeg = (Leg)planElements.get(currentPlanIndex+4);
-			Activity nextAct = (Activity)planElements.get(currentPlanIndex+5);
-			logger.trace("all evac activity info : {} ", nextAct.toString());
-
-			this.editRoutes.relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() );
-
-			logger.trace("number of plan elements after adding new leg : " + planElements.size());
-
-			WithinDayAgentUtils.resetCaches(agent);
-			this.qsim.rescheduleActivityEnd(agent);
-
+		PlanElement currentPE = plan.getPlanElements().get(currentPlanIndex);
+		if ( ! ( currentPE instanceof Activity ) ) {
+			return ;
+		}
+		Activity currentAct = (Activity) currentPE;
+		if(currentAct.getType().equals("Wait")) {
+			// yyyy why only for wait activity here, and for all activities in compagnon method?  kai, oct'17
+			//ending the current activity if its a Wait activity:
+			logger.debug("Wait/Current activity ending now:  {}", now);
+			currentAct.setEndTime(now);
 		}
 
+		final PopulationFactory pf = this.model.getScenario().getPopulation().getFactory();
+
+		// leg/route from current activity/position to pickup activity:
+		Leg newLeg = pf.createLeg(TransportMode.car);
+		this.editRoutes.relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+		logger.debug(" inserting leg into plan..");
+		plan.getPlanElements().add(currentPlanIndex+1,newLeg);
+
+		//ADDING Pickup ACTIVITY
+		Activity pickupAct = pf.createActivityFromLinkId("Pickup", newActivityLinkId ) ;
+		pickupAct.setMaximumDuration(pickupTime);
+		logger.debug(" added {} type activity",pickupAct.getType());
+		plan.getPlanElements().add(currentPlanIndex+2,pickupAct);
+
+		//ADDING Wait ACTIVITY
+		Activity waitAct = pf.createActivityFromLinkId("Wait", newActivityLinkId ) ;
+		waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
+		logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
+		plan.getPlanElements().add(currentPlanIndex+3,waitAct);
+
+		//rerouting the leg after wait activity
+		logger.debug("reRouting the leg after wait activity");
+		Leg nextLeg = (Leg)plan.getPlanElements().get(currentPlanIndex+4);
+		Activity nextAct = (Activity)plan.getPlanElements().get(currentPlanIndex+5);
+		logger.trace("all evac activity info : {} ", nextAct.toString());
+		this.editRoutes.relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() );
+
+		logger.trace("number of plan elements after adding pickup, wait, new leg : " + plan.getPlanElements().size());
+
+		WithinDayAgentUtils.resetCaches(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 
 	}
 
-	final void addNewActivityToPlan(Id<Person> agentId,int pickupTime)
+	final void insertPickupAndWaitAtCurrentLocation(Id<Person> agentId,int pickupTime)
 	{
 		logger.debug("started addNewActivityToPlan method..");
 		double now = model.getTime() ; 
@@ -162,14 +157,13 @@ final class CustomReplanner extends Replanner{
 		this.qsim.rescheduleActivityEnd(agent);
 	}
 
-	final void addNewLegToPlan(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
+	final void moveToWaitAtOtherLocation(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
 	{
 		logger.debug("agent {} | started addNewLegToPlan method..", agentId);
 		double now = model.getTime() ; 
 
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
-		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
-		List<PlanElement> planElements = plan.getPlanElements() ;
+		List<PlanElement> planElements = WithinDayAgentUtils.getModifiablePlan(agent).getPlanElements() ;
 		int currentPlanIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
 
 		logger.trace("number of plan elements : " + planElements.size());
@@ -184,7 +178,7 @@ final class CustomReplanner extends Replanner{
 		Activity currentAct = (Activity) currentPE;
 		currentAct.setEndTime(now);
 
-		//2-Adding a new activity and a leg 
+		//2-insert a leg:
 		Leg newLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
 		newLeg.setDepartureTime(now);	
 		this.editRoutes.relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
@@ -194,7 +188,6 @@ final class CustomReplanner extends Replanner{
 		//3-ADDING wait ACTIVITY
 		Activity newAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId(dest, newActivityLinkId ) ;
 		newAct.setEndTime(Double.POSITIVE_INFINITY);
-		//		newAct.setEndTime(20);
 		planElements.add(currentPlanIndex+2,newAct);
 		logger.debug(" added a new {} activity",newAct.getType());
 
@@ -208,15 +201,12 @@ final class CustomReplanner extends Replanner{
 			logger.debug("reRouting the leg after the added activity..");
 			Leg nextLeg = (Leg)planElements.get(currentPlanIndex+3);
 			Activity nextAct = (Activity)planElements.get(currentPlanIndex+4);
-
 			this.editRoutes.relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ; 
-
 			logger.debug("addNewActivityToPlan - leg info after reroute : " + nextLeg.toString());
 		}
 
 		WithinDayAgentUtils.resetCaches(agent);
 		this.qsim.rescheduleActivityEnd(agent);
-
 	}
 	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
 	{
@@ -361,8 +351,9 @@ final class CustomReplanner extends Replanner{
 
 	final Id<Link> replanCurrentRoute(Id<Person> agentId, String actType)
 	{
-		// yy I think this is more something like "replan everything up to activity of type=actType".  kai, oct'17
-		
+		// yy I think this is more something like "replan everything up to activity of type=actType".  
+		// But I don't really understand what it is supposed to do.  kai, oct'17
+
 		double now = model.getTime();
 		logger.debug(" starting replanCurrentRoute : activity type: {}", actType);
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
@@ -434,31 +425,6 @@ final class CustomReplanner extends Replanner{
 		logger.trace("Size of the retreived links : {}", targetLinkIds.size());
 
 
-		/*
-		 * 			//getCurrentNode
-			Id<Link> currentAct_linkId = currentAct.getLinkId();
-			Link cur_link = this.model.getScenario().getNetwork().getLinks().get(currentAct_linkId);
-			Node curNode = cur_link.getToNode();
-			logger.trace("ToNode  and the link of the current activity: node-{} link {}", curNode.getId(),currentAct_linkId.toString());
-
-			Person p = this.model.getScenario().getPopulation().getPersons().get(agentId);
-			logger.trace("retreived the person for ID: {}", agentId.toString());
-
-
-			FastAStarLandmarksFactory landmarkFac = new FastAStarLandmarksFactory(
-					this.model.getScenario().getNetwork(),
-					TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility( model.getScenario().getConfig().planCalcScore()) 
-);
-
-			LeastCostPathCalculator pathCalculator = 
-					landmarkFac.createPathCalculator(this.model.getScenario().getNetwork(),
-					TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility( model.getScenario().getConfig().planCalcScore()), 
-					TravelTimeUtils.createFreeSpeedTravelTime()); 
-
-				//Path path = pathCalculator.calcLeastCostPath(curNode, n, this.model.getTime(), p, vehicle);
-				//logger.debug("travel cost from basenode to node {} : {}",n,path.travelCost);
-
-		 */
 		LinkedHashMap<String,Double> routeDistances =  new LinkedHashMap<String,Double>();
 
 
@@ -581,7 +547,7 @@ final class CustomReplanner extends Replanner{
 
 	}
 
-	final boolean changeEndActivity(Id<Person> agentId, String actType, double newEndTime)
+	final boolean changeActivityEndTime(Id<Person> agentId, String actType, double newEndTime)
 	{
 		logger.debug("received to modify the endtime of activity {}", actType);
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
@@ -624,8 +590,8 @@ final class CustomReplanner extends Replanner{
 		activityToChange.setEndTime(endtime);
 
 		WithinDayAgentUtils.resetCaches(agent);
-		if ( currentIndex != 1)
-			this.qsim.rescheduleActivityEnd(agent);
+		//		if ( currentIndex != 1) // ??
+		this.qsim.rescheduleActivityEnd(agent);
 		return true;
 
 

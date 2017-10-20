@@ -192,7 +192,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
 
-				((CustomReplanner)model.getReplanner()).addNewLegToPlan(Id.createPersonId(agentID), newLinkId, (String) args[2]);
+				((CustomReplanner)model.getReplanner()).moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (String) args[2]);
 
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
@@ -268,7 +268,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
 
-				((CustomReplanner)model.getReplanner()).addNewLegAndActvityToPlan(Id.createPersonId(agentID), newLinkId, (int) args[3]);
+				((CustomReplanner)model.getReplanner()).insertPickupAndWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (int) args[3]);
 
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
@@ -307,7 +307,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				double newEndTime = (double) args[1];
 				String actType = (String) args[2];        
 
-				((CustomReplanner)model.getReplanner()).changeEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
+				((CustomReplanner)model.getReplanner()).changeActivityEndTime(Id.createPersonId( agentID ),actType, newEndTime);
 
 				// Now set the action to passed straight away
 				MATSimAgent agent = model.getBDIAgent(agentID);
