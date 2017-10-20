@@ -40,6 +40,7 @@ import org.w3c.dom.NodeList;
 
 import io.github.agentsoz.bushfiretute.datamodels.Location;
 import io.github.agentsoz.bushfiretute.datamodels.School;
+import io.github.agentsoz.util.Global;
 
 
 /**
@@ -680,7 +681,7 @@ public class Config {
 		 if(!schoolsWithinDistance.isEmpty()) {
 			 logger.debug("number of schools within the range : {}", schoolsWithinDistance.size());
 			 logger.debug(" selected school array : {}",schoolsWithinDistance.toString());
-			 int num = BushfireMain.getRandom().nextInt(schoolsWithinDistance.size());
+			 int num = Global.getRandom().nextInt(schoolsWithinDistance.size());
 			 selectedSchool= schoolsWithinDistance.get(num);
 			 logger.debug("selected school ID : " + selectedSchool.getID());
 			 

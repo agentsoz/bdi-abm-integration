@@ -24,7 +24,7 @@ package io.github.agentsoz.bushfiretute;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Random;
+
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -34,6 +34,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bushfiretute.matsim.ABMModel;
+import io.github.agentsoz.util.Global;
 
 public class BushfireMain {
 
@@ -45,8 +46,6 @@ public class BushfireMain {
 	public static PrintStream writer;
 
 
-	// all application code should use this same instance of Random
-	private static final Random random = new Random(); 
 	private static Long seed = null;
 
 	public static void main(final String[] args) {
@@ -56,7 +55,7 @@ public class BushfireMain {
 		parse(args);
 
 		// Create the logger
-		logger = createLogger("", logFile);
+		logger = createLogger("io.github.agentsoz.bushfiretute.BushfireMain", logFile);
 
 		// Redirect the agent program output if specified
 		if (outFile != null) {
@@ -71,7 +70,7 @@ public class BushfireMain {
 
 		// add seed to command line args if run replication needed
 		if (seed != null) {
-			random.setSeed(seed);
+			Global.getRandom().setSeed(seed);
 			logger.info( "random seed was set to " + seed );
 		}
 
@@ -192,10 +191,6 @@ public class BushfireMain {
 		logger.setAdditive(true); /* set to true if root should log too */
 
 		return logger;
-	}
-	synchronized
-	public static Random getRandom() {
-		return random;
 	}
 
 }

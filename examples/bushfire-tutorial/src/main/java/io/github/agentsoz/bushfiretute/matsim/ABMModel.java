@@ -15,6 +15,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
+import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.SearchableNetwork;
 import org.slf4j.Logger;
@@ -55,12 +56,12 @@ import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bushfiretute.BDIModel;
-import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
+import io.github.agentsoz.util.Global;
 import scenarioTWO.agents.EvacResident;
 
 public final class ABMModel implements MATSimApplicationInterface {
@@ -80,10 +81,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * Provides a custom Replanner (extended) to use with MATSim.
 	 */
 	@Override
-	public Replanner getReplanner(ActivityEndRescheduler activityEndRescheduler) {
+	public Replanner getReplanner(QSim qsim) {
 		if (replanner == null) {
-			replanner = new CustomReplanner(matsimModel, activityEndRescheduler);
+			replanner = new CustomReplanner(matsimModel, qsim);
 		}
+		// (singleton pattern!)
 		return replanner;
 	}
 
@@ -273,6 +275,10 @@ public final class ABMModel implements MATSimApplicationInterface {
 				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 				bdiAgent.log("will drive to pickup from coords "+coords[0] + "," + coords[1] 
 						+" i.e. link "+newLinkId.toString());
+				
+				if ( true ) {
+//					throw new RuntimeException("stop here while debugging");
+				}
 
 				// Now register a event handler for when the agent arrives and finished picking up the destination
 				agent.getPerceptHandler().registerBDIPerceptHandler(
@@ -301,7 +307,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				double newEndTime = (double) args[1];
 				String actType = (String) args[2];        
 
-				((CustomReplanner)model.getReplanner()).forceEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
+				((CustomReplanner)model.getReplanner()).changeEndActivity(Id.createPersonId( agentID ),actType, newEndTime);
 
 				// Now set the action to passed straight away
 				MATSimAgent agent = model.getBDIAgent(agentID);
@@ -380,7 +386,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
 			double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
 			pDependents = Util.normalise(pDependents);
-			Random random = BushfireMain.getRandom();
+			Random random = Global.getRandom();
 
 			if (random.nextDouble() < pDependents[0]) {
 				// Allocate dependent children

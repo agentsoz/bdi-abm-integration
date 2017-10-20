@@ -43,6 +43,7 @@ import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.mobsim.framework.HasPerson;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
+import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.withinday.utils.EditRoutes;
@@ -54,7 +55,7 @@ import io.github.agentsoz.bdimatsim.Replanner;
 
 final class CustomReplanner extends Replanner{
 
-	CustomReplanner(MATSimModel model, ActivityEndRescheduler activityEndRescheduler) {
+	CustomReplanner(MATSimModel model, QSim activityEndRescheduler) {
 		super(model, activityEndRescheduler);
 	}
 
@@ -116,7 +117,7 @@ final class CustomReplanner extends Replanner{
 			logger.trace("number of plan elements after adding new leg : " + planElements.size());
 
 			WithinDayAgentUtils.resetCaches(agent);
-			this.internalInterface.rescheduleActivityEnd(agent);
+			this.qsim.rescheduleActivityEnd(agent);
 
 		}
 
@@ -158,7 +159,7 @@ final class CustomReplanner extends Replanner{
 		planElements.add(currentPlanIndex+2,waitAct);
 
 		WithinDayAgentUtils.resetCaches(agent);
-		this.internalInterface.rescheduleActivityEnd(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 	}
 
 	final void addNewLegToPlan(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
@@ -214,7 +215,7 @@ final class CustomReplanner extends Replanner{
 		}
 
 		WithinDayAgentUtils.resetCaches(agent);
-		this.internalInterface.rescheduleActivityEnd(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 
 	}
 	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
@@ -265,7 +266,7 @@ final class CustomReplanner extends Replanner{
 				this.editRoutes.relocateFutureLegRoute(legCP,currentAct.getLinkId(),activityCP.getLinkId(),((HasPerson)agent).getPerson() ) ;
 				logger.debug("leg after pick up activity relocated to new dest");
 				WithinDayAgentUtils.resetCaches(agent);
-				this.internalInterface.rescheduleActivityEnd(agent);
+				this.qsim.rescheduleActivityEnd(agent);
 				return ;
 			}
 			else {
@@ -308,7 +309,7 @@ final class CustomReplanner extends Replanner{
 			this.editRoutes.relocateFutureLegRoute(lastLeg,currentAct.getLinkId(),safeAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
 			logger.debug("relocated the last leg to safe dest");
 			WithinDayAgentUtils.resetCaches(agent);
-			this.internalInterface.rescheduleActivityEnd(agent);
+			this.qsim.rescheduleActivityEnd(agent);
 			return ;
 
 		}
@@ -349,7 +350,7 @@ final class CustomReplanner extends Replanner{
 
 				logger.debug(" finished reRouting leg from home to cenrtal point");
 				WithinDayAgentUtils.resetCaches(agent);
-				this.internalInterface.rescheduleActivityEnd(agent);
+				this.qsim.rescheduleActivityEnd(agent);
 
 				return ;
 			}
@@ -360,6 +361,8 @@ final class CustomReplanner extends Replanner{
 
 	final Id<Link> replanCurrentRoute(Id<Person> agentId, String actType)
 	{
+		// yy I think this is more something like "replan everything up to activity of type=actType".  kai, oct'17
+		
 		double now = model.getTime();
 		logger.debug(" starting replanCurrentRoute : activity type: {}", actType);
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
@@ -546,7 +549,7 @@ final class CustomReplanner extends Replanner{
 
 
 		WithinDayAgentUtils.resetCaches(agent);
-		this.internalInterface.rescheduleActivityEnd(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 
 		return targetLink;
 	}
@@ -574,76 +577,55 @@ final class CustomReplanner extends Replanner{
 			return ;
 		}
 		WithinDayAgentUtils.resetCaches(agent);
-		this.internalInterface.rescheduleActivityEnd(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 
 	}
 
-	final boolean forceEndActivity(Id<Person> agentId, String actType, double newEndTime)
+	final boolean changeEndActivity(Id<Person> agentId, String actType, double newEndTime)
 	{
 		logger.debug("received to modify the endtime of activity {}", actType);
-		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
-		MobsimAgent agent = mapping.get(agentId);
+		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
 
-		Activity endAct=null;
+		Activity activityToChange=null;
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 		int currentIndex = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
-		int EvacIndex= 100;
-		List<PlanElement> planElements = plan.getPlanElements() ;
-		PlanElement pe =  planElements.get(currentIndex);
+		int evacIndex= 100;
 		logger.debug("forceEndActivity: agent {} | current plan Index  {} | current time : {} ",agent.getId().toString(), currentIndex, model.getTime() );
 
-		if (actType.equals("Current")) { 
-
-
-			if( !(pe instanceof Activity) ) {
+		if (actType.equals("Current")) 
+		{ 
+			if( !(plan.getPlanElements().get(currentIndex) instanceof Activity) ) {
 				logger.error("current plan element is not an activity, unable to forceEndActivity");
 				return false;
 			}
-			endAct = (Activity) planElements.get(currentIndex);
+			activityToChange = (Activity) plan.getPlanElements().get(currentIndex);
 		}
 
-		if(actType.equals("Evacuation")) {
-
-			for(int i=currentIndex;i<planElements.size();i++) {
-				PlanElement element =  planElements.get(i);
+		if(actType.equals("Evacuation")) 
+		{
+			for(int i=currentIndex;i<plan.getPlanElements().size();i++) {
+				PlanElement element =  plan.getPlanElements().get(i);
 				if( !(element instanceof Activity) ) {
-					//logger.error("current plan element is not an activity, unable to forceEndActivity");
 					continue;
 				}
-				Activity act = (Activity) element;
-				if(act.getType().equals("Evacuation")) {
-					endAct=act;
-					EvacIndex = i;
+				if(((Activity) element).getType().equals("Evacuation")) {
+					activityToChange=(Activity) element;
+					evacIndex = i;
 				}				
 			}
 		}
 		//delaying activity by newEndTime
-		if(endAct == null) {
+		if(activityToChange == null) {
 			logger.error("could not find the activity to End");
 			return false;
 		}
-		double ENDTIME =  model.getTime() +  newEndTime;
-		logger.debug("force end current actvity index {} with new end time  {} ", EvacIndex, ENDTIME );
-		endAct.setEndTime(ENDTIME);
-		//endAct.setMaximumDuration(ENDTIME);
-
-
-		//reRouteCurrentLeg(agent, model.getTime()) ;
-		//			if(currentIndex == 1) {
-		//				
-		//				reRouteCurrentLeg(agent, model.getTime()) ;
-		//				
-		//				Activity home =  (Activity) planElements.get(0);
-		//				planElements.remove(1);
-		//				Leg newHomeToEvacLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-		//				EditRoutes.relocateFutureLegRoute(newHomeToEvacLeg, agent.getCurrentLinkId(), endAct.getLinkId(),((HasPerson)agent).getPerson(), 
-		//						this.model.getScenario().getNetwork(), tripRouter );
-		//				planElements.add(1,newHomeToEvacLeg);
-		//			}
+		double endtime =  model.getTime() +  newEndTime;
+		logger.debug("change end time of actvity with index {} to new end time  {} ", evacIndex, endtime );
+		activityToChange.setEndTime(endtime);
 
 		WithinDayAgentUtils.resetCaches(agent);
 		if ( currentIndex != 1)
-			this.internalInterface.rescheduleActivityEnd(agent);
+			this.qsim.rescheduleActivityEnd(agent);
 		return true;
 
 
@@ -665,7 +647,7 @@ final class CustomReplanner extends Replanner{
 		planElements.add(2,tempAct);
 
 		WithinDayAgentUtils.resetCaches(agent);
-		this.internalInterface.rescheduleActivityEnd(agent);
+		this.qsim.rescheduleActivityEnd(agent);
 
 	}
 
