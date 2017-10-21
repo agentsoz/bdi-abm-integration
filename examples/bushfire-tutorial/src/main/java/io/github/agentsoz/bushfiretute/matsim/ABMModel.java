@@ -225,7 +225,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
 				String destination = (String) args[1];
 				// connect To route replanner method
-				Id<Link> newLinkId = ((CustomReplanner)model.getReplanner()).replanCurrentRoute(Id.createPersonId(agentID), destination);
+				Id<Link> newLinkId = ((CustomReplanner)model.getReplanner()).driveDirectlyToActivity(Id.createPersonId(agentID), destination);
 				if (newLinkId == null) {
 					logger.warn("CONNECT_TO: returned a null link from the target activity");
 					return true;

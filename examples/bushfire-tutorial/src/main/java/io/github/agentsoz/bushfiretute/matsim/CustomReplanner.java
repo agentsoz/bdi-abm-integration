@@ -349,7 +349,7 @@ final class CustomReplanner extends Replanner{
 
 	}
 
-	final Id<Link> replanCurrentRoute(Id<Person> agentId, String actType)
+	final Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType)
 	{
 		// yy I think this is more something like "replan everything up to activity of type=actType".  
 		// But I don't really understand what it is supposed to do.  kai, oct'17

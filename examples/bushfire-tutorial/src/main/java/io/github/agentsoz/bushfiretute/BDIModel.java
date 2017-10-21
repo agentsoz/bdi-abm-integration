@@ -63,7 +63,7 @@ public class BDIModel extends JACKModel {  //DataSource
 //	static boolean startedEvac = false;
 	int timeStepcount = 0; // ugly way to post the fire alert at the 4th time step
 
-	static boolean firePerceptAdded = false;  // to send the global fire alert percept
+	 boolean firePerceptAdded = false;  // to send the global fire alert percept
 	@Override
 	public void takeControl(AgentDataContainer adc) {
 
