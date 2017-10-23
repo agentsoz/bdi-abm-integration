@@ -307,7 +307,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				double newEndTime = (double) args[1];
 				String actType = (String) args[2];        
 
-				((CustomReplanner)model.getReplanner()).changeActivityEndTime(Id.createPersonId( agentID ),actType, newEndTime);
+				((CustomReplanner)model.getReplanner()).changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newEndTime);
 
 				// Now set the action to passed straight away
 				MATSimAgent agent = model.getBDIAgent(agentID);

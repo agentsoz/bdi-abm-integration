@@ -210,6 +210,8 @@ final class CustomReplanner extends Replanner{
 	}
 	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
 	{
+		// probably no longer used.  Essentially replaces the linkId for the different activity types.
+		
 		logger.debug("started addNewLegToPlan method..");
 		double now = model.getTime() ; 
 
@@ -349,10 +351,13 @@ final class CustomReplanner extends Replanner{
 
 	}
 
-	final Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType)
+	public final Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType)
 	{
-		// yy I think this is more something like "replan everything up to activity of type=actType".  
-		// But I don't really understand what it is supposed to do.  kai, oct'17
+		// This method 
+		// * finds the shortest path to the original evacuation route (from "Evacuation" to "Safe")
+		// end then
+		// * creates a new route from "here" via that "shortest path" and then continues on the 
+		// original evacuation route.
 
 		double now = model.getTime();
 		logger.debug(" starting replanCurrentRoute : activity type: {}", actType);
@@ -547,7 +552,7 @@ final class CustomReplanner extends Replanner{
 
 	}
 
-	final boolean changeActivityEndTime(Id<Person> agentId, String actType, double newEndTime)
+	final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newEndTime)
 	{
 		logger.debug("received to modify the endtime of activity {}", actType);
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
@@ -598,7 +603,7 @@ final class CustomReplanner extends Replanner{
 	}
 
 
-	public void addTempActivity(Id<Person> agentId) { 
+	public void insertTempActivity(Id<Person> agentId) { 
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 		MobsimAgent agent = mapping.get(agentId);
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
