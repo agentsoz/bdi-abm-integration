@@ -182,11 +182,13 @@ public class JillModelTest {
 			}
 		}
 
-		@Override
-		public Object queryPercept(String agentID, String perceptID) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+//		@Override
+//		public Object queryPercept(String agentID, String perceptID) {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+		// this method somehow isn't in the super-interface, and so the code does not compile on gilab-ci. 
+		// kai, oct'17
 		
 	}
 	
