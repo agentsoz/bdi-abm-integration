@@ -33,11 +33,11 @@ public class DataServer {
    
    private double                            time          = 0.0;
    private double                            timeStep      = 1.0;
-   private Map< String, List< DataClient > > subscriptions = new HashMap< String, List< DataClient > >();
-   private Map< String, List< DataSource > > sources       = new HashMap< String, List< DataSource > >();
+   private Map< String, List< DataClient > > subscriptions = new LinkedHashMap< String, List< DataClient > >();
+   private Map< String, List< DataSource > > sources       = new LinkedHashMap< String, List< DataSource > >();
    private SortedMap< Double, Map< String, List< DataSource > > > timedUpdates
       = new ConcurrentSkipListMap< Double, Map< String, List< DataSource > > >();
-   private static Map< String, DataServer >  servers       = new HashMap< String, DataServer >();
+   private static Map< String, DataServer >  servers       = new LinkedHashMap< String, DataServer >();
    
    public DataServer( String name ) {
       
@@ -95,7 +95,7 @@ public class DataServer {
    public void registerTimedUpdate( String dataType, DataSource source, double nextUpdate ) {
 
       if (!timedUpdates.containsKey( nextUpdate )) {
-         timedUpdates.put( nextUpdate, new HashMap< String, List< DataSource > >() );
+         timedUpdates.put( nextUpdate, new LinkedHashMap< String, List< DataSource > >() );
       }
       if (!timedUpdates.get( nextUpdate ).containsKey( dataType )) {
          timedUpdates.get( nextUpdate ).put( dataType, new ArrayList< DataSource >() );

@@ -30,8 +30,19 @@ import io.github.agentsoz.bdimatsim.MATSimActionList;
  */
  public class ActionID {
 	 public static final String DRIVETO = MATSimActionList.DRIVETO;
-	 public static final String CONNECT_TO = "connect to";
+	 // means drive to some location
+	 
+	 /**
+	 * This is the one described by {@link CustomReplanner#driveDirectlyToActivity}.
+	 */
+	public static final String CONNECT_TO = "connect to";
+	 
 	 public static final String PICKUP = "pick up";
+	 //  wait specified time.  Does (currently) NOT wait until someone shows up.  There is usually a wait action after the 
+	 // pickup action where the agent waits for the BDI system.
+	 
 	 public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
+	 // combining the two
+	 
 	 public static final String SET_DRIVE_TIME = "set drive time";
 }

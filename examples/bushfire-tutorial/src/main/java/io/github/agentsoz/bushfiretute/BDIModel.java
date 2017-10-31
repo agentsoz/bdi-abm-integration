@@ -63,7 +63,7 @@ public class BDIModel extends JACKModel {  //DataSource
 //	static boolean startedEvac = false;
 	int timeStepcount = 0; // ugly way to post the fire alert at the 4th time step
 
-	static boolean firePerceptAdded = false;  // to send the global fire alert percept
+	 boolean firePerceptAdded = false;  // to send the global fire alert percept
 	@Override
 	public void takeControl(AgentDataContainer adc) {
 
@@ -83,15 +83,14 @@ public class BDIModel extends JACKModel {  //DataSource
 	}
 
 
-	public void checkDepartureFromHome(AgentDataContainer adc) { 
-		 Iterator<Entry<String, Agent>> it = this.agents.entrySet().iterator();
-		 while(it.hasNext()) { 
-			 Entry<String, Agent> agentEntry = it.next();
-			 String agentID = (String) agentEntry.getKey();
+	private void checkDepartureFromHome(AgentDataContainer adc) { 
+		for ( Entry<String,Agent> agentEntry : this.agents.entrySet() ) {
+			 String agentID = agentEntry.getKey();
 			 EvacResident agent = (EvacResident) agentEntry.getValue();
 			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
 				 adc.getOrCreate(agentID).getPerceptContainer().put(DataTypes.LEAVENOW, " start departure");
 			 }
+			 waitUntilIdle(); // yyyyyy try to get code deterministic
 		 }
 		
 	}
@@ -173,7 +172,7 @@ public class BDIModel extends JACKModel {  //DataSource
 		
 	}
 	
-	protected void startDriving(String agentID,
+	private void startDriving(String agentID,
 			Object[] parameters){
 
 		String action = (String) parameters[0];
@@ -191,7 +190,7 @@ public class BDIModel extends JACKModel {  //DataSource
 
 	}
 //	
-	protected void callSuperPackageAction(String agentID, String action, Object[] parameters){
+	private void callSuperPackageAction(String agentID, String action, Object[] parameters){
 		super.packageAction(agentID, action, parameters);
 	}
 
@@ -199,7 +198,9 @@ public class BDIModel extends JACKModel {  //DataSource
 	@Override
 	public Agent createAgent(String agentID, Object[] initData) {
 		logger.debug("agent {} initiated from bushfire application", agentID);
-		return new EvacResident(agentID, bdiConnector, this, BushfireMain.writer);
+		final EvacResident evacResident = new EvacResident(agentID, bdiConnector, this, BushfireMain.writer);
+		waitUntilIdle(); // yyyyyy try to get code deterministic
+		return evacResident;
 	}
 
 	@Override
@@ -231,6 +232,9 @@ public class BDIModel extends JACKModel {  //DataSource
 		else if (perceptID.equals(PerceptID.PICKED_UP)) {
 			resident.log("picked up " + params);
 		}
+		
+		waitUntilIdle(); // yyyyyy try to get code deterministic
+
 	}
 
 	@Override
@@ -280,6 +284,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			logger.debug("NumberFormatException : {}", e.getMessage());
 		}
 		
+		waitUntilIdle(); // yyyyyy try to get code deterministic
 
 	}
 

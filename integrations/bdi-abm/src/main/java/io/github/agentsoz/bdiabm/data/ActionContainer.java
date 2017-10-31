@@ -23,7 +23,7 @@ package io.github.agentsoz.bdiabm.data;
  */
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -35,26 +35,26 @@ public class ActionContainer implements Serializable {
 	private static final long serialVersionUID = -8535318524134143574L;
 
 	/**
-	 * {@link HashMap} where all the {@link ActionContent}s are stored. Keys are
+	 * {@link LinkedHashMap} where all the {@link ActionContent}s are stored. Keys are
 	 * action types, values are {@link ActionContent}s
 	 */
-	private HashMap<String, ActionContent> container;
+	private LinkedHashMap<String, ActionContent> container;
 
 	/**
 	 * Public constructor
 	 */
 	public ActionContainer() {
-		this(new HashMap<String, ActionContent>());
+		this(new LinkedHashMap<String, ActionContent>());
 	}
 
 	/**
 	 * Public constructor
 	 * 
 	 * @param container
-	 *            {@link HashMap} of actions (keys are action types, values are
+	 *            {@link LinkedHashMap} of actions (keys are action types, values are
 	 *            {@link ActionContent}s)
 	 */
-	public ActionContainer(HashMap<String, ActionContent> container) {
+	public ActionContainer(LinkedHashMap<String, ActionContent> container) {
 		this.container = container;
 	}
 

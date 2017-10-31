@@ -26,6 +26,7 @@ import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
+import org.matsim.core.mobsim.qsim.QSim;
 
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
@@ -50,8 +51,14 @@ public class StubPlugin implements MATSimApplicationInterface {
 	}
 
 	@Override
-	public Replanner getReplanner(ActivityEndRescheduler activityEndRescheduler) {
+	public Replanner getReplanner(QSim activityEndRescheduler) {
 		return null;
+	}
+
+	@Override
+	public void run(String[] args) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

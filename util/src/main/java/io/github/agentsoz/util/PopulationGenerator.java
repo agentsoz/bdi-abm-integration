@@ -78,7 +78,7 @@ public class PopulationGenerator {
 				.createConfig());
 
 		// Use this random generator for placement of agents
-		Random rand = new Random();
+		Random rand = Global.getRandom() ;
 
 		// Get the list of educational addresses if given
 		ArrayList<Coordinates> edu = null;
@@ -127,7 +127,7 @@ public class PopulationGenerator {
 			Coordinates coordsOfAct, double actEndTime, Scenario scenario) {
 		PopulationFactory populationFactory = scenario.getPopulation()
 				.getFactory();
-		Coord matSimCoord = scenario.createCoord(coordsOfAct.getLongitude(),
+		Coord matSimCoord = new Coord(coordsOfAct.getLongitude(),
 				coordsOfAct.getLatitude());
 
 		// Create a new plan

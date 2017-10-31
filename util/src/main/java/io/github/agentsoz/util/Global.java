@@ -1,11 +1,13 @@
-package io.github.agentsoz.bushfiretute;
+/**
+ * 
+ */
+package io.github.agentsoz.util;
 
 /*
  * #%L
-
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -23,17 +25,21 @@ package io.github.agentsoz.bushfiretute;
  * #L%
  */
 
-import io.github.agentsoz.bdimatsim.MatsimParameterHandler;
+import java.util.Random;
 
-public class MATSimBDIParameterHandler extends MatsimParameterHandler {
-	
-	public MATSimBDIParameterHandler() {
-		super();
-	}
+/**
+ * @author kainagel
+ *
+ */
+public class Global {
+	// all application code should use this same instance of Random
+	private static final Random random = new Random();
 
-	@Override
-	public int getNumberOfAgents(){
-		return Config.getNumBDIAgents();
+	private Global() {} // do not instantiate
+
+	synchronized
+	public static Random getRandom() {
+		return random;
 	}
 
 }

@@ -1,5 +1,40 @@
 package io.github.agentsoz.bdimatsim;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlansConfigGroup.ActivityDurationInterpretation;
+import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
+import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.mobsim.framework.MobsimAgent;
+import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
+import org.matsim.core.mobsim.framework.events.MobsimInitializedEvent;
+import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
+import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
+import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
+import org.matsim.core.network.NetworkChangeEvent;
+import org.matsim.core.network.NetworkChangeEvent.ChangeType;
+import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.withinday.mobsim.MobsimDataProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -30,42 +65,6 @@ import io.github.agentsoz.bdimatsim.app.StubPlugin;
 import io.github.agentsoz.bdimatsim.moduleInterface.data.SimpleMessage;
 import io.github.agentsoz.dataInterface.DataServer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.framework.MobsimAgent;
-import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
-import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
-import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
-import org.matsim.core.network.NetworkChangeEvent;
-import org.matsim.core.network.NetworkChangeEvent.ChangeType;
-import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
-import org.matsim.core.network.NetworkChangeEventFactory;
-import org.matsim.core.network.NetworkChangeEventFactoryImpl;
-import org.matsim.core.network.NetworkImpl;
-import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.withinday.mobsim.MobsimDataProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Provider;
-
 /**
  * @author QingyuChen, KaiNagel, Dhi Singh
  */
@@ -81,13 +80,13 @@ public final class MATSimModel implements ABMServerInterface {
 
 	private double time;
 
-	private final MatsimParameterHandler matSimParameterManager;
+	//	private final MatsimParameterHandler matSimParameterManager;
 	private MATSimAgentManager agentManager ;
 	private MobsimDataProvider mobsimDataProvider = new MobsimDataProvider() ;
 
 	final BDIServerInterface bdiServer;
 
-	private MATSimApplicationInterface plugin;
+	private MATSimApplicationInterface application;
 
 	private AgentActivityEventHandler eventsHandler;
 
@@ -128,168 +127,156 @@ public final class MATSimModel implements ABMServerInterface {
 		return this.mobsimDataProvider ;
 	}
 
-	public MATSimModel( BDIServerInterface bidServer, MatsimParameterHandler matsimParams) {
+	public MATSimModel( BDIServerInterface bidServer) {
 		this.bdiServer = bidServer ;
-		this.matSimParameterManager = matsimParams ;
-		this.agentsUpdateMessages = new ArrayList<SimpleMessage>();
+		this.agentsUpdateMessages = new ArrayList<>();
 		this.agentManager = new MATSimAgentManager( this ) ;
 		this.registerPlugin(new StubPlugin());
 	}
 
 	public final void registerPlugin(MATSimApplicationInterface app) {
-		this.plugin = app;
+		this.application = app;
 	}
-	
-	public final void run(String parameterFile,String[] args) {
+
+	public final void run(String[] args) {
 		// (this needs to be public)
 
-		if (parameterFile != null) {
-			matSimParameterManager.readParameters(parameterFile);
-		}
 		Config config = ConfigUtils.loadConfig( args[0] ) ;
 
 		config.network().setTimeVariantNetwork(true);
 
+		config.plans().setActivityDurationInterpretation(ActivityDurationInterpretation.tryEndTimeThenDuration);
+		
+		config.global().setCoordinateSystem("EPSG:32756") ;
+
 		// Normally, the qsim starts at the earliest activity end time.  The following tells the mobsim to start
 		// at 2 seconds before 6:00, no matter what is in the initial plans file:
 		config.qsim().setStartTime( 1.00 );
-		config.qsim().setSimStarttimeInterpretation( QSimConfigGroup.ONLY_USE_STARTTIME );
-		//config.qsim().setEndTime( 8.*3600 + 1800. );
+		config.qsim().setSimStarttimeInterpretation( StarttimeInterpretation.onlyUseStarttime );
+		config.qsim().setEndTime( 8.*3600 + 1800. );
 
 		config.controler().setWritePlansInterval(1);
-		config.planCalcScore().setWriteExperiencedPlans(true);
+		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
+
+		// --- snapshots begin 
+		config.qsim().setSnapshotStyle(SnapshotStyle.withHoles);
+		config.qsim().setSnapshotPeriod(10);
+		{
+			Collection<String> snapshotFormat = new ArrayList<>() ;
+			snapshotFormat.add("transims") ;
+			snapshotFormat.add("googleearth") ;
+//			snapshotFormat.add("otfvis") ;
+			config.controler().setSnapshotFormat(snapshotFormat);
+		}
+		config.controler().setWriteSnapshotsInterval(10);
+		// --- snapshots end
 		
-		config.controler().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles );
+		ConfigUtils.setVspDefaults(config);
 
 		// ---
 
 		scenario = ScenarioUtils.loadScenario(config) ;
 
-		// FIXME: Get rid of the matSimParameterManager altogether (dsingh, 25aug16)
-		// At the moment it is used in the default bushfire application, but has
-		// already been removed for the jill version (where it is initialised as null).
-		// Will need a way to get the #bdi agents from the config to here (needed to
-		// allow both BDI and MATSim agents to co exist).
-		// For now, if matSimParameterManager is null then all MATSim agents
-		// will have BDI counterparts
-		if (this.matSimParameterManager != null) {
-			// this is some conversion of nice matsim objects into ugly conventional data structures :-):
-			final Collection<Id<Link>> allLinkIDs = this.getScenario().getNetwork().getLinks().keySet() ;
-			this.matSimParameterManager.setNETWORKIDS(Utils.createFlatLinkIDs(allLinkIDs)); //Link IDs in string[] format
+		for ( Link link : scenario.getNetwork().getLinks().values() ) {
+			final double veryLargeSpeed = 9999999999.;
+			if ( link.getFreespeed() > veryLargeSpeed ) {
+				link.setFreespeed(veryLargeSpeed);
+			}
 		}
-		final Collection<? extends Link> links = this.getScenario().getNetwork().getLinks().values();
-		Utils.generateLinkCoordsAsArray(links);
-		Utils.computeBoundingBox(links);
 
-		this.bdiAgentIDs = Utils.getBDIAgentIDs( scenario, matSimParameterManager );
+		bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
 
 		// ---
 
 		final Controler controller = new Controler( scenario );
 
-		final EventsManager eventsManager = controller.getEvents();
 		eventsHandler = new AgentActivityEventHandler(MATSimModel.this);
-		eventsManager.addHandler(eventsHandler);
+		controller.getEvents().addHandler(eventsHandler);
 
-		// having anonymous classes stuck into each other is not very pleasing to read, but it makes for short code and
-		// avoids going overboard with passing object references around. kai, mar'15  & may'15
 		controller.addOverridingModule(new AbstractModule(){
 			@Override public void install() {
-				this.bindMobsim().toProvider(new Provider<Mobsim>(){
-					@Override
-					public Mobsim get() {
-						QSim qSim = QSimUtils.createDefaultQSim(scenario, eventsManager) ;
+				this.addMobsimListenerBinding().toInstance( new MobsimInitializedListener() {
+					@Override public void notifyMobsimInitialized(MobsimInitializedEvent e) {
+						// for the time being doing this here since from a matsim perspective we would like to
+						// re-create them in every iteration. kai, oct;17
 
-						// ===
-						qSim.addQueueSimulationListeners( new MobsimBeforeSimStepListener() {
-							boolean setupFlag = true ;
-							/**
-							 * The most important method - called each time step during the iteration
-							 */		
-							@Override
-							public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
-								MATSimModel.this.setTime(e.getSimulationTime());
-								if(setupFlag) {
-									// should be possible to do the initialization in some other way ...
-									
-									//Utils.initialiseVisualisedAgents(MATSimModel.this) ;
+						QSim qSim = (QSim) e.getQueueSimulation() ;
 
-									// Allow the application to adjust the BDI agents list prior to creating agents
-									plugin.notifyBeforeCreatingBDICounterparts(MATSimModel.this.getBDIAgentIDs());
-									
-									for(Id<Person> agentId: MATSimModel.this.getBDIAgentIDs()) {
-										/*Important - add agent to agentManager */
-										MATSimModel.this.getAgentManager().createAndAddBDIAgent(agentId);
-										//MATSimModel.this.getAgentManager().getReplanner().removeActivities(agentId);
-									}
-									
-									// Allow the application to configure the freshly baked agents
-									plugin.notifyAfterCreatingBDICounterparts(MATSimModel.this.getBDIAgentIDs());
-									
-									// Register new BDI actions and percepts from the application
-									// Must be done after the agents have been created since new 
-									// actions/percepts are registered with each BDI agent
-									MATSimModel.this.getAgentManager().registerApplicationActionsPercepts(plugin);
-									
-									// Flag that setup is done
-									setupFlag = false;
-								}
-								// the real work is done here:
-								//MATSimModel.this.runBDIModule();
-								
-								// On 25 Aug 2016 dsingh said:
-								// The notifyMobsimBeforeSimStep(e) function essentially provides
-								// the simulation clock in any MATSim-BDI integration, since there
-								// is no external controller (MATSim acts as the controller).
-								// So this is where we control and synchronise all models
-								// (ABM, BDI, Fire, other) with respect to data transfer
-								//
-								// 1. First step the data server so that it can conduct
-								//    the data transfer between all connected models
-								publishDataToExternalListeners();
-								// 2. Next, call the BDI model that will populate the 
-								//    agent data container with any action/percepts per agent
-								MATSimModel.this.bdiServer.takeControl(agentManager.getAgentDataContainer());
-								// 3. Finally, call the MATSim model and process 
-								//    the BDI actions/percepts, and re-populate the 
-								//    agent data container, ready to pass to the BDI system in the 
-								//    next cycle.
-								MATSimModel.this.takeControl(agentManager.getAgentDataContainer());
-							}
-						} ) ; // end anonymous class MobsimListener
-						// ===
-						
+						//Utils.initialiseVisualisedAgents(MATSimModel.this) ;
+
+						// Allow the application to adjust the BDI agents list prior to creating agents
+						application.notifyBeforeCreatingBDICounterparts(bdiAgentIDs);
+
+						for(Id<Person> agentId: bdiAgentIDs) {
+							/*Important - add agent to agentManager */
+							agentManager.createAndAddBDIAgent(agentId);
+							//MATSimModel.this.getAgentManager().getReplanner().removeActivities(agentId);
+						}
+
+						// Allow the application to configure the freshly baked agents
+						application.notifyAfterCreatingBDICounterparts(MATSimModel.this.getBDIAgentIDs());
+
+						// Register new BDI actions and percepts from the application
+						// Must be done after the agents have been created since new 
+						// actions/percepts are registered with each BDI agent
+						agentManager.registerApplicationActionsPercepts(application);
+
 						// passes important matsim qsim functionality to the agent manager:
-						agentManager.setUpReplanner(plugin.getReplanner(qSim), qSim);
-						// yy "qSim" is too powerful an object here. kai, mar'15
+						agentManager.setUpReplanner(application.getReplanner(qSim), qSim);
 
-						// add stub agent to keep simulation alive:
+						// add stub agent to keep simulation alive.  yyyy find nicer way to do this.
 						Id<Link> dummyLinkId = qSim.getNetsimNetwork().getNetsimLinks().keySet().iterator().next() ;
-						MobsimVehicle veh = null ;
-						StubAgent stubAgent = new StubAgent(dummyLinkId,Id.createPersonId("StubAgent"),veh);
-						qSim.insertAgentIntoMobsim(stubAgent);
-
-						// return qsim (this is a factory)
-						return qSim ;
+						MobsimVehicle dummyVeh = null ;
+						qSim.insertAgentIntoMobsim(new StubAgent(dummyLinkId,Id.createPersonId("StubAgent"),dummyVeh));
 					}
 				}) ;
-			}
-		});
-		
 
-		controller.getMobsimListeners().add(mobsimDataProvider);
+				this.addMobsimListenerBinding().toInstance( new MobsimBeforeSimStepListener() {
+					/**
+					 * The most important method - called each time step during the iteration
+					 */		
+					@Override
+					public void notifyMobsimBeforeSimStep(MobsimBeforeSimStepEvent e) {
+						MATSimModel.this.setTime(e.getSimulationTime());
+
+						// the real work is done here:
+
+						// On 25 Aug 2016 dsingh said:
+						// The notifyMobsimBeforeSimStep(e) function essentially provides
+						// the simulation clock in any MATSim-BDI integration, since there
+						// is no external controller (MATSim acts as the controller).
+						// So this is where we control and synchronise all models
+						// (ABM, BDI, Fire, other) with respect to data transfer
+						//
+						// 1. First step the data server so that it can conduct
+						//    the data transfer between all connected models
+						publishDataToExternalListeners();
+						// 2. Next, call the BDI model that will populate the 
+						//    agent data container with any action/percepts per agent
+						bdiServer.takeControl(agentManager.getAgentDataContainer());
+						// 3. Finally, call the MATSim model and process 
+						//    the BDI actions/percepts, and re-populate the 
+						//    agent data container, ready to pass to the BDI system in the 
+						//    next cycle.
+						MATSimModel.this.takeControl(agentManager.getAgentDataContainer());
+					}
+				} ) ; // end anonymous class MobsimListener
+
+				this.addMobsimListenerBinding().toInstance( mobsimDataProvider );
+			}
+		}) ;
 
 		// FIXME: dsingh, 25aug16: BDI init and start should be done outside of MATSim model 
 		this.bdiServer.init(this.agentManager.getAgentDataContainer(),
 				this.agentManager.getAgentStateList(), this,
 				Utils.getPersonIDsAsArray(this.bdiAgentIDs));
-		
-		this.bdiServer.start();
 		// (yy "this" is too powerful an object here, but it saves many lines of code. kai, mar'15)
+
+		this.bdiServer.start();
 
 		controller.run();
 	}
-	
+
 	/**
 	 * Publish updates from this model to any connected listeners, such
 	 * as visualisers. Updates buffer is then flushed. 
@@ -307,11 +294,10 @@ public final class MATSimModel implements ABMServerInterface {
 	final void setFreeSpeedExample(){
 		// example how to set the freespeed of some link to zero:
 		if ( this.time == 6.*3600. + 10.*60. ) {
-			NetworkChangeEventFactory cef = new NetworkChangeEventFactoryImpl() ;
-			NetworkChangeEvent event = cef.createNetworkChangeEvent( this.time ) ;
-			event.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE,  0. ));
+			NetworkChangeEvent event = new NetworkChangeEvent( this.time ) ;
+			event.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0. ));
 			event.addLink( scenario.getNetwork().getLinks().get( Id.createLinkId( 6876 )));
-			((NetworkImpl)scenario.getNetwork()).addNetworkChangeEvent(event);
+			NetworkUtils.addNetworkChangeEvent( scenario.getNetwork(),event);
 
 			for ( MobsimAgent agent : this.getAgentMap().values() ) {
 				if ( !(agent instanceof StubAgent) ) {
@@ -319,11 +305,6 @@ public final class MATSimModel implements ABMServerInterface {
 				}
 			}
 		}
-	}
-
-	@Override
-	public final Object[] queryPercept(String agentID, String perceptID) {
-		return this.getBDIAgent(agentID).getPerceptHandler().processPercept(agentID, perceptID);
 	}
 
 	public final void registerDataServer( DataServer server ) {
@@ -347,12 +328,18 @@ public final class MATSimModel implements ABMServerInterface {
 		return this.mobsimDataProvider.getAgents() ;
 	}
 
-	public double getTime() {
+	public final double getTime() {
 		return time ;
 	}
 
 	AgentActivityEventHandler getEventHandler() {
 		return eventsHandler;
 	}
+
+    @Override
+    public Object queryPercept(String agentID, String perceptID) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

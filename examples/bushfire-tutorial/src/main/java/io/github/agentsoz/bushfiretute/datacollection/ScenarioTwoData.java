@@ -44,7 +44,7 @@ public class ScenarioTwoData {
 	public static int totPickups = 0;
 
 	public static int agentsWithRels = 0;
-//	public static HashMap<String,Long> connectToDepTimes = new HashMap<String,Long>();
+//	public static LinkedHashMap<String,Long> connectToDepTimes = new LinkedHashMap<String,Long>();
 	public static List connectToAgents = new ArrayList();
 	public static List connectToDepTimes = new ArrayList();
 

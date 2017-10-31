@@ -24,7 +24,7 @@ package io.github.agentsoz.bushfiretute;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Random;
+
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -34,6 +34,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bushfiretute.matsim.ABMModel;
+import io.github.agentsoz.util.Global;
 
 public class BushfireMain {
 
@@ -42,35 +43,36 @@ public class BushfireMain {
 	private static String outFile = null;
 	private static Level logLevel = Level.INFO;
 	private static Logger logger = null;
-    public static PrintStream writer;
+	public static PrintStream writer;
 
-	
-	// all application code should use this same instance of Random
-    private static final Random random = new Random(); 
-    private static Long seed = null;
 
-	public static void main(final String[] args) throws IOException {
+	private static Long seed = null;
+
+	public static void main(final String[] args) {
 		// TODO Auto-generated method stub
 
 		// Parse the command line arguments
 		parse(args);
 
 		// Create the logger
-		logger = createLogger("", logFile);
-		
-        // Redirect the agent program output if specified
-        if (outFile != null) {
-        	try {
-        		writer = new PrintStream(outFile, "UTF-8");
-        	} catch (Exception e) {
-        		e.printStackTrace();
-        	}
-        } else {
-        	writer = System.out;
-        }
+		logger = createLogger("io.github.agentsoz.bushfiretute.BushfireMain", logFile);
 
-	    // add seed to command line args if run replication needed
-		if (seed != null) random.setSeed(seed);
+		// Redirect the agent program output if specified
+		if (outFile != null) {
+			try {
+				writer = new PrintStream(outFile, "UTF-8");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			writer = System.out;
+		}
+
+		// add seed to command line args if run replication needed
+		if (seed != null) {
+			Global.getRandom().setSeed(seed);
+			logger.info( "random seed was set to " + seed );
+		}
 
 		// Read in the configuration
 		if (!Config.readConfig()) {
@@ -90,13 +92,14 @@ public class BushfireMain {
 			s += margs[i];
 		}
 		logger.info(s);
-		abmModel.run(null, margs);
+		abmModel.run(margs);
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
-		
+
 		writer.close();
-		System.exit(0);
+//		System.exit(0);
+		// prevents to test output afterwards.  kai, oct'17
 
 	}
 
@@ -136,6 +139,14 @@ public class BushfireMain {
 					outFile = args[i];
 				}
 				break;
+			case "-seed":
+				if (i + 1 < args.length) {
+					i++;
+					seed = Long.parseLong( args[i] );
+				}
+				break;
+			default:
+				throw new RuntimeException("unknown config option") ;
 			}
 		}
 	}
@@ -174,16 +185,12 @@ public class BushfireMain {
 		fileAppender.start();
 		Logger logger = (Logger) LoggerFactory.getLogger(string);
 		logger.detachAndStopAllAppenders(); // detach console (doesn't seem to
-											// work)
+		// work)
 		logger.addAppender(fileAppender); // attach file appender
 		logger.setLevel(logLevel);
 		logger.setAdditive(true); /* set to true if root should log too */
 
 		return logger;
-	}
-	
-	public static Random getRandom() {
-		return random;
 	}
 
 }
