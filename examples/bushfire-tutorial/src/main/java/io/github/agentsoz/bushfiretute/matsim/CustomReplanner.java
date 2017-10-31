@@ -60,8 +60,9 @@ final class CustomReplanner extends Replanner{
 		super(model, activityEndRescheduler);
 	}
 
-	final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime )
-	{
+	final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime ) {
+		// called at least once
+		
 		logger.debug("starting addNewLegAndActvityToPlan method..");
 		double now = model.getTime() ; 
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
@@ -118,9 +119,10 @@ final class CustomReplanner extends Replanner{
 		this.qsim.rescheduleActivityEnd(agent);
 
 	}
-
-	final void insertPickupAndWaitAtCurrentLocation(Id<Person> agentId,int pickupTime)
-	{
+	/*
+	final void insertPickupAndWaitAtCurrentLocation(Id<Person> agentId,int pickupTime) {
+		// probably never called
+		
 		logger.debug("started addNewActivityToPlan method..");
 		double now = model.getTime() ; 
 
@@ -156,9 +158,10 @@ final class CustomReplanner extends Replanner{
 		WithinDayAgentUtils.resetCaches(agent);
 		this.qsim.rescheduleActivityEnd(agent);
 	}
-
-	final void moveToWaitAtOtherLocation(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
-	{
+	*/
+	final void moveToWaitAtOtherLocation(Id<Person> agentId,Id<Link> newActivityLinkId, String dest) {
+		// called at least once
+		
 		logger.debug("agent {} | started addNewLegToPlan method..", agentId);
 		double now = model.getTime() ; 
 
@@ -208,9 +211,9 @@ final class CustomReplanner extends Replanner{
 		WithinDayAgentUtils.resetCaches(agent);
 		this.qsim.rescheduleActivityEnd(agent);
 	}
-	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest)
-	{
-		// probably no longer used.  Essentially replaces the linkId for the different activity types.
+	/*
+	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest) {
+		// probably no longer used.  Essentially changes location (= linkId) for an activity type ("dest")
 		
 		logger.debug("started addNewLegToPlan method..");
 		double now = model.getTime() ; 
@@ -346,13 +349,13 @@ final class CustomReplanner extends Replanner{
 
 				return ;
 			}
-
 		}
-
 	}
+	*/
 
-	public final Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType)
-	{
+	 final Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType) {
+		 // used at least once
+		 
 		// This method 
 		// * finds the shortest path to the original evacuation route (from "Evacuation" to "Safe")
 		// end then
@@ -452,7 +455,7 @@ final class CustomReplanner extends Replanner{
 		Double minDist = Collections.min(routeDistances.values());
 		for(Map.Entry<String, Double> entry : routeDistances.entrySet()) {
 			if(minDist == entry.getValue()) { 
-				connectLinkID = (String) entry.getKey();
+				connectLinkID = entry.getKey();
 			}
 		}
 
@@ -469,7 +472,7 @@ final class CustomReplanner extends Replanner{
 		logger.trace("retreived links of the route of connectLeg : {}", connectLegLinks.toString());
 
 		//new array list as container for the links of target leg
-		ArrayList<Id<Link>> targetLegLinkSet = new ArrayList<Id<Link>>();
+		ArrayList<Id<Link>> targetLegLinkSet = new ArrayList<>();
 
 		targetLegLinkSet.addAll(connectLegLinks);
 		logger.trace(" added linkset of the connect leg to the targetLegLinkSet : {}", targetLegLinkSet.toString());
@@ -524,9 +527,10 @@ final class CustomReplanner extends Replanner{
 
 		return targetLink;
 	}
-
-	final void removeFutureActivities(Id<Person> agentId)
-	{
+	 /*
+	final void removeFutureActivities(Id<Person> agentId) {
+		// possibly never used
+		
 		logger.debug("inside removeFutureActivities method");
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 		MobsimAgent agent = mapping.get(agentId);
@@ -549,11 +553,12 @@ final class CustomReplanner extends Replanner{
 		}
 		WithinDayAgentUtils.resetCaches(agent);
 		this.qsim.rescheduleActivityEnd(agent);
-
 	}
+	*/
 
-	final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newEndTime)
-	{
+	final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newEndTime) {
+		// used at least once
+		
 		logger.debug("received to modify the endtime of activity {}", actType);
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
 
@@ -601,9 +606,10 @@ final class CustomReplanner extends Replanner{
 
 
 	}
-
-
-	public void insertTempActivity(Id<Person> agentId) { 
+	/*
+	void insertTempActivity(Id<Person> agentId) {
+		// possibly never used
+		
 		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 		MobsimAgent agent = mapping.get(agentId);
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
@@ -619,8 +625,8 @@ final class CustomReplanner extends Replanner{
 
 		WithinDayAgentUtils.resetCaches(agent);
 		this.qsim.rescheduleActivityEnd(agent);
-
 	}
+	*/
 
 
 }

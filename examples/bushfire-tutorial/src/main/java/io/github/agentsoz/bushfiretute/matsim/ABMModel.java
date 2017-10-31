@@ -192,7 +192,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 					throw new RuntimeException("Destination coordinates are not given");
 				}
 
-				((CustomReplanner)model.getReplanner()).moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (String) args[2]);
+				final String dest = (String) args[2];
+				((CustomReplanner)model.getReplanner()).moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, dest);
 
 				// Now register a event handler for when the agent arrives at the destination
 				MATSimAgent agent = model.getBDIAgent(agentID);
@@ -209,7 +210,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 								MATSimAgent agent = model.getBDIAgent(agentId);
 								EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 								Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
+
 								agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
+								// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
+								// called earlier, maybe around where the replanner is called?  kai, oct'17)
+								
 								agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
 								agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
 								return true; //unregister this handler
@@ -221,6 +226,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 		// register new action
 		withHandler.registerBDIAction(ActionID.CONNECT_TO, new BDIActionHandler() {
+			// ("connect_to" means to connect back to the pre-computed evacuation route, and then follow that one to the "safe" location. kai, 17)
+			
 			@Override
 			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
 				String destination = (String) args[1];
@@ -244,7 +251,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 								MATSimAgent agent = model.getBDIAgent(agentId);
 								EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 								Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
+								
 								agent.getActionContainer().register(ActionID.CONNECT_TO, params);
+								// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
+								// called earlier, maybe around where the replanner is called?  kai, oct'17)
+
 								agent.getActionContainer().get(ActionID.CONNECT_TO).setState(ActionContent.State.PASSED);
 								agent.getPerceptContainer().put(PerceptID.ARRIVED_CONNECT_TO, params);
 								return true; //unregister this handler
@@ -276,10 +287,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 				bdiAgent.log("will drive to pickup from coords "+coords[0] + "," + coords[1] 
 						+" i.e. link "+newLinkId.toString());
 				
-				if ( true ) {
-//					throw new RuntimeException("stop here while debugging");
-				}
-
 				// Now register a event handler for when the agent arrives and finished picking up the destination
 				agent.getPerceptHandler().registerBDIPerceptHandler(
 						agent.getAgentID(), 
@@ -290,7 +297,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
 								MATSimAgent agent = model.getBDIAgent(agentId);
 								Object[] params = { linkId.toString() };
+
 								agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);
+								// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
+								// called earlier, maybe around where the replanner is called?  kai, oct'17)
+
 								agent.getActionContainer().get(ActionID.DRIVETO_AND_PICKUP).setState(ActionContent.State.PASSED);
 								agent.getPerceptContainer().put(PerceptID.ARRIVED_AND_PICKED_UP, params);
 								return true; //unregister this handler
