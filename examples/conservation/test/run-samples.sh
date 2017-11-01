@@ -16,7 +16,7 @@ cat $EXPERIMENT_DIR/samples.txt | while read x; do
 			test -d "$PBS_O_WORKDIR/$dst" && die "$dst" already exists
 			mkdir -p "$PBS_O_WORKDIR/$dst"
 			cd $PBS_O_WORKDIR/$dst
-			$PBS_O_WORKDIR/model.sh $x $replicate || die_run
+			$PBS_O_WORKDIR/model.sh $replicate $x  || die_run
 			rm -f _gams*
 			rm -f conservation.in.*
 			rm -f conservation.out.*
