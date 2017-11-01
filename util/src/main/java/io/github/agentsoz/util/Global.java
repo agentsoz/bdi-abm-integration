@@ -42,4 +42,8 @@ public class Global {
 		return random;
 	}
 
+	public static void setRandomSeed(long seed) {
+	  random.setSeed(seed);
+	}
+
 }
