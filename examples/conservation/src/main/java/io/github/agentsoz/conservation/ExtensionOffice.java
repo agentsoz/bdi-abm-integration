@@ -34,30 +34,16 @@ public class ExtensionOffice {
   final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
   /**
-   * The types of landholders that will be coverd by extension officer visits. 
-   * <ul> 
-   *   <li> NONE: No visits are ever conducted 
-   *   <li >SUCCESSFUL_ONLY: Only landholders with active contracts are visited 
-   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_ONLY: Only landholders with active contracts and those 
-   *        who were unsuccessful in the last round are visited 
-   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND: Same as SUCCESSFUL_AND_UNSUCCESSFUL_ONLY but 
-   *        probabilistically preferring those with conservation ethic closer to 50 (mid point). 
-   *   <li> SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND: Same as SUCCESSFUL_AND_UNSUCCESSFUL_ONLY but 
-   *        probabilistically preferring those with conservation ethic closer to 0 (lowest point). 
-   *   <li> ALL: All landholders are visited </ul>
+   * The types of landholders that will be coverd by extension officer visits. <ul> <li> NONE: No
+   * visits are ever conducted <li >SUCCESSFUL_ONLY: Only landholders with active contracts are
+   * visited <li> SUCCESSFUL_AND_UNSUCCESSFUL_ONLY: Only landholders with active contracts and those
+   * who were unsuccessful in the last round are visited <li> ALL: All landholders are visited </ul>
    *
    */
   public enum CoverageType {
-    NONE, 
-    SUCCESSFUL_ONLY, 
-    SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, 
-    SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND, 
-    SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND, 
-    ALL, 
+    NONE, SUCCESSFUL_ONLY, SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, ALL,
   }
 
-  private static final int maxVisitsPerLandholderPerRound = 5;
-  
   // Handle to the global agent data container
   private AgentDataContainer adc;
 
@@ -68,8 +54,7 @@ public class ExtensionOffice {
   private int visitsLastCycle = 0;
 
   private static CoverageType coverageType = CoverageType.NONE;
-  private static double visitPercentageOfEligibleLandholders = 0.0;
-  private static double visitPercentagePerLandholder = 0.0;
+  private static double visitPercentage = 0.0;
 
   public ExtensionOffice() {
     visits = new HashMap<String, Integer>();
@@ -80,28 +65,14 @@ public class ExtensionOffice {
    * percentage is applied to the set of agents first seleted by the {@link #setCoverageType(int)}
    * filter.
    * 
-   * @param visitPercentage value in range {@code [0.0, 100.0]}
+   * @param visitPercentage value in range {@code [0.0, 1.0]}
    */
-  public static void setVisitPercentageOfEligibleLandholders(double visitPercentage) {
-    visitPercentageOfEligibleLandholders = visitPercentage;
+  public static void setVisitPercentage(double visitCoveragePercentage) {
+    visitPercentage = visitCoveragePercentage;
   }
 
-  public static double getVisitPercentageOfEligibleLandholders() {
-    return visitPercentageOfEligibleLandholders;
-  }
-
-  /**
-   * Restricts the number of vists per landholder to this percentage of the maximum allowed, which
-   * in turn is given by the constant {@link #visitPercentagePerLandholder}.
-   * 
-   * @param visitPercentage value in range {@code [0.0, 100.0]}
-   */
-  public static void setVisitPercentagePerLandholder(double visitPercentage) {
-    visitPercentagePerLandholder = visitPercentage;
-  }
-
-  public static double getVisitPercentagePerLandholder() {
-    return visitPercentagePerLandholder;
+  public static double getVisitPercentage() {
+    return visitPercentage;
   }
 
   /**
@@ -127,106 +98,38 @@ public class ExtensionOffice {
   
   public void conductVisits(int cycle) {
     visitsLastCycle = 0;
-    int landholdersVisited = 0;
-    logger.debug("Will conduct visits to {}% of landholders of type {}", visitPercentageOfEligibleLandholders,
+    logger.debug("Will conduct visits to {}% of landholders of type {}", visitPercentage,
         coverageType);
 
     // Winning and in-contract land holders will be visited by an extension officer
     for (String name : visits.keySet()) {
       Landholder agent = Main.getLandholder(name);
       int active = agent.getContracts().activeCount(); // count active contracts for this agent
-      boolean shouldVisit = false;
-      switch(coverageType) {
-        case ALL:
-          shouldVisit = true;
-          break;
-        case SUCCESSFUL_ONLY:
-          shouldVisit = active > 0;
-          break;
-        case SUCCESSFUL_AND_UNSUCCESSFUL_ONLY:
-          if (active > 0) { 
-            // cover the successful ones
-            shouldVisit = true;
-          } else if (agent.getCurrentAuctionRound() != null &&
-              agent.getCurrentAuctionRound().isParticipated() && 
-              !agent.getCurrentAuctionRound().isWon()) {
-            // cover the unsuccessful ones
-            shouldVisit = true;
-          }
-          break;
-        case SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND:
-          if (active > 0) { 
-            // cover the successful ones
-            shouldVisit = true;
-          } else if (agent.getCurrentAuctionRound() != null &&
-              agent.getCurrentAuctionRound().isParticipated() && 
-              !agent.getCurrentAuctionRound().isWon()) {
-            // cover the unsuccessful ones
-            shouldVisit = true;
-          }
-          if (shouldVisit) {
-            // Direct visits to landholders in the middle band of the S-curve.
-            // We do this by calculating how far they are from the mid point of 50. 
-            // Then the closer they are to 50, the more likely they are to be visited.
-            double visitLikelihood = (50 - Math.abs(50 - agent.getConservationEthicBarometer()))/50.0;
-            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
-              shouldVisit = false;
-            }
-          }
-          break;
-        case SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND:
-          if (active > 0) { 
-            // cover the successful ones
-            shouldVisit = true;
-          } else if (agent.getCurrentAuctionRound() != null &&
-              agent.getCurrentAuctionRound().isParticipated() && 
-              !agent.getCurrentAuctionRound().isWon()) {
-            // cover the unsuccessful ones
-            shouldVisit = true;
-          }
-          if (shouldVisit) {
-            // Direct visits to landholders in the low band of the S-curve.
-            // We do this by calculating how far they are from the lowest point 0. 
-            // Then the closer they are to 0, the more likely they are to be visited.
-            double visitLikelihood = (100 - agent.getConservationEthicBarometer())/100;
-            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
-              shouldVisit = false;
-            }
-          }
-          break;
-        default:
-          break;
-      }
-      /*
+      boolean willVisit = false;
       if (coverageType == CoverageType.ALL) {
-        shouldVisit = true;
+        willVisit = true;
       } else if (coverageType == CoverageType.SUCCESSFUL_ONLY && active > 0) {
-        shouldVisit = true;
+        willVisit = true;
       } else if (coverageType == CoverageType.SUCCESSFUL_AND_UNSUCCESSFUL_ONLY) {
         if (active > 0) { 
           // cover the successful ones
-          shouldVisit = true;
+          willVisit = true;
         } else if (agent.getCurrentAuctionRound() != null &&
             agent.getCurrentAuctionRound().isParticipated() && 
             !agent.getCurrentAuctionRound().isWon()) {
           // cover the unsuccessful ones
-          shouldVisit = true;
+          willVisit = true;
         }
+        // TODO: cover the unsuccessful ones
       }
-      */
-      boolean willVisit = shouldVisit && visitPercentageOfEligibleLandholders >= ConservationUtils.getGlobalRandom().nextDouble()*100;
-      int numVisits = (int) (Math.round((getVisitPercentagePerLandholder()/100.0) * maxVisitsPerLandholderPerRound));
-      //numVisits = (numVisits == 0) ? 0 : ConservationUtils.getGlobalRandom().nextInt(numVisits);
-      
-      if (willVisit && numVisits > 0) {
+      if (willVisit && visitPercentage >= ConservationUtils.getGlobalRandom().nextDouble()*100) {
         logger.debug("Agent " + name + " with contracts " + agent.getContracts()
-            + " visited {} times by extension officers in this round", numVisits);
+            + " will be visited by extension officer");
         adc.getOrCreate(name).getPerceptContainer()
-            .put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), (1.0*numVisits/maxVisitsPerLandholderPerRound));
+            .put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), null);
         // Record the visit
         visits.put(name, visits.get(name) + 1);
-        visitsLastCycle += numVisits;
-        landholdersVisited++;
+        visitsLastCycle++;
       }
       // Update the contracts
       if (active > 0) {
@@ -234,7 +137,6 @@ public class ExtensionOffice {
         agent.getContracts().decrementYearsLeftOnAllContracts();
       }
     }
-    logger.info("Conducted {} visits to {} landholders of type {}", visitsLastCycle, landholdersVisited, coverageType);
   }
 
   public void init(AgentDataContainer adc, String[] agents) {

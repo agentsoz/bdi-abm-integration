@@ -32,12 +32,12 @@ output_names <- c("cycle_number", "cost_of_successful_bids")
 #        plot(all[,c(a,b)])
 #        title(main=paste("linear scatter:", a, "/", b))
 #}
-plot_pair <- function(all, labels, total) {
+plot_pair <- function(all, labels) {
 	melted = melt(all, id.vars="cycle_number")
 	gg <- ggplot(data=melted, aes(x=cycle_number, y=value, group=variable, shape=variable, color=variable)) + 
 		geom_line() +
 		geom_point(size=3) +
-		ylim(0,15) +
+		#ylim(0,100) +
 		theme_bw() +
   		theme(
 			legend.title=element_text(size=12,face="bold"),
@@ -47,7 +47,7 @@ plot_pair <- function(all, labels, total) {
 			) +
   		xlab("auction cycle") +
   		ylab("cost of successful bids") +
-		ggtitle(paste("Sample:", labels, " Total:", total)) +
+		ggtitle(paste("Sample:", labels)) +
   		guides(colour=guide_legend(title="")) +
   		guides(shape=guide_legend(title=""))
 	show(gg)
@@ -75,12 +75,11 @@ analysis <- function(db) {
 			}
 		}
 		print(final_result)
-		total_acc = round(as.numeric(colSums(final_result)[2]), digits=1)
-		print(sprintf("sample number:%s, accumulated cost:%s", i, total_acc))
+		print(sprintf("sample number:%s, accumulated cost:%s", i, as.numeric(colSums(final_result)[2])))
 
 		slabels <- matrix(ncol=1, nrow=nrow(final_result))
 		slabels[,1] = paste(samples[i,],collapse=" ")
-		plot_pair(as.data.frame(final_result), slabels, total_acc)
+		plot_pair(as.data.frame(final_result), slabels)
 
 
 	}

@@ -27,20 +27,4 @@ import io.github.agentsoz.bdiabm.data.PerceptContent;
 
 public interface ABMServerInterface {
 	public void takeControl(AgentDataContainer agentDataContainer);
-
-	/**
-	 * This is the ad hoc method for query percept.
-	 * 
-	 * Example query: agentsID: agentX, perceptID: REQUEST_LOCATION,
-	 * returns the response: coordinates of agentX
-	 * 
-	 * @param agentID
-	 *            ID of the agent
-	 * @param perceptID
-	 *            Query is similar to the percept_types defined in
-	 *            {@link PerceptContent} class
-	 * @return The response for the query
-	 */
-	public Object queryPercept(String agentID, String perceptID);
-
 }

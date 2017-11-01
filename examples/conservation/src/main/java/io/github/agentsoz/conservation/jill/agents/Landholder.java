@@ -438,7 +438,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 				post(callForBids);
 			}
 		} else if (percept.equals(Global.percepts.EXTENSION_OFFICER_VISIT.toString())) {
-			post(new MeetExtensionOfficerGoal(percept, (double)params));
+			post(new MeetExtensionOfficerGoal(percept));
 		}
 	}
 

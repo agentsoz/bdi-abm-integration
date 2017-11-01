@@ -34,11 +34,11 @@
 </ul>
 </nav>
 <h1 id="conservation-ethics-experiments-report">Conservation Ethics Experiments Report</h1>
-<p>This report is valid for commit <a href="https://github.com/agentsoz/bdi-abm-integration/commit/4d0a7bfecb28b32e466cf12d300a1a8c6ffb468c">4d0a7bf</a>.</p>
+<p>This report is valid for commit <a href="https://github.com/agentsoz/bdi-abm-integration/commit/6bc7fc2b5852145db81b1bd0cf571cbe335010b6">6bc7fc2</a>.</p>
 <h1 id="experiments">Experiments</h1>
-<p>All experiments were repeated 30 times and each data point on the graphs below represents the average value from those runs.</p>
+<p>All experiments were repeated 20 times and each data point on the graphs below represents the average value from those runs.</p>
 <h2 id="sensitivity-analysis-sa">Sensitivity Analysis (SA)</h2>
-<p>Our initial experiments involved performing Sensitivity Analysis (SA) that examines how sensitive outputs of the model are to changes in its inputs. We explored the input parameter space of the variables listed in the table below. Fully exploring the permutations of this n-dimensional parameter space would be prohibitive. Instead our design of experiment involved generating just 33 samples (where a set of variables values constitutes a sample) selected using the Nearly Orthogonal Latin Hypercube (NOLH) method following (Sanchez 2005). This method works by taking samples of each input variable from even sized buckets across its range and combining those (nearly) orthogonally to give improved space-filling properties to the experiment design. The model was then run 30 times for each sample to account for its stochasticity, giving a set of 990 simulation runs on which SA was performed.</p>
+<p>Sensitivity Analysis involves building an understanding of how sensitive outputs of the model are to changes in its inputs. Input parameter values for this experiment were generated using the Nearly Orthogonal Latin Hypercube (NOLH) method. This method works by taking samples of each input variable from even sized buckets across its range just like in Latin Hypercube Sampling, but then combining those orthogonally (nearly), thus giving improved space-filling properties to the experiment design. The SA experiment uses samples built from the following input parameters:</p>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 6%" />
@@ -83,16 +83,13 @@
 <td style="text-align: left;"><code>visitPercentage</code></td>
 <td style="text-align: left;">Percentage of landholders (selected by <code>visitType</code>) visited by extension office; value in range [0,100]</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><code>visitPercentagePerLandholder</code></td>
-<td style="text-align: left;">Restricts the number of visits per landholder per round to a percentage of the maximum; value in range [0,100]</td>
-</tr>
 </tbody>
 </table>
-<p>The figure below gives the correlation results using Spearman's Rank Correlation Coefficient that gives the strength of the monotonic relationship between an input-output pair. Rows represent selected inputs, while the columns represent various outputs. Cells with numbers represent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a highly negatively correlated pair.</p>
-<p><img src="testing-20170919-4d0a7bf-sa/test/output/correlation_diagram_v1.pdf.p0.png" /></p>
-<p>[<strong>CHANGE THIS TO REFLECT GRAPH</strong>] As one would expect, we see a positive monotonic correlation between <code>numAgents</code> and the absolute counts of agents in various classes at the end of the simulation. We also find that increasing <code>targetPercentage</code> tends to lower the number of winners overall in various categories and is an artifact of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to <code>numberOfAgents=100</code> and <code>targetPercentage=12</code>. <em>Note that where a correlation is not detected for an input-output pair by the Spearman’s coefficient, a non-monotonic relationship could still exist between the pair.</em></p>
-<p>[<strong>TODO:</strong>] <em>Need to find a SA test for non-monotonic correlations that are likely to exist but are not picked up here.</em></p>
+<p>The following figure gives the correlation results, and was generated using 33 input configuration samples, each run 20 times. The rows represent selected inputs, while the columns represent various outputs. Cells with numbers represent no significant correlation for the input-output pair. The cell numbers are the P-values. Where a correlation exists, it is shown with a circle and no associated number. The colour of the circles represents the sign of the correlation on a continuous scale between [+1.0,-1.0] as shown in the legend guide. Here a large dark blue circle represents a highly positively correlated input-output pair, and a large dark red circle represents a highly negatively correlated pair.</p>
+<p><img src="testing-20170825-6bc7fc2-sa/test/output/correlation_diagram.pdf.p0.png" /></p>
+<p>As one would expect, we see a positive correlation between the <code>numAgents</code> input parameter and the absolute counts of agents in various classes at the end of the simulation. We can also see that increasing <code>targetPercentage</code> tends to lower the number of winners overall and in various categories and is an artifact of the underlying auctioneer model. Given the sensitivity of the model to these parameters, after discussion with authors, for all further experiments, these parameters were fixed to <code>numberOfAgents=100</code> and <code>targetPercentage=12</code>. Model outputs are insensitive to the parameters that control how quickly the profit motive and social norm values are updated, i.e., <code>profitMotiveUpdateMultiplier</code> and <code>socialNormUpdateMultiplier</code> respectively. This just means that while they influence the rate of change of those variables <em>during</em> the simulation, they do not change the outcomes at the <em>end</em> of the simulation.</p>
+<p>With respect to the visiting policy <code>visitType</code> for extension officers (remembering that higher visiting policy numbers represent a higher proportion of landholders visited), we find a positive correlation with the change in social norm (average CE), and a negative correlation with the number of low CE landholders at the end of the simulation. This reflects the fact that visits from extension officers increase the CE of landholders being visited.</p>
+<p><strong>FIXME</strong>: <em>The percentage of agents visited by extension officers <code>visitPercentage</code> does not seem to influence the outputs. That would be because the code to implement the proportional choice is not implemented. Doh!</em></p>
 <h2 id="comparing-starting-populations-with-25-and-75-hc-agents">Comparing starting populations with 25% and 75% HC agents</h2>
 <p>Our first set of simulation results show the emergence of motivational crowding out, where monetary reward (profit) can negatively impact the intrinsic motivation to conserve (conservation ethic). The figure below shows how the percentage of high-conservation (HC) and high-profit (HP) agents changes over successive auctions, in two different initial populations:</p>
 <ul>
@@ -109,12 +106,12 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t0p100p100/number_of_agents.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t0p100p100/number_of_agents.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_agents.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_agents.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
-<p>We also find significant and interesting differences in the two populations with respect to the auction participation rate over time as shown next in Figure 3. In HC75 the overall participation rate starts at ~65% and steadily increases and settles at ~80%. This is due to an increase in the number of HC agents, who tend to participate more than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level. This U-shape is driven predominantly by the behaviour of HP landholders, of which those also with high CE (HCHP) are declining in number while those with low CE (LCHP), who bid more as profits increase, are gradually getting more involved. Comparing populations, at round 10 the total participation rate for HC75 was ~5x that of HC25, and summing over all rounds, ~3x more landholders participated in HC75 than in HC25.</p>
+<p>We also find significant and interesting differences in the two populations with respect to the auction participation rate over time. In HC75 the participation rate starts at ~65% and steadily increases and settles at ~80%. This is due to a corresponding increase in the number of HC agents, who tend to participate more than HP agents. In contrast, in HC25 the initial participation rate is significantly lower at ~45%. Moreover it drops sharply to well below half that in the first few rounds, before gradually climbing back to the initial level, driven predominantly by HP landholders gradually getting more involved. At around round 10, the total participation rate for HC75 is five times that of HC25, and by 30 rounds it is twice that of HC25.</p>
 <table>
 <thead>
 <tr class="header">
@@ -124,12 +121,12 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t0p100p100/number_of_participants.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t0p100p100/number_of_participants.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/number_of_participants.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/number_of_participants.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
-<p>Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. Figure 4 shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is ~70% higher than HC75. This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.</p>
+<p>Next we look at the difference in cost to the agency between the two sample populations, and how this cost varies over time. The figure below shows the result. We find that in HC25, as the high profit seeking behaviour increases over time, the cost to the agency also steadily increases. In comparison, in HC75, the cost starts off slightly lower, and stays relatively constant over time. This is because the latter has more HC agents, who tend to bid with moderate to low profit margins. After 30 rounds, the cost of auctions for HC25 is more than double that of HC75. The cumulative cost over all rounds for HC25 is 73% higher than HC75 (up from 171 to 295). This is despite the fact that the participation rate for HC75 is much higher than HC25 as already shown.</p>
 <table>
 <thead>
 <tr class="header">
@@ -139,8 +136,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t0p100p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t0p100p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -157,8 +154,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100p100/number_of_agents.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100p100/number_of_agents.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_agents.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_agents.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -172,8 +169,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100p100/number_of_participants.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100p100/number_of_participants.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/number_of_participants.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/number_of_participants.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -187,8 +184,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -204,8 +201,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100p100/number_of_agents.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100p100/number_of_agents.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/number_of_agents.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/number_of_agents.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -218,8 +215,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100p100/number_of_participants.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100p100/number_of_participants.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/number_of_participants.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/number_of_participants.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -232,8 +229,8 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
-<td style="text-align: center;"><img src="testing-20170919-4d0a7bf-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/cost_of_auction_cycles.pdf.p0.png" alt="a" /></td>
+<td style="text-align: center;"><img src="testing-20170825-6bc7fc2-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/cost_of_auction_cycles.pdf.p0.png" alt="b" /></td>
 </tr>
 </tbody>
 </table>
@@ -261,8 +258,13 @@
 <pre><code>rsync -avz gams-macbook:testing/ testing-20170801-f5acd62-sa/</code></pre></li>
 <li><p>Now we will post process our results into a database, to make further analysis and plotting easier. To to that, change to the <a href="../test">test</a> directory and run the <code>postproc.sh</code> script, pointing it to the test results directory that contains the <code>samples.txt</code> file. For example, if the directory structure is <code>./testing-20170801-f5acd62-sa/test/output/samples.txt</code>, then you would do something like:</p>
 <pre><code>./postproc.sh ./testing-20170801-f5acd62-sa/test/output/</code></pre>
-<p>For the HC25/HC75 experiments, a convinience script will do this for all the scenarios:</p>
-<pre><code>./postproc_hi_ce.sh  ../testing-20170816-5c3a824-hice/</code></pre></li>
+<p>This will create the database <code>./testing-20170801-f5acd62-sa/test/output/output.db</code>. You have to do this for each scenario that was run. For instance, for the HC25/HC75 experiments, you will have to do all of the following:</p>
+<pre><code>./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice25.visit.t2p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t1p100/
+./postproc.sh ../testing-20170816-5c3a824-hice/test/run-hi-ce-comparison.sh.output.hice75.visit.t2p100/</code></pre></li>
 <li><p>Finally, you can plot the results. To do that, change to the <a href="../test/new">new scripts directory</a> and try the following kinds of commands to plot various results (they all get saved in the same directory as the <code>output.db</code> database):</p>
 <pre><code>./correlation.R ../../testing-20170801-f5acd62-sa/test/output/ 30
 ./plot_number_of_agents.R ../../../testing-20170801-f5acd62-hice/test/output/ 30

@@ -551,19 +551,14 @@ public class Main {
 				+ getTargetPercentage()
 				+ ")\n"
                 + "  -visitType                            Types of landholders visited by extension office\n"
-                + "                                        one of 0 (none) 1 (successful only), 2 (successful and unsuccessful only)\n"
-                + "                                        3 (successful and unsuccessful directed towards CE=50), 4(successful and unsuccessful directed towards CE=0), 5 (all)\n"
+                + "                                        one of 0 (none) 1 (successful only), 2 (successful and unsuccessful only), 3 (all)\n"
                 + "                                        (default is "
                 + ExtensionOffice.getCoverageType()
                 + ")\n"
 				+ "  -visitPercentage                      Percentage of landholders (selected by -visitType) visited by extension office "
 				+ "                                        (default is "
-				+ ExtensionOffice.getVisitPercentageOfEligibleLandholders()
+				+ ExtensionOffice.getVisitPercentage()
 				+ ")\n"
-			    + "  -visitPercentagePerLandholder         Restricts the number of visits per landholder per round to a percentage of the maximum "
-                + "                                        (default is "
-                + ExtensionOffice.getVisitPercentagePerLandholder()
-                + ")\n"
 				+ "  -upper_threshold_c                    upper threshold for conservation ethic barometer to be high (default is "
 				+ getUpperThresholdC()
 				+ ")\n"
@@ -830,19 +825,9 @@ public class Main {
               if (i + 1 < args.length) {
                   i++;
                   try {
-                    ExtensionOffice.setVisitPercentageOfEligibleLandholders(Double.parseDouble(args[i]));
+                    ExtensionOffice.setVisitPercentage(Double.parseDouble(args[i]));
                   } catch (Exception e) {
                       exit("-visitPercentage value '" + args[i] + "' is not a double");
-                  }
-              }
-              break;
-            case "-visitPercentagePerLandholder":
-              if (i + 1 < args.length) {
-                  i++;
-                  try {
-                    ExtensionOffice.setVisitPercentagePerLandholder(Double.parseDouble(args[i]));
-                  } catch (Exception e) {
-                      exit("-visitPercentagePerLandholder value '" + args[i] + "' is not a double");
                   }
               }
               break;
