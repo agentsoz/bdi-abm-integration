@@ -2,7 +2,6 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 import java.util.ArrayList;
 
-
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -43,13 +42,9 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.mobsim.framework.HasPerson;
 import org.matsim.core.mobsim.framework.MobsimAgent;
-import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.withinday.utils.EditRoutes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.Replanner;
@@ -90,7 +85,7 @@ final class CustomReplanner extends Replanner{
 
 		// leg/route from current activity/position to pickup activity:
 		Leg newLeg = pf.createLeg(TransportMode.car);
-		this.editRoutes.relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+		this.getEditRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
 		logger.debug(" inserting leg into plan..");
 		plan.getPlanElements().add(currentPlanIndex+1,newLeg);
 
@@ -111,7 +106,7 @@ final class CustomReplanner extends Replanner{
 		Leg nextLeg = (Leg)plan.getPlanElements().get(currentPlanIndex+4);
 		Activity nextAct = (Activity)plan.getPlanElements().get(currentPlanIndex+5);
 		logger.trace("all evac activity info : {} ", nextAct.toString());
-		this.editRoutes.relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() );
+		this.getEditRoutes().relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() );
 
 		logger.trace("number of plan elements after adding pickup, wait, new leg : " + plan.getPlanElements().size());
 
@@ -184,7 +179,7 @@ final class CustomReplanner extends Replanner{
 		//2-insert a leg:
 		Leg newLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
 		newLeg.setDepartureTime(now);	
-		this.editRoutes.relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+		this.getEditRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
 		planElements.add(currentPlanIndex+1,newLeg);
 		logger.debug(" added a new leg to current index");
 
@@ -204,7 +199,7 @@ final class CustomReplanner extends Replanner{
 			logger.debug("reRouting the leg after the added activity..");
 			Leg nextLeg = (Leg)planElements.get(currentPlanIndex+3);
 			Activity nextAct = (Activity)planElements.get(currentPlanIndex+4);
-			this.editRoutes.relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ; 
+			this.getEditRoutes().relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ; 
 			logger.debug("addNewActivityToPlan - leg info after reroute : " + nextLeg.toString());
 		}
 
@@ -443,7 +438,7 @@ final class CustomReplanner extends Replanner{
 			Node n = link.getFromNode();
 
 			Leg leg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-			this.editRoutes.relocateFutureLegRoute(leg, currentAct.getLinkId(), link.getId(),((HasPerson)agent).getPerson() ) ;
+			this.getEditRoutes().relocateFutureLegRoute(leg, currentAct.getLinkId(), link.getId(),((HasPerson)agent).getPerson() ) ;
 
 			Route r = leg.getRoute();
 			routeDistances.put(lid.toString(), r.getDistance());
@@ -463,7 +458,7 @@ final class CustomReplanner extends Replanner{
 
 		//create the connect leg with minimum distance to get its route..
 		Leg connectLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-		editRoutes.relocateFutureLegRoute(connectLeg, currentAct.getLinkId(), Id.createLinkId(connectLinkID),((HasPerson)agent).getPerson() ) ;
+		getEditRoutes().relocateFutureLegRoute(connectLeg, currentAct.getLinkId(), Id.createLinkId(connectLinkID),((HasPerson)agent).getPerson() ) ;
 
 		Route rt = connectLeg.getRoute();
 		NetworkRoute netRt = (NetworkRoute) rt;
@@ -505,7 +500,7 @@ final class CustomReplanner extends Replanner{
 
 		//create a new leg and replace its route with the merged route
 		Leg targetLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-		this.editRoutes.relocateFutureLegRoute(targetLeg, currentAct.getLinkId(), targetAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
+		this.getEditRoutes().relocateFutureLegRoute(targetLeg, currentAct.getLinkId(), targetAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
 
 		Route rout = targetLeg.getRoute();
 		NetworkRoute netRout = (NetworkRoute) rout;
