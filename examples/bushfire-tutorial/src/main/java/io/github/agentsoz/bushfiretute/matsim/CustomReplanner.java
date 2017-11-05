@@ -174,7 +174,8 @@ final class CustomReplanner extends Replanner{
 			return ;
 		}
 		Activity currentAct = (Activity) currentPE;
-		currentAct.setEndTime(now);
+//		currentAct.setEndTime(now);
+		getEditPlans().rescheduleActivityEndtime(agent, currentPlanIndex, now);
 
 		//2-insert a leg:
 		Leg newLeg = this.model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
@@ -204,7 +205,7 @@ final class CustomReplanner extends Replanner{
 		}
 
 		WithinDayAgentUtils.resetCaches(agent);
-		this.qsim.rescheduleActivityEnd(agent);
+//		this.qsim.rescheduleActivityEnd(agent);
 	}
 	/*
 	final void modifyPlanForDest(Id<Person> agentId,Id<Link> newActivityLinkId, String dest) {
