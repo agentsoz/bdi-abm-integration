@@ -77,7 +77,8 @@ public class BushfireMain {
 		// Read in the configuration
 		if (!Config.readConfig()) {
 			logger.error("Failed to load configuration from '" + Config.getConfigFile() + "'. Aborting");
-			System.exit(-1);
+//			System.exit(-1); // remove system.exit from junit-tested material. kai, nov'17
+			throw new RuntimeException("failed to load configuration") ; 
 		}
 
 		// Initialise and hook up the BDI side
@@ -187,6 +188,7 @@ public class BushfireMain {
 		logger.detachAndStopAllAppenders(); // detach console (doesn't seem to
 		// work)
 		logger.addAppender(fileAppender); // attach file appender
+		logger.info("setting loglevel to " + logLevel ) ;
 		logger.setLevel(logLevel);
 		logger.setAdditive(true); /* set to true if root should log too */
 
