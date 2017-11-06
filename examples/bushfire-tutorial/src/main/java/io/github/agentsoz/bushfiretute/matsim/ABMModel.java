@@ -58,7 +58,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 	@Override
 	public Replanner getReplanner(QSim qsim) {
 		if (replanner == null) {
-			replanner = new CustomReplanner(matsimModel, qsim);
+			replanner = new Replanner(matsimModel, qsim);
 		}
 		// (singleton pattern!)
 		return replanner;
