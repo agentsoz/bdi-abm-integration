@@ -21,29 +21,6 @@ import org.matsim.core.network.SearchableNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
- * #%L
- * BDI-ABM Integration Package
- * %%
- * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
- */
-
-import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
@@ -52,7 +29,6 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.Replanner;
-import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bushfiretute.BDIModel;
@@ -187,24 +163,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel));
 
 		// register new action
-		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new BDIActionHandler() {
-			@Override
-			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				double newEndTime = (double) args[1];
-				String actType = (String) args[2];        
-
-				((CustomReplanner)model.getReplanner()).changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newEndTime);
-
-				// Now set the action to passed straight away
-				MATSimAgent agent = model.getBDIAgent(agentID);
-				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-				bdiAgent.log("has set the drive time for activity " + actType + " to " + newEndTime);
-				Object[] params = {};
-				agent.getActionContainer().register(ActionID.SET_DRIVE_TIME, params);
-				agent.getActionContainer().get(ActionID.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
-				return true;
-			}
-		});
+		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel));
 	}
 
 	/**
