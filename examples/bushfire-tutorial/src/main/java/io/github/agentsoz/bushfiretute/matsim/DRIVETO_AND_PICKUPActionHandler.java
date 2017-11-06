@@ -2,9 +2,20 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.core.mobsim.framework.HasPerson;
+import org.matsim.core.mobsim.framework.MobsimAgent;
+import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.SearchableNetwork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimAgent;
@@ -18,6 +29,8 @@ import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import scenarioTWO.agents.EvacResident;
 
 final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
+	private static final Logger logger = LoggerFactory.getLogger("");
+
 	private final BDIModel bdiModel;
 
 	public DRIVETO_AND_PICKUPActionHandler(BDIModel bdiModel) {
@@ -36,7 +49,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 			throw new RuntimeException("Destination coordinates are not given");
 		}
 
-		((CustomReplanner)model.getReplanner()).insertPickupAndWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (int) args[3], model);
+		DRIVETO_AND_PICKUPActionHandler.insertPickupAndWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (int) args[3], model);
 
 		// Now register a event handler for when the agent arrives at the destination
 		MATSimAgent agent = model.getBDIAgent(agentID);
@@ -65,5 +78,65 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 					}
 				});
 		return true;
+	}
+
+	static final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime, MATSimModel model ) {
+		// called at least once
+		
+		logger.debug("starting addNewLegAndActvityToPlan method..");
+		double now = model.getTime() ; 
+		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
+	
+		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
+	
+		int currentPlanIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
+	
+		logger.trace("number of plan elements: " + plan.getPlanElements().size());
+		logger.trace("current plan index : " + currentPlanIndex);
+	
+		PlanElement currentPE = plan.getPlanElements().get(currentPlanIndex);
+		if ( ! ( currentPE instanceof Activity ) ) {
+			return ;
+		}
+		Activity currentAct = (Activity) currentPE;
+		if(currentAct.getType().equals("Wait")) {
+			// yyyy why only for wait activity here, and for all activities in compagnon method?  kai, oct'17
+			//ending the current activity if its a Wait activity:
+			logger.debug("Wait/Current activity ending now:  {}", now);
+			currentAct.setEndTime(now);
+		}
+	
+		final PopulationFactory pf = model.getScenario().getPopulation().getFactory();
+	
+		// leg/route from current activity/position to pickup activity:
+		Leg newLeg = pf.createLeg(TransportMode.car);
+		model.getReplanner().getEditRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+		logger.debug(" inserting leg into plan..");
+		plan.getPlanElements().add(currentPlanIndex+1,newLeg);
+	
+		//ADDING Pickup ACTIVITY
+		Activity pickupAct = pf.createActivityFromLinkId("Pickup", newActivityLinkId ) ;
+		pickupAct.setMaximumDuration(pickupTime);
+		logger.debug(" added {} type activity",pickupAct.getType());
+		plan.getPlanElements().add(currentPlanIndex+2,pickupAct);
+	
+		//ADDING Wait ACTIVITY
+		Activity waitAct = pf.createActivityFromLinkId("Wait", newActivityLinkId ) ;
+		waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
+		logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
+		plan.getPlanElements().add(currentPlanIndex+3,waitAct);
+	
+		//rerouting the leg after wait activity
+		logger.debug("reRouting the leg after wait activity");
+		Leg nextLeg = (Leg)plan.getPlanElements().get(currentPlanIndex+4);
+		Activity nextAct = (Activity)plan.getPlanElements().get(currentPlanIndex+5);
+		logger.trace("all evac activity info : {} ", nextAct.toString());
+		model.getReplanner().getEditRoutes().relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() );
+	
+		logger.trace("number of plan elements after adding pickup, wait, new leg : " + plan.getPlanElements().size());
+	
+		WithinDayAgentUtils.resetCaches(agent);
+		model.getReplanner().getEditPlans().rescheduleActivityEnd(agent);
+	
 	}
 }
