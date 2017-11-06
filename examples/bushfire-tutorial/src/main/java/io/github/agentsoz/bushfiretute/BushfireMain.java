@@ -55,7 +55,16 @@ public class BushfireMain {
 		parse(args);
 
 		// Create the logger
-		logger = createLogger("io.github.agentsoz.bushfiretute.BushfireMain", logFile);
+		if ( logger==null ) {
+			logger = createLogger("io.github.agentsoz.bushfiretute.BushfireMain", logFile);
+		}
+		logger.setLevel(Level.INFO);
+
+		logger.error("error");
+		logger.warn("warn");
+		logger.info("info");
+		logger.debug("debug");
+		logger.trace("trace");
 
 		// Redirect the agent program output if specified
 		if (outFile != null) {

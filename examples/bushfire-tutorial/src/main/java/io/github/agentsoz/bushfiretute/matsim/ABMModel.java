@@ -60,13 +60,12 @@ import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import io.github.agentsoz.util.Global;
 import scenarioTWO.agents.EvacResident;
 
 public final class ABMModel implements MATSimApplicationInterface {
+	static final Logger logger = LoggerFactory.getLogger("");
 
-	private final Logger logger = LoggerFactory.getLogger("");
 	private final MATSimModel matsimModel;
 	private final BDIModel bdiModel;
 	private Replanner replanner = null;
@@ -182,91 +181,10 @@ public final class ABMModel implements MATSimApplicationInterface {
 		withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(bdiModel));
 
 		// register new action
-		withHandler.registerBDIAction(ActionID.CONNECT_TO, new BDIActionHandler() {
-			// ("connect_to" means to connect back to the pre-computed evacuation route, and then follow that one to the "safe" location. kai, 17)
-			
-			@Override
-			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				String destination = (String) args[1];
-				// connect To route replanner method
-				Id<Link> newLinkId = ((CustomReplanner)model.getReplanner()).driveDirectlyToActivity(Id.createPersonId(agentID), destination);
-				if (newLinkId == null) {
-					logger.warn("CONNECT_TO: returned a null link from the target activity");
-					return true;
-				}
-				// Now register a event handler for when the agent arrives at the destination
-				MATSimAgent agent = model.getBDIAgent(agentID);
-				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-				bdiAgent.log("replanned to drive to connecting link " + newLinkId.toString());
-				agent.getPerceptHandler().registerBDIPerceptHandler(
-						agent.getAgentID(), 
-						MonitoredEventType.ArrivedAtDestination, 
-						newLinkId,
-						new BDIPerceptHandler() {
-							@Override
-							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
-								MATSimAgent agent = model.getBDIAgent(agentId);
-								EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
-								Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
-								
-								agent.getActionContainer().register(ActionID.CONNECT_TO, params);
-								// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
-								// called earlier, maybe around where the replanner is called?  kai, oct'17)
-
-								agent.getActionContainer().get(ActionID.CONNECT_TO).setState(ActionContent.State.PASSED);
-								agent.getPerceptContainer().put(PerceptID.ARRIVED_CONNECT_TO, params);
-								return true; //unregister this handler
-							}
-						});
-				return true;
-			}
-		});
+		withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel));
 
 		// register new action
-		withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new BDIActionHandler() {
-			@Override
-			public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-				// Get nearest link ID and calls the CustomReplanner to map to MATSim.
-				Id<Link> newLinkId;
-				double[] coords = (double[]) args[1];
-				if (args[1] instanceof double[]) {
-					newLinkId = ((SearchableNetwork) model.getScenario().getNetwork())
-							.getNearestLinkExactly(new Coord(coords[0], coords[1])).getId();
-				} else {
-					throw new RuntimeException("Destination coordinates are not given");
-				}
-
-				((CustomReplanner)model.getReplanner()).insertPickupAndWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (int) args[3]);
-
-				// Now register a event handler for when the agent arrives at the destination
-				MATSimAgent agent = model.getBDIAgent(agentID);
-				EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-				bdiAgent.log("will drive to pickup from coords "+coords[0] + "," + coords[1] 
-						+" i.e. link "+newLinkId.toString());
-				
-				// Now register a event handler for when the agent arrives and finished picking up the destination
-				agent.getPerceptHandler().registerBDIPerceptHandler(
-						agent.getAgentID(), 
-						MonitoredEventType.EndedActivity, 
-						newLinkId,
-						new BDIPerceptHandler() {
-							@Override
-							public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
-								MATSimAgent agent = model.getBDIAgent(agentId);
-								Object[] params = { linkId.toString() };
-
-								agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);
-								// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
-								// called earlier, maybe around where the replanner is called?  kai, oct'17)
-
-								agent.getActionContainer().get(ActionID.DRIVETO_AND_PICKUP).setState(ActionContent.State.PASSED);
-								agent.getPerceptContainer().put(PerceptID.ARRIVED_AND_PICKED_UP, params);
-								return true; //unregister this handler
-							}
-						});
-				return true;
-			}
-		});
+		withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel));
 
 		// register new action
 		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new BDIActionHandler() {
