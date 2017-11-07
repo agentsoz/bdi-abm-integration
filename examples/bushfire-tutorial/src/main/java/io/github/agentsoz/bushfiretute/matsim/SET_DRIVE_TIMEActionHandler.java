@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
+import org.matsim.withinday.utils.EditPlans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,70 +52,54 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 
 	@Override
 	public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
-		double newEndTime = (double) args[1];
+		double newTime = (double) args[1];
 		String actType = (String) args[2];        
 
-		changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newEndTime, model);
+		changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newTime, model);
 
 		// Now set the action to passed straight away
 		MATSimAgent agent = model.getBDIAgent(agentID);
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-		bdiAgent.log("has set the drive time for activity " + actType + " to " + newEndTime);
+		bdiAgent.log("has set the end time for activity " + actType + " to " + newTime + " seconds past now." );
 		Object[] params = {};
 		agent.getActionContainer().register(ActionID.SET_DRIVE_TIME, params);
 		agent.getActionContainer().get(ActionID.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
 		return true;
 	}
 
-	static final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newEndTime, MATSimModel model) {
-		// used at least once
+	/**
+	 * The way I found this, "newTime" is added to "currentTime", and that is the new end time.  I don't find this particularly
+	 * intuitive, especially for future activities.  kai, nov'17
+	 */
+	static final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newTime, MATSimModel model) {
 		
 		logger.debug("received to modify the endtime of activity {}", actType);
 		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
 	
-		Activity activityToChange=null;
-		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 		int currentIndex = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
-		int evacIndex= 100;
+		int indexToChange= -1 ;
 		logger.debug("forceEndActivity: agent {} | current plan Index  {} | current time : {} ",agent.getId().toString(), currentIndex, model.getTime() );
 	
-		if (actType.equals("Current")) 
-		{ 
+		if (actType.equals("Current")) { 
 			if( !(WithinDayAgentUtils.getCurrentPlanElement(agent) instanceof Activity) ) {
 				logger.error("current plan element is not an activity, unable to forceEndActivity");
 				return false;
 			}
-			activityToChange = (Activity) WithinDayAgentUtils.getCurrentPlanElement(agent) ;
+			indexToChange = WithinDayAgentUtils.getCurrentPlanElementIndex(agent) ;
+		} else {
+			indexToChange = EditPlans.indexOfNextActivityWithType(agent, actType) ;
 		}
-	
-		if(actType.equals("Evacuation")) 
-		{
-			for(int i=currentIndex;i<plan.getPlanElements().size();i++) {
-				PlanElement element =  plan.getPlanElements().get(i);
-				if( !(element instanceof Activity) ) {
-					continue;
-				}
-				if(((Activity) element).getType().equals("Evacuation")) {
-					activityToChange=(Activity) element;
-					evacIndex = i;
-				}				
-			}
-		}
-		//delaying activity by newEndTime
-		if(activityToChange == null) {
+		
+		if ( indexToChange==-1 ) {
 			logger.error("could not find the activity to End");
 			return false;
 		}
-		double endtime =  model.getTime() +  newEndTime;
-		logger.debug("change end time of actvity with index {} to new end time  {} ", evacIndex, endtime );
-		activityToChange.setEndTime(endtime);
+		
+		double newEndTime =  model.getTime() +  newTime;
+		logger.debug("change end time of actvity with index {} to new end time  {} ", indexToChange, newEndTime );
+		model.getReplanner().getEditPlans().rescheduleActivityEndtime(agent, indexToChange, newEndTime);
 	
-		WithinDayAgentUtils.resetCaches(agent);
-		//		if ( currentIndex != 1) // ??
-		model.getReplanner().getEditPlans().rescheduleActivityEnd(agent);
 		return true;
-	
-	
 	}
 	/*
 	void insertTempActivity(Id<Person> agentId) {
