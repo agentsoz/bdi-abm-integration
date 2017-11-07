@@ -54,7 +54,7 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 		double newEndTime = (double) args[1];
 		String actType = (String) args[2];        
 
-		SET_DRIVE_TIMEActionHandler.changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newEndTime, model);
+		changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newEndTime, model);
 
 		// Now set the action to passed straight away
 		MATSimAgent agent = model.getBDIAgent(agentID);
@@ -80,11 +80,11 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	
 		if (actType.equals("Current")) 
 		{ 
-			if( !(plan.getPlanElements().get(currentIndex) instanceof Activity) ) {
+			if( !(WithinDayAgentUtils.getCurrentPlanElement(agent) instanceof Activity) ) {
 				logger.error("current plan element is not an activity, unable to forceEndActivity");
 				return false;
 			}
-			activityToChange = (Activity) plan.getPlanElements().get(currentIndex);
+			activityToChange = (Activity) WithinDayAgentUtils.getCurrentPlanElement(agent) ;
 		}
 	
 		if(actType.equals("Evacuation")) 
