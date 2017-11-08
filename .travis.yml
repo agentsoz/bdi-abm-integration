@@ -4,11 +4,12 @@ addons:
   apt:
     packages:
       - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
-script:
+before_install:
   git clone https://github.com/matsim-org/matsim.git 
   cd matsim && git checkout kaibranch && git log -1
   cd matsim/examples && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true 
   cd matsim/matsim && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true 
+script:
   - mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
 env:
   global:
