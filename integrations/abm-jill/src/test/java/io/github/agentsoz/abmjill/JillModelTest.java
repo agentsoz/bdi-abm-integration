@@ -125,7 +125,8 @@ public class JillModelTest {
 				"--config",
 				"{agents:[{classname:io.github.agentsoz.abmjill.testagent.TestAgent, args:null, count:"+nAgents+"}]," +
 				"logLevel: ERROR," +
-				"logFile: " + JillModelTest.class.getSimpleName() + ".log" +
+				"logFile: " + JillModelTest.class.getSimpleName() + ".log," +
+				"numThreads: 1" +
 				"}"
 				};
 		jillmodel = new TestModel();
