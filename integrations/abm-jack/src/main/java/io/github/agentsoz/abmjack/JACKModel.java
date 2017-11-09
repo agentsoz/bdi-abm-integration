@@ -1,5 +1,21 @@
 package io.github.agentsoz.abmjack;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
+import aos.jack.jak.agent.Agent;
+import io.github.agentsoz.abmjack.shared.ActionManager;
+import io.github.agentsoz.abmjack.shared.GlobalTime;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -21,21 +37,16 @@ package io.github.agentsoz.abmjack;
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
-
-import io.github.agentsoz.bdiabm.*;
-import io.github.agentsoz.bdiabm.data.*;
+import io.github.agentsoz.bdiabm.ABMServerInterface;
+import io.github.agentsoz.bdiabm.BDIServerInterface;
+import io.github.agentsoz.bdiabm.data.ActionContainer;
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
-import io.github.agentsoz.dataInterface.DataServer;
-import io.github.agentsoz.abmjack.shared.*;
-import aos.jack.jak.agent.Agent;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
+import io.github.agentsoz.bdiabm.data.ActionPerceptContainer;
+import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.data.AgentState;
+import io.github.agentsoz.bdiabm.data.AgentStateList;
+import io.github.agentsoz.bdiabm.data.PerceptContainer;
 
 /**
  * 
@@ -52,7 +63,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	protected Map<String, Agent> agents = new LinkedHashMap<>();
 	// need deterministically sorted map for testing.  kai, oct'17
 	
-	private ABMServerInterface abmServer;
 	private AgentDataContainer nextContainer;
 	public final String GLOBAL_AGENT = "global";
 
@@ -61,7 +71,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public boolean init(AgentDataContainer agentDataContainer,
 			AgentStateList agentList, ABMServerInterface abmServer,
 			Object[] params) {
-		this.abmServer = abmServer;
 		setup(abmServer);
 		takeControl(agentDataContainer);
 		if (params != null) {
@@ -97,6 +106,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	}
 
 	// package new agent action into the agent data container
+	@Override
 	public void packageAction(String agentID, String actionID,
 			Object[] parameters) {
 
@@ -114,6 +124,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	}
 
 	// send percepts to individual agents
+	@Override
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
 		logger.trace("Received {}", agentDataContainer);
