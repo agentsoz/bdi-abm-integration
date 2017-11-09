@@ -33,11 +33,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.matsim.ABMModel;
 import io.github.agentsoz.util.Global;
 
 public class BushfireMain {
-
 	// Defaults
 	private static String logFile = BushfireMain.class.getSimpleName() + ".log";
 	private static String outFile = null;
@@ -47,6 +47,7 @@ public class BushfireMain {
 
 
 	private static Long seed = null;
+	private static String matsimOutputDirectory;
 
 	public static void main(final String[] args) {
 		// TODO Auto-generated method stub
@@ -96,7 +97,7 @@ public class BushfireMain {
 		// Initialise the MATSim model
 		ABMModel abmModel = new ABMModel(bdiModel);
 		// Finally, start the MATSim controller
-		String[] margs = { Config.getMatSimFile() };
+		String[] margs = { Config.getMatSimFile(), MATSimModel.MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory };
 		String s = "starting matsim with args:";
 		for (int i = 0; i < margs.length; i++) {
 			s += margs[i];
@@ -127,6 +128,7 @@ public class BushfireMain {
 				break;
 			case "-h":
 				exit(null);
+				break;
 			case "-logfile":
 				if (i + 1 < args.length) {
 					i++;
@@ -153,6 +155,12 @@ public class BushfireMain {
 				if (i + 1 < args.length) {
 					i++;
 					seed = Long.parseLong( args[i] );
+				}
+				break;
+			case "--matsim-output-directory":
+				if (i + 1 < args.length) {
+					i++;
+					matsimOutputDirectory = args[i] ;
 				}
 				break;
 			default:
