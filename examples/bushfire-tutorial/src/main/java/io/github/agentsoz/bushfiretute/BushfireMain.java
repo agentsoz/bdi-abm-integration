@@ -1,29 +1,8 @@
 package io.github.agentsoz.bushfiretute;
 
-/*
- * #%L
- * BDI-ABM Integration Package
- * %%
- * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
- */
-
-import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
@@ -93,17 +72,27 @@ public class BushfireMain {
 
 		// Initialise and hook up the BDI side
 		BDIModel bdiModel = new BDIModel();
-
-		// Initialise the MATSim model
-		ABMModel abmModel = new ABMModel(bdiModel);
-		// Finally, start the MATSim controller
-		String[] margs = { Config.getMatSimFile(), MATSimModel.MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory };
-		String s = "starting matsim with args:";
-		for (int i = 0; i < margs.length; i++) {
-			s += margs[i];
+		
+		// Start the MATSim controller
+		List<String> config = new ArrayList<>() ;
+		config.add( Config.getMatSimFile() ) ;
+		if ( matsimOutputDirectory != null ) { 
+			config.add( MATSimModel.MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR ) ;
+			config.add( matsimOutputDirectory ) ;
 		}
-		logger.info(s);
-		abmModel.run(margs);
+		logger.info( config.toString() );
+		new ABMModel(bdiModel).run( config.toArray( new String[config.size()] ) ) ;
+
+//
+//		// Initialise the MATSim model
+//		// Finally, start the MATSim controller
+//		String[] margs = { Config.getMatSimFile(), MATSimModel.MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory };
+//		String s = "starting matsim with args:";
+//		for (int i = 0; i < margs.length; i++) {
+//			s += margs[i];
+//		}
+//		logger.info(s);
+//		abmModel.run(margs);
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
