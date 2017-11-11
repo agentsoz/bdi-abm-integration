@@ -9,4 +9,8 @@ tubcommit:
 quick:
 	cd ../matsim ; make matsim-quick
 	mvn clean install ${QUICK}
-	cd examples/bushfire ; mvn test -Dtest=MainMaldon600Test
+	cd examples/bushfire ; mvn test
+
+normal:
+	cd ../matsim ; make matsim-quick
+	mvn clean install
