@@ -39,6 +39,7 @@ import io.github.agentsoz.jill.util.Log;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -122,7 +123,7 @@ public abstract class JillModel implements BDIServerInterface {
 		nextContainer = agentDataContainer;
 
 		boolean global = false;
-		HashMap<String, Object> globalPercepts = new HashMap<String, Object>();
+		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
 		try {
 			PerceptContainer gPC = agentDataContainer.get(BROADCAST)

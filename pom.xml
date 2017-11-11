@@ -124,6 +124,26 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-surefire-plugin</artifactId>
+	<version>2.10</version>
+	<configuration>
+	  <excludes>
+	    <exclude>**/*$*</exclude> <!-- exclude all inner classes -->
+	  </excludes>
+
+	  <!--execute each test in separate JVM (slow, but otherwise it does not-->
+	  <!--work, and no problem as long as there are only integration tests):-->
+	  <!--<forkMode>always</forkMode>-->
+	  <!--formMode is deprecated; replaced by following options:-->
+	  <forkCount>1</forkCount>
+	  <reuseForks>false</reuseForks>
+
+	  <!-- avoid out of memory errors: -->
+	  <argLine>-Xmx2000m -Djava.awt.headless=true -Dmatsim.preferLocalDtds=true </argLine>
+	</configuration>
+      </plugin>
     </plugins>
 
     <!-- Used by some but possibly not all modules (optional) -->

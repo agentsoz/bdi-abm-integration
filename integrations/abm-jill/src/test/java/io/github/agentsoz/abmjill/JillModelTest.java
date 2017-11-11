@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.junit.After;
 import org.junit.Before;
@@ -151,7 +152,7 @@ public class JillModelTest {
 		
 		public StubABM(int durationPerAction) {
 			this.durationPerAction = durationPerAction;
-			agentsDurativeCount = new HashMap<String, Integer>();
+			agentsDurativeCount = new LinkedHashMap<String, Integer>();
 		}
 		
 		@Override
