@@ -64,7 +64,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 	private final MATSimModel matsimModel;
 	private final BDIModel bdiModel;
-	private Replanner replanner = null;
 
 	public ABMModel(BDIModel bdiModel) {
 		this.bdiModel = bdiModel;
