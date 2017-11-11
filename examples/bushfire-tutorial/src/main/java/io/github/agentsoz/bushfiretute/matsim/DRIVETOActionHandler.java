@@ -53,14 +53,17 @@ import scenarioTWO.agents.EvacResident;
 final class DRIVETOActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");
 
-	private BDIModel bdiModel;
+	private final BDIModel bdiModel;
 
-	public DRIVETOActionHandler(BDIModel bdiModel) {
+	private final MATSimModel model;
+
+	public DRIVETOActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
+		this.model = model;
 	}
 
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
+	public boolean handle(String agentID, String actionID, Object[] args) {
 		// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 		Id<Link> newLinkId;
 		double[] coords = (double[]) args[1];

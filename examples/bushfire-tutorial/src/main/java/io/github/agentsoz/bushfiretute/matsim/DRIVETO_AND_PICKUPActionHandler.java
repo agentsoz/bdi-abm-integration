@@ -55,12 +55,15 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 
 	private final BDIModel bdiModel;
 
-	public DRIVETO_AND_PICKUPActionHandler(BDIModel bdiModel) {
+	private final MATSimModel model;
+
+	public DRIVETO_AND_PICKUPActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
+		this.model = model;
 	}
 
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
+	public boolean handle(String agentID, String actionID, Object[] args) {
 		// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 		Id<Link> newLinkId;
 		double[] coords = (double[]) args[1];

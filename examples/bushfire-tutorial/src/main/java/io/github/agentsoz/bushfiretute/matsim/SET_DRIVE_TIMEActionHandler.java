@@ -46,12 +46,15 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 
 	private final BDIModel bdiModel;
 
-	public SET_DRIVE_TIMEActionHandler(BDIModel bdiModel) {
+	private final MATSimModel model;
+
+	public SET_DRIVE_TIMEActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
+		this.model = model;
 	}
 
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
+	public boolean handle(String agentID, String actionID, Object[] args) {
 		double newTime = (double) args[1];
 		String actType = (String) args[2];        
 

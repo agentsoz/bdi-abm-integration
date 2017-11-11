@@ -60,12 +60,15 @@ import scenarioTWO.agents.EvacResident;
 final class CONNECT_TOActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");
 
-	private BDIModel bdiModel;
-	CONNECT_TOActionHandler(BDIModel bdiModel) {
+	private final BDIModel bdiModel;
+	private final MATSimModel model;
+
+	CONNECT_TOActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
+		this.model = model;
 	}
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args, MATSimModel model) {
+	public boolean handle(String agentID, String actionID, Object[] args) {
 		String destination = (String) args[1];
 		// connect To route replanner method
 		Id<Link> newLinkId = CONNECT_TOActionHandler.driveDirectlyToActivity(Id.createPersonId(agentID), destination, model);

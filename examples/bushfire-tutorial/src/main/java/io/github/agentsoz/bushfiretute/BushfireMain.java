@@ -18,10 +18,10 @@ import io.github.agentsoz.util.Global;
 
 public class BushfireMain {
 	// Defaults
-	private static String logFile = BushfireMain.class.getSimpleName() + ".log";
-	private static String outFile = null;
-	private static Level logLevel = Level.INFO;
-	private static Logger logger = null;
+	private static String logFile ;
+	private static String outFile ;
+	private static Level logLevel ;
+	private static Logger logger ;
 	public static PrintStream writer;
 
 
@@ -29,8 +29,12 @@ public class BushfireMain {
 	private static String matsimOutputDirectory;
 
 	public static void main(final String[] args) {
-		// TODO Auto-generated method stub
-
+		logFile = BushfireMain.class.getSimpleName() + ".log";
+		outFile = null ;
+		logLevel = Level.INFO ;
+		logger = null ;
+		writer = null ;
+		
 		// Parse the command line arguments
 		parse(args);
 
