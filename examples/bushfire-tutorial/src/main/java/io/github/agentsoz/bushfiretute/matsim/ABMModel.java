@@ -197,9 +197,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
 					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
 				@Override
-				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent,
-						MATSimModel model) {
-					MATSimAgent agent = model.getBDIAgent(agentId);
+				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
+					MATSimAgent agent = matsimModel.getBDIAgent(agentId);
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
 					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);

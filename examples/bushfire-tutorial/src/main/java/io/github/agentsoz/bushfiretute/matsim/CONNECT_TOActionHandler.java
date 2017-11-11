@@ -86,7 +86,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				newLinkId,
 				new BDIPerceptHandler() {
 					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
+					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
 						MATSimAgent agent = model.getBDIAgent(agentId);
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};

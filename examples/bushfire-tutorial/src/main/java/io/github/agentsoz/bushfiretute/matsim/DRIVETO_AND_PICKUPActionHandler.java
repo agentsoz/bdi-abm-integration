@@ -89,7 +89,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 				newLinkId,
 				new BDIPerceptHandler() {
 					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent, MATSimModel model) {
+					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
 						MATSimAgent agent = model.getBDIAgent(agentId);
 						Object[] params = { linkId.toString() };
 

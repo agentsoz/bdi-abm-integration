@@ -47,6 +47,8 @@ public class DataServer {
    public static DataServer getServer( String name ) {
       
       if (!servers.containsKey( name )) { new DataServer( name ); }
+      // yyyy how is the above line supposed to work??  kai, nov'17
+      
       return servers.get( name );
    }
 
