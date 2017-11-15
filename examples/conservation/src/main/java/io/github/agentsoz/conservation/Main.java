@@ -440,9 +440,11 @@ public class Main {
 		 * Remove the former percepts as they are no longer needed
 		 */
 		for (String agentName : agentDataContainer.keySet()) {
-			PerceptContainer newPerceptContainer = new PerceptContainer();
-			agentDataContainer.getOrCreate(agentName).setPerceptContainer(
-					newPerceptContainer);
+//			PerceptContainer newPerceptContainer = new PerceptContainer();
+//			agentDataContainer.getOrCreate(agentName).setPerceptContainer(
+//					newPerceptContainer);
+			agentDataContainer.getOrCreate(agentName).getPerceptContainer().clear(); 
+			// I think that this is much safer.  But it may change the results.  kai, nov'17
 		}
 
 		for (String agent : agentDataContainer.keySet()) {
