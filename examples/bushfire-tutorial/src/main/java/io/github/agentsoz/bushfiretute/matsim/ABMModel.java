@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.AgentWithPerceptsAndActions;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
@@ -199,7 +199,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
 		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
-			MATSimAgent agent = matsimModel.getBDIAgent(agentID);
+			AgentWithPerceptsAndActions agent = matsimModel.getBDIAgent(agentID);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Gbl.assertNotNull(bdiAgent);
 			Id<Link> newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
@@ -209,7 +209,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
 				@Override
 				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-					MATSimAgent agent = matsimModel.getBDIAgent(agentId);
+					AgentWithPerceptsAndActions agent = matsimModel.getBDIAgent(agentId);
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
 					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);

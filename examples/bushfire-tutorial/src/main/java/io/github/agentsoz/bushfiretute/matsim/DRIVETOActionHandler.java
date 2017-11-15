@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.AgentWithPerceptsAndActions;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
@@ -78,7 +78,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 		DRIVETOActionHandler.moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, dest, model);
 
 		// Now register a event handler for when the agent arrives at the destination
-		MATSimAgent agent = model.getBDIAgent(agentID);
+		AgentWithPerceptsAndActions agent = model.getBDIAgent(agentID);
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 		bdiAgent.log("has started driving to coords "+coords[0] + "," + coords[1] 
 				+" i.e. link "+newLinkId.toString());
@@ -89,7 +89,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						MATSimAgent agent = model.getBDIAgent(agentId);
+						AgentWithPerceptsAndActions agent = model.getBDIAgent(agentId);
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 
