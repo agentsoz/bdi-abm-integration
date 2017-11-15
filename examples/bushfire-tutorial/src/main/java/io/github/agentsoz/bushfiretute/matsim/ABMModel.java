@@ -199,7 +199,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
 		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
-			AgentWithPerceptsAndActions agent = matsimModel.getBDIAgent(agentID);
+			AgentWithPerceptsAndActions agent = matsimModel.getAgentManager().getAgent( agentID );
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Gbl.assertNotNull(bdiAgent);
 			Id<Link> newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
@@ -209,7 +209,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
 				@Override
 				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-					AgentWithPerceptsAndActions agent = matsimModel.getBDIAgent(agentId);
+					AgentWithPerceptsAndActions agent = matsimModel.getAgentManager().getAgent( agentId );
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
 					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);

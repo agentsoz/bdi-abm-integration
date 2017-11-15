@@ -61,7 +61,7 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 		changeActivityEndTimeByActivityType(Id.createPersonId( agentID ),actType, newTime, model);
 
 		// Now set the action to passed straight away
-		AgentWithPerceptsAndActions agent = model.getBDIAgent(agentID);
+		AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentID );
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 		bdiAgent.log("has set the end time for activity " + actType + " to " + newTime + " seconds past now." );
 		Object[] params = {};
@@ -77,7 +77,7 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	static final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newTime, MATSimModel model) {
 		
 		logger.debug("received to modify the endtime of activity {}", actType);
-		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
+		MobsimAgent agent = model.getMobsimDataProvider().getAgents().get(agentId);
 	
 		int currentIndex = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
 		int indexToChange= -1 ;
