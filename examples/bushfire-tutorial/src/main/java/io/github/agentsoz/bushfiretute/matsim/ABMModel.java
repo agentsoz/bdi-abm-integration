@@ -36,8 +36,10 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.SearchableNetwork;
+import org.matsim.core.population.PopulationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,13 +99,22 @@ public final class ABMModel implements MATSimApplicationInterface {
 						+ "'. Should not happen, but will keep going");
 				continue;
 			}
-			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+			
+			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( agentId ).getSelectedPlan() ;
 			List<PlanElement> planElements = plan.getPlanElements();
+			Activity startAct = (Activity) planElements.get(0) ;
 
 			// Assign start location
-			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
-			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, matsimModel.getScenario().getActivityFacilities(), matsimModel.getScenario().getConfig() ) ;
+			double lat = startCoord.getX() ;
+			double lon = startCoord.getY();
+			
 			bdiAgent.startLocation = new double[] { lat, lon };
+			// yy this is just used for finding school locations, so startLocation is a slight mis-nomer; it needs the home location. kai, nov'17
+			
 			bdiAgent.currentLocation = "home"; // agents always start at home
 			bdiAgent.log("is at home at location "+lon+","+lat);
 
@@ -190,8 +201,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
 			MATSimAgent agent = matsimModel.getBDIAgent(agentID);
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-			Id<Link> newLinkId;
-			newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
+			Gbl.assertNotNull(bdiAgent);
+			Id<Link> newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
 					.getNearestLinkExactly(new Coord(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
 
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
