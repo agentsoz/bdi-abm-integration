@@ -1,5 +1,12 @@
 package io.github.agentsoz.bdimatsim;
 
+import java.util.LinkedHashMap;
+
+import javax.inject.Inject;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -29,14 +36,6 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentState;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
-import java.util.LinkedHashMap;
-
-import javax.inject.Inject;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.mobsim.qsim.ActivityEndRescheduler;
-import org.matsim.core.mobsim.qsim.QSim;
 
 /**
  * This class holds MatsimAgent objects and information
@@ -46,16 +45,16 @@ import org.matsim.core.mobsim.qsim.QSim;
  *         
  * @author Edmund Kemsley 
  */
-final class MATSimAgentManager {
+public final class AgentManager {
 	private AgentStateList agentStateList;
-	private LinkedHashMap<Id<Person>, MATSimAgent> matSimAgents;
+	private LinkedHashMap<Id<Person>, AgentWithPerceptsAndActions> agentsWithPerceptsAndActions;
 	private MATSimModel matSimModel;
 	private AgentDataContainer agentDataContainer;
 
-	@Inject MATSimAgentManager(MATSimModel model) {
+	@Inject AgentManager(MATSimModel model) {
 		this.matSimModel = model;
 
-		matSimAgents = new LinkedHashMap<>();
+		agentsWithPerceptsAndActions = new LinkedHashMap<>();
 		agentStateList = new AgentStateList();
 		this.agentDataContainer = new AgentDataContainer();
 	}
@@ -68,12 +67,12 @@ final class MATSimAgentManager {
 		return agentStateList;
 	}
 
-	final MATSimAgent getAgent(Id<Person> agentID) {
-		return matSimAgents.get(agentID);
+	public final AgentWithPerceptsAndActions getAgent(Id<Person> agentID) {
+		return agentsWithPerceptsAndActions.get(agentID);
 	}
 
-	final MATSimAgent getAgent(String agentID) {
-		return matSimAgents.get(Id.createPersonId(agentID));
+	public final AgentWithPerceptsAndActions getAgent(String agentID) {
+		return agentsWithPerceptsAndActions.get(Id.createPersonId(agentID));
 	}
 
 	/*
@@ -83,14 +82,12 @@ final class MATSimAgentManager {
 	 * functionality
 	 */
 	final boolean createAndAddBDIAgent(Id<Person> agentID) {
-		ActionPerceptContainer agentContainer = agentDataContainer.getOrCreate(agentID.toString());
-		MATSimAgent agent = new MATSimAgent(
+		AgentWithPerceptsAndActions agent = new AgentWithPerceptsAndActions(
 				new MATSimActionHandler(matSimModel), 
 				new MATSimPerceptHandler(matSimModel), 
 				agentID,
-				agentContainer.getActionContainer(),
-				agentContainer.getPerceptContainer());
-		matSimAgents.put(agentID, agent);
+				agentDataContainer.getOrCreate(agentID.toString()) );
+		agentsWithPerceptsAndActions.put(agentID, agent);
 		agentStateList.add(new AgentState(agentID.toString()));
 		return true;
 	}
@@ -101,14 +98,14 @@ final class MATSimAgentManager {
 	 */
 	final void registerApplicationActionsPercepts(MATSimApplicationInterface app) {
 		for(Id<Person> agentId: matSimModel.getBDIAgentIDs()) {
-			MATSimAgent agent = matSimModel.getBDIAgent(agentId);
+			AgentWithPerceptsAndActions agent = matSimModel.getAgentManager().getAgent( agentId );
 			app.registerNewBDIActions(agent.getActionHandler());
 			app.registerNewBDIPercepts(agent.getPerceptHandler());
 		}
 	}
 
 	final boolean removeAgent(Id<Person> agentID) {
-		matSimAgents.remove(agentID);
+		agentsWithPerceptsAndActions.remove(agentID);
 		agentStateList.remove(agentStateList.remove(new AgentState(agentID
 				.toString())));// maybe will work
 		// don't you need to also remove this from agentDataContainer??
@@ -149,8 +146,8 @@ final class MATSimAgentManager {
 	 */
 	private final boolean initiateNewAction(String agentID, String actionID) {
 		// if (matSimAgents.containsKey(new IdImpl(agentID))){
-		if (matSimAgents.containsKey(Id.createPersonId(agentID))) {
-			MATSimAgent agent = getAgent(agentID);
+		if (agentsWithPerceptsAndActions.containsKey(Id.createPersonId(agentID))) {
+			AgentWithPerceptsAndActions agent = getAgent(agentID);
 			Object[] parameters = agent.getActionContainer().get(actionID)
 					.getParameters();
 			if (agent.getActionHandler().processAction(agentID, actionID,
@@ -172,7 +169,7 @@ final class MATSimAgentManager {
 	 */
 	private final void dropAction(String agentID, String actionID) {
 		// if (matSimAgents.containsKey(new IdImpl(agentID))){
-		if (matSimAgents.containsKey(Id.createPersonId(agentID))) {
+		if (agentsWithPerceptsAndActions.containsKey(Id.createPersonId(agentID))) {
 
 		}
 	}

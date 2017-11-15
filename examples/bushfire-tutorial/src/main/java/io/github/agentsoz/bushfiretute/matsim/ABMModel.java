@@ -36,15 +36,17 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.SearchableNetwork;
+import org.matsim.core.population.PopulationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.AgentWithPerceptsAndActions;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
@@ -97,13 +99,22 @@ public final class ABMModel implements MATSimApplicationInterface {
 						+ "'. Should not happen, but will keep going");
 				continue;
 			}
-			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+			
+			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( agentId ).getSelectedPlan() ;
 			List<PlanElement> planElements = plan.getPlanElements();
+			Activity startAct = (Activity) planElements.get(0) ;
 
 			// Assign start location
-			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
-			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, matsimModel.getScenario().getActivityFacilities(), matsimModel.getScenario().getConfig() ) ;
+			double lat = startCoord.getX() ;
+			double lon = startCoord.getY();
+			
 			bdiAgent.startLocation = new double[] { lat, lon };
+			// yy this is just used for finding school locations, so startLocation is a slight mis-nomer; it needs the home location. kai, nov'17
+			
 			bdiAgent.currentLocation = "home"; // agents always start at home
 			bdiAgent.log("is at home at location "+lon+","+lat);
 
@@ -188,17 +199,17 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
 		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
-			MATSimAgent agent = matsimModel.getBDIAgent(agentID);
+			AgentWithPerceptsAndActions agent = matsimModel.getAgentManager().getAgent( agentID );
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-			Id<Link> newLinkId;
-			newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
+			Gbl.assertNotNull(bdiAgent);
+			Id<Link> newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
 					.getNearestLinkExactly(new Coord(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
 
 			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
 					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
 				@Override
 				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-					MATSimAgent agent = matsimModel.getBDIAgent(agentId);
+					AgentWithPerceptsAndActions agent = matsimModel.getAgentManager().getAgent( agentId );
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
 					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);

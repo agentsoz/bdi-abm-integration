@@ -23,6 +23,7 @@ package io.github.agentsoz.bdimatsim;
  */
 
 import io.github.agentsoz.bdiabm.data.ActionContainer;
+import io.github.agentsoz.bdiabm.data.ActionPerceptContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContainer;
 
 import java.util.ArrayList;
@@ -41,16 +42,18 @@ import org.matsim.api.core.v01.population.Person;
  * @author Edmund Kemsley 
  */
 
-public final class MATSimAgent {
+public final class AgentWithPerceptsAndActions {
 	private MATSimPerceptHandler perceptHandler;
 	private MATSimActionHandler actionHandler;
 	private Id<Person> agentID;
-	private String agentType;
+//	private String agentType;
+//
+//	private final List<Id<Link>> driveToActions = new ArrayList<>() ;
 
-	private final List<Id<Link>> driveToActions = new ArrayList<>() ;
-
-	private ActionContainer actionContainer;
-	private PerceptContainer perceptContainer;
+	/**
+	 * the agent keeps a handle to its own material in {@link AgentDataContainer}, which is globally passed around
+	 */
+	private ActionPerceptContainer actPerceptContainer;
 
 	public final Id<Person> getAgentID() {
 		return agentID;
@@ -65,57 +68,56 @@ public final class MATSimAgent {
 	}
 
 	public final ActionContainer getActionContainer() {
-		return this.actionContainer;
+		return this.actPerceptContainer.getActionContainer() ;
 	}
 
 	public final PerceptContainer getPerceptContainer() {
-		return this.perceptContainer;
+		return this.actPerceptContainer.getPerceptContainer();
 	}
 
-	MATSimAgent(MATSimActionHandler actionHandler,
+	AgentWithPerceptsAndActions(MATSimActionHandler actionHandler,
 			MATSimPerceptHandler perceptHandler, Id<Person> agentID,
-			ActionContainer actionContainer, PerceptContainer perceptContainer) {
+			ActionPerceptContainer actPerceptContainer) {
 		this.perceptHandler = perceptHandler;
 		this.actionHandler = actionHandler;
 		this.agentID = agentID;
-		this.actionContainer = actionContainer;
-		this.perceptContainer = perceptContainer;
+		this.actPerceptContainer = actPerceptContainer ;
 	}
 
-	public final void newDriveTo(Id<Link> newAction) {
-		driveToActions.add(newAction);
-	}
-
-	final void removeActions(Id<Link> action) {
-		driveToActions.remove(action);
-	}
-
-	final void clearAllActions() {
-		driveToActions.clear();
-	}
-
-	/*
-	 * Checks the location and returns which driveToAction has been
-	 * PASSED/ARRIVED
-	 */
-	final Id<Link> arrivedAtDriveTo(Id<Link> location) {
-		Iterator<Id<Link>> actions = driveToActions.iterator();
-		while (actions.hasNext()) {
-			Id<Link> dest = actions.next();
-
-			if (dest.equals(location)) {
-				driveToActions.remove(dest);
-				return dest;
-			}
-		}
-		return Id.createLinkId(0);
-	}
-
-	public String getAgentType() {
-		return agentType;
-	}
-
-	public void setAgentType(String agentType) {
-		this.agentType = agentType;
-	}
+//	public final void newDriveTo(Id<Link> newAction) {
+//		driveToActions.add(newAction);
+//	}
+//
+//	final void removeActions(Id<Link> action) {
+//		driveToActions.remove(action);
+//	}
+//
+//	final void clearAllActions() {
+//		driveToActions.clear();
+//	}
+//
+//	/*
+//	 * Checks the location and returns which driveToAction has been
+//	 * PASSED/ARRIVED
+//	 */
+//	final Id<Link> arrivedAtDriveTo(Id<Link> location) {
+//		Iterator<Id<Link>> actions = driveToActions.iterator();
+//		while (actions.hasNext()) {
+//			Id<Link> dest = actions.next();
+//
+//			if (dest.equals(location)) {
+//				driveToActions.remove(dest);
+//				return dest;
+//			}
+//		}
+//		return Id.createLinkId(0);
+//	}
+//
+//	public String getAgentType() {
+//		return agentType;
+//	}
+//
+//	public void setAgentType(String agentType) {
+//		this.agentType = agentType;
+//	}
 }

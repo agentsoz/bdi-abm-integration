@@ -47,9 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.AgentWithPerceptsAndActions;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bushfiretute.BDIModel;
@@ -77,7 +77,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			return true;
 		}
 		// Now register a event handler for when the agent arrives at the destination
-		MATSimAgent agent = model.getBDIAgent(agentID);
+		AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentID );
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 		bdiAgent.log("replanned to drive to connecting link " + newLinkId.toString());
 		agent.getPerceptHandler().registerBDIPerceptHandler(
@@ -87,7 +87,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						MATSimAgent agent = model.getBDIAgent(agentId);
+						AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentId );
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 						
@@ -113,7 +113,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	
 			double now = model.getTime();
 			logger.debug(" starting replanCurrentRoute : activity type: {}", actType);
-			Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
+			Map<Id<Person>, MobsimAgent> mapping = model.getMobsimDataProvider().getAgents();
 			MobsimAgent agent = mapping.get(agentId);
 	
 			Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;

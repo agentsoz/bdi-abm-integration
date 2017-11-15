@@ -75,7 +75,7 @@ public final class Utils {
 
 	static void initialiseVisualisedAgents(MATSimModel matSimModel){
 		Map<Id<Link>,? extends Link> links = matSimModel.getScenario().getNetwork().getLinks();
-		for(MobsimAgent agent: matSimModel.getMobsimAgentMap().values()){
+		for(MobsimAgent agent: matSimModel.getMobsimDataProvider().getAgents().values()){
 			SimpleMessage m = new SimpleMessage();
 			m.name = "initAgent";
 			//m.params = new Object[]{agent.getId().toString(),links.get(agent.getCurrentLinkId()).getFromNode().getId().toString(),(((MATSimReplannableAgent)agent).taxi == true?"T":"N")};
@@ -129,14 +129,14 @@ public final class Utils {
 	}
 
 	 final static String[] getPersonIDsAsArray( List<Id<Person>> personIds ){
-		List<Id<Person>> list = personIds ;
-		String[] agentIDArray = new String[list.size()];
+		String[] agentIDArray = new String[personIds.size()];
 		int j = 0;
-		for(Id<Person> id: list){
+		for(Id<Person> id: personIds){
 			agentIDArray[j] = id.toString();
 			j ++;
 		}
 		return agentIDArray;
+//		return personIds.toArray( new String[personIds.size()] ) ; // wrong type!
 	}
 	 
 	 public static List<Link> findIntersectingLinks(Link link, Network network) {

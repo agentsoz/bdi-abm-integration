@@ -40,9 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.MATSimAgent;
+import io.github.agentsoz.bdimatsim.AgentWithPerceptsAndActions;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bushfiretute.BDIModel;
@@ -77,7 +77,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		DRIVETO_AND_PICKUPActionHandler.insertPickupAndWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, (int) args[3], model);
 
 		// Now register a event handler for when the agent arrives at the destination
-		MATSimAgent agent = model.getBDIAgent(agentID);
+		AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentID );
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 		bdiAgent.log("will drive to pickup from coords "+coords[0] + "," + coords[1] 
 				+" i.e. link "+newLinkId.toString());
@@ -90,7 +90,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						MATSimAgent agent = model.getBDIAgent(agentId);
+						AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentId );
 						Object[] params = { linkId.toString() };
 
 						agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);
@@ -110,7 +110,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		
 		logger.debug("starting addNewLegAndActvityToPlan method..");
 		double now = model.getTime() ; 
-		MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
+		MobsimAgent agent = model.getMobsimDataProvider().getAgents().get(agentId);
 	
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 	

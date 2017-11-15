@@ -40,7 +40,7 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.AgentActivityEventHandler.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 
@@ -65,7 +65,7 @@ final class DRIVETODefaultActionHandler implements BDIActionHandler {
 		DRIVETODefaultActionHandler.attachNewActivityAtEndOfPlan(newLinkId, Id.createPersonId(agentID), model);
 
 		// Now register a event handler for when the agent arrives at the destination
-		MATSimAgent agent = model.getBDIAgent(agentID);
+		AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentID );
 		agent.getPerceptHandler().registerBDIPerceptHandler(
 				agent.getAgentID(), 
 				MonitoredEventType.ArrivedAtDestination, 
@@ -73,7 +73,7 @@ final class DRIVETODefaultActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						MATSimAgent agent = model.getBDIAgent(agentId);
+						AgentWithPerceptsAndActions agent = model.getAgentManager().getAgent( agentId );
 						Object[] params = { linkId.toString() };
 						agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
 						agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
@@ -93,7 +93,7 @@ final class DRIVETODefaultActionHandler implements BDIActionHandler {
 	
 			double now = model.getTime() ; 
 	
-			MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
+			MobsimAgent agent = model.getMobsimDataProvider().getAgents().get(agentId);
 	
 			Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 	

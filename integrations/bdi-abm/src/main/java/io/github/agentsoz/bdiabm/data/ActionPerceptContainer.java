@@ -42,16 +42,16 @@ public class ActionPerceptContainer implements Serializable
 		perceptContainer = new PerceptContainer();
 	}
 	
-	public void replace (ActionPerceptContainer apContainer)
-	{
-		setActionContainer (apContainer.actionContainer);
-		setPerceptContainer (apContainer.perceptContainer);
-	}
-	
-	public void setActionContainer (ActionContainer newContainer)
-	{
-		this.actionContainer = newContainer;
-	}
+//	public void replace (ActionPerceptContainer apContainer)
+//	{
+//		setActionContainer (apContainer.actionContainer);
+//		setPerceptContainer (apContainer.perceptContainer);
+//	}
+//	
+//	public void setActionContainer (ActionContainer newContainer)
+//	{
+//		this.actionContainer = newContainer;
+//	}
 	
 	/**
 	 * @return
@@ -62,10 +62,10 @@ public class ActionPerceptContainer implements Serializable
 		return actionContainer;
 	}
 	
-	public void setPerceptContainer (PerceptContainer perceptContainer)
-	{
-		this.perceptContainer = perceptContainer;
-	}
+//	public void setPerceptContainer (PerceptContainer perceptContainer)
+//	{
+//		this.perceptContainer = perceptContainer;
+//	}
 	
 	/**
 	 * @return
