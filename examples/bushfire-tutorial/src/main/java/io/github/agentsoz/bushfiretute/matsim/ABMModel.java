@@ -87,16 +87,16 @@ public final class ABMModel implements MATSimApplicationInterface {
 	}
 
 
-	/**
-	 * Use this to pre-process the BDI agents list if needed. For instance, 
-	 * tasks like adding/removing specific agents, or renaming agents IDs, 
-	 * should be done here. This function is called just prior to the
-	 * BDI agent counterparts in MATSim being created.
-	 * 
-	 */
-	@Override
-	public void notifyBeforeCreatingBDICounterparts(List<String> bdiAgentsIDs) {
-	}
+//	/**
+//	 * Use this to pre-process the BDI agents list if needed. For instance, 
+//	 * tasks like adding/removing specific agents, or renaming agents IDs, 
+//	 * should be done here. This function is called just prior to the
+//	 * BDI agent counterparts in MATSim being created.
+//	 * 
+//	 */
+//	@Override
+//	public void notifyBeforeCreatingBDICounterparts(List<String> bdiAgentsIDs) {
+//	}
 
 	/**
 	 * Initialise the BDI agents with any application specific data. This 

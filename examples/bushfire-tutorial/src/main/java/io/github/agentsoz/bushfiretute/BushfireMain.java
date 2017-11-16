@@ -87,23 +87,12 @@ public class BushfireMain {
 		logger.info( config.toString() );
 		new ABMModel(bdiModel).run( config.toArray( new String[config.size()] ) ) ;
 
-//
-//		// Initialise the MATSim model
-//		// Finally, start the MATSim controller
-//		String[] margs = { Config.getMatSimFile(), MATSimModel.MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory };
-//		String s = "starting matsim with args:";
-//		for (int i = 0; i < margs.length; i++) {
-//			s += margs[i];
-//		}
-//		logger.info(s);
-//		abmModel.run(margs);
-
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
 
 		writer.close();
-//		System.exit(0);
-		// prevents to test output afterwards.  kai, oct'17
+
+//		System.exit(0); // prevents to test output afterwards.  kai, oct'17
 
 	}
 
