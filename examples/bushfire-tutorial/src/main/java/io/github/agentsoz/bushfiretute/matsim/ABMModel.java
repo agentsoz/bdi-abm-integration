@@ -173,6 +173,14 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 			// Assign dependent persons (to pick up before evacuating)
 			assignDependentPersons(bdiAgent);
+			
+			final PAAgentManager agentManager = this.matsimModel.getAgentManager();
+			for(String agentId1: agentManager.getBdiAgentIds() ) {
+				PAAgent agent = agentManager.getAgent( agentId1 );
+				this.registerNewBDIActions(agent.getActionHandler());
+				this.registerNewBDIPercepts(agent.getPerceptHandler());
+			}
+
 		}
 	}
 
