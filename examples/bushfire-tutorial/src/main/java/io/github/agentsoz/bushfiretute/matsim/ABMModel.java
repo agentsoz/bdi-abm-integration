@@ -92,6 +92,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 //		EventsMonitorRegistry eventsMonitors = new EventsMonitorRegistry();
 //		PAAgentManager agentManager = new PAAgentManager( this.matsimModel, eventsMonitors ) ;
 
+		// An attempt with Guice.  It really just goes from here ...
 		Injector injector = Guice.createInjector(new AbstractModule() {
 			@Override protected void configure() {
 				bind(PAAgentManager.class).in(Singleton.class);
@@ -102,12 +103,14 @@ public final class ABMModel implements MATSimApplicationInterface {
 		});
 		PAAgentManager agentManager = injector.getInstance( PAAgentManager.class ) ;
 		EventsMonitorRegistry eventsMonitors = injector.getInstance( EventsMonitorRegistry.class ) ;
+		// ... to here, plus you can now use @Inject in the bound classes.  Note that this injector here is 
+		// independent from the MATSim injector; there, it is a bit more complicated.  kai, nov'17
 		
 		this.bdiModel.init(agentManager.getAgentDataContainer(),
 				agentManager.getAgentStateList(), this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
-		matsimModel.run(args, scenario, bdiAgentIDs, agentManager, eventsMonitors);
+		matsimModel.run(args, bdiAgentIDs, agentManager, eventsMonitors);
 	}
 
 
