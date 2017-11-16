@@ -37,7 +37,7 @@ import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.PAAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
-import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import scenarioTWO.agents.EvacResident;
 

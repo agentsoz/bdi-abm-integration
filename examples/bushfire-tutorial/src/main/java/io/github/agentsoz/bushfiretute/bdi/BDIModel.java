@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfiretute;
+package io.github.agentsoz.bushfiretute.bdi;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -34,8 +34,9 @@ import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.bushfiretute.BushfireMain;
+import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.DataTypes;
-import io.github.agentsoz.bushfiretute.bdi.BdiConnector;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;

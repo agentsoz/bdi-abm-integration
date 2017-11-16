@@ -47,7 +47,7 @@ import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
-import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import scenarioTWO.agents.EvacResident;
 
 final class DRIVETOActionHandler implements BDIActionHandler {

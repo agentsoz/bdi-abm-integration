@@ -45,7 +45,7 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
-import io.github.agentsoz.bushfiretute.BDIModel;
+import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import scenarioTWO.agents.EvacResident;
