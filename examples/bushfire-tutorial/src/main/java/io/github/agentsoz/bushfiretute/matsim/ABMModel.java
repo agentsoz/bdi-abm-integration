@@ -98,7 +98,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 				bind(PAAgentManager.class).in(Singleton.class);
 				bind(EventsMonitorRegistry.class).in(Singleton.class);
 				bind(MATSimModel.class).toInstance( matsimModel );
-				bind(Scenario.class).toInstance(scenario);
 			}
 		});
 		PAAgentManager agentManager = injector.getInstance( PAAgentManager.class ) ;
@@ -110,7 +109,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 				agentManager.getAgentStateList(), this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
-		matsimModel.run(args, bdiAgentIDs, agentManager, eventsMonitors);
+		matsimModel.run(args, bdiAgentIDs, agentManager, eventsMonitors, scenario);
 	}
 
 
