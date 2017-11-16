@@ -37,7 +37,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.SearchableNetwork;
 import org.matsim.core.population.PopulationUtils;
 import org.slf4j.Logger;
@@ -46,10 +45,10 @@ import org.slf4j.LoggerFactory;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.PAAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.bdimatsim.PAAgent;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bushfiretute.BDIModel;
@@ -80,7 +79,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * 
 	 */
 	@Override
-	public void notifyBeforeCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
+	public void notifyBeforeCreatingBDICounterparts(List<String> bdiAgentsIDs) {
 	}
 
 	/**
@@ -89,11 +88,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * created. 
 	 */
 	@Override
-	public void notifyAfterCreatingBDICounterparts(List<Id<Person>> bdiAgentsIDs) {
+	public void notifyAfterCreatingBDICounterparts(List<String> bdiAgentsIDs) {
 
 		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
-		for (Id<Person> agentId : bdiAgentsIDs) {
-			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+		for (String agentId : bdiAgentsIDs) {
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
 			if (bdiAgent == null) {
 				logger.warn("No BDI counterpart for MATSim agent '" + agentId
 						+ "'. Should not happen, but will keep going");
@@ -101,7 +100,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			}
 //			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
 			
-			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( agentId ).getSelectedPlan() ;
+			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( Id.createPersonId(agentId) ).getSelectedPlan() ;
 			List<PlanElement> planElements = plan.getPlanElements();
 			Activity startAct = (Activity) planElements.get(0) ;
 
@@ -198,7 +197,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// planned (according to their MATSim plan). 
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
-		for (Id<Person> agentID : matsimModel.getBDIAgentIDs()) {
+		for (String agentID : matsimModel.getBDIAgentIDs()) {
 			PAAgent agent = matsimModel.getAgentManager().getAgent( agentID.toString() );
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Gbl.assertNotNull(bdiAgent);
