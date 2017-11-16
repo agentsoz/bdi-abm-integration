@@ -174,81 +174,51 @@ public final class ABMModel implements MATSimApplicationInterface {
 			// Assign dependent persons (to pick up before evacuating)
 			assignDependentPersons(bdiAgent);
 			
-			final PAAgentManager agentManager = this.matsimModel.getAgentManager();
-			for(String agentId1: agentManager.getBdiAgentIds() ) {
-				PAAgent agent = agentManager.getAgent( agentId1 );
-				this.registerNewBDIActions(agent.getActionHandler());
-				this.registerNewBDIPercepts(agent.getPerceptHandler());
-			}
+			registerActions();
+			
+			registerPercepts();
 
 		}
 	}
-
-	/**
-	 * This is where we register all application specific BDI actions, and/or
-	 * overwrite default ones (like {@link MATSimActionList#DRIVETO}). 
-	 * <p>
-	 * This is also the place to register action-dependent percepts. 
-	 * For instance, {@link MATSimPerceptList.ARRIVED} is conditional on the 
-	 * agent arriving at the network link in action 
-	 * {@link MATSimActionList.DRIVETO}, and so must be registered at the 
-	 * same time.
-	 * <p>
-	 * Action-independent percepts should be registered using
-	 * {@link this#registerNewBDIPercepts(MATSimPerceptHandler)}.
-	 * <p>
-	 * Note that actions/percepts are registered <strong>per agent</strong>,
-	 * i.e. handlers passed in belong to specific agents.
-	 */
-
-	@Override
-	public void registerNewBDIActions(MATSimActionHandler withHandler) {
-		// overwrite default DRIVETO
-		withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
-
-		// register new action
-		withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
-
-		// register new action
-		withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
-
-		// register new action
-		withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
+	private void registerPercepts() {
+		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+			PAAgent agent = this.matsimModel.getAgentManager().getAgent( agentId1 );
+			for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+				PAAgent agent1 = this.matsimModel.getAgentManager().getAgent( agentID.toString() );
+				EvacResident bdiAgent1 = this.bdiModel.getBDICounterpart(agentID.toString());
+				Gbl.assertNotNull(bdiAgent1);
+				Id<Link> newLinkId = ((SearchableNetwork) this.matsimModel.getScenario().getNetwork())
+						.getNearestLinkExactly(new Coord(bdiAgent1.endLocation[0], bdiAgent1.endLocation[1])).getId();
+			
+				agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
+						MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
+					@Override
+					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
+						PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
+						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+						Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
+						agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
+						return true; // unregister this handler
+					}
+				});
+			}
+		}
 	}
-
-	/**
-	 * Register any action-independent percepts here. Percepts that are
-	 * conditional on actions (such as {@link MATSimPerceptList#ARRIVED} that
-	 * is specific {@link ActionID#DRIVETO}
-	 */
-	@Override
-	public void registerNewBDIPercepts(MATSimPerceptHandler withHandler) {
-		// For all agents, register a percept for when they arrive at the safe
-		// destination. We do this here, irrespective of whether there is any
-		// BDI reasoning involved, i.e., where the percept is not conditional
-		// on a BDI (drive) action. 
-		// Such as for MATSim agents that leave as
-		// planned (according to their MATSim plan). 
-		// FIXME: add Safe arrival percept for all agents (in a for loop)
-
-		for (String agentID : matsimModel.getAgentManager().getBdiAgentIds() ) {
-			PAAgent agent = matsimModel.getAgentManager().getAgent( agentID.toString() );
-			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
-			Gbl.assertNotNull(bdiAgent);
-			Id<Link> newLinkId = ((SearchableNetwork) matsimModel.getScenario().getNetwork())
-					.getNearestLinkExactly(new Coord(bdiAgent.endLocation[0], bdiAgent.endLocation[1])).getId();
-
-			agent.getPerceptHandler().registerBDIPerceptHandler(agent.getAgentID(),
-					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
-				@Override
-				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
-					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
-					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
-					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
-					return true; // unregister this handler
-				}
-			});
+	private void registerActions() {
+		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+			PAAgent agent = this.matsimModel.getAgentManager().getAgent( agentId1 );
+			MATSimActionHandler withHandler = agent.getActionHandler();
+			// overwrite default DRIVETO
+			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(this.bdiModel, this.matsimModel));
+			
+			// register new action
+			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(this.bdiModel, this.matsimModel));
+			
+			// register new action
+			withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(this.bdiModel, this.matsimModel));
+			
+			// register new action
+			withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(this.bdiModel, this.matsimModel));
 		}
 	}
 
