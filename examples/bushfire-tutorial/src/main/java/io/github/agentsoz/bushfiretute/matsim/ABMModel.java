@@ -41,6 +41,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.SearchableNetwork;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -124,22 +125,22 @@ public final class ABMModel implements MATSimApplicationInterface {
 						+ "'. Should not happen, but will keep going");
 				continue;
 			}
-//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
-			
+			//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+
 			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( Id.createPersonId(agentId) ).getSelectedPlan() ;
 			List<PlanElement> planElements = plan.getPlanElements();
 			Activity startAct = (Activity) planElements.get(0) ;
 
 			// Assign start location
-//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
-//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+			//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
 			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, matsimModel.getScenario().getActivityFacilities(), matsimModel.getScenario().getConfig() ) ;
 			double lat = startCoord.getX() ;
 			double lon = startCoord.getY();
-			
+
 			bdiAgent.startLocation = new double[] { lat, lon };
 			// yy this is just used for finding school locations, so startLocation is a slight mis-nomer; it needs the home location. kai, nov'17
-			
+
 			bdiAgent.currentLocation = "home"; // agents always start at home
 			bdiAgent.log("is at home at location "+lon+","+lat);
 
@@ -173,35 +174,33 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 			// Assign dependent persons (to pick up before evacuating)
 			assignDependentPersons(bdiAgent);
-			
+
 			registerActions();
-			
+
 			registerPercepts();
 
 		}
 	}
 	private void registerPercepts() {
-		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
-			PAAgent agent = this.matsimModel.getAgentManager().getAgent( agentId1 );
-			for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
-				PAAgent agent1 = this.matsimModel.getAgentManager().getAgent( agentID.toString() );
-				EvacResident bdiAgent1 = this.bdiModel.getBDICounterpart(agentID.toString());
-				Gbl.assertNotNull(bdiAgent1);
-				Id<Link> newLinkId = ((SearchableNetwork) this.matsimModel.getScenario().getNetwork())
-						.getNearestLinkExactly(new Coord(bdiAgent1.endLocation[0], bdiAgent1.endLocation[1])).getId();
-			
-				agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
-						MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
-					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
-						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
-						Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
-						agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
-						return true; // unregister this handler
-					}
-				});
-			}
+		for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+			PAAgent agent1 = this.matsimModel.getAgentManager().getAgent( agentID );
+			EvacResident bdiAgent1 = this.bdiModel.getBDICounterpart(agentID.toString());
+			Gbl.assertNotNull(bdiAgent1);
+			final Coord endCoord = new Coord(bdiAgent1.endLocation[0], bdiAgent1.endLocation[1]);
+			Id<Link> newLinkId = NetworkUtils.getNearestLinkExactly(this.matsimModel.getScenario().getNetwork(),
+					endCoord).getId();
+
+			agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
+					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
+				@Override
+				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
+					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
+					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
+					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
+					return true; // unregister this handler
+				}
+			});
 		}
 	}
 	private void registerActions() {
@@ -210,13 +209,13 @@ public final class ABMModel implements MATSimApplicationInterface {
 			MATSimActionHandler withHandler = agent.getActionHandler();
 			// overwrite default DRIVETO
 			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(this.bdiModel, this.matsimModel));
-			
+
 			// register new action
 			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(this.bdiModel, this.matsimModel));
-			
+
 			// register new action
 			withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(this.bdiModel, this.matsimModel));
-			
+
 			// register new action
 			withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(this.bdiModel, this.matsimModel));
 		}
