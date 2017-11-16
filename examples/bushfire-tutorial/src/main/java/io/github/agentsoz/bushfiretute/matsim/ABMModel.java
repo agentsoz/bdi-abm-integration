@@ -46,12 +46,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.PAAgent;
+import io.github.agentsoz.bdimatsim.PAAgentManager;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
@@ -201,7 +203,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// planned (according to their MATSim plan). 
 		// FIXME: add Safe arrival percept for all agents (in a for loop)
 
-		for (String agentID : matsimModel.getBDIAgentIDs()) {
+		for (String agentID : matsimModel.getAgentManager().getBdiAgentIds() ) {
 			PAAgent agent = matsimModel.getAgentManager().getAgent( agentID.toString() );
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 			Gbl.assertNotNull(bdiAgent);
@@ -227,8 +229,15 @@ public final class ABMModel implements MATSimApplicationInterface {
 		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
 		config.network().setTimeVariantNetwork(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
-		List<String> bdiAgentIds = Utils.getBDIAgentIDs( scenario );
-		matsimModel.run(args, scenario, bdiAgentIds);
+		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
+		EventsMonitorRegistry eventsMonitors = new EventsMonitorRegistry();
+		PAAgentManager agentManager = new PAAgentManager( this.matsimModel, eventsMonitors ) ;
+		// FIXME: dsingh, 25aug16: BDI init and start should be done outside of MATSim model 
+		this.bdiModel.init(agentManager.getAgentDataContainer(),
+				agentManager.getAgentStateList(), this.matsimModel,
+				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
+
+		matsimModel.run(args, scenario, bdiAgentIDs, agentManager, eventsMonitors);
 	}
 
 	/**
