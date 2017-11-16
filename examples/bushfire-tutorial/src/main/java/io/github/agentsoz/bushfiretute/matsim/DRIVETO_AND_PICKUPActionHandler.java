@@ -90,7 +90,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = model.getAgentManager().getAgent( agentId );
+						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						Object[] params = { linkId.toString() };
 
 						agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);

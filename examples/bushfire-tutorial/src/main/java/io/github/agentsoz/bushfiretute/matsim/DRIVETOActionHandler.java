@@ -89,7 +89,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = model.getAgentManager().getAgent( agentId );
+						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 
