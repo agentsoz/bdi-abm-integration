@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.inject.Singleton;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -44,6 +46,10 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
@@ -76,6 +82,34 @@ public final class ABMModel implements MATSimApplicationInterface {
 		this.matsimModel = new MATSimModel(bdiModel);
 		matsimModel.registerPlugin(this);
 	}
+	@Override
+	public void run(String[] args) {
+		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
+		config.network().setTimeVariantNetwork(true);
+		Scenario scenario = ScenarioUtils.loadScenario(config) ;
+		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
+
+//		EventsMonitorRegistry eventsMonitors = new EventsMonitorRegistry();
+//		PAAgentManager agentManager = new PAAgentManager( this.matsimModel, eventsMonitors ) ;
+
+		Injector injector = Guice.createInjector(new AbstractModule() {
+			@Override protected void configure() {
+				bind(PAAgentManager.class).in(Singleton.class);
+				bind(EventsMonitorRegistry.class).in(Singleton.class);
+				bind(MATSimModel.class).toInstance( matsimModel );
+				bind(Scenario.class).toInstance(scenario);
+			}
+		});
+		PAAgentManager agentManager = injector.getInstance( PAAgentManager.class ) ;
+		EventsMonitorRegistry eventsMonitors = injector.getInstance( EventsMonitorRegistry.class ) ;
+		
+		this.bdiModel.init(agentManager.getAgentDataContainer(),
+				agentManager.getAgentStateList(), this.matsimModel,
+				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
+
+		matsimModel.run(args, scenario, bdiAgentIDs, agentManager, eventsMonitors);
+	}
+
 
 	/**
 	 * Use this to pre-process the BDI agents list if needed. For instance, 
@@ -222,22 +256,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 				}
 			});
 		}
-	}
-
-	@Override
-	public void run(String[] args) {
-		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
-		config.network().setTimeVariantNetwork(true);
-		Scenario scenario = ScenarioUtils.loadScenario(config) ;
-		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
-		EventsMonitorRegistry eventsMonitors = new EventsMonitorRegistry();
-		PAAgentManager agentManager = new PAAgentManager( this.matsimModel, eventsMonitors ) ;
-		// FIXME: dsingh, 25aug16: BDI init and start should be done outside of MATSim model 
-		this.bdiModel.init(agentManager.getAgentDataContainer(),
-				agentManager.getAgentStateList(), this.matsimModel,
-				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
-
-		matsimModel.run(args, scenario, bdiAgentIDs, agentManager, eventsMonitors);
 	}
 
 	/**

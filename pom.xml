@@ -197,7 +197,12 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-  </dependencies>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>4.1.0</version>
+    </dependency>  
+</dependencies>
 
 <profiles>
   <profile>
