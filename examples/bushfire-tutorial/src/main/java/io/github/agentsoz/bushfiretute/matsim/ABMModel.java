@@ -220,7 +220,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 	@Override
 	public void run(String[] args) {
-		matsimModel.run(args);
+		matsimModel.run(args, scenario);
 	}
 
 	/**
