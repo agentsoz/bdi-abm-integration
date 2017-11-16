@@ -52,6 +52,7 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.PAAgent;
+import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bushfiretute.BDIModel;
@@ -226,7 +227,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
 		config.network().setTimeVariantNetwork(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
-		matsimModel.run(args, scenario);
+		List<String> bdiAgentIds = Utils.getBDIAgentIDs( scenario );
+		matsimModel.run(args, scenario, bdiAgentIds);
 	}
 
 	/**
