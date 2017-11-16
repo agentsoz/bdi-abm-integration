@@ -30,15 +30,18 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.SearchableNetwork;
 import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,6 +223,9 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 	@Override
 	public void run(String[] args) {
+		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
+		config.network().setTimeVariantNetwork(true);
+		Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		matsimModel.run(args, scenario);
 	}
 
