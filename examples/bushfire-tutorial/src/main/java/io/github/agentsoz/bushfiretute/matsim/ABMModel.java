@@ -74,6 +74,9 @@ public final class ABMModel implements MATSimApplicationInterface {
 	}
 	@Override
 	public void run(String[] args) {
+		// This uses the MATSim scenario infrastructure for reading the agents from file.  Since we do not want to read this
+		// twice (and possibly become inconsistent), this has to contain bits of matsim initialization.
+		// yy maybe get rid of that, at the price of loading the files twice? kai, nov'17
 		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
 		config.network().setTimeVariantNetwork(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
