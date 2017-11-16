@@ -25,10 +25,7 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-
-import javax.inject.Singleton;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -42,25 +39,17 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.SearchableNetwork;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
-import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
 import io.github.agentsoz.bdimatsim.MATSimActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.MATSimPerceptHandler;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.PAAgent;
-import io.github.agentsoz.bdimatsim.PAAgentManager;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
@@ -116,8 +105,25 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 */
 	@Override
 	public void notifyAfterCreatingBDICounterparts(List<String> bdiAgentsIDs) {
+		// note: it seems better to have the for loop over the agents inside the methods, since then one can create
+		// joint infrastructure (e.g. lookup tables) before the agent loop. kai, nov'17
 
-		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
+		determineSafeCoordinatesFromMATSimPlans(bdiAgentsIDs);
+		// yyyy could now be before matsim start
+
+		assignDependentPersons(bdiAgentsIDs);
+		// yyyy could be before matsim start
+
+		registerActions();
+		// yyyy I think that this could be done before matsim start
+
+		registerPercepts();
+		// yyyy I think that this could be done before matsim start
+		
+		// yyyy which then means that this whole callback would not be necessary at all any more.
+	}
+	private void determineSafeCoordinatesFromMATSimPlans(List<String> bdiAgentsIDs) {
+//		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
 		for (String agentId : bdiAgentsIDs) {
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
 			if (bdiAgent == null) {
@@ -171,17 +177,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 					bdiAgent.log("safe location is at "+safeX+","+safeY);
 				}
 			}
-
-			// Assign dependent persons (to pick up before evacuating)
-			assignDependentPersons(bdiAgent);
-
-			registerActions();
-
-			registerPercepts();
-
 		}
 	}
 	private void registerPercepts() {
+		// this is more complex than registerActions because for the percepts we need the linkIDs beforehand. kai, nov'17
+
 		for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
 			PAAgent agent1 = this.matsimModel.getAgentManager().getAgent( agentID );
 			EvacResident bdiAgent1 = this.bdiModel.getBDICounterpart(agentID.toString());
@@ -205,8 +205,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 	}
 	private void registerActions() {
 		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
-			PAAgent agent = this.matsimModel.getAgentManager().getAgent( agentId1 );
-			MATSimActionHandler withHandler = agent.getActionHandler();
+			MATSimActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
+
 			// overwrite default DRIVETO
 			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(this.bdiModel, this.matsimModel));
 
@@ -240,39 +240,42 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * 
 	 * @param bdiAgent
 	 */
-	private static void assignDependentPersons(EvacResident bdiAgent) {
-		if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
-			double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
-			pDependents = Util.normalise(pDependents);
-			Random random = Global.getRandom();
+	private void assignDependentPersons(List<String> bdiAgentsIDs) {
+		for (String agentId : bdiAgentsIDs) {
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
+			if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
+				double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
+				pDependents = Util.normalise(pDependents);
+				Random random = Global.getRandom();
 
-			if (random.nextDouble() < pDependents[0]) {
-				// Allocate dependent children
-				ScenarioTwoData.agentsWithKids++;
-				double[] sclCords = Config.getRandomSchoolCoords(bdiAgent.getId(),bdiAgent.startLocation);
-				if(sclCords != null) { 
-					bdiAgent.kidsNeedPickUp = true;  
-					bdiAgent.schoolLocation = sclCords;
+				if (random.nextDouble() < pDependents[0]) {
+					// Allocate dependent children
+					ScenarioTwoData.agentsWithKids++;
+					double[] sclCords = Config.getRandomSchoolCoords(bdiAgent.getId(),bdiAgent.startLocation);
+					if(sclCords != null) { 
+						bdiAgent.kidsNeedPickUp = true;  
+						bdiAgent.schoolLocation = sclCords;
+						bdiAgent.prepared_to_evac_flag = false;
+						ScenarioTwoData.totPickups++;
+						bdiAgent.log("has children at school coords " 
+								+ sclCords[0] + "," +sclCords[1]);
+					}
+					else{
+						bdiAgent.log("has children but there are no schools nearby");
+						ScenarioTwoData.agentsWithKidsNoSchools++;
+					}
+				}
+				if (random.nextDouble() < pDependents[1]) {
+					// Allocate dependent adults
+					ScenarioTwoData.agentsWithRels++;
+					bdiAgent.relsNeedPickUp = true;
 					bdiAgent.prepared_to_evac_flag = false;
 					ScenarioTwoData.totPickups++;
-					bdiAgent.log("has children at school coords " 
-							+ sclCords[0] + "," +sclCords[1]);
+					bdiAgent.log("has relatives");
 				}
-				else{
-					bdiAgent.log("has children but there are no schools nearby");
-					ScenarioTwoData.agentsWithKidsNoSchools++;
+				if (!bdiAgent.relsNeedPickUp && !bdiAgent.kidsNeedPickUp) {
+					bdiAgent.log("has neither children nor relatives");
 				}
-			}
-			if (random.nextDouble() < pDependents[1]) {
-				// Allocate dependent adults
-				ScenarioTwoData.agentsWithRels++;
-				bdiAgent.relsNeedPickUp = true;
-				bdiAgent.prepared_to_evac_flag = false;
-				ScenarioTwoData.totPickups++;
-				bdiAgent.log("has relatives");
-			}
-			if (!bdiAgent.relsNeedPickUp && !bdiAgent.kidsNeedPickUp) {
-				bdiAgent.log("has neither children nor relatives");
 			}
 		}
 	}
