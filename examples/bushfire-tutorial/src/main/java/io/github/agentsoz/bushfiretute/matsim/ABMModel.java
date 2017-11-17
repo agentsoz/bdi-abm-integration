@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
-import io.github.agentsoz.bdimatsim.MATSimActionHandler;
+import io.github.agentsoz.bdimatsim.ActionHandler;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
@@ -211,7 +211,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 	private void registerActions() {
 		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
 			
-			MATSimActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
+			ActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
 
 			// overwrite default DRIVETO
 			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(this.bdiModel, this.matsimModel));
