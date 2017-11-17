@@ -27,6 +27,7 @@ package io.github.agentsoz.bushfiretute.matsim;
 import java.util.List;
 import java.util.Random;
 
+import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -81,6 +82,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		config.network().setTimeVariantNetwork(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
+		System.err.println("bdiAgentIDs=" + bdiAgentIDs.toString());
 
 		this.bdiModel.init(matsimModel.getAgentManager().getAgentDataContainer(),
 				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
@@ -208,6 +210,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 	}
 	private void registerActions() {
 		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+			
 			MATSimActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
 
 			// overwrite default DRIVETO
