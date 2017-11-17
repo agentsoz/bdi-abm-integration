@@ -41,13 +41,13 @@ import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimActionList;
-import io.github.agentsoz.bdimatsim.PAAgent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
+import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
 
 final class DRIVETOActionHandler implements BDIActionHandler {
