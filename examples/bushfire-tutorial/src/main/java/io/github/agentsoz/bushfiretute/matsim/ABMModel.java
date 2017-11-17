@@ -82,7 +82,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 		config.network().setTimeVariantNetwork(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
-		System.err.println("bdiAgentIDs=" + bdiAgentIDs.toString());
 
 		this.bdiModel.init(matsimModel.getAgentManager().getAgentDataContainer(),
 				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
@@ -90,18 +89,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 		matsimModel.run(args, bdiAgentIDs, scenario);
 	}
-
-
-//	/**
-//	 * Use this to pre-process the BDI agents list if needed. For instance, 
-//	 * tasks like adding/removing specific agents, or renaming agents IDs, 
-//	 * should be done here. This function is called just prior to the
-//	 * BDI agent counterparts in MATSim being created.
-//	 * 
-//	 */
-//	@Override
-//	public void notifyBeforeCreatingBDICounterparts(List<String> bdiAgentsIDs) {
-//	}
 
 	/**
 	 * Initialise the BDI agents with any application specific data. This 
