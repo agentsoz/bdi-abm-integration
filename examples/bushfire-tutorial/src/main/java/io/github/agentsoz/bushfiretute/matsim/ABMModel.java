@@ -68,30 +68,24 @@ public final class ABMModel implements MATSimApplicationInterface {
 	private final MATSimModel matsimModel;
 	private final BDIModel bdiModel;
 
-	public ABMModel(BDIModel bdiModel) {
+	public ABMModel(BDIModel bdiModel, String[] args) {
 		this.bdiModel = bdiModel;
-		this.matsimModel = new MATSimModel(bdiModel);
+		this.matsimModel = new MATSimModel(bdiModel, args);
 		matsimModel.registerPlugin(this);
 	}
 	@Override
-	public void run(String[] args) {
-		// This uses the MATSim scenario infrastructure for reading the agents from file.  Since we do not want to read this
-		// twice (and possibly become inconsistent), this has to contain bits of matsim initialization.
-		// yy maybe get rid of that, at the price of loading the files twice? kai, nov'17
-		org.matsim.core.config.Config config = ConfigUtils.loadConfig( args[0] ) ;
-		config.network().setTimeVariantNetwork(true);
-		Scenario scenario = ScenarioUtils.loadScenario(config) ;
-		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
+	public void run() {
+		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( matsimModel.getScenario() );
 
 		this.bdiModel.init(matsimModel.getAgentManager().getAgentDataContainer(),
 				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
-		determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, scenario);
+		determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, matsimModel.getScenario() );
 
 		assignDependentPersons(bdiAgentIDs, bdiModel);
 
-		matsimModel.run(args, bdiAgentIDs, scenario);
+		matsimModel.run( bdiAgentIDs);
 	}
 
 	/**

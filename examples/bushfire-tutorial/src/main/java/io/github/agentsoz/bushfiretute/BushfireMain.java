@@ -86,7 +86,7 @@ public class BushfireMain {
 			config.add( matsimOutputDirectory ) ;
 		}
 		logger.info( config.toString() );
-		new ABMModel(bdiModel).run( config.toArray( new String[config.size()] ) ) ;
+		new ABMModel(bdiModel,config.toArray( new String[config.size()] )).run( )  ;
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
