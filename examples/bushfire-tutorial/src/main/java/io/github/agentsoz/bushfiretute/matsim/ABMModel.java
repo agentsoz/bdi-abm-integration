@@ -89,6 +89,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 		determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, scenario);
 
+		assignDependentPersons(bdiAgentIDs, bdiModel);
+
 		matsimModel.run(args, bdiAgentIDs, scenario);
 	}
 
@@ -102,15 +104,10 @@ public final class ABMModel implements MATSimApplicationInterface {
 		// note: it seems better to have the for loop over the agents inside the methods, since then one can create
 		// joint infrastructure (e.g. lookup tables) before the agent loop. kai, nov'17
 
-		// yyyy could now be before matsim start
-
-		assignDependentPersons(bdiAgentIDs);
-		// yyyy could be before matsim start
-
-		registerActions();
+		registerActionsWithAgents();
 		// yyyy I think that this could be done before matsim start
 
-		registerPercepts();
+		registerPerceptsWithAgents();
 		// yyyy I think that this could be done before matsim start
 		
 		// yyyy which then means that this whole callback would not be necessary at all any more.
@@ -172,7 +169,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			}
 		}
 	}
-	private void registerPercepts() {
+	private void registerPerceptsWithAgents() {
 		// this is more complex than registerActions because for the percepts we need the linkIDs beforehand. kai, nov'17
 
 		for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
@@ -196,7 +193,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 			});
 		}
 	}
-	private void registerActions() {
+	private void registerActionsWithAgents() {
 		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
 			
 			ActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
@@ -218,23 +215,11 @@ public final class ABMModel implements MATSimApplicationInterface {
 	/**
 	 * Randomly assign dependent persons to be picked up. Uses 
 	 * Pk ({@link Config#getProportionWithKids()}) and 
-	 * Pr ({@link Config#getProportionWithRelatives()) probabilities to calculate
-	 * normalised probabilities, and then allocate kids and/or relatives
-	 * with those probabilities. If both input probabilities are non-zero,
-	 * then all four allocations are possible (no kids or relatives, one or the
-	 * other, both kids and relatives). 
-	 * <p>
-	 * Some examples:
-	 * <ul> 
-	 * <li> Pk=0.0, Pr=0.0: results in always no kids or relatives</li>
-	 * <li> Pk=0.0, 0.0&lt;Pr&lt;1.0: results in always relatives</li>
-	 * <li> 0.0&lt;Pk&lt;1.0, Pr=0.0: results in always kids</li>
-	 * <li> 0.0&lt;Pk&lt;1.0, 0.0&lt;Pr&lt;1.0: results in all four combinations of kids and relatives</li>
-	 * </ul>
-	 * 
+	 * Pr ({@link
+	 * @param bdiModel TODO
 	 * @param bdiAgent
 	 */
-	private void assignDependentPersons(List<String> bdiAgentsIDs) {
+	private static void assignDependentPersons(List<String> bdiAgentsIDs, BDIModel bdiModel) {
 		for (String agentId : bdiAgentsIDs) {
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
 			if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
