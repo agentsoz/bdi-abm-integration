@@ -87,6 +87,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
+		determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, scenario);
+
 		matsimModel.run(args, bdiAgentIDs, scenario);
 	}
 
@@ -96,14 +98,13 @@ public final class ABMModel implements MATSimApplicationInterface {
 	 * created. 
 	 */
 	@Override
-	public void notifyAfterCreatingBDICounterparts(List<String> bdiAgentsIDs) {
+	public void notifyAfterCreatingBDICounterparts(List<String> bdiAgentIDs) {
 		// note: it seems better to have the for loop over the agents inside the methods, since then one can create
 		// joint infrastructure (e.g. lookup tables) before the agent loop. kai, nov'17
 
-		determineSafeCoordinatesFromMATSimPlans(bdiAgentsIDs);
 		// yyyy could now be before matsim start
 
-		assignDependentPersons(bdiAgentsIDs);
+		assignDependentPersons(bdiAgentIDs);
 		// yyyy could be before matsim start
 
 		registerActions();
@@ -114,7 +115,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 		
 		// yyyy which then means that this whole callback would not be necessary at all any more.
 	}
-	private void determineSafeCoordinatesFromMATSimPlans(List<String> bdiAgentsIDs) {
+	private static void determineSafeCoordinatesFromMATSimPlans(List<String> bdiAgentsIDs, BDIModel bdiModel, Scenario scenario) {
 //		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
 		for (String agentId : bdiAgentsIDs) {
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
@@ -125,14 +126,14 @@ public final class ABMModel implements MATSimApplicationInterface {
 			}
 			//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
 
-			Plan plan = matsimModel.getScenario().getPopulation().getPersons().get( Id.createPersonId(agentId) ).getSelectedPlan() ;
+			Plan plan = scenario.getPopulation().getPersons().get( Id.createPersonId(agentId) ).getSelectedPlan() ;
 			List<PlanElement> planElements = plan.getPlanElements();
 			Activity startAct = (Activity) planElements.get(0) ;
 
 			// Assign start location
 			//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
 			//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
-			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, matsimModel.getScenario().getActivityFacilities(), matsimModel.getScenario().getConfig() ) ;
+			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, scenario.getActivityFacilities(), scenario.getConfig() ) ;
 			double lat = startCoord.getX() ;
 			double lon = startCoord.getY();
 
