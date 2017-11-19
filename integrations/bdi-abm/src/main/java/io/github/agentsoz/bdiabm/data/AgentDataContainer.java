@@ -52,8 +52,10 @@ public class AgentDataContainer extends LinkedHashMap <String, ActionPerceptCont
 	 * @return
 	 * ActionPerceptContainer
 	 */
-	public ActionPerceptContainer getOrCreate (String agentID)
-	{
+	public ActionPerceptContainer getOrCreate (String agentID) {
+		// yy I think that one should remove the level of ActionPerceptContainer and have "getOrCreatePerceptContent" & 
+		// "getOrCreateActionContent" directly.  kai, nov'17
+		
 		ActionPerceptContainer container = this.get(agentID);
 		
 		if (container == null)

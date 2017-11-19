@@ -85,7 +85,7 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 		assignDependentPersons(bdiAgentIDs, bdiModel);
 
-		matsimModel.run( bdiAgentIDs);
+		matsimModel.init( bdiAgentIDs);
 	}
 
 	/**
