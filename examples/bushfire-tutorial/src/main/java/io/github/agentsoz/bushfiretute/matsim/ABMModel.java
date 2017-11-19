@@ -86,6 +86,17 @@ public final class ABMModel implements MATSimApplicationInterface {
 		assignDependentPersons(bdiAgentIDs, bdiModel);
 
 		matsimModel.init( bdiAgentIDs);
+		
+		while ( true ) {
+			this.bdiModel.takeControl( matsimModel.getAgentManager().getAgentDataContainer() );
+			this.matsimModel.takeControl(matsimModel.getAgentManager().getAgentDataContainer());
+			if( this.matsimModel.isFinished() ) {
+				break ;
+			}
+		}
+		
+		this.matsimModel.finish() ;
+		this.bdiModel.finish();
 	}
 
 	/**
