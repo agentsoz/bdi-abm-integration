@@ -125,38 +125,28 @@ public abstract class JillModel implements BDIServerInterface {
 		boolean global = false;
 		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
-		try {
-			PerceptContainer gPC = agentDataContainer.get(BROADCAST)
-					.getPerceptContainer();
-			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
-					new String[0]);
-			for (int g = 0; g < globalPerceptsArray.length; g++) {
-				String globalPID = globalPerceptsArray[g];
-				Object gaParameters = gPC.read(globalPID);
-				globalPercepts.put(globalPID, gaParameters);
-				global = true;
-			}
-		}
-		// no global agent
-		catch (NullPointerException npe) {
-			global = false;
-		}
-		// post global percepts to all agents - this was moved out of the below
-		// while loop
-		// since not all agents will have an ActionPerceptContainer when program
-		// starts
-		if (global) {
-			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
-					.entrySet().iterator();
-			while (globalEntries.hasNext()) {
-				Map.Entry<String, Object> gme = globalEntries.next();
-				String gPerceptID = gme.getKey();
-				Object gParameters = gme.getValue();
-				for (int i = 0; i < GlobalState.agents.size(); i++) {
-					getAgent(i).handlePercept(gPerceptID, gParameters);
-				}
-			}
-		}
+        if (agentDataContainer.containsKey(BROADCAST)) {
+          PerceptContainer gPC = agentDataContainer.get(BROADCAST)
+                  .getPerceptContainer();
+          String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
+                  new String[0]);
+          for (int g = 0; g < globalPerceptsArray.length; g++) {
+              String globalPID = globalPerceptsArray[g];
+              Object gaParameters = gPC.read(globalPID);
+              globalPercepts.put(globalPID, gaParameters);
+              global = true;
+          }
+          Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
+              .entrySet().iterator();
+          while (globalEntries.hasNext()) {
+            Map.Entry<String, Object> gme = globalEntries.next();
+            String gPerceptID = gme.getKey();
+            Object gParameters = gme.getValue();
+            for (int i = 0; i < GlobalState.agents.size(); i++) {
+              getAgent(i).handlePercept(gPerceptID, gParameters);
+            }
+          }
+        }
 
 		Iterator<Entry<String, ActionPerceptContainer>> i = agentDataContainer
 				.entrySet().iterator();
