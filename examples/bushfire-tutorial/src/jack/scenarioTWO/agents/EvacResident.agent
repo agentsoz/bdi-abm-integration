@@ -11,6 +11,7 @@ import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.abmjack.env.GenericActions;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
 import io.github.agentsoz.abmjack.env.UpdateAction;
+import io.github.agentsoz.util.Global;
 
 import io.github.agentsoz.util.Global;
 

@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.abmjack.JACKModel;
-import io.github.agentsoz.abmjack.shared.GlobalTime;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
