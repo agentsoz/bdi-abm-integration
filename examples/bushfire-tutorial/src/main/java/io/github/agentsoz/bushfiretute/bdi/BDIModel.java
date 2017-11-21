@@ -40,6 +40,7 @@ import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
+import io.github.agentsoz.util.Global;
 import aos.jack.jak.agent.Agent;
 //import test.EvacResident;
 import scenarioTWO.agents.EvacResident;
@@ -69,15 +70,15 @@ public class BDIModel extends JACKModel {  //DataSource
 	public void takeControl(AgentDataContainer adc) {
 
 		// on receiving the fire alert, insert a global percept into the agent data containers
-		if (GlobalTime.time.getTime() == 4.0 && !firePerceptAdded ) {
+		if (Global.getTime() == 4.0 && !firePerceptAdded ) {
 			adc.getOrCreate("global").getPerceptContainer()
 					.put(DataTypes.FIREALERT, "bushfire started");
-			logger.debug("broadcasted fire alert global percept at timestep : {}",GlobalTime.time.getTime());
+			logger.debug("broadcasted fire alert global percept at timestep : {}",Global.getTime());
 			firePerceptAdded = true;
 
 		}
 		
-		GlobalTime.increaseNewTime();
+		//GlobalTime.increaseNewTime();
 		super.takeControl(adc);
 		
 		checkDepartureFromHome(adc);
@@ -215,7 +216,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			resident.fireResponse = true;
 		}
 		else if (perceptID.equals(DataTypes.LEAVENOW)) {
-			resident.log("recieved percept to leave now at time " + GlobalTime.time.getTime());
+			resident.log("recieved percept to leave now at time " + Global.getTime());
 			resident.postLeaveGoal();
 			resident.waitAtHomeFlag = false;
 		}

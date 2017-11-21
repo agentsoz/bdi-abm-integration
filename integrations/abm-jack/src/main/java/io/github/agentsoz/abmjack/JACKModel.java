@@ -48,6 +48,8 @@ import io.github.agentsoz.bdiabm.data.AgentState;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.bdiabm.data.PerceptContainer;
 
+import io.github.agentsoz.util.Global;
+
 /**
  * 
  * @author Alex Lutman, Oscar Francis
@@ -129,7 +131,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 		logger.trace("Received {}", agentDataContainer);
 		nextContainer = agentDataContainer;
-		GlobalTime.updateTime();
+		Global.updateTime();
 
 		// Pull apart data container
 		// Perform actions
