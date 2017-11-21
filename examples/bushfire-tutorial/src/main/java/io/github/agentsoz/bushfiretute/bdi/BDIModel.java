@@ -1,6 +1,5 @@
 package io.github.agentsoz.bushfiretute.bdi;
 
-import java.util.Iterator;
 import java.util.Map.Entry;
 
 /*
@@ -28,6 +27,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aos.jack.jak.agent.Agent;
 import io.github.agentsoz.abmjack.JACKModel;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
@@ -40,7 +40,6 @@ import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import io.github.agentsoz.util.Global;
-import aos.jack.jak.agent.Agent;
 //import test.EvacResident;
 import scenarioTWO.agents.EvacResident;
 
