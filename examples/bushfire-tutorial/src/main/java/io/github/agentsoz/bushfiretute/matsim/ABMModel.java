@@ -27,7 +27,6 @@ package io.github.agentsoz.bushfiretute.matsim;
 import java.util.List;
 import java.util.Random;
 
-import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -37,11 +36,9 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +48,6 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.MATSimPerceptList;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
-import io.github.agentsoz.bdimatsim.app.MATSimApplicationInterface;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
@@ -62,7 +58,7 @@ import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.Global;
 import scenarioTWO.agents.EvacResident;
 
-public final class ABMModel implements MATSimApplicationInterface {
+public final class ABMModel  {
 	static final Logger logger = LoggerFactory.getLogger("");
 
 	private final MATSimModel matsimModel;
@@ -70,10 +66,8 @@ public final class ABMModel implements MATSimApplicationInterface {
 
 	public ABMModel(BDIModel bdiModel, String[] args) {
 		this.bdiModel = bdiModel;
-		this.matsimModel = new MATSimModel(bdiModel, args);
-		matsimModel.registerPlugin(this);
+		this.matsimModel = new MATSimModel(args);
 	}
-	@Override
 	public void run() {
 		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( matsimModel.getScenario() );
 
@@ -81,11 +75,15 @@ public final class ABMModel implements MATSimApplicationInterface {
 				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
+		matsimModel.init( bdiAgentIDs);
+		
 		determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, matsimModel.getScenario() );
 
 		assignDependentPersons(bdiAgentIDs, bdiModel);
 
-		matsimModel.init( bdiAgentIDs);
+		registerActionsWithAgents(bdiModel, matsimModel);
+
+		registerPerceptsWithAgents(bdiModel, matsimModel);
 		
 		while ( true ) {
 			this.bdiModel.takeControl( matsimModel.getAgentManager().getAgentDataContainer() );
@@ -100,24 +98,6 @@ public final class ABMModel implements MATSimApplicationInterface {
 		this.bdiModel.finish();
 	}
 
-	/**
-	 * Initialise the BDI agents with any application specific data. This 
-	 * function is just immediately after the MATSim counterparts have been 
-	 * created. 
-	 */
-	@Override
-	public void notifyAfterCreatingBDICounterparts(List<String> bdiAgentIDs) {
-		// note: it seems better to have the for loop over the agents inside the methods, since then one can create
-		// joint infrastructure (e.g. lookup tables) before the agent loop. kai, nov'17
-
-		registerActionsWithAgents();
-		// yyyy I think that this could be done before matsim start
-
-		registerPerceptsWithAgents();
-		// yyyy I think that this could be done before matsim start
-		
-		// yyyy which then means that this whole callback would not be necessary at all any more.
-	}
 	private static void determineSafeCoordinatesFromMATSimPlans(List<String> bdiAgentsIDs, BDIModel bdiModel, Scenario scenario) {
 //		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
 		for (String agentId : bdiAgentsIDs) {
@@ -175,15 +155,15 @@ public final class ABMModel implements MATSimApplicationInterface {
 			}
 		}
 	}
-	private void registerPerceptsWithAgents() {
+	private static void registerPerceptsWithAgents ( final BDIModel bdiModel, final MATSimModel matsimModel ) {
 		// this is more complex than registerActions because for the percepts we need the linkIDs beforehand. kai, nov'17
 
-		for (String agentID : this.matsimModel.getAgentManager().getBdiAgentIds() ) {
-			PAAgent agent1 = this.matsimModel.getAgentManager().getAgent( agentID );
-			EvacResident bdiAgent1 = this.bdiModel.getBDICounterpart(agentID.toString());
+		for (String agentID : matsimModel.getAgentManager().getBdiAgentIds() ) {
+			PAAgent agent1 = matsimModel.getAgentManager().getAgent( agentID );
+			EvacResident bdiAgent1 = bdiModel.getBDICounterpart(agentID.toString());
 			Gbl.assertNotNull(bdiAgent1);
 			final Coord endCoord = new Coord(bdiAgent1.endLocation[0], bdiAgent1.endLocation[1]);
-			Id<Link> newLinkId = NetworkUtils.getNearestLinkExactly(this.matsimModel.getScenario().getNetwork(),
+			Id<Link> newLinkId = NetworkUtils.getNearestLinkExactly(matsimModel.getScenario().getNetwork(),
 					endCoord).getId();
 
 			agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
@@ -199,22 +179,22 @@ public final class ABMModel implements MATSimApplicationInterface {
 			});
 		}
 	}
-	private void registerActionsWithAgents() {
-		for(String agentId1: this.matsimModel.getAgentManager().getBdiAgentIds() ) {
+	private static void registerActionsWithAgents(final BDIModel bdiModel, final MATSimModel matsimModel ) {
+		for(String agentId1: matsimModel.getAgentManager().getBdiAgentIds() ) {
 			
-			ActionHandler withHandler = this.matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
+			ActionHandler withHandler = matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
 
 			// overwrite default DRIVETO
-			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(this.bdiModel, this.matsimModel));
+			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(this.bdiModel, this.matsimModel));
+			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(this.bdiModel, this.matsimModel));
+			withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(this.bdiModel, this.matsimModel));
+			withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
 		}
 	}
 
