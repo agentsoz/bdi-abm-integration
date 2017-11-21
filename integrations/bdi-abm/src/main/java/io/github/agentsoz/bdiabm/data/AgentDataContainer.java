@@ -24,7 +24,10 @@ package io.github.agentsoz.bdiabm.data;
 
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 /**
  * 2/20/2013
  * AgentDataContainer is a Map of 
@@ -37,14 +40,20 @@ import java.util.LinkedHashMap;
  * @author Andreas
  *
  */
-public class AgentDataContainer extends LinkedHashMap <String, ActionPerceptContainer> implements Serializable
+public class AgentDataContainer implements Serializable
 {	 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3486877478758677517L;
-	
 
+	Map <String, ActionPerceptContainer> map;
+
+	public AgentDataContainer() {
+	  map = Collections.synchronizedMap(new LinkedHashMap <String, ActionPerceptContainer>());
+	}
+	
+	
 	/**
 	 * Get an actionPerceptContainer, if it did not exist then
 	 * create a new data.
@@ -56,25 +65,20 @@ public class AgentDataContainer extends LinkedHashMap <String, ActionPerceptCont
 		// yy I think that one should remove the level of ActionPerceptContainer and have "getOrCreatePerceptContent" & 
 		// "getOrCreateActionContent" directly.  kai, nov'17
 		
-		ActionPerceptContainer container = this.get(agentID);
-		
-		if (container == null)
-		{
-			container = new ActionPerceptContainer();
-			this.put(agentID, container);
-		}
-		
-		return container;
+	  if (!map.containsKey(agentID)) {
+	    map.put(agentID, new ActionPerceptContainer());
+	  }
+	  return map.get(agentID);
 	}
 	
 	@Override
 	public String toString() {
-		if (isEmpty()) {
+		if (map.isEmpty()) {
 			return "{}";
 		}
 		String s = "{";
-		for (String key : this.keySet()) {
-			ActionPerceptContainer apc = this.get(key);
+		for (String key : map.keySet()) {
+			ActionPerceptContainer apc = map.get(key);
 			if (!apc.isEmpty()) {
 				s += "\n\""+key+"\":" + apc.toString();
 			}
@@ -83,5 +87,33 @@ public class AgentDataContainer extends LinkedHashMap <String, ActionPerceptCont
 		return s;
 		//return (isEmpty()) ? "{}" : new Gson().toJson(this);
 	}
+
+
+  public boolean isEmpty() {
+    return map.isEmpty();
+  }
+
+  public PerceptContainer getPerceptContainer(String agentID) {
+    if (map.containsKey(agentID)) {
+      return map.get(agentID).getPerceptContainer();
+    }
+    return null;
+  }
+  
+  public ActionContainer getActionContainer(String agentID) {
+    if (map.containsKey(agentID)) {
+      return map.get(agentID).getActionContainer();
+    }
+    return null;
+  }
+  
+  public Iterator<String> getAgentIDs() {
+    return map.keySet().iterator();
+  }
+
+
+  public ActionPerceptContainer remove(String agentID) {
+    return map.remove(agentID);
+  }
 
 }

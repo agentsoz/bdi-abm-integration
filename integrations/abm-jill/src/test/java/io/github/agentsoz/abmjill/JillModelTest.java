@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.junit.After;
@@ -158,7 +159,9 @@ public class JillModelTest {
 		@Override
 		public void takeControl(AgentDataContainer adc) {
 			Log.trace("Stub ABM Received " + adc);
-			for (String agentId : adc.keySet()) {
+	        Iterator<String> i = adc.getAgentIDs();
+	        while (i.hasNext()) {
+	            String agentId = i.next();
 				ActionContainer ac = adc.getOrCreate(agentId).getActionContainer();
 				ActionContent acc = ac.get("TESTACTION");
 				if (acc != null) {

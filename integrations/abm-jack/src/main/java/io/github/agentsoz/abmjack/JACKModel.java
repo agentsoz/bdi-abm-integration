@@ -143,75 +143,37 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 			return;
 		}
 		
-		boolean global = false;
 		Map<String, Object> globalPercepts = new LinkedHashMap<>();
 		// need deterministically sorted map for testing.  kai, oct'17
 
-		try {
-			PerceptContainer gPC = agentDataContainer.get(GLOBAL_AGENT)
-					.getPerceptContainer();
-			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
-					new String[0]);
-
+        PerceptContainer gPC = agentDataContainer.getPerceptContainer(GLOBAL_AGENT);
+        if (gPC != null) {
+			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
 			for (int g = 0; g < globalPerceptsArray.length; g++) {
-
 				String globalPID = globalPerceptsArray[g];
 				Object gaParameters = gPC.read(globalPID);
 				globalPercepts.put(globalPID, gaParameters);
-				global = true;
 			}
-		}
-		// no global agent
-		catch (NullPointerException npe) {
-			global = false;
-		}
-		// post global percepts to all agents - this was moved out of the below
-		// while loop
-		// since not all agents will have an ActionPerceptContainer when program
-		// starts
-		if (global) {
-
-			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts .entrySet().iterator();
-
-			while (globalEntries.hasNext()) {
-
-				Map.Entry<String, Object> gme = globalEntries.next();
-				String gPerceptID = gme.getKey();
-				Object gParameters = gme.getValue();
-				
-//				List<String> agentIds = new ArrayList<String>(agents.keySet());
-//
-//				Comparator<String> agentIDSort = new Comparator<String>() {
-//					@Override
-//					public int compare(String o1, String o2) {
-//						int id1 = Integer.parseInt(o1);
-//						int id2 = Integer.parseInt(o2);
-//
-//						return id1 - id2;
-//					}
-//				};
-//
-//				Collections.sort(agentIds, agentIDSort);
-//				for (String agentID : agentIds) {
-//					Agent agent = agents.get(agentID);
-				// (agents is a deterministic data structure, and I don't see why it needs to be sorted.  kai, oct'17)
-				
-				for( Agent agent : agents.values() ) {
-					handlePercept(agent, gPerceptID, gParameters);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
-				}
-			}
+            Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts .entrySet().iterator();
+            while (globalEntries.hasNext()) {
+                Map.Entry<String, Object> gme = globalEntries.next();
+                String gPerceptID = gme.getKey();
+                Object gParameters = gme.getValue();
+                for( Agent agent : agents.values() ) {
+                    handlePercept(agent, gPerceptID, gParameters);
+                    waitUntilIdle(); // yyyyyy try to get code deterministic
+                }
+            }
 		}
 
-		Iterator<Entry<String, ActionPerceptContainer>> i = agentDataContainer
-				.entrySet().iterator();
-		// For each ActionPercept (one for each agent)
-		while (i.hasNext()) {
-			Map.Entry<String, ActionPerceptContainer> entry = i .next();
-			if (entry.getKey().equals(GLOBAL_AGENT)) {
+        Iterator<String> i = agentDataContainer.getAgentIDs();
+        // For each ActionPercept (one for each agent)
+        while (i.hasNext()) {
+            String agentID = i.next();
+			if (agentID.equals(GLOBAL_AGENT)) {
 				continue;
 			}
-			ActionPerceptContainer apc = entry.getValue();
+			ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -222,7 +184,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
-					handlePercept(agents.get(entry.getKey()), perceptID, parameters);
+					handlePercept(agents.get(agentID), perceptID, parameters);
 					waitUntilIdle(); // yyyyyy try to get code deterministic
 				}
 				// now remove the percepts
@@ -239,7 +201,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					State state = State.valueOf(ac.get(actionID).getState()
 							.toString());
 					Object[] params = ac.get(actionID).getParameters();
-					updateAction(agents.get(entry.getKey()), actionID, state,
+					updateAction(agents.get(agentID), actionID, state,
 							params);
 					waitUntilIdle(); // yyyyyy try to get code deterministic
 

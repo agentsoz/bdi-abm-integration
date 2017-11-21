@@ -126,11 +126,9 @@ public abstract class JillModel implements BDIServerInterface {
 		boolean global = false;
 		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
-        if (agentDataContainer.containsKey(BROADCAST)) {
-          PerceptContainer gPC = agentDataContainer.get(BROADCAST)
-                  .getPerceptContainer();
-          String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
-                  new String[0]);
+        PerceptContainer gPC = agentDataContainer.getPerceptContainer(BROADCAST);
+        if (gPC != null) {
+          String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
           for (int g = 0; g < globalPerceptsArray.length; g++) {
               String globalPID = globalPerceptsArray[g];
               Object gaParameters = gPC.read(globalPID);
@@ -149,16 +147,14 @@ public abstract class JillModel implements BDIServerInterface {
           }
         }
 
-		Iterator<Entry<String, ActionPerceptContainer>> i = agentDataContainer
-				.entrySet().iterator();
+		Iterator<String> i = agentDataContainer.getAgentIDs();
 		// For each ActionPercept (one for each agent)
 		while (i.hasNext()) {
-			Map.Entry<String, ActionPerceptContainer> entry = (Map.Entry<String, ActionPerceptContainer>) i
-					.next();
-			if (entry.getKey().equals(BROADCAST)) {
+			String agentID = i.next();
+			if (agentID.equals(BROADCAST)) {
 				continue;
 			}
-			ActionPerceptContainer apc = entry.getValue();
+			ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -169,11 +165,11 @@ public abstract class JillModel implements BDIServerInterface {
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
 					try {
-						int id = Integer.parseInt(entry.getKey());
+						int id = Integer.parseInt(agentID);
 						getAgent(id).handlePercept(perceptID, parameters);
 					} catch (Exception e) {
 						Log.error("While sending percept to Agent "
-								+ entry.getKey() + ": " + e.getMessage());
+								+ agentID + ": " + e.getMessage());
 					}
 				}
 				// now remove the percepts
@@ -193,11 +189,11 @@ public abstract class JillModel implements BDIServerInterface {
 					Object[] params = ac.get(actionID).getParameters();
 					ActionContent content = new ActionContent(params, state, actionID);
 					try {
-						int id = Integer.parseInt(entry.getKey());
+						int id = Integer.parseInt(agentID);
 						getAgent(id).updateAction(actionID, content);
 					} catch (Exception e) {
 						Log.error("While updating action status for Agent "
-								+ entry.getKey() + ": " + e.getMessage());
+								+ agentID + ": " + e.getMessage());
 					}
 
 					// remove completed states
