@@ -36,7 +36,7 @@ public class Global {
 	// all application code should use this same instance of Random
 	private static final Random random = new Random();
 
-	private static double time;
+	private static long time;
 	    
 	private Global() {} // do not instantiate
 
@@ -45,7 +45,7 @@ public class Global {
       time++;
     }
   
-    public static double getTime() {
+    public static long getTime() {
       return time;
     }
 

@@ -13,4 +13,7 @@ quick:
 
 normal:
 	cd ../matsim ; make matsim-quick
-	mvn clean install
+	mvn clean install ${QUICK}
+	cd integrations/abm-jack ; mvn clean install
+	cd examples/bushfire-tutorial ; mvn clean install
+	mvn test
