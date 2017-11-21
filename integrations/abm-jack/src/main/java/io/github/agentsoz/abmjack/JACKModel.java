@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 
 import aos.jack.jak.agent.Agent;
 import io.github.agentsoz.abmjack.shared.ActionManager;
-import io.github.agentsoz.abmjack.shared.GlobalTime;
 
 /*
  * #%L
