@@ -49,11 +49,11 @@ import org.slf4j.LoggerFactory;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
-import io.github.agentsoz.bdimatsim.app.BDIActionHandler;
-import io.github.agentsoz.bdimatsim.app.BDIPerceptHandler;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.bushfiretute.shared.PerceptID;
+import io.github.agentsoz.nonmatsim.BDIActionHandler;
+import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
 
