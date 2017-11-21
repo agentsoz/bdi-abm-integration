@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -175,7 +176,9 @@ public class AuctioneerModel extends GAMSModel {
 
 		// Process the bids (as well as set the BID BDI-actions to PASSED)
 		ArrayList<String> bids = new ArrayList<String>();
-		for (String agentId : adc.keySet()) {
+        Iterator<String> i = adc.getAgentIDs();
+        while (i.hasNext()) {
+            String agentId = i.next();
 			ActionContainer ac = adc.getOrCreate(agentId).getActionContainer();
 			ActionContent acc = ac.get(Global.actions.BID.toString());
 			if (acc != null) {
