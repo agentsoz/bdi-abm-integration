@@ -135,8 +135,8 @@
 
 	  <!--execute each test in separate JVM (slow, but otherwise it does not-->
 	  <!--work, and no problem as long as there are only integration tests):-->
-	  <!--<forkMode>always</forkMode>-->
-	  <!--formMode is deprecated; replaced by following options:-->
+	  <forkMode>always</forkMode>
+	  <!--formMode is deprecated; replaced since 2.14 by following options (BUT NOTE OUR VERSION!):-->
 	  <forkCount>1</forkCount>
 	  <reuseForks>false</reuseForks>
 
