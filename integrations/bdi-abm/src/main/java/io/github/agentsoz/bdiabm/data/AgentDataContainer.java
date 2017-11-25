@@ -64,11 +64,12 @@ public class AgentDataContainer implements Serializable
 	public ActionPerceptContainer getOrCreate (String agentID) {
 		// yy I think that one should remove the level of ActionPerceptContainer and have "getOrCreatePerceptContent" & 
 		// "getOrCreateActionContent" directly.  kai, nov'17
-		
-	  if (!map.containsKey(agentID)) {
-	    map.put(agentID, new ActionPerceptContainer());
-	  }
-	  return map.get(agentID);
+		synchronized (agentID ) {
+			if (!map.containsKey(agentID)) {
+				map.put(agentID, new ActionPerceptContainer());
+			}
+			return map.get(agentID);
+		}
 	}
 	
 	@Override
