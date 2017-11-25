@@ -166,7 +166,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 			}
 			Activity currentAct = (Activity) currentPE;
 	//		currentAct.setEndTime(now);
-			model.getReplanner().getEditPlans().rescheduleActivityEndtime(agent, currentPlanIndex, now);
+			model.getReplanner().editPlans().rescheduleActivityEndtime(agent, currentPlanIndex, now);
 	
 			//2-insert a leg:
 			Leg newLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);

@@ -162,7 +162,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		logger.trace("number of plan elements after adding pickup, wait, new leg : " + plan.getPlanElements().size());
 	
 		WithinDayAgentUtils.resetCaches(agent);
-		model.getReplanner().getEditPlans().rescheduleActivityEnd(agent);
+		model.getReplanner().editPlans().rescheduleActivityEnd(agent);
 	
 	}
 }

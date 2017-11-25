@@ -112,10 +112,13 @@ public class BushfireMain {
 
 		// MATSim finished executing, so terminate the BDI model before exiting
 		bdiModel.finish();
+		
 
 		writer.close();
 
-//		System.exit(0); // prevents to test output afterwards.  kai, oct'17
+		for (Thread t : Thread.getAllStackTraces().keySet()) {
+			System.err.println( t.toString() ) ;
+		}
 
 	}
 

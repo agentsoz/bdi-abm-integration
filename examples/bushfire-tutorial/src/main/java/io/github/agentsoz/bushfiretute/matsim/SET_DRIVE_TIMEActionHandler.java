@@ -25,8 +25,6 @@ package io.github.agentsoz.bushfiretute.matsim;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.withinday.utils.EditPlans;
@@ -100,7 +98,7 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 		
 		double newEndTime =  model.getTime() +  newTime;
 		logger.debug("change end time of actvity with index {} to new end time  {} ", indexToChange, newEndTime );
-		model.getReplanner().getEditPlans().rescheduleActivityEndtime(agent, indexToChange, newEndTime);
+		model.getReplanner().editPlans().rescheduleActivityEndtime(agent, indexToChange, newEndTime);
 	
 		return true;
 	}
