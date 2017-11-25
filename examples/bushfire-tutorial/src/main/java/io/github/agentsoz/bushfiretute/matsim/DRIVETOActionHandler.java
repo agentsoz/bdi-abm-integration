@@ -177,7 +177,8 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 	
 			//3-ADDING wait ACTIVITY
 			Activity newAct = model.getScenario().getPopulation().getFactory().createActivityFromLinkId(dest, newActivityLinkId ) ;
-			newAct.setEndTime(Double.POSITIVE_INFINITY);
+//			newAct.setEndTime(Double.POSITIVE_INFINITY);
+			newAct.setEndTime(Double.MAX_VALUE);
 			planElements.add(currentPlanIndex+2,newAct);
 			logger.debug(" added a new {} activity",newAct.getType());
 	

@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire.matsimjill;
+package io.github.agentsoz.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +30,14 @@ import org.matsim.core.utils.misc.CRCChecksum;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator.Result;
 
+/**
+ * There is already a MatsimTestUtils.  So it might seem logical to add the methods here to that class.  However, 
+ * that class is _not_ a collection of static methods, but rather something that becomes instantiated.  So
+ * I am putting these here into a separate class.
+ * 
+ * @author kainagel
+ *
+ */
 public final class TestUtils {
 	private TestUtils(){}  // do not instantiate
 

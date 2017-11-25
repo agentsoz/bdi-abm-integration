@@ -147,7 +147,8 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 	
 		//ADDING Wait ACTIVITY
 		Activity waitAct = pf.createActivityFromLinkId("Wait", newActivityLinkId ) ;
-		waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
+//		waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
+		waitAct.setEndTime( Double.MAX_VALUE ) ;
 		logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
 		plan.getPlanElements().add(currentPlanIndex+3,waitAct);
 	
