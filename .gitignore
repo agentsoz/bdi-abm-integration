@@ -4,7 +4,9 @@
 **/*.orig
 
 # IntelliJ ignores
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/dictionaries
+# .idea/**/workspace.xml
+# .idea/**/tasks.xml
+# .idea/dictionaries
+.idea
+**/*.iml
 
