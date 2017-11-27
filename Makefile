@@ -16,5 +16,5 @@ normal:
 	mvn clean install ${QUICK}
 	cd integrations/abm-jack ; mvn clean install
 	cd examples/bushfire-tutorial ; mvn clean install
-	mvn test -Dmaven.test.redirectTestOutputToFile 
+# mvn test -Dmaven.test.redirectTestOutputToFile 
 	cd examples/bushfire-tutorial ; mvn test -Dmaven.test.redirectTestOutputToFile

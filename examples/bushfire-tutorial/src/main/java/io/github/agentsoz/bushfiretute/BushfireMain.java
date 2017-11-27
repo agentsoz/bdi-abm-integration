@@ -114,7 +114,8 @@ public class BushfireMain {
 		bdiModel.finish();
 		
 
-		writer.close();
+//		writer.close();
+		// cannot do this since it also closes stdout when doing tests in sequence. kai, nov'17
 
 //		for (Thread t : Thread.getAllStackTraces().keySet()) {
 //			System.err.println( t.toString() ) ;
