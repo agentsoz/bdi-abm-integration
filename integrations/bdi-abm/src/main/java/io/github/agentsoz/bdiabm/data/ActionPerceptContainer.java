@@ -57,7 +57,7 @@ public class ActionPerceptContainer implements Serializable
 	 * @return
 	 * The action container
 	 */
-	public ActionContainer getActionContainer ()
+	public synchronized ActionContainer getActionContainer ()
 	{
 		return actionContainer;
 	}
@@ -74,17 +74,17 @@ public class ActionPerceptContainer implements Serializable
 	 * @return
 	 * The percept container
 	 */
-	public PerceptContainer getPerceptContainer()
+	public synchronized PerceptContainer getPerceptContainer()
 	{
 		return perceptContainer;
 	}
 	
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return perceptContainer.isEmpty() && actionContainer.isEmpty();
 	}
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		return (isEmpty()) ? "{}" : new Gson().toJson(this);
 	}
 }

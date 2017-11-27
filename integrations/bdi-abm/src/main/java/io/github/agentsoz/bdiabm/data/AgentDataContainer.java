@@ -61,19 +61,17 @@ public class AgentDataContainer implements Serializable
 	 * @return
 	 * ActionPerceptContainer
 	 */
-	public ActionPerceptContainer getOrCreate (String agentID) {
+	public synchronized ActionPerceptContainer getOrCreate (String agentID) {
 		// yy I think that one should remove the level of ActionPerceptContainer and have "getOrCreatePerceptContent" & 
 		// "getOrCreateActionContent" directly.  kai, nov'17
-		synchronized (agentID ) {
-			if (!map.containsKey(agentID)) {
-				map.put(agentID, new ActionPerceptContainer());
-			}
-			return map.get(agentID);
+		if (!map.containsKey(agentID)) {
+			map.put(agentID, new ActionPerceptContainer());
 		}
+		return map.get(agentID);
 	}
 	
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (map.isEmpty()) {
 			return "{}";
 		}
@@ -90,30 +88,30 @@ public class AgentDataContainer implements Serializable
 	}
 
 
-  public boolean isEmpty() {
+  public synchronized boolean isEmpty() {
     return map.isEmpty();
   }
 
-  public PerceptContainer getPerceptContainer(String agentID) {
+  public synchronized PerceptContainer getPerceptContainer(String agentID) {
     if (map.containsKey(agentID)) {
       return map.get(agentID).getPerceptContainer();
     }
     return null;
   }
   
-  public ActionContainer getActionContainer(String agentID) {
+  public synchronized ActionContainer getActionContainer(String agentID) {
     if (map.containsKey(agentID)) {
       return map.get(agentID).getActionContainer();
     }
     return null;
   }
   
-  public Iterator<String> getAgentIDs() {
+  public synchronized Iterator<String> getAgentIDs() {
     return map.keySet().iterator();
   }
 
 
-  public ActionPerceptContainer remove(String agentID) {
+  public synchronized ActionPerceptContainer remove(String agentID) {
     return map.remove(agentID);
   }
 

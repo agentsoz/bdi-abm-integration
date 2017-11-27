@@ -61,7 +61,7 @@ public class ActionContainer implements Serializable {
 	/**
 	 * @return How many actions are stored in the container
 	 */
-	public int size() {
+	public synchronized int size() {
 		return container.size();
 	}
 
@@ -69,10 +69,16 @@ public class ActionContainer implements Serializable {
 	 * 
 	 * @return Return the set of action id in the container
 	 */
-	public Set<String> actionIDSet() {
+	public synchronized Set<String> actionIDSet() {
 		return container.keySet();
 	}
 
+	/**
+	 * Empties the container
+	 */
+	public synchronized void clear() {
+		container.clear();
+	}
 	/**
 	 * Shallow copy of the container
 	 * 
@@ -80,8 +86,25 @@ public class ActionContainer implements Serializable {
 	 *            The AbtractActionContainer which content want to be referred
 	 *            to. (Shallow copy)
 	 */
-	public void copyContainer(ActionContainer x) {
+	private void copyContainer(ActionContainer x) {
 		container = x.container;
+	}
+
+	/**
+	 * Deep copy
+	 */
+	public void copy(ActionContainer ac) {
+		// shallow copy if the incoming container is null or empty
+		if (ac.container == null || ac.container.isEmpty()) {
+			return;
+		}
+		// else start by clearing this container
+		clear();
+		// now do a deep copy
+		for (String key : ac.container.keySet()) {
+			ActionContent value = ac.container.get(key);
+			container.put(key, value);
+		}
 	}
 
 	/**
@@ -93,12 +116,11 @@ public class ActionContainer implements Serializable {
 	 *         registered is not contained yet in the container, then
 	 *         registration could be made.
 	 */
-	public boolean register(String identifier, Object[] parameters) {
+	public synchronized boolean register(String identifier, Object[] parameters) {
 		boolean isValid = false;
 		if (!container.containsKey(identifier)) {
 			isValid = true;
-			container
-					.put(identifier, new ActionContent(parameters, identifier));
+			container.put(identifier, new ActionContent(parameters, identifier));
 		}
 		return isValid;
 	}
@@ -110,7 +132,7 @@ public class ActionContainer implements Serializable {
 	 *            action's id
 	 * @return The content which is removed
 	 */
-	public ActionContent remove(String identifier) {
+	public synchronized ActionContent remove(String identifier) {
 		return container.remove(identifier);
 	}
 
@@ -121,7 +143,7 @@ public class ActionContainer implements Serializable {
 	 *            action's id
 	 * @return content of action
 	 */
-	public ActionContent get(String identifier) {
+	public synchronized ActionContent get(String identifier) {
 
 		return container.get(identifier);
 	}
@@ -129,12 +151,12 @@ public class ActionContainer implements Serializable {
 	/**
 	 * @return true if the container does not contain any actions
 	 */
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return container.isEmpty();
 	}
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		return (isEmpty()) ? "{}" : new Gson().toJson(this);
 	}
 }
