@@ -61,6 +61,7 @@ public class Bushfire5Test {
 		{
 			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_events.xml.gz" );
 			expecteds.add(3907061199L) ; // tub gitlab
+			expecteds.add(3810517158L) ; // tub gitlab
 			log.warn("done with retrieving expecteds") ;
 			TestUtils.checkSeveral(expecteds, actualEvents);
 			log.warn("checking events files was successful") ;
@@ -68,6 +69,7 @@ public class Bushfire5Test {
 		{
 			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_plans.xml.gz" );
 			expecteds.add(2959191893L); // tub gitlab
+			expecteds.add(1604079186L) ; // tub gitlab
 			log.warn("done with retrieving expecteds") ;
 			TestUtils.checkSeveral(expecteds, actualPlans);
 			log.warn("checking events files was successful") ;
