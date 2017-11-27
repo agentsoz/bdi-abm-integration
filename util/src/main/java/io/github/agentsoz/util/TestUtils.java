@@ -76,8 +76,8 @@ public final class TestUtils {
 		while ( itActual.hasNext() ) {
 			Entry<Id<Person>, List<Double>> actual = itActual.next() ;
 			Entry<Id<Person>, List<Double>> expected = itExpected.next() ;
-			Assert.assertEquals( expected.getKey(), actual.getKey() );
-			Assert.assertEquals( expected.getValue().size(), actual.getValue().size() ) ;
+			Assert.assertEquals( "finding a different personId: ", expected.getKey(), actual.getKey() );
+			Assert.assertEquals( "person has different number of arrivals: ", expected.getValue().size(), actual.getValue().size() ) ;
 			Iterator<Double> itExpectedArrivals = expected.getValue().iterator() ; 
 			Iterator<Double> itActualArrivals = actual.getValue().iterator() ;
 			while ( itExpectedArrivals.hasNext() ) {
