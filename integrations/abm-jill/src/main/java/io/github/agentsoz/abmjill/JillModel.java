@@ -64,7 +64,7 @@ public abstract class JillModel implements BDIServerInterface {
 
 	@Override
 	public boolean init(AgentDataContainer agentDataContainer,
-			AgentStateList agentList, 
+			AgentStateList agentList, // not used
 			ABMServerInterface abmServer,
 			Object[] params) {
 		nextContainer = agentDataContainer;
@@ -113,8 +113,7 @@ public abstract class JillModel implements BDIServerInterface {
 	@Override
 	// send percepts to individual agents
 	public void takeControl(AgentDataContainer agentDataContainer) {
-	  synchronized (agentDataContainer) {
-        
+
 		Log.trace("Received " + agentDataContainer);
 
 		if (agentDataContainer == null || agentDataContainer.isEmpty()) {
@@ -206,7 +205,6 @@ public abstract class JillModel implements BDIServerInterface {
 		}
 		// Wait until idle
 		Main.waitUntilIdle();
-	}
     }
 
 }
