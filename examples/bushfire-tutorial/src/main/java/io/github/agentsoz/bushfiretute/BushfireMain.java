@@ -116,9 +116,9 @@ public class BushfireMain {
 
 		writer.close();
 
-		for (Thread t : Thread.getAllStackTraces().keySet()) {
-			System.err.println( t.toString() ) ;
-		}
+//		for (Thread t : Thread.getAllStackTraces().keySet()) {
+//			System.err.println( t.toString() ) ;
+//		}
 
 	}
 

@@ -148,7 +148,7 @@ Agent Name: EvacResident
 		}
 		catch(java.lang.Exception e)
 		{
-			System.out.println("unable to set  depTime to agent " + this.agentID); // bse.getMessage()
+			logger.info("unable to set  depTime to agent " + this.agentID); // bse.getMessage()
 		}
 	}
 
@@ -224,6 +224,6 @@ Agent Name: EvacResident
 	
 	public void log(String msg) {
 		Object[] o = {Long.toString(getCurrentTime()), this.agentID, msg};
-		out.println(String.format("Time %-6s, Agent %-5s: %s", o));
+		logger.info(String.format("Time %-6s, Agent %-5s: %s", o));
 	}
 }

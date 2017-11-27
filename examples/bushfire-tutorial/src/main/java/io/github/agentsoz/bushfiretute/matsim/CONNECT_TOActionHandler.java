@@ -192,7 +192,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				Node n = link.getFromNode();
 	
 				Leg leg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-				model.getReplanner().getEditRoutes().relocateFutureLegRoute(leg, currentAct.getLinkId(), link.getId(),((HasPerson)agent).getPerson() ) ;
+				model.getReplanner().editRoutes().relocateFutureLegRoute(leg, currentAct.getLinkId(), link.getId(),((HasPerson)agent).getPerson() ) ;
 	
 				Route r = leg.getRoute();
 				routeDistances.put(lid.toString(), r.getDistance());
@@ -212,7 +212,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	
 			//create the connect leg with minimum distance to get its route..
 			Leg connectLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-			model.getReplanner().getEditRoutes().relocateFutureLegRoute(connectLeg, currentAct.getLinkId(), Id.createLinkId(connectLinkID),((HasPerson)agent).getPerson() ) ;
+			model.getReplanner().editRoutes().relocateFutureLegRoute(connectLeg, currentAct.getLinkId(), Id.createLinkId(connectLinkID),((HasPerson)agent).getPerson() ) ;
 	
 			Route rt = connectLeg.getRoute();
 			NetworkRoute netRt = (NetworkRoute) rt;
@@ -254,7 +254,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	
 			//create a new leg and replace its route with the merged route
 			Leg targetLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
-			model.getReplanner().getEditRoutes().relocateFutureLegRoute(targetLeg, currentAct.getLinkId(), targetAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
+			model.getReplanner().editRoutes().relocateFutureLegRoute(targetLeg, currentAct.getLinkId(), targetAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
 	
 			Route rout = targetLeg.getRoute();
 			NetworkRoute netRout = (NetworkRoute) rout;
