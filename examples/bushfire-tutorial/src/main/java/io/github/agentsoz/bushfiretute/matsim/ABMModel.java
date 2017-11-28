@@ -88,10 +88,10 @@ public final class ABMModel  {
 		while ( true ) {
 			this.bdiModel.takeControl( matsimModel.getAgentManager().getAgentDataContainer() );
 //			this.matsimModel.takeControl(matsimModel.getAgentManager().getAgentDataContainer());
-			this.matsimModel.runUntil(Global.getTime()+1, matsimModel.getAgentManager().getAgentDataContainer());
 			if( this.matsimModel.isFinished() ) {
 				break ;
 			}
+			this.matsimModel.runUntil(Global.getTime()+1, matsimModel.getAgentManager().getAgentDataContainer());
 		}
 		
 		this.matsimModel.finish() ;
@@ -167,7 +167,7 @@ public final class ABMModel  {
 					endCoord).getId();
 
 			agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
-					MonitoredEventType.ArrivedAtDestination, newLinkId, new BDIPerceptHandler() {
+					MonitoredEventType.ArrivedAtDestination, newLinkId.toString(), new BDIPerceptHandler() {
 				@Override
 				public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
 					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );

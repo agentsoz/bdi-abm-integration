@@ -84,7 +84,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 		agent.getPerceptHandler().registerBDIPerceptHandler(
 				agent.getAgentID(), 
 				MonitoredEventType.ArrivedAtDestination, 
-				newLinkId,
+				newLinkId.toString(),
 				new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
