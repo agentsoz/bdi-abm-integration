@@ -72,7 +72,7 @@ public final class ABMModel  {
 		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( matsimModel.getScenario() );
 
 		this.bdiModel.init(matsimModel.getAgentManager().getAgentDataContainer(),
-				matsimModel.getAgentManager().getAgentStateList(), this.matsimModel,
+				null, this.matsimModel,
 				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
 
 		matsimModel.init( bdiAgentIDs);
