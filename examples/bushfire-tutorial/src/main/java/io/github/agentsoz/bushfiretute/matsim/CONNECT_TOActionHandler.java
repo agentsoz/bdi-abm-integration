@@ -69,11 +69,12 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	}
 	@Override
 	public boolean handle(String agentID, String actionID, Object[] args) {
+		logger.info("------------------------------------------------------------------------------------------") ;
 		String destination = (String) args[1];
 		// connect To route replanner method
-		Id<Link> newLinkId = CONNECT_TOActionHandler.driveDirectlyToActivity(Id.createPersonId(agentID), destination, model);
+		Id<Link> newLinkId = driveDirectlyToActivity(Id.createPersonId(agentID), destination, model);
 		if (newLinkId == null) {
-			ABMModel.logger.warn("CONNECT_TO: returned a null link from the target activity");
+			logger.warn("CONNECT_TO: returned a null link from the target activity");
 			return true;
 		}
 		// Now register a event handler for when the agent arrives at the destination
@@ -100,6 +101,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 						return true; //unregister this handler
 					}
 				});
+		logger.info("------------------------------------------------------------------------------------------") ;
 		return true;
 	}
 	final static Id<Link> driveDirectlyToActivity(Id<Person> agentId, String actType, MATSimModel model) {
@@ -112,14 +114,13 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			// original evacuation route.
 	
 			double now = model.getTime();
-			logger.debug(" starting replanCurrentRoute : activity type: {}", actType);
-			Map<Id<Person>, MobsimAgent> mapping = model.getMobsimDataProvider().getAgents();
-			MobsimAgent agent = mapping.get(agentId);
+			logger.info(" starting replanCurrentRoute : activity type: {}", actType);
+			MobsimAgent agent = model.getMobsimDataProvider().getAgents().get(agentId);
 	
 			Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
 			List<PlanElement> planElements = plan.getPlanElements() ;
 			int currentIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
-			logger.trace("current plan index {}", currentIndex);
+			logger.debug("current plan index {}", currentIndex);
 			PlanElement pe =  planElements.get(currentIndex);
 	
 	
@@ -132,11 +133,12 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			// should this activity always be a wait activity??
 			Activity currentAct = (Activity) pe;
 			if(currentAct.getType().equals("Wait")) {
-				logger.debug("set end time of the Wait activity to {}  type {} ", now);
-				currentAct.setEndTime(now);
+				logger.info("set end time of the Wait activity to {}  type {} ", now);
+//				currentAct.setEndTime(now);
+				model.getReplanner().editPlans().rescheduleCurrentActivityEndtime(agent,now);
 			}
 			else {
-				logger.debug("current activity is not the type of Wait");
+				logger.info("current activity is not the type of Wait");
 				return null;
 			}
 	
@@ -154,7 +156,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				if(act.getType().equals(actType)) {
 					targetAct=act;
 					targetActIndex = i;
-					logger.trace("target activity plan index: {}", i);
+					logger.debug("target activity plan index: {}", i);
 				}				
 	
 			}
@@ -172,14 +174,14 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			}
 	
 			Leg legWithOptRoute =  (Leg) e;
-			logger.trace("Optimised leg route info before replacement: {}", legWithOptRoute.toString());
+			logger.debug("Optimised leg route info before replacement: {}", legWithOptRoute.toString());
 	
 			Route replanRoute = legWithOptRoute.getRoute();
 			NetworkRoute netRoute = (NetworkRoute) replanRoute;
 	
 			//get the links
 			List<Id<Link>> targetLinkIds = netRoute.getLinkIds();
-			logger.trace("Size of the retreived links : {}", targetLinkIds.size());
+			logger.debug("Size of the retreived links : {}", targetLinkIds.size());
 	
 	
 			LinkedHashMap<String,Double> routeDistances =  new LinkedHashMap<>();
@@ -196,7 +198,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	
 				Route r = leg.getRoute();
 				routeDistances.put(lid.toString(), r.getDistance());
-				logger.trace("travel distance from link {}: {}",lid.toString(),r.getDistance());
+				logger.debug("travel distance from link {}: {}",lid.toString(),r.getDistance());
 			}
 	
 			//find the link for the shortest distance
@@ -208,7 +210,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				}
 			}
 	
-			logger.debug("minimum distance : {} is found to linkID : {}", minDist, connectLinkID);
+			logger.info("minimum distance : {} is found to linkID : {}", minDist, connectLinkID);
 	
 			//create the connect leg with minimum distance to get its route..
 			Leg connectLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
@@ -218,13 +220,13 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			NetworkRoute netRt = (NetworkRoute) rt;
 	
 			List<Id<Link>> connectLegLinks = netRt.getLinkIds();
-			logger.trace("retreived links of the route of connectLeg : {}", connectLegLinks.toString());
+			logger.debug("retreived links of the route of connectLeg : {}", connectLegLinks.toString());
 	
 			//new array list as container for the links of target leg
 			ArrayList<Id<Link>> targetLegLinkSet = new ArrayList<>();
 	
 			targetLegLinkSet.addAll(connectLegLinks);
-			logger.trace(" added linkset of the connect leg to the targetLegLinkSet : {}", targetLegLinkSet.toString());
+			logger.debug(" added linkset of the connect leg to the targetLegLinkSet : {}", targetLegLinkSet.toString());
 	
 			boolean linkDeleted = false;
 			for (Id<Link> lid : targetLinkIds) {
@@ -240,7 +242,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			}
 	
 	
-			logger.trace("agent {} | added the subset of the optimised route to the targetLegLinkSet: {}",agentId, targetLegLinkSet.toString());
+			logger.debug("agent {} | added the subset of the optimised route to the targetLegLinkSet: {}",agentId, targetLegLinkSet.toString());
 	
 			//delete all plan elements between the current activity and the target activity
 			int noDelElements = targetActIndex - (currentIndex+1);
@@ -250,7 +252,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 				count++;
 			}
 	
-			logger.trace("agent {} | removed {} elements between currentAct and targetAct | new plan size after removal {}",agentId, noDelElements,planElements.size() );
+			logger.debug("agent {} | removed {} elements between currentAct and targetAct | new plan size after removal {}",agentId, noDelElements,planElements.size() );
 	
 			//create a new leg and replace its route with the merged route
 			Leg targetLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
@@ -268,7 +270,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 	
 			//add targetLeg to the plan
 			planElements.add(currentIndex+1,targetLeg);
-			logger.trace("agent {} | set the targetLegLinkSet to the route of the targetLeg and added it to the position of {}",agentId, currentIndex+1);	
+			logger.debug("agent {} | set the targetLegLinkSet to the route of the targetLeg and added it to the position of {}",agentId, currentIndex+1);	
 	
 	
 			WithinDayAgentUtils.resetCaches(agent);
@@ -280,7 +282,7 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 		final void removeFutureActivities(Id<Person> agentId) {
 			// possibly never used
 			
-			logger.debug("inside removeFutureActivities method");
+			logger.info("inside removeFutureActivities method");
 			Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
 			MobsimAgent agent = mapping.get(agentId);
 	
@@ -288,12 +290,12 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 			List<PlanElement> planElements = plan.getPlanElements() ;
 			int currentPlanIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
 	
-			logger.debug("plan size before removal : {}", planElements.size());
+			logger.info("plan size before removal : {}", planElements.size());
 			while(planElements.size() > currentPlanIndex+1){
 				planElements.remove(planElements.size()-1);
 			}
 	
-			logger.debug("plan size after removal : {}", planElements.size());
+			logger.info("plan size after removal : {}", planElements.size());
 			PlanElement currentPE = planElements.get(currentPlanIndex);
 			if( !(currentPE instanceof Activity) ) { 
 	

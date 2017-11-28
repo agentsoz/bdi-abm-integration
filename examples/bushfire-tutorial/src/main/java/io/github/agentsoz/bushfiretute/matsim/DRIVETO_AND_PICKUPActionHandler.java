@@ -64,6 +64,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 
 	@Override
 	public boolean handle(String agentID, String actionID, Object[] args) {
+		logger.info("------------------------------------------------------------------------------------------") ;
 		// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 		Id<Link> newLinkId;
 		double[] coords = (double[]) args[1];
@@ -102,6 +103,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 						return true; //unregister this handler
 					}
 				});
+		logger.info("------------------------------------------------------------------------------------------") ;
 		return true;
 	}
 
@@ -149,7 +151,7 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		Activity waitAct = pf.createActivityFromLinkId("Wait", newActivityLinkId ) ;
 //		waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
 		waitAct.setEndTime( Double.MAX_VALUE ) ;
-		logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
+		logger.debug(" added {} type activity with MAX_VALUE end time..",waitAct.getType());
 		plan.getPlanElements().add(currentPlanIndex+3,waitAct);
 	
 		//rerouting the leg after wait activity
