@@ -90,7 +90,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
 				 adc.getOrCreate(agentID).getPerceptContainer().put(DataTypes.LEAVENOW, " start departure");
 			 }
-			 waitUntilIdle(); // yyyyyy try to get code deterministic
+			 //waitUntilIdle(); // yyyyyy try to get code deterministic
 		 }
 		
 	}
@@ -199,7 +199,7 @@ public class BDIModel extends JACKModel {  //DataSource
 	public Agent createAgent(String agentID, Object[] initData) {
 		logger.debug("agent {} initiated from bushfire application", agentID);
 		final EvacResident evacResident = new EvacResident(agentID, bdiConnector, this, BushfireMain.writer);
-		waitUntilIdle(); // yyyyyy try to get code deterministic
+		//waitUntilIdle(); // yyyyyy try to get code deterministic
 		return evacResident;
 	}
 
@@ -233,7 +233,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			resident.log("picked up " + params);
 		}
 		
-		waitUntilIdle(); // yyyyyy try to get code deterministic
+		//waitUntilIdle(); // yyyyyy try to get code deterministic
 
 	}
 
@@ -284,7 +284,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			logger.debug("NumberFormatException : {}", e.getMessage());
 		}
 		
-		waitUntilIdle(); // yyyyyy try to get code deterministic
+		//waitUntilIdle(); // yyyyyy try to get code deterministic
 
 	}
 

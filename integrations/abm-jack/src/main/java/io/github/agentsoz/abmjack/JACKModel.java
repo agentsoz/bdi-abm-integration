@@ -63,8 +63,12 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 	protected Map<String, Agent> agents = new LinkedHashMap<>();
 	// need deterministically sorted map for testing.  kai, oct'17
-	
-	private AgentDataContainer nextContainer;
+
+	// dsingh, 29/nov/17, all Jack side updates should be collected in this
+	// local container, and will get copied over once when passing control
+	// back to the abm side
+	private AgentDataContainer nextContainer = new AgentDataContainer();
+
 	public final String GLOBAL_AGENT = "global";
 
 	@Override
@@ -101,7 +105,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		return ids;
 	}
 
-	public AgentDataContainer getNextContainer() {
+	private AgentDataContainer getNextContainer() {
 
 		return nextContainer;
 	}
@@ -129,15 +133,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
 		logger.trace("Received {}", agentDataContainer);
-		nextContainer = agentDataContainer;
 		Global.updateTime();
-
-		// Pull apart data container
-		// Perform actions
-		if (nextContainer == null) {
-			waitUntilIdle();
-			return;
-		}
 
 		if (agentDataContainer.isEmpty()) {
 			return;
@@ -161,7 +157,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
                 Object gParameters = gme.getValue();
                 for( Agent agent : agents.values() ) {
                     handlePercept(agent, gPerceptID, gParameters);
-                    waitUntilIdle(); // yyyyyy try to get code deterministic
                 }
             }
 		}
@@ -185,7 +180,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
 					handlePercept(agents.get(agentID), perceptID, parameters);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
 				}
 				// now remove the percepts
 				pc.clear();
@@ -203,7 +197,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					Object[] params = ac.get(actionID).getParameters();
 					updateAction(agents.get(agentID), actionID, state,
 							params);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
 
 					// remove completed states
 					if (!(state.equals(State.INITIATED) || state
@@ -214,6 +207,27 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 			}
 		}
 		waitUntilIdle();
+
+        // now transfer all the new updates in nextcontainer to the container
+		applyNextUpdates(agentDataContainer);
+	}
+
+	private void applyNextUpdates(AgentDataContainer agentDataContainer) {
+		// lock both containers before proceeding
+		synchronized (nextContainer) {
+			//agentDataContainer.removeAll();
+			synchronized (agentDataContainer) {
+				Iterator<String> i = nextContainer.getAgentIDs();
+				while (i.hasNext()) {
+					String agentID = i.next();
+					ActionPerceptContainer apcNext = nextContainer.getOrCreate(agentID);
+					ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
+					apc.getPerceptContainer().copy(apcNext.getPerceptContainer());
+					apc.getActionContainer().copy(apcNext.getActionContainer());
+				}
+				nextContainer.removeAll();
+			}
+		}
 	}
 
 	// wait until all JACK agents have finished processing before returning
@@ -240,7 +254,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void createAgents(String[] agentIDs, Object initData) {
 		for (int i = 0; i < agentIDs.length; i++) {
 			Agent agent = createAgent(agentIDs[i], new Object[] { initData });
-			waitUntilIdle(); // yyyyyy try to get code deterministic
 			agents.put(agentIDs[i], agent);
 		}
 		logger.debug("created agents: {}", new Gson().toJson(agentIDs));
@@ -271,7 +284,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 		for (int i = 0; i < ar1.length; i++) {
 			ar2[i] = ar1[i].getBasename();
-			waitUntilIdle(); // yyyyyy try to get code deterministic
 		}
 		killAgents(ar2);
 	}
