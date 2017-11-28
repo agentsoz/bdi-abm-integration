@@ -268,7 +268,7 @@ public class BDIModel extends JACKModel {  //DataSource
 				((EvacResident) agent).updateCurrentLocation(); //update current location of the agent
 				((EvacResident) agent).removeTargetDestination(); // reset the target attributes of the agent
 			}
-			else {
+			else if (State.FAILED.toString().equals(returnedState)) {
 				((EvacResident) agent).removeTargetDestination(); //remove target dest upon failure
 			}
 			
