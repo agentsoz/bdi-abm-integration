@@ -115,4 +115,8 @@ public class AgentDataContainer implements Serializable
     return map.remove(agentID);
   }
 
+  public synchronized void removeAll() {
+	map.clear();
+  }
+
 }
