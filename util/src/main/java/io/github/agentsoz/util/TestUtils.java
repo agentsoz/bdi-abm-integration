@@ -38,9 +38,11 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
@@ -237,5 +239,21 @@ public final class TestUtils {
 		log.info("Full events file: comparison: result=" + result.name() );
 		Assert.assertEquals(Result.FILES_ARE_EQUAL, result);
 	}
-
+	
+	public static SortedMap<Id<Person>,List<Double>> collectActivityStarts(String filename ) {
+		SortedMap<Id<Person>,List<Double>> collecteds = new TreeMap<>() ;
+		EventsManager events = new EventsManagerImpl() ;
+		events.addHandler(new ActivityStartEventHandler(){
+			@Override public void handleEvent(ActivityStartEvent event) {
+				Id<Person> personId = event.getPersonId() ;
+				if ( !collecteds.containsKey(personId) ) {
+					collecteds.put(personId, new ArrayList<Double>() ) ;
+				}
+				List<Double> list = collecteds.get( personId ) ;
+				list.add( event.getTime() ) ;
+			}
+		});
+		new MatsimEventsReader(events).readFile(filename);
+		return collecteds ;
+	}
 }
