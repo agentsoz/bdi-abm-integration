@@ -247,6 +247,7 @@ public final class TestUtils {
 		EventsManager events = new EventsManagerImpl() ;
 		events.addHandler(new ActivityStartEventHandler(){
 			@Override public void handleEvent(ActivityStartEvent event) {
+				System.out.println( event ) ;
 				Id<Person> personId = event.getPersonId() ;
 				if ( !collecteds.containsKey(personId) ) {
 					collecteds.put(personId, new ArrayList<Double>() ) ;
