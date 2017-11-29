@@ -88,7 +88,22 @@ public class AgentDataContainer implements Serializable
 	}
 
 
-  public synchronized boolean isEmpty() {
+	public synchronized void copy(AgentDataContainer adc) {
+		// lock both containers before proceeding
+		synchronized (adc) {
+			Iterator<String> i = adc.getAgentIDs();
+			while (i.hasNext()) {
+				String agentID = i.next();
+				ActionPerceptContainer apcNext = adc.getOrCreate(agentID);
+				ActionPerceptContainer apc = this.getOrCreate(agentID);
+				apc.getPerceptContainer().copy(apcNext.getPerceptContainer());
+				apc.getActionContainer().copy(apcNext.getActionContainer());
+				map.put(agentID,apc);
+			}
+		}
+	}
+
+	public synchronized boolean isEmpty() {
     return map.isEmpty();
   }
 

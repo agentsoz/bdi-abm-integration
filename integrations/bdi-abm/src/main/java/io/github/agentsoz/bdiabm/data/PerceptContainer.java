@@ -89,7 +89,7 @@ public class PerceptContainer implements Serializable {
 	 */
 	public synchronized void copy(PerceptContainer pc) {
 		// shallow copy if the incoming container is null or empty
-		if (pc.container == null || pc.container.isEmpty()) {
+		if (pc.container == null) {
 			return;
 		}
 		// else start by clearing this container

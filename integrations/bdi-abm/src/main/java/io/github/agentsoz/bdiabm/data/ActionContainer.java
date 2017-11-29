@@ -95,7 +95,7 @@ public class ActionContainer implements Serializable {
 	 */
 	public synchronized void copy(ActionContainer ac) {
 		// shallow copy if the incoming container is null or empty
-		if (ac.container == null || ac.container.isEmpty()) {
+		if (ac.container == null) {
 			return;
 		}
 		// else start by clearing this container

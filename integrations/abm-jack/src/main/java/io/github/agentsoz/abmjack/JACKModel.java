@@ -67,6 +67,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	// dsingh, 29/nov/17, all Jack side updates should be collected in this
 	// local container, and will get copied over once when passing control
 	// back to the abm side
+	private AgentDataContainer lastContainer = new AgentDataContainer();
 	private AgentDataContainer nextContainer = new AgentDataContainer();
 
 	public final String GLOBAL_AGENT = "global";
@@ -135,14 +136,18 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		logger.trace("Received {}", agentDataContainer);
 		Global.updateTime();
 
+		// save the container
+		lastContainer.removeAll();
+		lastContainer.copy(agentDataContainer);
+
 		if (agentDataContainer.isEmpty()) {
 			return;
 		}
-		
+
 		Map<String, Object> globalPercepts = new LinkedHashMap<>();
 		// need deterministically sorted map for testing.  kai, oct'17
 
-        PerceptContainer gPC = agentDataContainer.getPerceptContainer(GLOBAL_AGENT);
+        PerceptContainer gPC = lastContainer.getPerceptContainer(GLOBAL_AGENT);
         if (gPC != null) {
 			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
 			for (int g = 0; g < globalPerceptsArray.length; g++) {
@@ -159,16 +164,17 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
                     handlePercept(agent, gPerceptID, gParameters);
                 }
             }
+            gPC.clear();
 		}
 
-        Iterator<String> i = agentDataContainer.getAgentIDs();
+        Iterator<String> i = lastContainer.getAgentIDs();
         // For each ActionPercept (one for each agent)
         while (i.hasNext()) {
             String agentID = i.next();
 			if (agentID.equals(GLOBAL_AGENT)) {
 				continue;
 			}
-			ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
+			ActionPerceptContainer apc = lastContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -208,26 +214,11 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		}
 		waitUntilIdle();
 
-        // now transfer all the new updates in nextcontainer to the container
-		applyNextUpdates(agentDataContainer);
-	}
-
-	private void applyNextUpdates(AgentDataContainer agentDataContainer) {
-		// lock both containers before proceeding
-		synchronized (nextContainer) {
-			//agentDataContainer.removeAll();
-			synchronized (agentDataContainer) {
-				Iterator<String> i = nextContainer.getAgentIDs();
-				while (i.hasNext()) {
-					String agentID = i.next();
-					ActionPerceptContainer apcNext = nextContainer.getOrCreate(agentID);
-					ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
-					apc.getPerceptContainer().copy(apcNext.getPerceptContainer());
-					apc.getActionContainer().copy(apcNext.getActionContainer());
-				}
-				nextContainer.removeAll();
-			}
-		}
+        // now transfer all the new updates to the container
+		agentDataContainer.copy(lastContainer); // copies status changes
+		lastContainer.removeAll();
+		agentDataContainer.copy(nextContainer); // copies new actions
+		nextContainer.removeAll();
 	}
 
 	// wait until all JACK agents have finished processing before returning
