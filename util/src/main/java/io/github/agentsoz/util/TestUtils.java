@@ -161,7 +161,7 @@ public final class TestUtils {
 				@Override public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 					final String filename = dir + "/" + cmpFileName;
 					if ( Files.exists( new File( filename).toPath() ) ) {
-						log.info( "checking against " + filename );
+						System.out.println( "checking against " + filename );
 						long crc = CRCChecksum.getCRCFromFile( filename ) ; 
 						expecteds.add(crc) ;
 					}
@@ -187,7 +187,7 @@ public final class TestUtils {
 		boolean found = false ;
 		for ( int ii=0 ; ii<expectedEvents.length ; ii++ ) {
 			final boolean b = actualEvents==expectedEvents[ii];
-			log.info("checking if " + actualEvents + "==" + expectedEvents[ii] + " ? " + b);
+			System.out.println("checking if " + actualEvents + "==" + expectedEvents[ii] + " ? " + b);
 			if ( b ) {
 				found = true ;
 				break ;
@@ -199,44 +199,44 @@ public final class TestUtils {
 	}
 
 	static void comparingArrivals(final String primaryExpectedEventsFilename, String actualEventsFilename) {
-		log.info("Comparing arrivals:");
+		System.out.println("Comparing arrivals:");
 		SortedMap<Id<Person>, List<Double>> arrivalsExpected = 
 				collectArrivals(primaryExpectedEventsFilename) ;
 		SortedMap<Id<Person>, List<Double>> arrivalsActual = 
 				collectArrivals(actualEventsFilename) ;
 		compareEventsWithSlack(arrivalsExpected, arrivalsActual, 20.);
-		log.info("Arrivals: Comparison with slack: passed.");
-		log.info("") ;
+		System.out.println("Arrivals: Comparison with slack: passed.");
+		System.out.println("") ;
 	
 		Assert.assertEquals(arrivalsExpected, arrivalsActual);
-		log.info("Arrivals: Exact comparison: passed.");
+		System.out.println("Arrivals: Exact comparison: passed.");
 	}
 
 	static void comparingEnterTraffic(final String primaryExpectedEventsFilename, String actualEventsFilename) {
-		log.info("Comparing enterTraffic:");
+		System.out.println("Comparing enterTraffic:");
 		SortedMap<Id<Person>, List<Double>> enterTrafficExpected = 
 				collectEnterTraffic(primaryExpectedEventsFilename) ;
 		SortedMap<Id<Person>, List<Double>> enterTrafficActual = 
 				collectEnterTraffic(actualEventsFilename) ;
 		compareEventsWithSlack(enterTrafficExpected, enterTrafficActual, 20.);
-		log.info("EnterTraffic: Comparison with slack: passed.");
-		log.info("") ;
+		System.out.println("EnterTraffic: Comparison with slack: passed.");
+		System.out.println("") ;
 	}
 
 	static void comparingDepartures(final String primaryExpectedEventsFilename, String actualEventsFilename) {
-		log.info("Comparing departures:");
+		System.out.println("Comparing departures:");
 		SortedMap<Id<Person>, List<Double>> departuresExpected = 
 				collectDepartures(primaryExpectedEventsFilename) ;
 		SortedMap<Id<Person>, List<Double>> departuresActual = 
 				collectDepartures(actualEventsFilename) ;
 		compareEventsWithSlack(departuresExpected, departuresActual, 20.);
-		log.info("Departures: Comparison with slack: passed.");
-		log.info("") ;
+		System.out.println("Departures: Comparison with slack: passed.");
+		System.out.println("") ;
 	}
 
 	static void compareFullEvents(final String primaryExpectedEventsFilename, String actualEventsFilename) {
 		Result result = EventsFileComparator.compare(primaryExpectedEventsFilename, actualEventsFilename) ;
-		log.info("Full events file: comparison: result=" + result.name() );
+		System.out.println("Full events file: comparison: result=" + result.name() );
 		Assert.assertEquals(Result.FILES_ARE_EQUAL, result);
 	}
 	
