@@ -64,6 +64,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 
 	@Override
 	public boolean handle(String agentID, String actionID, Object[] args) {
+		logger.info("------------------------------------------------------------------------------------------") ;
 		// Get nearest link ID and calls the CustomReplanner to map to MATSim.
 		Id<Link> newLinkId;
 		double[] coords = (double[]) args[1];
@@ -102,6 +103,7 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 						return true; //unregister this handler
 					}
 				});
+		logger.info("------------------------------------------------------------------------------------------") ;
 		return true;
 	}
 
