@@ -2,6 +2,7 @@
 **/*.jts
 **/.classpath
 **/*.orig
+/target
 
 # IntelliJ ignores
 .idea/
