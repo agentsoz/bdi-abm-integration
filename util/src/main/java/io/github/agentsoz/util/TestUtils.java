@@ -89,7 +89,7 @@ public final class TestUtils {
 					final double difference = actualArrival-expectedArrival;
 					differencesSum += difference ;
 					differencesCnt ++ ;
-					log.warn("personId=" + expected.getKey()
+					System.err.println("personId=" + expected.getKey()
 					+ ";\texpectedTime=" + expectedArrival
 					+ ";\tactualTime=" + actualArrival
 					+ ";\tdifference=" + difference );
@@ -98,7 +98,7 @@ public final class TestUtils {
 			}
 		}
 		if ( differencesCnt > 0 ) {
-			log.warn( "differencesSum=" + differencesSum + ";\tdifferencesAv=" + differencesSum/differencesCnt );
+			System.err.println( "differencesSum=" + differencesSum + ";\tdifferencesAv=" + differencesSum/differencesCnt );
 		}
 	}
 
