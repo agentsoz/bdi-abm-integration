@@ -70,6 +70,7 @@ public final class TestUtils {
 
 	public static void compareEventsWithSlack(SortedMap<Id<Person>, List<Double>> arrivalsExpected,
 			SortedMap<Id<Person>, List<Double>> arrivalsActual, double slack) {
+		System.out.println("CompareEventsWithSlack ...") ;
 		Assert.assertEquals( arrivalsExpected.size(), arrivalsActual.size() ) ;
 		Iterator<Entry<Id<Person>, List<Double>>> itActual = arrivalsActual.entrySet().iterator() ;
 		Iterator<Entry<Id<Person>, List<Double>>> itExpected = arrivalsExpected.entrySet().iterator() ;
@@ -100,6 +101,7 @@ public final class TestUtils {
 		if ( differencesCnt > 0 ) {
 			System.err.println( "differencesSum=" + differencesSum + ";\tdifferencesAv=" + differencesSum/differencesCnt );
 		}
+		System.out.println("... compareEventsWithSlack DONE.") ;
 	}
 
 	public static SortedMap<Id<Person>, List<Double>> collectArrivals(final String filename) {
