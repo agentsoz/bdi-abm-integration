@@ -34,7 +34,6 @@ import io.github.agentsoz.bdiabm.data.PerceptContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.jill.Main;
 import io.github.agentsoz.jill.core.GlobalState;
-import io.github.agentsoz.jill.util.Log;
 
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -46,12 +45,18 @@ import java.util.Set;
 
 import io.github.agentsoz.jill.config.Config;
 import io.github.agentsoz.jill.util.ArgumentsLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class JillModel implements BDIServerInterface {
+
+	private static final Logger logger = LoggerFactory.getLogger("");
 
 	private static final String BROADCAST = "global";
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
+	private static AgentDataContainer lastContainer;
+
 	private Config config;
 	
 	public JillModel() {
@@ -67,7 +72,8 @@ public abstract class JillModel implements BDIServerInterface {
 			AgentStateList agentList, // not used
 			ABMServerInterface abmServer,
 			Object[] params) {
-		nextContainer = agentDataContainer;
+		nextContainer = new AgentDataContainer();;
+		lastContainer = new AgentDataContainer();;
 		// Parse the command line options
 		ArgumentsLoader.parse((String[])params);
 		// Load the configuration 
@@ -76,7 +82,7 @@ public abstract class JillModel implements BDIServerInterface {
 		try {
 			Main.init(config);
 		} catch(Exception e) {
-			Log.error("While initialising JillModel: " + e.getMessage());
+			logger.error("While initialising JillModel: {}", e.getMessage());
 			return false;
 		}
 		return true;
@@ -105,7 +111,7 @@ public abstract class JillModel implements BDIServerInterface {
 			ac.get(actionID).setParameters(parameters);
 			ac.get(actionID).setState(ActionContent.State.INITIATED);
 		}
-		Log.debug("added " + ((isNewAction) ? "new action" : "")
+		logger.debug("added " + ((isNewAction) ? "new action" : "")
 				+ " into ActionContainer: agent:" + agentID + ", action id:"
 				+ actionID + ", content:" + ac.get(actionID));
 	}
@@ -114,18 +120,21 @@ public abstract class JillModel implements BDIServerInterface {
 	// send percepts to individual agents
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
-		Log.trace("Received " + agentDataContainer);
+		// save the container
+		lastContainer.removeAll();
+		lastContainer.copy(agentDataContainer);
 
 		if (agentDataContainer == null || agentDataContainer.isEmpty()) {
-			Log.debug("Received empty container, nothing to do.");
+			logger.debug("Received empty container, nothing to do.");
 			return;
 		}
-		nextContainer = agentDataContainer;
+
+		logger.trace("Received {}", agentDataContainer);
 
 		boolean global = false;
 		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
-        PerceptContainer gPC = agentDataContainer.getPerceptContainer(BROADCAST);
+        PerceptContainer gPC = lastContainer.getPerceptContainer(BROADCAST);
         if (gPC != null) {
           String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
           for (int g = 0; g < globalPerceptsArray.length; g++) {
@@ -146,14 +155,14 @@ public abstract class JillModel implements BDIServerInterface {
           }
         }
 
-		Iterator<String> i = agentDataContainer.getAgentIDs();
+		Iterator<String> i = lastContainer.getAgentIDs();
 		// For each ActionPercept (one for each agent)
 		while (i.hasNext()) {
 			String agentID = i.next();
 			if (agentID.equals(BROADCAST)) {
 				continue;
 			}
-			ActionPerceptContainer apc = agentDataContainer.getOrCreate(agentID);
+			ActionPerceptContainer apc = lastContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -167,8 +176,7 @@ public abstract class JillModel implements BDIServerInterface {
 						int id = Integer.parseInt(agentID);
 						getAgent(id).handlePercept(perceptID, parameters);
 					} catch (Exception e) {
-						Log.error("While sending percept to Agent "
-								+ agentID + ": " + e.getMessage());
+						logger.error("While sending percept to Agent {}: {}", agentID, e.getMessage());
 					}
 				}
 				// now remove the percepts
@@ -191,8 +199,7 @@ public abstract class JillModel implements BDIServerInterface {
 						int id = Integer.parseInt(agentID);
 						getAgent(id).updateAction(actionID, content);
 					} catch (Exception e) {
-						Log.error("While updating action status for Agent "
-								+ agentID + ": " + e.getMessage());
+						logger.error("While updating action status for Agent {}: {}", agentID, e.getMessage());
 					}
 
 					// remove completed states
@@ -205,6 +212,12 @@ public abstract class JillModel implements BDIServerInterface {
 		}
 		// Wait until idle
 		Main.waitUntilIdle();
+
+		// now transfer all the new updates to the container
+		agentDataContainer.copy(lastContainer); // copies status changes
+		lastContainer.removeAll();
+		agentDataContainer.copy(nextContainer); // copies new actions
+		nextContainer.removeAll();
     }
 
 }
