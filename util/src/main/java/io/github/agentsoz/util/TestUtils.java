@@ -109,7 +109,6 @@ public final class TestUtils {
 		EventsManager events = new EventsManagerImpl() ;
 		events.addHandler(new PersonArrivalEventHandler(){
 			@Override public void handleEvent(PersonArrivalEvent event) {
-				System.out.println( event ) ;
 				Id<Person> personId = event.getPersonId() ;
 				if ( !actualArrivals.containsKey(personId) ) {
 					actualArrivals.put(personId, new ArrayList<Double>() ) ;
@@ -127,7 +126,6 @@ public final class TestUtils {
 		EventsManager events = new EventsManagerImpl() ;
 		events.addHandler(new PersonDepartureEventHandler(){
 			@Override public void handleEvent(PersonDepartureEvent event) {
-				System.out.println( event ) ;
 				Id<Person> personId = event.getPersonId() ;
 				if ( !actualDepartures.containsKey(personId) ) {
 					actualDepartures.put(personId, new ArrayList<Double>() ) ;
@@ -145,7 +143,6 @@ public final class TestUtils {
 		EventsManager events = new EventsManagerImpl() ;
 		events.addHandler(new VehicleEntersTrafficEventHandler(){
 			@Override public void handleEvent(VehicleEntersTrafficEvent event) {
-				System.out.println( event ) ;
 				Id<Person> personId = event.getPersonId() ;
 				if ( !actualDepartures.containsKey(personId) ) {
 					actualDepartures.put(personId, new ArrayList<Double>() ) ;
@@ -250,7 +247,6 @@ public final class TestUtils {
 		EventsManager events = new EventsManagerImpl() ;
 		events.addHandler(new ActivityStartEventHandler(){
 			@Override public void handleEvent(ActivityStartEvent event) {
-				System.out.println( event ) ;
 				Id<Person> personId = event.getPersonId() ;
 				if ( !collecteds.containsKey(personId) ) {
 					collecteds.put(personId, new ArrayList<Double>() ) ;
