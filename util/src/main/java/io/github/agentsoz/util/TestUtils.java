@@ -66,11 +66,13 @@ import org.matsim.utils.eventsfilecomparison.EventsFileComparator.Result;
 public final class TestUtils {
 	private static final Logger log = Logger.getLogger( TestUtils.class ) ;
 	
+	public static final String SEPARATOR = "---------------------------------------------" ;
+
 	private TestUtils(){}  // do not instantiate
 
 	public static void compareEventsWithSlack(SortedMap<Id<Person>, List<Double>> arrivalsExpected,
 			SortedMap<Id<Person>, List<Double>> arrivalsActual, double slack) {
-		log.info("CompareEventsWithSlack ...") ;
+//		log.info("CompareEventsWithSlack ...") ;
 		Assert.assertEquals( arrivalsExpected.size(), arrivalsActual.size() ) ;
 		Iterator<Entry<Id<Person>, List<Double>>> itActual = arrivalsActual.entrySet().iterator() ;
 		Iterator<Entry<Id<Person>, List<Double>>> itExpected = arrivalsExpected.entrySet().iterator() ;
@@ -90,7 +92,7 @@ public final class TestUtils {
 					final double difference = actualArrival-expectedArrival;
 					differencesSum += difference ;
 					differencesCnt ++ ;
-					System.err.println("personId=" + expected.getKey()
+					log.info("personId=" + expected.getKey()
 					+ ";\texpectedTime=" + expectedArrival
 					+ ";\tactualTime=" + actualArrival
 					+ ";\tdifference=" + difference );
@@ -99,9 +101,9 @@ public final class TestUtils {
 			}
 		}
 		if ( differencesCnt > 0 ) {
-			System.err.println( "differencesSum=" + differencesSum + ";\tdifferencesAv=" + differencesSum/differencesCnt );
+			log.info( "differencesSum=" + differencesSum + ";\tdifferencesAv=" + differencesSum/differencesCnt );
 		}
-		log.info("... compareEventsWithSlack DONE.") ;
+//		log.info("... compareEventsWithSlack DONE.") ;
 	}
 
 	public static SortedMap<Id<Person>, List<Double>> collectArrivals(final String filename) {
@@ -199,47 +201,69 @@ public final class TestUtils {
 			Assert.fail(); 
 		}
 	}
-
-	static void comparingArrivals(final String primaryExpectedEventsFilename, String actualEventsFilename) {
-		log.info("Comparing arrivals:");
-		SortedMap<Id<Person>, List<Double>> arrivalsExpected = 
-				collectArrivals(primaryExpectedEventsFilename) ;
-		SortedMap<Id<Person>, List<Double>> arrivalsActual = 
-				collectArrivals(actualEventsFilename) ;
-		compareEventsWithSlack(arrivalsExpected, arrivalsActual, 20.);
-		log.info("Arrivals: Comparison with slack: passed.");
-		log.info("") ;
 	
-		Assert.assertEquals(arrivalsExpected, arrivalsActual);
-		log.info("Arrivals: Exact comparison: passed.");
+	public static void comparingArrivals(final String primaryExpectedEventsFilename, String actualEventsFilename, double slack) {
+		log.info(SEPARATOR) ;
+		log.info("START comparing arrivals:");
+		SortedMap<Id<Person>, List<Double>> arrivalsExpected =
+				collectArrivals(primaryExpectedEventsFilename) ;
+		SortedMap<Id<Person>, List<Double>> arrivalsActual =
+				collectArrivals(actualEventsFilename) ;
+		compareEventsWithSlack(arrivalsExpected, arrivalsActual, slack);
+		log.info("... comparing arrivals DONE.");
+		log.info(SEPARATOR) ;
+//
+//		Assert.assertEquals(arrivalsExpected, arrivalsActual);
+//		log.info("Arrivals: Exact comparison: passed.");
 	}
 
-	static void comparingEnterTraffic(final String primaryExpectedEventsFilename, String actualEventsFilename) {
+	public static void comparingActivityStarts(final String primaryExpectedEventsFilename, String actualEventsFilename, double slack) {
+		log.info(SEPARATOR) ;
+		log.info("START comparing activity starts:");
+		SortedMap<Id<Person>, List<Double>> expecteds = collectArrivals(primaryExpectedEventsFilename) ;
+		SortedMap<Id<Person>, List<Double>> actuals = collectArrivals(actualEventsFilename) ;
+		compareEventsWithSlack(expecteds, actuals, slack);
+		log.info("... comparing activity starts DONE.");
+		log.info(SEPARATOR) ;
+//
+//		Assert.assertEquals(expecteds, actuals);
+//		log.info("Arrivals: Exact comparison: passed.");
+	}
+
+	public static void comparingEnterTraffic(final String primaryExpectedEventsFilename, String actualEventsFilename, double slack) {
+		log.info(SEPARATOR) ;
 		log.info("Comparing enterTraffic:");
 		SortedMap<Id<Person>, List<Double>> enterTrafficExpected = 
 				collectEnterTraffic(primaryExpectedEventsFilename) ;
 		SortedMap<Id<Person>, List<Double>> enterTrafficActual = 
 				collectEnterTraffic(actualEventsFilename) ;
-		compareEventsWithSlack(enterTrafficExpected, enterTrafficActual, 20.);
+		compareEventsWithSlack(enterTrafficExpected, enterTrafficActual, slack);
 		log.info("EnterTraffic: Comparison with slack: passed.");
-		log.info("") ;
+		log.info(SEPARATOR) ;
 	}
 
-	static void comparingDepartures(final String primaryExpectedEventsFilename, String actualEventsFilename) {
-		log.info("Comparing departures:");
+	public static void comparingDepartures(final String primaryExpectedEventsFilename, String actualEventsFilename, double slack ) {
+		log.info(SEPARATOR) ;
+		log.info("START comparing departures:");
 		SortedMap<Id<Person>, List<Double>> departuresExpected = 
 				collectDepartures(primaryExpectedEventsFilename) ;
 		SortedMap<Id<Person>, List<Double>> departuresActual = 
 				collectDepartures(actualEventsFilename) ;
-		compareEventsWithSlack(departuresExpected, departuresActual, 20.);
-		log.info("Departures: Comparison with slack: passed.");
-		log.info("") ;
+		compareEventsWithSlack(departuresExpected, departuresActual, slack);
+		log.info("... comparing departures DONE.") ;
+		log.info(SEPARATOR) ;
 	}
 
-	static void compareFullEvents(final String primaryExpectedEventsFilename, String actualEventsFilename) {
+	public static void compareFullEvents(final String primaryExpectedEventsFilename, String actualEventsFilename, boolean failWhenDifferent ) {
+		log.info(SEPARATOR) ;
+		log.info("START comparing full events:") ;
 		Result result = EventsFileComparator.compare(primaryExpectedEventsFilename, actualEventsFilename) ;
 		log.info("Full events file: comparison: result=" + result.name() );
-		Assert.assertEquals(Result.FILES_ARE_EQUAL, result);
+		if (failWhenDifferent ) {
+			Assert.assertEquals(Result.FILES_ARE_EQUAL, result);
+		}
+		log.info("... comparing full events DONE.") ;
+		log.info(SEPARATOR) ;
 	}
 	
 	public static SortedMap<Id<Person>,List<Double>> collectActivityStarts(String filename ) {

@@ -47,33 +47,33 @@ public class Bushfire5Test {
 		
 		final String actualEventsFilename = utils.getOutputDirectory() + "/run0.output_events.xml.gz";
 		long actualEvents = CRCChecksum.getCRCFromFile(actualEventsFilename) ;
-		log.warn("actual(events)="+actualEvents) ;
+		log.info("actual(events)="+actualEvents); ;
 
 		long actualPlans = CRCChecksum.getCRCFromFile( utils.getOutputDirectory() + "/run0.output_plans.xml.gz" ) ;
-		log.warn("actual(plans)="+actualPlans);
+		log.info("actual(plans)="+actualPlans);
 		
-		{
-//			SortedMap<Id<Person>, List<Double>> actuals = TestUtils.collectArrivals(actualEventsFilename);
-//			SortedMap<Id<Person>, List<Double>> expecteds = TestUtils.collectArrivals(utils.getInputDirectory() + "run0.output_events.xml.gz");
-//			TestUtils.compareEventsWithSlack(expecteds, actuals, 500.);
-		}
+		String primaryExpectedEventsFilename = utils.getInputDirectory() + "/run0.output_events.xml.gz" ;
+		TestUtils.comparingDepartures(primaryExpectedEventsFilename,actualEventsFilename,5.);
+		TestUtils.comparingArrivals(primaryExpectedEventsFilename,actualEventsFilename,5.);
+		TestUtils.comparingActivityStarts(primaryExpectedEventsFilename,actualEventsFilename, 5.);
+		TestUtils.compareFullEvents(primaryExpectedEventsFilename,actualEventsFilename, false);
 
-		{
-			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_events.xml.gz" );
-			expecteds.add(3907061199L) ; // tub gitlab
-			expecteds.add(3810517158L) ; // tub gitlab
-			log.warn("done with retrieving expecteds") ;
-			TestUtils.checkSeveral(expecteds, actualEvents);
-			log.warn("checking events files was successful") ;
-		}
-		{
-			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_plans.xml.gz" );
-			expecteds.add(2959191893L); // tub gitlab
-			expecteds.add(1604079186L) ; // tub gitlab
-			log.warn("done with retrieving expecteds") ;
-			TestUtils.checkSeveral(expecteds, actualPlans);
-			log.warn("checking events files was successful") ;
-		}
+//		{
+//			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_events.xml.gz" );
+//			expecteds.add(3907061199L) ; // tub gitlab
+//			expecteds.add(3810517158L) ; // tub gitlab
+//			log.warn("done with retrieving expecteds") ;
+//			TestUtils.checkSeveral(expecteds, actualEvents);
+//			log.warn("checking events files was successful") ;
+//		}
+//		{
+//			List<Long> expecteds = getExpectedsFromFiles( utils.getInputDirectory() , "run0.output_plans.xml.gz" );
+//			expecteds.add(2959191893L); // tub gitlab
+//			expecteds.add(1604079186L) ; // tub gitlab
+//			log.warn("done with retrieving expecteds") ;
+//			TestUtils.checkSeveral(expecteds, actualPlans);
+//			log.warn("checking events files was successful") ;
+//		}
 		
 	}
 

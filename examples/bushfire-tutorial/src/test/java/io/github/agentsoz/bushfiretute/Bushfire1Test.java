@@ -33,18 +33,25 @@ public class Bushfire1Test {
 		
 		// ---
 		
-		long actualEvents = CRCChecksum.getCRCFromFile(utils.getOutputDirectory() + "/run0.output_events.xml.gz");
-		log.warn("actual(events)=" + actualEvents);
+		final String actualEventsFilename = utils.getOutputDirectory() + "/run0.output_events.xml.gz";
+		long actualEvents = CRCChecksum.getCRCFromFile(actualEventsFilename);
+		log.info("actual(events)=" + actualEvents);
 		
 		long actualPlans = CRCChecksum.getCRCFromFile(utils.getOutputDirectory() + "/run0.output_plans.xml.gz");
-		log.warn("actual(plans)=" + actualPlans);
+		log.info("actual(plans)=" + actualPlans);
 		
-		{
-			List<Long> expecteds = Bushfire5Test.getExpectedsFromFiles(utils.getInputDirectory(), "run0.output_events.xml.gz");
-			log.warn("done with retrieving expecteds") ;
-			TestUtils.checkSeveral(expecteds, actualEvents);
-			log.warn("checking events files was successful") ;
-		}
+		String primaryExpectedEventsFilename = utils.getInputDirectory() + "/run0.output_events.xml.gz" ;
+		TestUtils.comparingDepartures(primaryExpectedEventsFilename,actualEventsFilename,1.);
+		TestUtils.comparingArrivals(primaryExpectedEventsFilename,actualEventsFilename,1.);
+		TestUtils.comparingActivityStarts(primaryExpectedEventsFilename,actualEventsFilename, 1.);
+		TestUtils.compareFullEvents(primaryExpectedEventsFilename,actualEventsFilename, false);
+		
+//		{
+//			List<Long> expecteds = Bushfire5Test.getExpectedsFromFiles(utils.getInputDirectory(), "run0.output_events.xml.gz");
+//			log.warn("done with retrieving expecteds") ;
+//			TestUtils.checkSeveral(expecteds, actualEvents);
+//			log.warn("checking events files was successful") ;
+//		}
 		{
 			List<Long> expecteds = Bushfire5Test.getExpectedsFromFiles(utils.getInputDirectory(), "run0.output_plans.xml.gz");
 			log.warn("done with retrieving expecteds") ;
