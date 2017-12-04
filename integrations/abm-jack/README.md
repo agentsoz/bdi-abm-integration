@@ -8,7 +8,7 @@ see the top level README.
 <a name="Dependencies"></a>
 ## Dependencies
 
-- JACK 5.6 (aosgrp.com/products/jack)
+- JACK 5.6 [(download from here)](http://tiny.cc/jack-for-matsim-download)
 
 Make sure JACK is installed on your system. Then assuming JACKROOT is the 
 root directory of the installation, issue the following command to install
