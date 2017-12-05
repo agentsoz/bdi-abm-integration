@@ -29,5 +29,8 @@ package io.github.agentsoz.util.evac;
 public final class PerceptList {
 	public static final String ARRIVED = "Arrived";
 	public static final String BLOCKED = "Blocked";
+	public static final String FIRE_ALERT = "fire_alert";
+	public static final String FIRE_DATA  = "fire_data";
+	public static final String FIRE = "fire";
 }
 
