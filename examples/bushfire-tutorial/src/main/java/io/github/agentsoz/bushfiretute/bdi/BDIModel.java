@@ -24,6 +24,7 @@ import java.util.Map.Entry;
  * #L%
  */
 
+import io.github.agentsoz.util.evac.ActionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,7 @@ import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import io.github.agentsoz.util.Global;
-//import test.EvacResident;
 import scenarioTWO.agents.EvacResident;
 
 /* The BDI Model class handles passing percepts and actions to and
@@ -136,35 +134,35 @@ public class BDIModel extends JACKModel {  //DataSource
 //		}
 
 		// if the parameter is a BDI DriveTo action
-		if ((String) parameters[0] == ActionID.DRIVETO) {
+		if ((String) parameters[0] == ActionList.DRIVETO) {
 				logger.trace("received a DRIVETO action in package action");
 				startDriving(agentID, parameters);
 		
 		}
 		
 		//pick up action
-		if ((String) parameters[0] == ActionID.DRIVETO_AND_PICKUP) {
+		if ((String) parameters[0] == ActionList.DRIVETO_AND_PICKUP) {
 			logger.trace("received a DRIVETO_AND_PICKUP action in package action");
-			callSuperPackageAction(agentID, ActionID.DRIVETO_AND_PICKUP, parameters);
+			callSuperPackageAction(agentID, ActionList.DRIVETO_AND_PICKUP, parameters);
 	
 		}	
 		
 		//pick up action
-		if ((String) parameters[0] == ActionID.PICKUP) {
+		if ((String) parameters[0] == ActionList.PICKUP) {
 			logger.trace("received a PICKUP action in package action");
-			callSuperPackageAction(agentID, ActionID.PICKUP, parameters);
+			callSuperPackageAction(agentID, ActionList.PICKUP, parameters);
 	
 		}
 		
 		//pick up action
-		if ((String) parameters[0] == ActionID.SET_DRIVE_TIME) {
+		if ((String) parameters[0] == ActionList.SET_DRIVE_TIME) {
 			logger.trace("received a SET_DRIVE_TIME action in package action");
-			callSuperPackageAction(agentID, ActionID.SET_DRIVE_TIME, parameters);
+			callSuperPackageAction(agentID, ActionList.SET_DRIVE_TIME, parameters);
 	
 		}
 		
 		//finalt drive to action
-		if ((String) parameters[0] == ActionID.CONNECT_TO) {
+		if ((String) parameters[0] == ActionList.CONNECT_TO) {
 			logger.trace("received a CONNECT_TO action in package action");
 			startDriving(agentID, parameters);
 	
@@ -181,11 +179,11 @@ public class BDIModel extends JACKModel {  //DataSource
 
 //		logger.debug("agent {} driving to {}, coordinates: {}", agentID,
 //				destinationName, destination);
-		if(action.equals(ActionID.DRIVETO)) { 
-			callSuperPackageAction(agentID, ActionID.DRIVETO, parameters);
+		if(action.equals(ActionList.DRIVETO)) {
+			callSuperPackageAction(agentID, ActionList.DRIVETO, parameters);
 		}
-		else if(action.equals(ActionID.CONNECT_TO)){ 
-			callSuperPackageAction(agentID, ActionID.CONNECT_TO, parameters);
+		else if(action.equals(ActionList.CONNECT_TO)){
+			callSuperPackageAction(agentID, ActionList.CONNECT_TO, parameters);
 		}
 
 	}
@@ -222,14 +220,14 @@ public class BDIModel extends JACKModel {  //DataSource
 			Object[] args = (Object[])params;
 			resident.log("reached " + args[0] + " at time " + args[1]);
 		}
-		else if (perceptID.equals(PerceptID.ARRIVED_CONNECT_TO)) {
+		else if (perceptID.equals(PerceptList.ARRIVED_CONNECT_TO)) {
 			Object[] args = (Object[])params;
 			resident.log("arrived at conection link " + args[0] + " at time " + args[1]);
 		}
-		else if (perceptID.equals(PerceptID.ARRIVED_AND_PICKED_UP)) {
+		else if (perceptID.equals(PerceptList.ARRIVED_AND_PICKED_UP)) {
 			resident.log("arrived and picked up from link " + ((Object[])params)[0]);
 		}
-		else if (perceptID.equals(PerceptID.PICKED_UP)) {
+		else if (perceptID.equals(PerceptList.PICKED_UP)) {
 			resident.log("picked up " + params);
 		}
 		
@@ -260,7 +258,7 @@ public class BDIModel extends JACKModel {  //DataSource
 		String passed = State.PASSED.toString();
 		
 		//selecting action types which have a destination allocated
-		if(actionID.equals(ActionID.DRIVETO) || actionID.equals(ActionID.CONNECT_TO) || actionID.equals(ActionID.DRIVETO_AND_PICKUP) ) { 
+		if(actionID.equals(ActionList.DRIVETO) || actionID.equals(ActionList.CONNECT_TO) || actionID.equals(ActionList.DRIVETO_AND_PICKUP) ) {
 			
 			//if the action state is passed and the action type equals the last initiated action type 
 			if( returnedState.compareTo(passed) == 0 && actionID.equals(((EvacResident) agent).initiatedAction) ) {  //equals

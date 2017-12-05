@@ -22,15 +22,14 @@ package io.github.agentsoz.util.evac;
  * #L%
  */
 
-/**
- * The list of percepts that can be processed on Matsim level
- */
-
 public final class PerceptList {
 	public static final String ARRIVED = "Arrived";
 	public static final String BLOCKED = "Blocked";
 	public static final String FIRE_ALERT = "fire_alert";
 	public static final String FIRE_DATA  = "fire_data";
 	public static final String FIRE = "fire";
+	public static final String ARRIVED_CONNECT_TO = "Arrived to connect to";
+	public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
+	public static final String PICKED_UP = "picked up";
 }
 

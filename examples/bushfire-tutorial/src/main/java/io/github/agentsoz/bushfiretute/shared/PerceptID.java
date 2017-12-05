@@ -22,8 +22,10 @@ package io.github.agentsoz.bushfiretute.shared;
  * #L%
  */
 
+import io.github.agentsoz.util.evac.PerceptList;
+
 public final class PerceptID {
-    public static final String ARRIVED_CONNECT_TO = "Arrived to connect to";
-    public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
-    public static final String PICKED_UP = "picked up";
+    public static final String ARRIVED_CONNECT_TO = PerceptList.ARRIVED_CONNECT_TO;
+    public static final String ARRIVED_AND_PICKED_UP = PerceptList.ARRIVED_AND_PICKED_UP;
+    public static final String PICKED_UP = PerceptList.PICKED_UP;
 }

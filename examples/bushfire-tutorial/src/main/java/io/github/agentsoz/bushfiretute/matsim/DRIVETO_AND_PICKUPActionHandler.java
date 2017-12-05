@@ -22,6 +22,8 @@ package io.github.agentsoz.bushfiretute.matsim;
  * #L%
  */
 
+import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.util.evac.PerceptList;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -44,8 +46,6 @@ import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
@@ -95,12 +95,12 @@ final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						Object[] params = { linkId.toString() };
 
-						agent.getActionContainer().register(ActionID.DRIVETO_AND_PICKUP, params);
+						agent.getActionContainer().register(ActionList.DRIVETO_AND_PICKUP, params);
 						// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
 						// called earlier, maybe around where the replanner is called?  kai, oct'17)
 
-						agent.getActionContainer().get(ActionID.DRIVETO_AND_PICKUP).setState(ActionContent.State.PASSED);
-						agent.getPerceptContainer().put(PerceptID.ARRIVED_AND_PICKED_UP, params);
+						agent.getActionContainer().get(ActionList.DRIVETO_AND_PICKUP).setState(ActionContent.State.PASSED);
+						agent.getPerceptContainer().put(PerceptList.ARRIVED_AND_PICKED_UP, params);
 						return true; //unregister this handler
 					}
 				});

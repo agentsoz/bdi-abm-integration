@@ -51,7 +51,6 @@ import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.Util;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.nonmatsim.ActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
@@ -190,13 +189,13 @@ public final class ABMModel  {
 			withHandler.registerBDIAction(ActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
+			withHandler.registerBDIAction(ActionList.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
+			withHandler.registerBDIAction(ActionList.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionID.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
+			withHandler.registerBDIAction(ActionList.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
 		}
 	}
 

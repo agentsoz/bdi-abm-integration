@@ -27,8 +27,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.util.evac.PerceptList;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -50,8 +51,6 @@ import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
-import io.github.agentsoz.bushfiretute.shared.PerceptID;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
@@ -92,12 +91,12 @@ final class CONNECT_TOActionHandler implements BDIActionHandler {
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 						
-						agent.getActionContainer().register(ActionID.CONNECT_TO, params);
+						agent.getActionContainer().register(ActionList.CONNECT_TO, params);
 						// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
 						// called earlier, maybe around where the replanner is called?  kai, oct'17)
 
-						agent.getActionContainer().get(ActionID.CONNECT_TO).setState(ActionContent.State.PASSED);
-						agent.getPerceptContainer().put(PerceptID.ARRIVED_CONNECT_TO, params);
+						agent.getActionContainer().get(ActionList.CONNECT_TO).setState(ActionContent.State.PASSED);
+						agent.getPerceptContainer().put(PerceptList.ARRIVED_CONNECT_TO, params);
 						return true; //unregister this handler
 					}
 				});

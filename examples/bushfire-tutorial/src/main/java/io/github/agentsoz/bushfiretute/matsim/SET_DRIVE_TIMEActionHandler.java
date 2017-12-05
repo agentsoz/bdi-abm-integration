@@ -22,6 +22,7 @@ package io.github.agentsoz.bushfiretute.matsim;
  * #L%
  */
 
+import io.github.agentsoz.util.evac.ActionList;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
@@ -63,8 +63,8 @@ final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 		EvacResident bdiAgent = bdiModel.getBDICounterpart(agentID.toString());
 		bdiAgent.log("has set the end time for activity " + actType + " to " + newTime + " seconds past now." );
 		Object[] params = {};
-		agent.getActionContainer().register(ActionID.SET_DRIVE_TIME, params);
-		agent.getActionContainer().get(ActionID.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
+		agent.getActionContainer().register(ActionList.SET_DRIVE_TIME, params);
+		agent.getActionContainer().get(ActionList.SET_DRIVE_TIME).setState(ActionContent.State.PASSED);
 		return true;
 	}
 

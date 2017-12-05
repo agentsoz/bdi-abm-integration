@@ -25,24 +25,13 @@ import io.github.agentsoz.util.evac.ActionList;
  */
 /**
  *
- * @author Dhirenda Singh
+ * @author Dhirendra Singh
  *
  */
  public class ActionID {
-	 public static final String DRIVETO = ActionList.DRIVETO;
-	 // means drive to some location
-	 
-	 /**
-	 * This is the one described by {@link CustomReplanner#driveDirectlyToActivity}.
-	 */
-	public static final String CONNECT_TO = "connect to";
-	 
-	 public static final String PICKUP = "pick up";
-	 //  wait specified time.  Does (currently) NOT wait until someone shows up.  There is usually a wait action after the 
-	 // pickup action where the agent waits for the BDI system.
-	 
-	 public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
-	 // combining the two
-	 
-	 public static final String SET_DRIVE_TIME = "set drive time";
+	public static final String DRIVETO = ActionList.DRIVETO;
+	public static final String CONNECT_TO = ActionList.CONNECT_TO;
+	public static final String PICKUP = ActionList.PICKUP;
+	public static final String DRIVETO_AND_PICKUP = ActionList.DRIVETO_AND_PICKUP;
+	public static final String SET_DRIVE_TIME = ActionList.SET_DRIVE_TIME;
 }

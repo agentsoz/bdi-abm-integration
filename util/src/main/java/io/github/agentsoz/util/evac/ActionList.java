@@ -22,12 +22,10 @@ package io.github.agentsoz.util.evac;
  * #L%
  */
 
-/**
- * The list of actions that can be processed on Matsim level
- */
 public class ActionList {
-		//An action that any Matsim Agent can carry out
-		public static final String DRIVETO = "drive to";	
-		//An action that any Matsim Agent can carry out
-		public static final String REQUESTLOCATION = "Request Location";
+	public static final String DRIVETO = "drive to";
+   	public static final String CONNECT_TO = "connect to";
+	public static final String PICKUP = "pick up";
+	public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
+	public static final String SET_DRIVE_TIME = "set drive time";
 }
