@@ -4,7 +4,7 @@ import scenarioTWO.plans.*;
 import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 
-import io.github.agentsoz.bushfiretute.bdi.IBdiConnector;
+import io.github.agentsoz.util.evac.jackhelper.IBdiConnector;
 import io.github.agentsoz.abmjack.shared.ActionManager;
 import io.github.agentsoz.abmjack.shared.GlobalTime;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;

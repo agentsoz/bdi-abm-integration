@@ -22,13 +22,14 @@ package io.github.agentsoz.bushfiretute.bdi;
  * #L%
  */
 
+import io.github.agentsoz.util.evac.jackhelper.IBdiConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bushfiretute.Config;
 
 
-public class BdiConnector implements IBdiConnector{
+public class BdiConnector implements IBdiConnector {
 
 	final Logger logger = LoggerFactory.getLogger("");
 	
