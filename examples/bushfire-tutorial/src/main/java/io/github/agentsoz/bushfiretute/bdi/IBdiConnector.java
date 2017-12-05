@@ -22,6 +22,11 @@ package io.github.agentsoz.bushfiretute.bdi;
  * #L%
  */
 
+/**
+ * Interface providing functions used by JACK code. This should not strictly be
+ * required, but is needed to get JACK code to compile (their compiler does not handle
+ * external dependencies very well so this is somewhat of a hack). dsingh, 6/dec/2017
+ */
 public interface IBdiConnector {
 
     public int getMaxDistanceToRelatives();
