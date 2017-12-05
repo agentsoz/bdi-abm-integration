@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.util;
 
 /*
  * #%L

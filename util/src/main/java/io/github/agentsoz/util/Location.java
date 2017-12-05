@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire.datamodels;
+package io.github.agentsoz.util;
 
 /*
  * #%L

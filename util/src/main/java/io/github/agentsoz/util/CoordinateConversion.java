@@ -3,7 +3,7 @@
  *
  * (c) Copyright IBM Corp. 2007
  */
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.util;
 
 import java.util.Collections;
 

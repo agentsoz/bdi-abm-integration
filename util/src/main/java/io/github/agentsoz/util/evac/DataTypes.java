@@ -1,4 +1,4 @@
-package io.github.agentsoz.bushfire;
+package io.github.agentsoz.util.evac;
 
 /*
  * #%L
@@ -22,7 +22,7 @@ package io.github.agentsoz.bushfire;
  * #L%
  */
 
-// DataServer data types used by the bushfire application
+// DataServer data types
 public class DataTypes {
    
    public static final String MATSIM_AGENT_UPDATES = "matsim_agent_updates";
