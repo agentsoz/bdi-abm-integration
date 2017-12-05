@@ -2,7 +2,7 @@ package scenarioTWO.plans;
 import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
+import io.github.agentsoz.util.evac.ActionList;
 import scenarioTWO.agents.EvacResident;
 
 import org.slf4j.Logger;
@@ -51,14 +51,14 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 		double[] relCoords = getRandomCoordinate(); // 1. get a destination
 		int pickuptime = res.bdiConnector.getPickupTime() * 60; // 2. get a random pickup time in minutes and convert it to seconds
 
-		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
+		res.initiatedAction=ActionList.DRIVETO_AND_PICKUP;
 		res.targetDestination="Relatives";
 
-		Object[] params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , relCoords, res.targetDestination, pickuptime};
+		Object[] params = new Object[] { (Object)ActionList.DRIVETO_AND_PICKUP , relCoords, res.targetDestination, pickuptime};
 
-		res.log("picking up relatives; action "+ActionID.DRIVETO_AND_PICKUP + "; relatives are at " + relCoords[0] +","+ relCoords[1] + "; pickup-time is "+ pickuptime );
+		res.log("picking up relatives; action "+ActionList.DRIVETO_AND_PICKUP + "; relatives are at " + relCoords[0] +","+ relCoords[1] + "; pickup-time is "+ pickuptime );
 
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO_AND_PICKUP, params );
 		long startTime = res.getCurrentTime();
 		@subtask( gag );
 

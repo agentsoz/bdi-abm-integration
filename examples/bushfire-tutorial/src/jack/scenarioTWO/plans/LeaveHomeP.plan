@@ -3,7 +3,7 @@ import scenarioTWO.events.*;
 import scenarioTWO.agents.EvacResident;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
+import io.github.agentsoz.util.evac.ActionList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +34,10 @@ Plan Name: LeaveP
 	body()
 	{
 		double delayTime = 10.0;
-		Object[] leave_params = new Object[] { (Object)ActionID.SET_DRIVE_TIME ,delayTime,"Current"};
+		Object[] leave_params = new Object[] { (Object)ActionList.SET_DRIVE_TIME ,delayTime,"Current"};
 		long startTime = res.getCurrentTime();
 		res.log("current time is " + startTime + "; planning to leave in " + delayTime);
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.SET_DRIVE_TIME, leave_params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.SET_DRIVE_TIME, leave_params );
 		@post( gag );
 	}
 }

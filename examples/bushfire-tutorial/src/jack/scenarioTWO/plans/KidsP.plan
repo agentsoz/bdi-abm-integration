@@ -3,7 +3,7 @@ import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 import scenarioTWO.agents.EvacResident;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.bushfiretute.shared.ActionID;
+import io.github.agentsoz.util.evac.ActionList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +48,12 @@ Plan Name: KidsP
 		res.log("will drive to and pick up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") ; pickup time is " + pickuptime + "; time now is " + startTime);
 
 		//DRIVETO_AND_PICKUP
-		res.initiatedAction=ActionID.DRIVETO_AND_PICKUP;
+		res.initiatedAction=ActionList.DRIVETO_AND_PICKUP;
 		res.targetDestination="school";
 
-		Object[] pickup_params = new Object[] { (Object)ActionID.DRIVETO_AND_PICKUP , res.schoolLocation , "Kids", pickuptime};
+		Object[] pickup_params = new Object[] { (Object)ActionList.DRIVETO_AND_PICKUP , res.schoolLocation , "Kids", pickuptime};
 
-		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionID.DRIVETO_AND_PICKUP, pickup_params );
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO_AND_PICKUP, pickup_params );
 		@subtask( gag );
 
 
