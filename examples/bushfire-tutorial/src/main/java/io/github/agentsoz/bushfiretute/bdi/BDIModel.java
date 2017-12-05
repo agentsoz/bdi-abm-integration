@@ -36,7 +36,6 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.bushfiretute.DataTypes;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.util.Global;
 import scenarioTWO.agents.EvacResident;
@@ -68,7 +67,7 @@ public class BDIModel extends JACKModel {  //DataSource
 		// on receiving the fire alert, insert a global percept into the agent data containers
 		if (Global.getTime() == 4.0 && !firePerceptAdded ) {
 			adc.getOrCreate("global").getPerceptContainer()
-					.put(DataTypes.FIREALERT, "bushfire started");
+					.put(PerceptList.FIRE_ALERT, "bushfire started");
 			logger.debug("broadcasted fire alert global percept at timestep : {}",Global.getTime());
 			firePerceptAdded = true;
 
@@ -86,7 +85,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			 String agentID = agentEntry.getKey();
 			 EvacResident agent = (EvacResident) agentEntry.getValue();
 			 if(agent.waitAtHomeFlag == true && agent.getTimeLeftToEvac() <= Config.getDepartureTriggerTime()) { 
-				 adc.getOrCreate(agentID).getPerceptContainer().put(DataTypes.LEAVENOW, " start departure");
+				 adc.getOrCreate(agentID).getPerceptContainer().put(PerceptList.LEAVENOW, " start departure");
 			 }
 			 //waitUntilIdle(); // yyyyyy try to get code deterministic
 		 }
@@ -205,13 +204,13 @@ public class BDIModel extends JACKModel {  //DataSource
 	public void handlePercept(Agent agent, String perceptID, Object params) {
 
 		EvacResident resident = (EvacResident) agent;
-		if (perceptID.equals(DataTypes.FIREALERT) && resident.fireResponse == false) {
+		if (perceptID.equals(PerceptList.FIRE_ALERT) && resident.fireResponse == false) {
 			// dataServer.publish(DataTypes.FIRE_ALERT, null);
 			resident.log("received alert " + params);
 			resident.postEvacAlert("fire started");
 			resident.fireResponse = true;
 		}
-		else if (perceptID.equals(DataTypes.LEAVENOW)) {
+		else if (perceptID.equals(PerceptList.LEAVENOW)) {
 			resident.log("recieved percept to leave now at time " + Global.getTime());
 			resident.postLeaveGoal();
 			resident.waitAtHomeFlag = false;

@@ -31,5 +31,6 @@ public final class PerceptList {
 	public static final String ARRIVED_CONNECT_TO = "Arrived to connect to";
 	public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
 	public static final String PICKED_UP = "picked up";
+	public static final String LEAVENOW = "leave now";
 }
 
