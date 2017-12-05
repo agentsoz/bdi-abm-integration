@@ -48,7 +48,7 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.bushfiretute.Util;
+import io.github.agentsoz.util.Util;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.nonmatsim.ActionHandler;
