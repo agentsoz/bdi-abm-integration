@@ -32,7 +32,7 @@ import io.github.agentsoz.abmjack.JACKModel;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.DataTypes;
@@ -218,7 +218,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			resident.postLeaveGoal();
 			resident.waitAtHomeFlag = false;
 		}
-		else if (perceptID.equals(MATSimPerceptList.ARRIVED)) {
+		else if (perceptID.equals(PerceptList.ARRIVED)) {
 			Object[] args = (Object[])params;
 			resident.log("reached " + args[0] + " at time " + args[1]);
 		}

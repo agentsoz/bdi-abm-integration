@@ -1,6 +1,6 @@
 package io.github.agentsoz.bushfiretute.shared;
 
-import io.github.agentsoz.bdimatsim.MATSimActionList;
+import io.github.agentsoz.util.evac.ActionList;
 
 /*
  * #%L
@@ -29,7 +29,7 @@ import io.github.agentsoz.bdimatsim.MATSimActionList;
  *
  */
  public class ActionID {
-	 public static final String DRIVETO = MATSimActionList.DRIVETO;
+	 public static final String DRIVETO = ActionList.DRIVETO;
 	 // means drive to some location
 	 
 	 /**

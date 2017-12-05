@@ -1,4 +1,4 @@
-package io.github.agentsoz.bdimatsim;
+package io.github.agentsoz.util.evac;
 
 /*
  * #%L
@@ -26,7 +26,7 @@ package io.github.agentsoz.bdimatsim;
  * The list of percepts that can be processed on Matsim level
  */
 
-public final class MATSimPerceptList {
+public final class PerceptList {
 	public static final String ARRIVED = "Arrived";
 	public static final String BLOCKED = "Blocked";
 }

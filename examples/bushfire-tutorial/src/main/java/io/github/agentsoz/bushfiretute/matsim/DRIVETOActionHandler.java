@@ -40,9 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.MATSimActionList;
+import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
@@ -94,12 +94,12 @@ final class DRIVETOActionHandler implements BDIActionHandler {
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
 
-						agent.getActionContainer().register(MATSimActionList.DRIVETO, params);
+						agent.getActionContainer().register(ActionList.DRIVETO, params);
 						// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
 						// called earlier, maybe around where the replanner is called?  kai, oct'17)
 						
-						agent.getActionContainer().get(MATSimActionList.DRIVETO).setState(ActionContent.State.PASSED);
-						agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
+						agent.getActionContainer().get(ActionList.DRIVETO).setState(ActionContent.State.PASSED);
+						agent.getPerceptContainer().put(PerceptList.ARRIVED, params);
 						return true; //unregister this handler
 					}
 				});

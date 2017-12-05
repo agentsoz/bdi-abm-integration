@@ -1,4 +1,4 @@
-package io.github.agentsoz.bdimatsim;
+package io.github.agentsoz.util.evac;
 
 /*
  * #%L
@@ -25,7 +25,7 @@ package io.github.agentsoz.bdimatsim;
 /**
  * The list of actions that can be processed on Matsim level
  */
-public class MATSimActionList {
+public class ActionList {
 		//An action that any Matsim Agent can carry out
 		public static final String DRIVETO = "drive to";	
 		//An action that any Matsim Agent can carry out

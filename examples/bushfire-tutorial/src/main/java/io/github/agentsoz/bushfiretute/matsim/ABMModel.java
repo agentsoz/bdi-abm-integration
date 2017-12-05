@@ -43,9 +43,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
-import io.github.agentsoz.bdimatsim.MATSimActionList;
+import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.bdimatsim.MATSimModel;
-import io.github.agentsoz.bdimatsim.MATSimPerceptList;
+import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bushfiretute.Config;
 import io.github.agentsoz.bushfiretute.Util;
@@ -175,7 +175,7 @@ public final class ABMModel  {
 					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
 					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
-					agent.getPerceptContainer().put(MATSimPerceptList.ARRIVED, params);
+					agent.getPerceptContainer().put(PerceptList.ARRIVED, params);
 					return true; // unregister this handler
 				}
 			});
@@ -187,7 +187,7 @@ public final class ABMModel  {
 			ActionHandler withHandler = matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
 
 			// overwrite default DRIVETO
-			withHandler.registerBDIAction(MATSimActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
+			withHandler.registerBDIAction(ActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
 
 			// register new action
 			withHandler.registerBDIAction(ActionID.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
