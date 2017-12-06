@@ -41,9 +41,9 @@ public class Bushfire1Test {
 		log.info("actual(plans)=" + actualPlans);
 		
 		String primaryExpectedEventsFilename = utils.getInputDirectory() + "/run0.output_events.xml.gz" ;
-		TestUtils.comparingDepartures(primaryExpectedEventsFilename,actualEventsFilename,1.);
-		TestUtils.comparingArrivals(primaryExpectedEventsFilename,actualEventsFilename,1.);
-		TestUtils.comparingActivityStarts(primaryExpectedEventsFilename,actualEventsFilename, 1.);
+		TestUtils.comparingDepartures(primaryExpectedEventsFilename,actualEventsFilename,2.);
+		TestUtils.comparingArrivals(primaryExpectedEventsFilename,actualEventsFilename,2.);
+		TestUtils.comparingActivityStarts(primaryExpectedEventsFilename,actualEventsFilename, 2.);
 		TestUtils.compareFullEvents(primaryExpectedEventsFilename,actualEventsFilename, false);
 		
 //		{

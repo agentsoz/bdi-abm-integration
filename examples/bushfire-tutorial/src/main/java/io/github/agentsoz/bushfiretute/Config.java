@@ -31,6 +31,8 @@ import java.util.Random;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import io.github.agentsoz.util.Util;
+import javafx.beans.property.IntegerProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -38,8 +40,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import io.github.agentsoz.bushfiretute.datamodels.Location;
-import io.github.agentsoz.bushfiretute.datamodels.School;
+import io.github.agentsoz.util.Location;
 import io.github.agentsoz.util.Global;
 
 
@@ -110,7 +111,7 @@ public class Config {
 	private static double low_panic = 0.0 ;
 	
 	
-	private static LinkedHashMap<Integer, School> schools = new LinkedHashMap<Integer, School>();
+	private static LinkedHashMap<Integer, Location> schools = new LinkedHashMap<Integer, Location>();
 	private static ArrayList<String> agentsWithoutSchools =  new ArrayList<String>();
 	
 	private static Image image = new Image();
@@ -139,7 +140,7 @@ public class Config {
 		return agentsWithoutSchools.size();
 	}
 	
-	public static LinkedHashMap<Integer,School> getSchools() { 
+	public static LinkedHashMap<Integer,Location> getSchools() {
 		return schools;
 	}
 	
@@ -613,7 +614,7 @@ public class Config {
 	/**
 	 * read the list of schools and store them.
 	 * 
-	 * @param parent
+	 * @param node
 	 *            The node containing the list
 	 * @return false if there was a problem
 	 */
@@ -630,7 +631,7 @@ public class Config {
 					.getNodeValue();
 			double easting = Double.parseDouble(eastStr);
 			double northing = Double.parseDouble(northStr);
-			School scl = new School(schoolCount,name, type, easting, northing);
+			Location scl = new Location(String.valueOf(schoolCount), easting, northing, name);
 			schools.put(schoolCount, scl);
 			schoolCount++;
 		} catch (Exception e) {
@@ -645,8 +646,8 @@ public class Config {
 		for(Map.Entry<Double, Double> entry : schoolLocs.entrySet()) {
 			double east = (double) entry.getKey();
 			double north =  (double) entry.getValue();
-			
-			School scl = new School(schoolCount,"school","s", east, north);			
+
+			Location scl = new Location(String.valueOf(schoolCount),east, north);
 			schools.put(schoolCount, scl);
 			schoolCount++;			
 		}
@@ -654,7 +655,7 @@ public class Config {
 	}
 	private static void printSchools(){
 		for (Integer key : schools.keySet()) {
-			School scl = schools.get(key);
+			Location scl = schools.get(key);
 			logger.trace("school info : {} ", scl.toString());
 
 		}
@@ -664,16 +665,15 @@ public class Config {
 	 * measures the distance in between two locations in km and randomly
 	 * selects coords of a school.
 	 * @param agentLoc : home location of the agent .These should be UTM (meters)
-	 * @param distRange : distance range in km
 	 * @return
 	 */
-	public static School getRandomSchool(String id,double[] agentLoc) {
+	public static Location getRandomSchool(String id,double[] agentLoc) {
 		 double distRange = maxDistanceToSchool;
-		 School selectedSchool=null;
-		 ArrayList<School> schoolsWithinDistance = new ArrayList<School> ();
-		 for(School school : schools.values()) {
+		Location selectedSchool=null;
+		 ArrayList<Location> schoolsWithinDistance = new ArrayList<Location> ();
+		 for(Location school : schools.values()) {
 			 //distance is returned in km
-			 if(Location.distance(agentLoc,school.getCoordinates()) <= distRange)
+			 if((Util.distance(agentLoc, school.getCoordinates()) / 1000) <= distRange)
 			 {
 				 schoolsWithinDistance.add(school);
 			 }
@@ -683,13 +683,13 @@ public class Config {
 			 logger.debug(" selected school array : {}",schoolsWithinDistance.toString());
 			 int num = Global.getRandom().nextInt(schoolsWithinDistance.size());
 			 selectedSchool= schoolsWithinDistance.get(num);
-			 logger.debug("selected school ID : " + selectedSchool.getID());
-			 
-			 
-			School scl = schools.get(selectedSchool.getID());
-			scl.addKid(id);
+			 logger.debug("selected school ID : " + selectedSchool.getName());
+
+
+			 Location scl = schools.get(Integer.parseInt(selectedSchool.getName()));
+			 //scl.addKid(id);
 			
-			logger.trace("added kid {} to school {} ",id, scl.getID());
+			logger.trace("added kid {} to school {} ",id, scl.getName());
 			 
 		 }
 		 else {
@@ -699,8 +699,8 @@ public class Config {
 	}
 	
 	public static double[] getRandomSchoolCoords(String id,double[] agentLoc) {
-		double[] coords =  null; 
-		School randomSchool = getRandomSchool(id,agentLoc);
+		double[] coords =  null;
+		Location randomSchool = getRandomSchool(id,agentLoc);
 		if(randomSchool != null) {
 			coords = randomSchool.getCoordinates();
 		}	
@@ -708,22 +708,13 @@ public class Config {
 	}
 	
 	public static int getRandomSchoolID(String id, double[] agentLoc) {
-		int schoolID=-1; 
-		School randomSchool = getRandomSchool(id,agentLoc);
+		int schoolID=-1;
+		Location randomSchool = getRandomSchool(id,agentLoc);
 		if(randomSchool != null) {
-			schoolID = randomSchool.getID();
+			schoolID = Integer.parseInt(randomSchool.getName());
 
 		}
 				
 		return schoolID;
 	}
-	
-	public static void testGetRandomSchool()
-	{
-		//testing getRandomSchool method
-		double[] test = {1500.0,1000.0};
-		School school = getRandomSchool("1",test); //
-		logger.debug("selected school coords : easting - {} northing -{}", school.getEasting(), school.getNorthing());
-	}
-	
 }

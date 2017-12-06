@@ -99,4 +99,19 @@ public class Util {
 		return index;
 	}
 
+	/**
+	 * Eulicidian distance between two locations
+	 *
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static double distance(double[] a, double[] b) {
+
+		double dx = b[1] - a[1];
+		double dy = b[0] - a[0];
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+
 }
