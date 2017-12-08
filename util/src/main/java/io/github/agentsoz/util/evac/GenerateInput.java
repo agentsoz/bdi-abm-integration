@@ -65,7 +65,7 @@ public class GenerateInput {
 	private static ArrayList<PopulationArea> populationAreas = new ArrayList<PopulationArea>();
 
 	// Keeps the next unique person ID
-	private static int nextUniquePersonId = 1;
+	private static int nextUniquePersonId = 0;
 
 	public static void main(String[] args) {
 
