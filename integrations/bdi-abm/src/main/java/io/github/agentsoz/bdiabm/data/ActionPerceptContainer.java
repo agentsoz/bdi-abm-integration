@@ -42,17 +42,6 @@ public class ActionPerceptContainer implements Serializable
 		perceptContainer = new PerceptContainer();
 	}
 	
-//	public void replace (ActionPerceptContainer apContainer)
-//	{
-//		setActionContainer (apContainer.actionContainer);
-//		setPerceptContainer (apContainer.perceptContainer);
-//	}
-//	
-//	public void setActionContainer (ActionContainer newContainer)
-//	{
-//		this.actionContainer = newContainer;
-//	}
-	
 	/**
 	 * @return
 	 * The action container
@@ -61,14 +50,6 @@ public class ActionPerceptContainer implements Serializable
 	{
 		return actionContainer;
 	}
-	
-//	public void setPerceptContainer (PerceptContainer perceptContainer) {
-//		// this _is_ actually used once (to clear the container)
-//		// yyyy but I don't like it.  giving a totally new address means that everything that kept a handle on the old
-//		// container is now confused.   Rather put a "clear()" method into PerceptContainer.  kai, nov'17
-//		this.perceptContainer = perceptContainer;
-//	}
-
 	
 	/**
 	 * @return

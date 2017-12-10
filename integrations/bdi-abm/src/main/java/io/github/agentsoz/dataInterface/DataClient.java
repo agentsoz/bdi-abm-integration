@@ -26,4 +26,5 @@ package io.github.agentsoz.dataInterface;
 public interface DataClient {
    
    public boolean dataUpdate( double time, String dataType, Object data );
+   // yy what should be returned here? kai, dec'17
 }
