@@ -48,10 +48,10 @@ public abstract class JillModel implements BDIServerInterface {
 
 	private Config config;
 	
-	JillModel() {
+	public JillModel() {
 	}
 
-	private static Agent getAgent(int id) {
+	protected static Agent getAgent(int id) {
 		// FIXME: No contract that says returned object will be instanceof Agent
 		return (Agent) GlobalState.agents.get(id);
 	}
