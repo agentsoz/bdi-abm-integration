@@ -140,9 +140,10 @@ public class DataServer {
    }
    
    public void stepTime() {
-      
-      time += timeStep;
-      updateTimedSources();
+      synchronized (sources) {
+         time += timeStep;
+         updateTimedSources();
+      }
    }
    
    // increase time by a given amount and poll for new timed updates
@@ -171,7 +172,11 @@ public class DataServer {
       return true;
    }
    
-   public double getTime() { return time; }
+   public double getTime() {
+      synchronized (sources) {
+         return time;
+      }
+   }
    
    // send a new data update to all clients that have subscribed to the data type
    public boolean publish( String dataType, Object data ) {
