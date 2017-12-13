@@ -32,5 +32,7 @@ public final class PerceptList {
 	public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
 	public static final String PICKED_UP = "picked up";
 	public static final String LEAVENOW = "leave now";
+    public static final String BROADCAST = "global";
+	public static final String TIME = "time";
 }
 

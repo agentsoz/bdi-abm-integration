@@ -25,44 +25,33 @@ package io.github.agentsoz.abmjill;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.Agent;
 import io.github.agentsoz.bdiabm.BDIServerInterface;
-import io.github.agentsoz.bdiabm.data.ActionContainer;
-import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.ActionPerceptContainer;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.AgentStateList;
-import io.github.agentsoz.bdiabm.data.PerceptContainer;
+import io.github.agentsoz.bdiabm.data.*;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.jill.Main;
-import io.github.agentsoz.jill.core.GlobalState;
-
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import io.github.agentsoz.jill.config.Config;
+import io.github.agentsoz.jill.core.GlobalState;
 import io.github.agentsoz.jill.util.ArgumentsLoader;
+import io.github.agentsoz.util.evac.PerceptList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.PrintStream;
+import java.util.*;
 
 public abstract class JillModel implements BDIServerInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger("");
 
-	private static final String BROADCAST = "global";
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
 	private static AgentDataContainer lastContainer;
 
 	private Config config;
 	
-	public JillModel() {
+	JillModel() {
 	}
 
-	public static Agent getAgent(int id) {
+	private static Agent getAgent(int id) {
 		// FIXME: No contract that says returned object will be instanceof Agent
 		return (Agent) GlobalState.agents.get(id);
 	}
@@ -72,8 +61,8 @@ public abstract class JillModel implements BDIServerInterface {
 			AgentStateList agentList, // not used
 			ABMServerInterface abmServer,
 			Object[] params) {
-		nextContainer = new AgentDataContainer();;
-		lastContainer = new AgentDataContainer();;
+		nextContainer = new AgentDataContainer();
+		lastContainer = new AgentDataContainer();
 		// Parse the command line options
 		ArgumentsLoader.parse((String[])params);
 		// Load the configuration 
@@ -131,18 +120,16 @@ public abstract class JillModel implements BDIServerInterface {
 
 		logger.trace("Received {}", agentDataContainer);
 
-		boolean global = false;
 		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
-        PerceptContainer gPC = lastContainer.getPerceptContainer(BROADCAST);
+        PerceptContainer gPC = lastContainer.getPerceptContainer(PerceptList.BROADCAST);
         if (gPC != null) {
           String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
           for (int g = 0; g < globalPerceptsArray.length; g++) {
               String globalPID = globalPerceptsArray[g];
               Object gaParameters = gPC.read(globalPID);
               globalPercepts.put(globalPID, gaParameters);
-              global = true;
-          }
+		  }
           Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
               .entrySet().iterator();
           while (globalEntries.hasNext()) {
@@ -159,7 +146,7 @@ public abstract class JillModel implements BDIServerInterface {
 		// For each ActionPercept (one for each agent)
 		while (i.hasNext()) {
 			String agentID = i.next();
-			if (agentID.equals(BROADCAST)) {
+			if (agentID.equals(PerceptList.BROADCAST)) {
 				continue;
 			}
 			ActionPerceptContainer apc = lastContainer.getOrCreate(agentID);
@@ -219,5 +206,4 @@ public abstract class JillModel implements BDIServerInterface {
 		agentDataContainer.copy(nextContainer); // copies new actions
 		nextContainer.removeAll();
     }
-
 }
