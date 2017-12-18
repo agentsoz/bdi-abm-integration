@@ -5,12 +5,12 @@ addons:
     packages:
       - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
 before_install:
-  - cd $HOME && git clone --depth=1 --branch=kaibranch https://github.com/matsim-org/matsim.git 
-  - cd $HOME/matsim && git checkout kaibranch && git log -1
-  - cd $HOME/matsim/examples && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true 
-  - cd $HOME/matsim/matsim && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true 
+#  - cd $HOME && git clone --depth=1 --branch=kaibranch https://github.com/matsim-org/matsim.git
+#  - cd $HOME/matsim && git checkout kaibranch && git log -1
+#  - cd $HOME/matsim/examples && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true
+#  - cd $HOME/matsim/matsim && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true
 script:
-  - cd $TRAVIS_BUILD_DIR && mvn package -B -Dmatsim.preferLocalDtds=true 
+  - cd $TRAVIS_BUILD_DIR && mvn package -B -Dmatsim.preferLocalDtds=true
 # --fail-at-end # stop at first error --> easier to debug
 # -Dmaven.test.redirectTestOutputToFile # otherwise nearly impossible to debug
 env:
@@ -19,4 +19,3 @@ env:
 cache:
   directories:
   - $HOME/.m2
-
