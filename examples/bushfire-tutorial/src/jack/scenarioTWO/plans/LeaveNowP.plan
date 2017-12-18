@@ -2,7 +2,6 @@ package scenarioTWO.plans;
 import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import scenarioTWO.agents.EvacResident;
 import io.github.agentsoz.util.evac.ActionList;
 
@@ -57,10 +56,6 @@ Plan Name: LeaveNowP
 		res.targetDestination="Safe";
 
 		Object[] drive_params = new Object[] { (Object)ActionList.CONNECT_TO, res.targetDestination};
-
-		ScenarioTwoData.leaveNow++;
-		ScenarioTwoData.connectToAgents.add((Object)res.agentID);
-		ScenarioTwoData.connectToDepTimes.add((Object)res.getCurrentTime());
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.CONNECT_TO, drive_params );
 		double startTime = res.getCurrentTime();

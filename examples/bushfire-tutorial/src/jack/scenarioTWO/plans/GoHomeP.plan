@@ -3,7 +3,6 @@ import scenarioTWO.events.*;
 import scenarioTWO.data.*;
 import scenarioTWO.agents.EvacResident;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.util.evac.ActionList;
 
 import org.slf4j.Logger;
@@ -68,7 +67,6 @@ Description: Set prepared_to_evac_flag = false
 
 
 		res.waitAtHomeFlag = true;
-		ScenarioTwoData.goHome++;
 
 		double endTime = res.getCurrentTime();
 		double tripTime = endTime - startTime;

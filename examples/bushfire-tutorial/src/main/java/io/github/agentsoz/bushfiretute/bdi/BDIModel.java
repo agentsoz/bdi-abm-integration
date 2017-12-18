@@ -37,7 +37,6 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.util.Global;
 import scenarioTWO.agents.EvacResident;
 
@@ -110,17 +109,6 @@ public class BDIModel extends JACKModel {  //DataSource
 	// Implemented here so we can cleanly close our log files.
 	@Override
 	public void finish() {
-		logger.debug("agents with kids: {}"
-				+ "| agents with Relatives: {}"
-				+ "| agents with schools: {}"
-				+ "| agents with kids but no schools: {}"
-				+ "| totPickups: {} | maxPickups: {}"
-				+ "", ScenarioTwoData.agentsWithKids,ScenarioTwoData.agentsWithRels,ScenarioTwoData.agentsWithSchools,ScenarioTwoData.agentsWithKidsNoSchools,ScenarioTwoData.totPickups, Config.getMaxPickUps());
-		
-		//store data
-		ScenarioTwoData.writeToFile();
-		ScenarioTwoData.writeConnectToDepTimesToFile();
-		
 		logger.info("shut down");
 	}
 	

@@ -29,7 +29,6 @@ import java.util.Random;
 
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
 import io.github.agentsoz.bdimatsim.Utils;
-import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.matsim.*;
 import io.github.agentsoz.dataInterface.DataServer;
 import io.github.agentsoz.nonmatsim.ActionHandler;
@@ -376,34 +375,30 @@ public class BushfireMain {
 	public static void assignDependentPersons(List<String> bdiAgentsIDs, BDIModel bdiModel) {
 		for (String agentId : bdiAgentsIDs) {
 			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
-			if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
+			int totPickups = 0;
+			if( totPickups <= Config.getMaxPickUps() ) {
 				double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
 				pDependents = Util.normalise(pDependents);
 				Random random = Global.getRandom();
 
 				if (random.nextDouble() < pDependents[0]) {
 					// Allocate dependent children
-					ScenarioTwoData.agentsWithKids++;
 					double[] sclCords = Config.getRandomSchoolCoords(bdiAgent.getId(),bdiAgent.startLocation);
 					if(sclCords != null) {
 						bdiAgent.kidsNeedPickUp = true;
 						bdiAgent.schoolLocation = sclCords;
 						bdiAgent.prepared_to_evac_flag = false;
-						ScenarioTwoData.totPickups++;
 						bdiAgent.log("has children at school coords "
 								+ sclCords[0] + "," +sclCords[1]);
 					}
 					else{
 						bdiAgent.log("has children but there are no schools nearby");
-						ScenarioTwoData.agentsWithKidsNoSchools++;
 					}
 				}
 				if (random.nextDouble() < pDependents[1]) {
 					// Allocate dependent adults
-					ScenarioTwoData.agentsWithRels++;
 					bdiAgent.relsNeedPickUp = true;
 					bdiAgent.prepared_to_evac_flag = false;
-					ScenarioTwoData.totPickups++;
 					bdiAgent.log("has relatives");
 				}
 				if (!bdiAgent.relsNeedPickUp && !bdiAgent.kidsNeedPickUp) {
