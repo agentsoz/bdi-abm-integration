@@ -36,20 +36,7 @@ public class Global {
 	// all application code should use this same instance of Random
 	private static final Random random = new Random();
 
-	private static long time;
-	    
 	private Global() {} // do not instantiate
-
-	
-    public static void updateTime() {
-      time++;
-    }
-  
-    public static long getTime() {
-      return time;
-    }
-
-
 
 	synchronized
 	public static Random getRandom() {

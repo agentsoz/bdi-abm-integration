@@ -31,6 +31,7 @@ import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
 import io.github.agentsoz.bdimatsim.Utils;
 import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
 import io.github.agentsoz.bushfiretute.matsim.*;
+import io.github.agentsoz.dataInterface.DataServer;
 import io.github.agentsoz.nonmatsim.ActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
@@ -115,8 +116,12 @@ public class BushfireMain {
 			throw new RuntimeException("failed to load configuration") ;
 		}
 
+		// Create the data and time server
+		DataServer dataServer = DataServer.getServer("BushfireTutorial");
+		dataServer.setTime(0.0);
+
 		// Create the BDI model
-		BDIModel bdiModel = new BDIModel();
+		BDIModel bdiModel = new BDIModel(dataServer);
 		
 		// Create the MATSim side
 		List<String> config = new ArrayList<>() ;
@@ -150,7 +155,10 @@ public class BushfireMain {
 			if( matsimModel.isFinished() ) {
 				break ;
 			}
-			matsimModel.runUntil(Global.getTime()+1, matsimModel.getAgentManager().getAgentDataContainer());
+			matsimModel.runUntil((long)dataServer.getTime(), matsimModel.getAgentManager().getAgentDataContainer());
+
+			// increment time
+			dataServer.stepTime();
 		}
 
 		// Finish up
@@ -331,7 +339,7 @@ public class BushfireMain {
 				public boolean handle(Id<Person> agentId, Id<Link> linkId, EventsMonitorRegistry.MonitoredEventType monitoredEvent) {
 					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
 					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
-					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
+					Object[] params = { "Safe" , Double.toString(bdiAgent.getCurrentTime())};
 					agent.getPerceptContainer().put(PerceptList.ARRIVED, params);
 					return true; // unregister this handler
 				}

@@ -24,6 +24,7 @@ import java.util.Map.Entry;
  * #L%
  */
 
+import io.github.agentsoz.dataInterface.DataServer;
 import io.github.agentsoz.util.evac.ActionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,15 +61,22 @@ public class BDIModel extends JACKModel {  //DataSource
 //	static boolean startedEvac = false;
 	int timeStepcount = 0; // ugly way to post the fire alert at the 4th time step
 
-	 boolean firePerceptAdded = false;  // to send the global fire alert percept
+	boolean firePerceptAdded = false;  // to send the global fire alert percept
+	private DataServer dataServer;
+
+	public BDIModel(DataServer dataServer) {
+		this.dataServer = dataServer;
+
+	}
+
 	@Override
 	public void takeControl(AgentDataContainer adc) {
 
 		// on receiving the fire alert, insert a global percept into the agent data containers
-		if (Global.getTime() == 4.0 && !firePerceptAdded ) {
+		if (dataServer.getTime() == 4.0 && !firePerceptAdded ) {
 			adc.getOrCreate("global").getPerceptContainer()
 					.put(PerceptList.FIRE_ALERT, "bushfire started");
-			logger.debug("broadcasted fire alert global percept at timestep : {}",Global.getTime());
+			logger.debug("broadcasted fire alert global percept at timestep : {}",dataServer.getTime());
 			firePerceptAdded = true;
 
 		}
@@ -191,7 +199,6 @@ public class BDIModel extends JACKModel {  //DataSource
 		super.packageAction(agentID, action, parameters);
 	}
 
-
 	@Override
 	public Agent createAgent(String agentID, Object[] initData) {
 		logger.debug("agent {} initiated from bushfire application", agentID);
@@ -211,7 +218,7 @@ public class BDIModel extends JACKModel {  //DataSource
 			resident.fireResponse = true;
 		}
 		else if (perceptID.equals(PerceptList.LEAVENOW)) {
-			resident.log("recieved percept to leave now at time " + Global.getTime());
+			resident.log("recieved percept to leave now at time " + dataServer.getTime());
 			resident.postLeaveGoal();
 			resident.waitAtHomeFlag = false;
 		}

@@ -64,7 +64,7 @@ public static void writeConnectToDepTimesToFile() {
 			writer.println("id" + "\t" + "deptime");
 	        for(int i = 0 ; i < connectToAgents.size() ; i++){
 	        	String id = (String)connectToAgents.get(i) ;
-	        	long time  = (long)connectToDepTimes.get(i);
+	        	double time  = (double)connectToDepTimes.get(i);
 	        	writer.println(id + "\t" + time);
 	            }
 

@@ -134,7 +134,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
 		logger.trace("Received {}", agentDataContainer);
-		Global.updateTime();
 
 		// save the container
 		lastContainer.removeAll();

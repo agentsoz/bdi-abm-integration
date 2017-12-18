@@ -92,7 +92,7 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
 						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
-						Object[] params = { linkId.toString() , Long.toString(bdiAgent.getCurrentTime())};
+						Object[] params = { linkId.toString() , Double.toString(bdiAgent.getCurrentTime())};
 
 						agent.getActionContainer().register(ActionList.DRIVETO, params);
 						// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be

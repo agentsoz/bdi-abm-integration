@@ -11,6 +11,7 @@ import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.abmjack.env.GenericActions;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
 import io.github.agentsoz.abmjack.env.UpdateAction;
+import io.github.agentsoz.dataInterface.DataServer;
 import io.github.agentsoz.util.Global;
 
 import io.github.agentsoz.util.Global;
@@ -85,7 +86,7 @@ Agent Name: EvacResident
    	public boolean waitAtHomeFlag = false;
 	public double depTime;
 	public boolean prepared_to_evac_flag = true;
-	public long travelTime = 0L;
+	public double travelTime;
 	public double[] startLocation;
 	public double[] endLocation;
 	public double[] currentDestination;
@@ -162,7 +163,6 @@ Agent Name: EvacResident
 	 	      currentDestination = dest;
 	 }
 
-
 	public ActionManager getActionManager() {
       	return actionManager;
    	}
@@ -173,8 +173,8 @@ Agent Name: EvacResident
 
    	}
 
-   	public long getCurrentTime(){
-        return Global.getTime();
+   	public double getCurrentTime(){
+        return DataServer.getServer("BushfireTutorial").getTime();
     }
 
 	public double getTimeLeftToEvac()
@@ -212,7 +212,7 @@ Agent Name: EvacResident
 	}
 
 	//travel time
-	public void addToTravelTime(long tripTime)
+	public void addToTravelTime(double tripTime)
 	{
 		this.travelTime = this.travelTime + tripTime;
 	}
@@ -223,7 +223,7 @@ Agent Name: EvacResident
 	}
 	
 	public void log(String msg) {
-		Object[] o = {Long.toString(getCurrentTime()), this.agentID, msg};
+		Object[] o = {Double.toString(getCurrentTime()), this.agentID, msg};
 		logger.info(String.format("Time %-6s, Agent %-5s: %s", o));
 	}
 }

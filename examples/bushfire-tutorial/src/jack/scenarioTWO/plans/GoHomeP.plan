@@ -63,15 +63,15 @@ Description: Set prepared_to_evac_flag = false
 
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO, drive_params );
-		long startTime = res.getCurrentTime();
+		double startTime = res.getCurrentTime();
 		@subtask( gag );
 
 
 		res.waitAtHomeFlag = true;
 		ScenarioTwoData.goHome++;
 
-		long endTime = res.getCurrentTime();
-		long tripTime = endTime - startTime;
+		double endTime = res.getCurrentTime();
+		double tripTime = endTime - startTime;
 		res.log("reached Home at time " + endTime);
 
 	}

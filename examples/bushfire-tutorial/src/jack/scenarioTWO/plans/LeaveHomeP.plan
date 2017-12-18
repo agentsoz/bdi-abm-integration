@@ -35,7 +35,7 @@ Plan Name: LeaveP
 	{
 		double delayTime = 10.0;
 		Object[] leave_params = new Object[] { (Object)ActionList.SET_DRIVE_TIME ,delayTime,"Current"};
-		long startTime = res.getCurrentTime();
+		double startTime = res.getCurrentTime();
 		res.log("current time is " + startTime + "; planning to leave in " + delayTime);
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.SET_DRIVE_TIME, leave_params );
 		@post( gag );

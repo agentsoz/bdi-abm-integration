@@ -59,14 +59,14 @@ Description: Lin - get a relative from a random address. This goal instantiated 
 		res.log("picking up relatives; action "+ActionList.DRIVETO_AND_PICKUP + "; relatives are at " + relCoords[0] +","+ relCoords[1] + "; pickup-time is "+ pickuptime );
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO_AND_PICKUP, params );
-		long startTime = res.getCurrentTime();
+		double startTime = res.getCurrentTime();
 		@subtask( gag );
 
 
 
 		//after pick up rels calculations  | endtime should minus the pickup time to get the travel time
-		long endTime = res.getCurrentTime();
-		long tripTime = (endTime - pickuptime) - startTime;
+		double endTime = res.getCurrentTime();
+		double tripTime = (endTime - pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
 		res.log("picked up relatives at time " + endTime);
 

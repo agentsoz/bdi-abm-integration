@@ -63,10 +63,10 @@ Plan Name: LeaveNowP
 		ScenarioTwoData.connectToDepTimes.add((Object)res.getCurrentTime());
 
 		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.CONNECT_TO, drive_params );
-		long startTime = res.getCurrentTime();
+		double startTime = res.getCurrentTime();
 		@subtask( gag );
-		long endTime = res.getCurrentTime();
-		long tripTime = endTime - startTime;
+		double endTime = res.getCurrentTime();
+		double tripTime = endTime - startTime;
 		//res.log("reached "+ drive_params[1] + " at time " + endTime);
 
 	}

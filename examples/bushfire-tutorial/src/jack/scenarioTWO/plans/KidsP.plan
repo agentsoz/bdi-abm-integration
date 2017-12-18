@@ -43,7 +43,7 @@ Plan Name: KidsP
 	body()
 	{
 
-		long startTime = res.getCurrentTime();
+		double startTime = res.getCurrentTime();
 		int pickuptime = res.bdiConnector.getPickupTime() * 60; // get a random pickup time in minutes and convert it to seconds
 		res.log("will drive to and pick up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") ; pickup time is " + pickuptime + "; time now is " + startTime);
 
@@ -58,8 +58,8 @@ Plan Name: KidsP
 
 
 		//after pick up kids calculations  should minus pickuptime from the endtime
-		long endTime = res.getCurrentTime();
-		long tripTime = (endTime - pickuptime) - startTime;
+		double endTime = res.getCurrentTime();
+		double tripTime = (endTime - pickuptime) - startTime;
 		res.addToTravelTime(tripTime);
 		res.log("finished picking up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") at time " + endTime);
 	}
