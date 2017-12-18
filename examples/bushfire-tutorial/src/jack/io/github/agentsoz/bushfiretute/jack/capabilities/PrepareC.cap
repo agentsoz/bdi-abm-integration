@@ -1,0 +1,64 @@
+package io.github.agentsoz.bushfiretute.jack.capabilities;
+import io.github.agentsoz.bushfiretute.jack.plans.*;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
+
+import io.github.agentsoz.abmjack.env.GenericActions;
+import io.github.agentsoz.abmjack.env.UpdateAction;
+
+public capability PrepareC extends Capability
+		 /*implements Interface*/
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+/*
+Capability Name: PrepareC
+*/
+
+	//Knowledge bases used are declared here.
+
+	//Events handled, posted and sent are declared here.
+	#handles external event EvacAlert ;
+
+
+	#handles event RelsG ;
+	#posts event RelsG relsg_p;
+
+	#handles event KidsG ;
+	#posts event KidsG kidsg_p;
+
+
+	#posts external event AssessThreatG assessthreatg_p;
+
+	//sub capabilities
+  	#has capability GenericActions genericactions_cap;
+
+  	#handles event UpdateAction;
+   	#posts event UpdateAction updateaction_p;
+
+	//Plans directly used are declared here.
+	#uses plan KidsP ;
+
+	#uses plan RelsP ;
+
+	#uses plan PrepareP ;
+
+
+	// Inner capabilities are declared here.
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	/* Action Reminder:
+		Name: drive_to(School) and pickup(kids)
+	*/
+
+	/* Action Reminder:
+		Name: drive_to(rel) and pickup(rels)
+	*/
+	//other Data Member and Method definitions.
+
+	/* Constructor */
+	public PrepareC()
+	{
+		super();
+	}
+}

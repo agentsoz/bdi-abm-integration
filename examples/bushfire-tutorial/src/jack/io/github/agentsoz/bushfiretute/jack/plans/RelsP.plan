@@ -1,0 +1,91 @@
+package io.github.agentsoz.bushfiretute.jack.plans;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.Random;
+import io.github.agentsoz.util.Global;
+
+public plan RelsP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: RelsP
+Description: Lin - get a relative from a random address. This goal instantiated only with some probability.
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event RelsG relsg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	/* Action Reminder:
+		Name: drive_to(rel) and pickup(rels)
+	*/
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+
+	context()
+	{
+		/*Context: cc : relsNeedPickUp==true
+*/
+		// Trigger: Event "KidsG"
+
+
+		true;
+	}
+
+	body()
+	{
+		double[] relCoords = getRandomCoordinate(); // 1. get a destination
+		int pickuptime = res.bdiConnector.getPickupTime() * 60; // 2. get a random pickup time in minutes and convert it to seconds
+
+		res.initiatedAction=ActionList.DRIVETO_AND_PICKUP;
+		res.targetDestination="Relatives";
+
+		Object[] params = new Object[] { (Object)ActionList.DRIVETO_AND_PICKUP , relCoords, res.targetDestination, pickuptime};
+
+		res.log("picking up relatives; action "+ActionList.DRIVETO_AND_PICKUP + "; relatives are at " + relCoords[0] +","+ relCoords[1] + "; pickup-time is "+ pickuptime );
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO_AND_PICKUP, params );
+		double startTime = res.getCurrentTime();
+		@subtask( gag );
+
+
+
+		//after pick up rels calculations  | endtime should minus the pickup time to get the travel time
+		double endTime = res.getCurrentTime();
+		double tripTime = (endTime - pickuptime) - startTime;
+		res.addToTravelTime(tripTime);
+		res.log("picked up relatives at time " + endTime);
+
+	}
+
+	private double[] getRandomCoordinate() {
+		Random random = Global.getRandom() ;
+		double[] coordinates = new double[2];
+
+		int distance = random.nextInt(res.bdiConnector.getMaxDistanceToRelatives());
+		logger.trace( " | Max distance to relatives: " + res.bdiConnector.getMaxDistanceToRelatives());
+		double angle = random.nextDouble() * 2 * Math.PI;
+
+		// Calculating destination's X coordinate
+		coordinates[0] = res.startLocation[0] + distance * Math.cos(angle);
+
+		// Calculating destination's Y coordinate
+		coordinates[1] = res.startLocation[1] + distance * Math.sin(angle);
+
+		return coordinates;
+	}
+}

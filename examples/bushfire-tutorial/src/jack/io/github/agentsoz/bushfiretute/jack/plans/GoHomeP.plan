@@ -1,0 +1,76 @@
+package io.github.agentsoz.bushfiretute.jack.plans;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.util.evac.ActionList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public plan GoHomeP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: GoHomeP
+Description: Set prepared_to_evac_flag = false
+
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event AssessThreatG assessthreatg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+	#reads data depTime depTimesBDB_dat;
+
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+	/* Action Reminder:
+		Name: drive_to(home)
+	*/
+
+	context()
+	{
+		/*Context: cc : agent is not at home and have time to go home  */
+
+
+		( res.getTravelTime() * 0.75 <= res.getTimeLeftToEvac()  && (!res.currentLocation.equals("home"))   );
+
+
+		// Trigger: Event "AssessThreatG"
+
+
+		//true;
+		//false;
+	}
+
+	body()
+	{
+		res.log("current location is " + res.currentLocation + "; time left to evac is " + res.getTimeLeftToEvac() + ";  initiated goHome plan  ");
+
+		res.initiatedAction=ActionList.DRIVETO;
+		res.targetDestination="Home";
+
+		Object[] drive_params = new Object[] { (Object)ActionList.DRIVETO , res.startLocation , res.targetDestination};
+
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO, drive_params );
+		double startTime = res.getCurrentTime();
+		@subtask( gag );
+
+
+		res.waitAtHomeFlag = true;
+
+		double endTime = res.getCurrentTime();
+		double tripTime = endTime - startTime;
+		res.log("reached Home at time " + endTime);
+
+	}
+}

@@ -83,6 +83,23 @@ public class NetworkGenerator {
 				.getCoordinateTransformation(TransformationFactory.WGS84,
 						esriWkt);
 		OsmNetworkReader onr = new OsmNetworkReader(net, ct);
+
+		// Explicitly specify the defaults for Australian roads
+		onr.setHighwayDefaults(1, "motorway",      2, 110.0/3.6, 1.0, 2000, true);
+		onr.setHighwayDefaults(1, "motorway_link", 1,  80.0/3.6, 1.0, 1500, true);
+		onr.setHighwayDefaults(2, "trunk",         1,  80.0/3.6, 1.0, 2000);
+		onr.setHighwayDefaults(2, "trunk_link",    1,  50.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(3, "primary",       1,  80.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(3, "primary_link",  1,  60.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(4, "secondary",     1,  30.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(4, "secondary_link",     1,  30.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(5, "tertiary",      1,  25.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(5, "tertiary_link",      1,  25.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(6, "unclassified",  1,  15.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(7, "residential",   1,  15.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(8, "living_street", 1,  10.0/3.6, 1.0,  300);
+
+
 		onr.setKeepPaths(true);
 		onr.parse(osmfile);
 		new NetworkCleaner().run(net);

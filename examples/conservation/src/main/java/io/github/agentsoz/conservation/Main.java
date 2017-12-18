@@ -41,6 +41,7 @@ import io.github.agentsoz.conservation.outputwriters.LowCHighPStatistics;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.LoggerFactory;
@@ -439,13 +440,19 @@ public class Main {
 		/*
 		 * Remove the former percepts as they are no longer needed
 		 */
-		for (String agentName : agentDataContainer.keySet()) {
-			PerceptContainer newPerceptContainer = new PerceptContainer();
-			agentDataContainer.getOrCreate(agentName).setPerceptContainer(
-					newPerceptContainer);
-		}
+      Iterator<String> i = agentDataContainer.getAgentIDs();
+      while (i.hasNext()) {
+          String agentName = i.next();
+//			PerceptContainer newPerceptContainer = new PerceptContainer();
+//			agentDataContainer.getOrCreate(agentName).setPerceptContainer(
+//					newPerceptContainer);
+			agentDataContainer.getOrCreate(agentName).getPerceptContainer().clear(); 
+			// I think that this is much safer.  But it may change the results.  kai, nov'17
+      }
 
-		for (String agent : agentDataContainer.keySet()) {
+      Iterator<String> ii = agentDataContainer.getAgentIDs();
+      while (ii.hasNext()) {
+        String agent = ii.next();
 			ActionContainer actionContainer = agentDataContainer.getOrCreate(
 					agent).getActionContainer();
 			for (String action : actionContainer.actionIDSet()) {

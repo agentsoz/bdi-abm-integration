@@ -25,48 +25,44 @@ package io.github.agentsoz.abmjill;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.Agent;
 import io.github.agentsoz.bdiabm.BDIServerInterface;
-import io.github.agentsoz.bdiabm.data.ActionContainer;
-import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.ActionPerceptContainer;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.AgentStateList;
-import io.github.agentsoz.bdiabm.data.PerceptContainer;
+import io.github.agentsoz.bdiabm.data.*;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.jill.Main;
+import io.github.agentsoz.jill.config.Config;
 import io.github.agentsoz.jill.core.GlobalState;
-import io.github.agentsoz.jill.util.Log;
+import io.github.agentsoz.jill.util.ArgumentsLoader;
+import io.github.agentsoz.util.evac.PerceptList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import io.github.agentsoz.jill.config.Config;
-import io.github.agentsoz.jill.util.ArgumentsLoader;
+import java.util.*;
 
 public abstract class JillModel implements BDIServerInterface {
 
-	private static final String BROADCAST = "global";
+	private static final Logger logger = LoggerFactory.getLogger("");
+
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
+	private static AgentDataContainer lastContainer;
+
 	private Config config;
 	
 	public JillModel() {
 	}
 
-	public static Agent getAgent(int id) {
+	protected static Agent getAgent(int id) {
 		// FIXME: No contract that says returned object will be instanceof Agent
 		return (Agent) GlobalState.agents.get(id);
 	}
 
 	@Override
 	public boolean init(AgentDataContainer agentDataContainer,
-			AgentStateList agentList, 
+			AgentStateList agentList, // not used
 			ABMServerInterface abmServer,
 			Object[] params) {
-		nextContainer = agentDataContainer;
+		nextContainer = new AgentDataContainer();
+		lastContainer = new AgentDataContainer();
 		// Parse the command line options
 		ArgumentsLoader.parse((String[])params);
 		// Load the configuration 
@@ -75,7 +71,7 @@ public abstract class JillModel implements BDIServerInterface {
 		try {
 			Main.init(config);
 		} catch(Exception e) {
-			Log.error("While initialising JillModel: " + e.getMessage());
+			logger.error("While initialising JillModel: {}", e.getMessage());
 			return false;
 		}
 		return true;
@@ -104,7 +100,7 @@ public abstract class JillModel implements BDIServerInterface {
 			ac.get(actionID).setParameters(parameters);
 			ac.get(actionID).setState(ActionContent.State.INITIATED);
 		}
-		Log.debug("added " + ((isNewAction) ? "new action" : "")
+		logger.debug("added " + ((isNewAction) ? "new action" : "")
 				+ " into ActionContainer: agent:" + agentID + ", action id:"
 				+ actionID + ", content:" + ac.get(actionID));
 	}
@@ -113,60 +109,47 @@ public abstract class JillModel implements BDIServerInterface {
 	// send percepts to individual agents
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
-		Log.trace("Received " + agentDataContainer);
+		// save the container
+		lastContainer.removeAll();
+		lastContainer.copy(agentDataContainer);
 
 		if (agentDataContainer == null || agentDataContainer.isEmpty()) {
-			Log.debug("Received empty container, nothing to do.");
+			logger.debug("Received empty container, nothing to do.");
 			return;
 		}
-		nextContainer = agentDataContainer;
 
-		boolean global = false;
-		HashMap<String, Object> globalPercepts = new HashMap<String, Object>();
+		logger.trace("Received {}", agentDataContainer);
 
-		try {
-			PerceptContainer gPC = agentDataContainer.get(BROADCAST)
-					.getPerceptContainer();
-			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
-					new String[0]);
-			for (int g = 0; g < globalPerceptsArray.length; g++) {
-				String globalPID = globalPerceptsArray[g];
-				Object gaParameters = gPC.read(globalPID);
-				globalPercepts.put(globalPID, gaParameters);
-				global = true;
-			}
-		}
-		// no global agent
-		catch (NullPointerException npe) {
-			global = false;
-		}
-		// post global percepts to all agents - this was moved out of the below
-		// while loop
-		// since not all agents will have an ActionPerceptContainer when program
-		// starts
-		if (global) {
-			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
-					.entrySet().iterator();
-			while (globalEntries.hasNext()) {
-				Map.Entry<String, Object> gme = globalEntries.next();
-				String gPerceptID = gme.getKey();
-				Object gParameters = gme.getValue();
-				for (int i = 0; i < GlobalState.agents.size(); i++) {
-					getAgent(i).handlePercept(gPerceptID, gParameters);
-				}
-			}
-		}
+		HashMap<String, Object> globalPercepts = new LinkedHashMap<String, Object>();
 
-		Iterator<Entry<String, ActionPerceptContainer>> i = agentDataContainer
-				.entrySet().iterator();
+        PerceptContainer gPC = lastContainer.getPerceptContainer(PerceptList.BROADCAST);
+        if (gPC != null) {
+          String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
+          for (int g = 0; g < globalPerceptsArray.length; g++) {
+              String globalPID = globalPerceptsArray[g];
+              Object gaParameters = gPC.read(globalPID);
+              globalPercepts.put(globalPID, gaParameters);
+		  }
+          Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts
+              .entrySet().iterator();
+          while (globalEntries.hasNext()) {
+            Map.Entry<String, Object> gme = globalEntries.next();
+            String gPerceptID = gme.getKey();
+            Object gParameters = gme.getValue();
+            for (int i = 0; i < GlobalState.agents.size(); i++) {
+              getAgent(i).handlePercept(gPerceptID, gParameters);
+            }
+          }
+        }
+
+		Iterator<String> i = lastContainer.getAgentIDs();
 		// For each ActionPercept (one for each agent)
 		while (i.hasNext()) {
-			Map.Entry<String, ActionPerceptContainer> entry = (Map.Entry<String, ActionPerceptContainer>) i
-					.next();
-			if (entry.getKey().equals(BROADCAST)) {
+			String agentID = i.next();
+			if (agentID.equals(PerceptList.BROADCAST)) {
 				continue;
 			}
-			ActionPerceptContainer apc = entry.getValue();
+			ActionPerceptContainer apc = lastContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -177,11 +160,10 @@ public abstract class JillModel implements BDIServerInterface {
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
 					try {
-						int id = Integer.parseInt(entry.getKey());
+						int id = Integer.parseInt(agentID);
 						getAgent(id).handlePercept(perceptID, parameters);
 					} catch (Exception e) {
-						Log.error("While sending percept to Agent "
-								+ entry.getKey() + ": " + e.getMessage());
+						logger.error("While sending percept to Agent {}: {}", agentID, e.getMessage());
 					}
 				}
 				// now remove the percepts
@@ -201,11 +183,10 @@ public abstract class JillModel implements BDIServerInterface {
 					Object[] params = ac.get(actionID).getParameters();
 					ActionContent content = new ActionContent(params, state, actionID);
 					try {
-						int id = Integer.parseInt(entry.getKey());
+						int id = Integer.parseInt(agentID);
 						getAgent(id).updateAction(actionID, content);
 					} catch (Exception e) {
-						Log.error("While updating action status for Agent "
-								+ entry.getKey() + ": " + e.getMessage());
+						logger.error("While updating action status for Agent {}: {}", agentID, e.getMessage());
 					}
 
 					// remove completed states
@@ -218,6 +199,11 @@ public abstract class JillModel implements BDIServerInterface {
 		}
 		// Wait until idle
 		Main.waitUntilIdle();
-	}
 
+		// now transfer all the new updates to the container
+		agentDataContainer.copy(lastContainer); // copies status changes
+		lastContainer.removeAll();
+		agentDataContainer.copy(nextContainer); // copies new actions
+		nextContainer.removeAll();
+    }
 }

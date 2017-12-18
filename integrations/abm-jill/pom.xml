@@ -31,6 +31,11 @@
       <artifactId>jill</artifactId>
       <version>0.3.2</version>
     </dependency>
+    <dependency>
+      <groupId>io.github.agentsoz</groupId>
+      <artifactId>util</artifactId>
+      <version>2.0.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

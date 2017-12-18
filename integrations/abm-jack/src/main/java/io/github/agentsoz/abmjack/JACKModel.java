@@ -1,5 +1,20 @@
 package io.github.agentsoz.abmjack;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
+import aos.jack.jak.agent.Agent;
+import io.github.agentsoz.abmjack.shared.ActionManager;
+
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -21,21 +36,18 @@ package io.github.agentsoz.abmjack;
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
-
-import io.github.agentsoz.bdiabm.*;
-import io.github.agentsoz.bdiabm.data.*;
+import io.github.agentsoz.bdiabm.ABMServerInterface;
+import io.github.agentsoz.bdiabm.BDIServerInterface;
+import io.github.agentsoz.bdiabm.data.ActionContainer;
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
-import io.github.agentsoz.dataInterface.DataServer;
-import io.github.agentsoz.abmjack.shared.*;
-import aos.jack.jak.agent.Agent;
+import io.github.agentsoz.bdiabm.data.ActionPerceptContainer;
+import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.data.AgentState;
+import io.github.agentsoz.bdiabm.data.AgentStateList;
+import io.github.agentsoz.bdiabm.data.PerceptContainer;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
+import io.github.agentsoz.util.Global;
 
 /**
  * 
@@ -51,9 +63,13 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 	protected Map<String, Agent> agents = new LinkedHashMap<>();
 	// need deterministically sorted map for testing.  kai, oct'17
-	
-	private ABMServerInterface abmServer;
-	private AgentDataContainer nextContainer;
+
+	// dsingh, 29/nov/17, all Jack side updates should be collected in this
+	// local container, and will get copied over once when passing control
+	// back to the abm side
+	private AgentDataContainer lastContainer = new AgentDataContainer();
+	private AgentDataContainer nextContainer = new AgentDataContainer();
+
 	public final String GLOBAL_AGENT = "global";
 
 	@Override
@@ -61,7 +77,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public boolean init(AgentDataContainer agentDataContainer,
 			AgentStateList agentList, ABMServerInterface abmServer,
 			Object[] params) {
-		this.abmServer = abmServer;
 		setup(abmServer);
 		takeControl(agentDataContainer);
 		if (params != null) {
@@ -91,12 +106,13 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 		return ids;
 	}
 
-	public AgentDataContainer getNextContainer() {
+	private AgentDataContainer getNextContainer() {
 
 		return nextContainer;
 	}
 
 	// package new agent action into the agent data container
+	@Override
 	public void packageAction(String agentID, String actionID,
 			Object[] parameters) {
 
@@ -114,92 +130,50 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	}
 
 	// send percepts to individual agents
+	@Override
 	public void takeControl(AgentDataContainer agentDataContainer) {
 
 		logger.trace("Received {}", agentDataContainer);
-		nextContainer = agentDataContainer;
-		GlobalTime.updateTime();
 
-		// Pull apart data container
-		// Perform actions
-		if (nextContainer == null) {
-			waitUntilIdle();
-			return;
-		}
+		// save the container
+		lastContainer.removeAll();
+		lastContainer.copy(agentDataContainer);
 
 		if (agentDataContainer.isEmpty()) {
 			return;
 		}
-		
-		boolean global = false;
+
 		Map<String, Object> globalPercepts = new LinkedHashMap<>();
 		// need deterministically sorted map for testing.  kai, oct'17
 
-		try {
-			PerceptContainer gPC = agentDataContainer.get(GLOBAL_AGENT)
-					.getPerceptContainer();
-			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(
-					new String[0]);
-
+        PerceptContainer gPC = lastContainer.getPerceptContainer(GLOBAL_AGENT);
+        if (gPC != null) {
+			String[] globalPerceptsArray = gPC.perceptIDSet().toArray(new String[0]);
 			for (int g = 0; g < globalPerceptsArray.length; g++) {
-
 				String globalPID = globalPerceptsArray[g];
 				Object gaParameters = gPC.read(globalPID);
 				globalPercepts.put(globalPID, gaParameters);
-				global = true;
 			}
-		}
-		// no global agent
-		catch (NullPointerException npe) {
-			global = false;
-		}
-		// post global percepts to all agents - this was moved out of the below
-		// while loop
-		// since not all agents will have an ActionPerceptContainer when program
-		// starts
-		if (global) {
-
-			Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts .entrySet().iterator();
-
-			while (globalEntries.hasNext()) {
-
-				Map.Entry<String, Object> gme = globalEntries.next();
-				String gPerceptID = gme.getKey();
-				Object gParameters = gme.getValue();
-				
-//				List<String> agentIds = new ArrayList<String>(agents.keySet());
-//
-//				Comparator<String> agentIDSort = new Comparator<String>() {
-//					@Override
-//					public int compare(String o1, String o2) {
-//						int id1 = Integer.parseInt(o1);
-//						int id2 = Integer.parseInt(o2);
-//
-//						return id1 - id2;
-//					}
-//				};
-//
-//				Collections.sort(agentIds, agentIDSort);
-//				for (String agentID : agentIds) {
-//					Agent agent = agents.get(agentID);
-				// (agents is a deterministic data structure, and I don't see why it needs to be sorted.  kai, oct'17)
-				
-				for( Agent agent : agents.values() ) {
-					handlePercept(agent, gPerceptID, gParameters);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
-				}
-			}
+            Iterator<Map.Entry<String, Object>> globalEntries = globalPercepts .entrySet().iterator();
+            while (globalEntries.hasNext()) {
+                Map.Entry<String, Object> gme = globalEntries.next();
+                String gPerceptID = gme.getKey();
+                Object gParameters = gme.getValue();
+                for( Agent agent : agents.values() ) {
+                    handlePercept(agent, gPerceptID, gParameters);
+                }
+            }
+            gPC.clear();
 		}
 
-		Iterator<Entry<String, ActionPerceptContainer>> i = agentDataContainer
-				.entrySet().iterator();
-		// For each ActionPercept (one for each agent)
-		while (i.hasNext()) {
-			Map.Entry<String, ActionPerceptContainer> entry = i .next();
-			if (entry.getKey().equals(GLOBAL_AGENT)) {
+        Iterator<String> i = lastContainer.getAgentIDs();
+        // For each ActionPercept (one for each agent)
+        while (i.hasNext()) {
+            String agentID = i.next();
+			if (agentID.equals(GLOBAL_AGENT)) {
 				continue;
 			}
-			ActionPerceptContainer apc = entry.getValue();
+			ActionPerceptContainer apc = lastContainer.getOrCreate(agentID);
 			PerceptContainer pc = apc.getPerceptContainer();
 			ActionContainer ac = apc.getActionContainer();
 			if (!pc.isEmpty()) {
@@ -210,8 +184,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 					String perceptID = pcArray[pcI];
 					Object parameters = pc.read(perceptID);
-					handlePercept(agents.get(entry.getKey()), perceptID, parameters);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
+					handlePercept(agents.get(agentID), perceptID, parameters);
 				}
 				// now remove the percepts
 				pc.clear();
@@ -227,9 +200,8 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 					State state = State.valueOf(ac.get(actionID).getState()
 							.toString());
 					Object[] params = ac.get(actionID).getParameters();
-					updateAction(agents.get(entry.getKey()), actionID, state,
+					updateAction(agents.get(agentID), actionID, state,
 							params);
-					waitUntilIdle(); // yyyyyy try to get code deterministic
 
 					// remove completed states
 					if (!(state.equals(State.INITIATED) || state
@@ -240,6 +212,12 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 			}
 		}
 		waitUntilIdle();
+
+        // now transfer all the new updates to the container
+		agentDataContainer.copy(lastContainer); // copies status changes
+		lastContainer.removeAll();
+		agentDataContainer.copy(nextContainer); // copies new actions
+		nextContainer.removeAll();
 	}
 
 	// wait until all JACK agents have finished processing before returning
@@ -266,7 +244,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void createAgents(String[] agentIDs, Object initData) {
 		for (int i = 0; i < agentIDs.length; i++) {
 			Agent agent = createAgent(agentIDs[i], new Object[] { initData });
-			waitUntilIdle(); // yyyyyy try to get code deterministic
 			agents.put(agentIDs[i], agent);
 		}
 		logger.debug("created agents: {}", new Gson().toJson(agentIDs));
@@ -297,7 +274,6 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 
 		for (int i = 0; i < ar1.length; i++) {
 			ar2[i] = ar1[i].getBasename();
-			waitUntilIdle(); // yyyyyy try to get code deterministic
 		}
 		killAgents(ar2);
 	}

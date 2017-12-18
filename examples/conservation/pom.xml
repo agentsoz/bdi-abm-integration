@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.gams</groupId>
       <artifactId>gams</artifactId>
-      <version>24.4</version>
+      <version>[24.4,24.9]</version>
     </dependency>
     <dependency>
       <groupId>io.github.agentsoz</groupId>

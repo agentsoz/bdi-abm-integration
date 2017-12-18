@@ -28,6 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import org.junit.After;
 import org.junit.Before;
@@ -125,7 +127,8 @@ public class JillModelTest {
 				"--config",
 				"{agents:[{classname:io.github.agentsoz.abmjill.testagent.TestAgent, args:null, count:"+nAgents+"}]," +
 				"logLevel: ERROR," +
-				"logFile: " + JillModelTest.class.getSimpleName() + ".log" +
+				"logFile: " + JillModelTest.class.getSimpleName() + ".log," +
+				"numThreads: 1" +
 				"}"
 				};
 		jillmodel = new TestModel();
@@ -150,13 +153,15 @@ public class JillModelTest {
 		
 		public StubABM(int durationPerAction) {
 			this.durationPerAction = durationPerAction;
-			agentsDurativeCount = new HashMap<String, Integer>();
+			agentsDurativeCount = new LinkedHashMap<String, Integer>();
 		}
 		
 		@Override
 		public void takeControl(AgentDataContainer adc) {
 			Log.trace("Stub ABM Received " + adc);
-			for (String agentId : adc.keySet()) {
+	        Iterator<String> i = adc.getAgentIDs();
+	        while (i.hasNext()) {
+	            String agentId = i.next();
 				ActionContainer ac = adc.getOrCreate(agentId).getActionContainer();
 				ActionContent acc = ac.get("TESTACTION");
 				if (acc != null) {

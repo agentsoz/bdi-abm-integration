@@ -27,6 +27,7 @@ package io.github.agentsoz.util;
 
 import java.util.Random;
 
+
 /**
  * @author kainagel
  *

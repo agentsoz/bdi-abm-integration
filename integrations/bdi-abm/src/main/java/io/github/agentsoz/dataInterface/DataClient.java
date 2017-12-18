@@ -25,5 +25,12 @@ package io.github.agentsoz.dataInterface;
 
 public interface DataClient {
    
+   /**
+    * @param time
+    * @param dataType
+    * @param data
+    * @return true if data was successfully consumed, false otherwise (this is, at least,
+    * how I interpret Dhirendra's example). kai, dec'17
+    */
    public boolean dataUpdate( double time, String dataType, Object data );
 }

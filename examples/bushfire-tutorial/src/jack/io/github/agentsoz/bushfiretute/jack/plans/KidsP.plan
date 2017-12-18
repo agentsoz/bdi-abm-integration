@@ -1,0 +1,66 @@
+package io.github.agentsoz.bushfiretute.jack.plans;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
+import io.github.agentsoz.abmjack.env.GenericActGoal;
+import io.github.agentsoz.util.evac.ActionList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public plan KidsP extends Plan
+{
+/******** Start PDT Design Block *** DO NOT EDIT IT *********/
+
+/*
+Plan Name: KidsP
+*/
+	//Events handled by the plan are declared here.
+
+	#handles event KidsG kidsg_h;
+
+
+	// Declarations of any beliefset/data that the plan accesses.
+/******** End PDT Design Block *** DO NOT EDIT IT *********/
+
+
+	#uses interface EvacResident res;
+	#posts event GenericActGoal genericactgoal_p;
+
+	final Logger logger = LoggerFactory.getLogger("");
+
+	static boolean relevant(KidsG kidsg_h)
+    {
+        return true;
+    }
+
+	context()
+	{
+		true;
+	}
+
+	#reasoning method
+	body()
+	{
+
+		double startTime = res.getCurrentTime();
+		int pickuptime = res.bdiConnector.getPickupTime() * 60; // get a random pickup time in minutes and convert it to seconds
+		res.log("will drive to and pick up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") ; pickup time is " + pickuptime + "; time now is " + startTime);
+
+		//DRIVETO_AND_PICKUP
+		res.initiatedAction=ActionList.DRIVETO_AND_PICKUP;
+		res.targetDestination="school";
+
+		Object[] pickup_params = new Object[] { (Object)ActionList.DRIVETO_AND_PICKUP , res.schoolLocation , "Kids", pickuptime};
+
+		GenericActGoal gag = genericactgoal_p.act(res.getActionManager(), ActionList.DRIVETO_AND_PICKUP, pickup_params );
+		@subtask( gag );
+
+
+		//after pick up kids calculations  should minus pickuptime from the endtime
+		double endTime = res.getCurrentTime();
+		double tripTime = (endTime - pickuptime) - startTime;
+		res.addToTravelTime(tripTime);
+		res.log("finished picking up kids from school ("+res.schoolLocation[0]+","+res.schoolLocation[1]+") at time " + endTime);
+	}
+}

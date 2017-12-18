@@ -44,7 +44,7 @@ public class PerceptContainer implements Serializable {
 	/**
 	 * @return Returns true if there are no percepts are stored in the container
 	 */
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return container.isEmpty();
 	}
 
@@ -69,7 +69,7 @@ public class PerceptContainer implements Serializable {
 	/**
 	 * @return IDs of all percepts
 	 */
-	public Set<String> perceptIDSet() {
+	public synchronized Set<String> perceptIDSet() {
 		return container.keySet();
 	}
 
@@ -80,14 +80,31 @@ public class PerceptContainer implements Serializable {
 	 *            The AbtractActionContainer which content want to be referred
 	 *            to. (Shallow copy)
 	 */
-	public void copyContainer(PerceptContainer x) {
+	private void copyContainer(PerceptContainer x) {
 		container = x.container;
+	}
+
+	/**
+	 * Deep copy
+	 */
+	public synchronized void copy(PerceptContainer pc) {
+		// shallow copy if the incoming container is null or empty
+		if (pc.container == null) {
+			return;
+		}
+		// else start by clearing this container
+		clear();
+		// now do a deep copy
+		for (String key : pc.container.keySet()) {
+			PerceptContent value = pc.container.get(key);
+			container.put(key, value);
+		}
 	}
 
 	/**
 	 * Empties the container
 	 */
-	public void clear() {
+	public synchronized void clear() {
 		container.clear();
 	}
 
@@ -98,7 +115,7 @@ public class PerceptContainer implements Serializable {
 	 *            percept's id
 	 * @return value of percept, or null if it does not exists
 	 */
-	public Object read(String identifier) {
+	public synchronized Object read(String identifier) {
 		return container.remove(identifier).getValue();
 	}
 
@@ -110,15 +127,13 @@ public class PerceptContainer implements Serializable {
 	 *            percept's id
 	 * @param value
 	 *            percept's value
-	 * @param parameters
-	 *            papameters associated with the percept
 	 */
-	public void put(String identifier, Object value) {
+	public synchronized void put(String identifier, Object value) {
 		container.put(identifier, new PerceptContent(identifier, value));
 	}
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		return (isEmpty()) ? "{}" : new Gson().toJson(this);
 	}
 }
