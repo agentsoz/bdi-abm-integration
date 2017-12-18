@@ -1,5 +1,5 @@
-package scenarioTWO.events;
-import scenarioTWO.data.*;
+package io.github.agentsoz.bushfiretute.jack.events;
+import io.github.agentsoz.bushfiretute.jack.data.*;
 
 
 import org.slf4j.Logger;

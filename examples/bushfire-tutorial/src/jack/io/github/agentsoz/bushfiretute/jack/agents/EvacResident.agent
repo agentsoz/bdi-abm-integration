@@ -1,8 +1,8 @@
-package scenarioTWO.agents;
-import scenarioTWO.capabilities.*;
-import scenarioTWO.plans.*;
-import scenarioTWO.events.*;
-import scenarioTWO.data.*;
+package io.github.agentsoz.bushfiretute.jack.agents;
+import io.github.agentsoz.bushfiretute.jack.capabilities.*;
+import io.github.agentsoz.bushfiretute.jack.plans.*;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
 
 import io.github.agentsoz.util.evac.jackhelper.IBdiConnector;
 import io.github.agentsoz.abmjack.shared.ActionManager;
@@ -95,6 +95,7 @@ Agent Name: EvacResident
 	public String initiatedAction=" ";
 	public String currentLocation=" ";
 
+    private double currentTime = 0.0;
 
 	/* Constructor */
 	public EvacResident(String id, 
@@ -174,7 +175,11 @@ Agent Name: EvacResident
    	}
 
    	public double getCurrentTime(){
-        return DataServer.getServer("BushfireTutorial").getTime();
+        return currentTime;
+    }
+
+   	public void setCurrentTime(double time){
+        this.currentTime = time;
     }
 
 	public double getTimeLeftToEvac()

@@ -1,7 +1,7 @@
-package scenarioTWO.plans;
-import scenarioTWO.events.*;
-import scenarioTWO.data.*;
-import scenarioTWO.agents.EvacResident;
+package io.github.agentsoz.bushfiretute.jack.plans;
+import io.github.agentsoz.bushfiretute.jack.events.*;
+import io.github.agentsoz.bushfiretute.jack.data.*;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 
 
 import org.slf4j.Logger;
