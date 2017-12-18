@@ -25,7 +25,26 @@ package io.github.agentsoz.bushfiretute;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
+import io.github.agentsoz.bdimatsim.Utils;
+import io.github.agentsoz.bushfiretute.datacollection.ScenarioTwoData;
+import io.github.agentsoz.bushfiretute.matsim.*;
+import io.github.agentsoz.nonmatsim.ActionHandler;
+import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
+import io.github.agentsoz.nonmatsim.PAAgent;
+import io.github.agentsoz.util.Util;
+import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.util.evac.PerceptList;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.*;
+import org.matsim.core.gbl.Gbl;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -36,8 +55,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
-import io.github.agentsoz.bushfiretute.matsim.ABMModel;
 import io.github.agentsoz.util.Global;
+import scenarioTWO.agents.EvacResident;
 
 public class BushfireMain {
 	// Defaults
@@ -93,14 +112,13 @@ public class BushfireMain {
 		// Read in the configuration
 		if (!Config.readConfig()) {
 			logger.error("Failed to load configuration from '" + Config.getConfigFile() + "'. Aborting");
-//			System.exit(-1); // remove system.exit from junit-tested material. kai, nov'17
-			throw new RuntimeException("failed to load configuration") ; 
+			throw new RuntimeException("failed to load configuration") ;
 		}
 
-		// Initialise and hook up the BDI side
+		// Create the BDI model
 		BDIModel bdiModel = new BDIModel();
 		
-		// Start the MATSim controller
+		// Create the MATSim side
 		List<String> config = new ArrayList<>() ;
 		config.add( Config.getMatSimFile() ) ;
 		if ( matsimOutputDirectory != null ) { 
@@ -108,19 +126,36 @@ public class BushfireMain {
 			config.add( matsimOutputDirectory ) ;
 		}
 		logger.info( config.toString() );
-		new ABMModel(bdiModel,config.toArray( new String[config.size()] )).run( )  ;
+		MATSimModel matsimModel = new MATSimModel(config.toArray( new String[config.size()]));
 
-		// MATSim finished executing, so terminate the BDI model before exiting
+		// Get the list of BDI agent IDs
+		Scenario scenario = matsimModel.loadAndPrepareScenario();
+		List<String> bdiAgentIDs = Utils.getBDIAgentIDs( scenario );
+
+		// Initialise both models
+		bdiModel.init(matsimModel.getAgentManager().getAgentDataContainer(),
+				null, matsimModel,
+				bdiAgentIDs.toArray( new String[bdiAgentIDs.size()] ));
+		matsimModel.init( bdiAgentIDs);
+
+		// Set up evacuation specifics
+		BushfireMain.determineSafeCoordinatesFromMATSimPlans(bdiAgentIDs, bdiModel, matsimModel.getScenario() );
+		BushfireMain.assignDependentPersons(bdiAgentIDs, bdiModel);
+		BushfireMain.registerActionsWithAgents(bdiModel, matsimModel);
+		BushfireMain.registerPerceptsWithAgents(bdiModel, matsimModel);
+
+		// Now run until the simulation ends
+		while ( true ) {
+			bdiModel.takeControl( matsimModel.getAgentManager().getAgentDataContainer() );
+			if( matsimModel.isFinished() ) {
+				break ;
+			}
+			matsimModel.runUntil(Global.getTime()+1, matsimModel.getAgentManager().getAgentDataContainer());
+		}
+
+		// Finish up
+		matsimModel.finish() ;
 		bdiModel.finish();
-		
-
-//		writer.close();
-		// cannot do this since it also closes stdout when doing tests in sequence. kai, nov'17
-
-//		for (Thread t : Thread.getAllStackTraces().keySet()) {
-//			System.err.println( t.toString() ) ;
-//		}
-
 	}
 
 	/**
@@ -221,4 +256,152 @@ public class BushfireMain {
 		return logger;
 	}
 
+	public static void determineSafeCoordinatesFromMATSimPlans(List<String> bdiAgentsIDs, BDIModel bdiModel, Scenario scenario) {
+//		Map<Id<Link>,? extends Link> links = matsimModel.getScenario().getNetwork().getLinks();
+		for (String agentId : bdiAgentsIDs) {
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
+			if (bdiAgent == null) {
+				logger.warn("No BDI counterpart for MATSim agent '" + agentId
+						+ "'. Should not happen, but will keep going");
+				continue;
+			}
+			//			Plan plan = WithinDayAgentUtils.getModifiablePlan(matsimModel.getMobsimAgentMap().get(agentId));
+
+			Plan plan = scenario.getPopulation().getPersons().get( Id.createPersonId(agentId) ).getSelectedPlan() ;
+			List<PlanElement> planElements = plan.getPlanElements();
+			Activity startAct = (Activity) planElements.get(0) ;
+
+			// Assign start location
+			//			double lat = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getX();
+			//			double lon = links.get(matsimModel.getMobsimAgentMap().get(agentId).getCurrentLinkId()).getFromNode().getCoord().getY();
+			Coord startCoord = PopulationUtils.computeCoordFromActivity( startAct, scenario.getActivityFacilities(), scenario.getConfig() ) ;
+			double lat = startCoord.getX() ;
+			double lon = startCoord.getY();
+
+			bdiAgent.startLocation = new double[] { lat, lon };
+			// yy this is just used for finding school locations, so startLocation is a slight mis-nomer; it needs the home location. kai, nov'17
+
+			bdiAgent.currentLocation = "home"; // agents always start at home
+			bdiAgent.log("is at home at location "+lon+","+lat);
+
+			for (int i = 0; i < planElements.size(); i++) {
+				PlanElement element = planElements.get(i);
+				if (!(element instanceof Activity)) {
+					continue;
+				}
+				Activity act = (Activity) element;
+				// Get departure time
+				if (act.getType().equals("Evacuation")) {
+					PlanElement pe = plan.getPlanElements().get(i + 1);
+					if (!(pe instanceof Leg)) {
+						logger.error("Utils : selected plan element to get deptime is not a leg");
+						continue;
+					}
+					Leg depLeg = (Leg) pe;
+					double depTime = depLeg.getDepartureTime();
+					logger.trace("departure time of the depLeg : {}", depTime);
+					bdiAgent.setDepTime(depTime);
+
+				}
+				// Assign coords of safe destination
+				if (act.getType().equals("Safe")) {
+					double safeX = act.getCoord().getX();
+					double safeY = act.getCoord().getY();
+					bdiAgent.endLocation = new double[] { safeX, safeY };
+					bdiAgent.log("safe location is at "+safeX+","+safeY);
+				}
+			}
+		}
+	}
+
+	public static void registerPerceptsWithAgents(final BDIModel bdiModel, final MATSimModel matsimModel) {
+		// this is more complex than registerActions because for the percepts we need the linkIDs beforehand. kai, nov'17
+
+		for (String agentID : matsimModel.getAgentManager().getBdiAgentIds() ) {
+			PAAgent agent1 = matsimModel.getAgentManager().getAgent( agentID );
+			EvacResident bdiAgent1 = bdiModel.getBDICounterpart(agentID.toString());
+			Gbl.assertNotNull(bdiAgent1);
+			final Coord endCoord = new Coord(bdiAgent1.endLocation[0], bdiAgent1.endLocation[1]);
+			Id<Link> newLinkId = NetworkUtils.getNearestLinkExactly(matsimModel.getScenario().getNetwork(),
+					endCoord).getId();
+
+			agent1.getPerceptHandler().registerBDIPerceptHandler(agent1.getAgentID(),
+					EventsMonitorRegistry.MonitoredEventType.ArrivedAtDestination, newLinkId.toString(), new BDIPerceptHandler() {
+				@Override
+				public boolean handle(Id<Person> agentId, Id<Link> linkId, EventsMonitorRegistry.MonitoredEventType monitoredEvent) {
+					PAAgent agent = matsimModel.getAgentManager().getAgent( agentId.toString() );
+					EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId.toString());
+					Object[] params = { "Safe" , Long.toString(bdiAgent.getCurrentTime())};
+					agent.getPerceptContainer().put(PerceptList.ARRIVED, params);
+					return true; // unregister this handler
+				}
+			});
+		}
+	}
+
+	public static void registerActionsWithAgents(final BDIModel bdiModel, final MATSimModel matsimModel) {
+		for(String agentId1: matsimModel.getAgentManager().getBdiAgentIds() ) {
+
+			ActionHandler withHandler = matsimModel.getAgentManager().getAgent( agentId1 ).getActionHandler();
+
+			// overwrite default DRIVETO
+			withHandler.registerBDIAction(ActionList.DRIVETO, new DRIVETOActionHandler(bdiModel, matsimModel));
+
+			// register new action
+			withHandler.registerBDIAction(ActionList.CONNECT_TO, new CONNECT_TOActionHandler(bdiModel, matsimModel));
+
+			// register new action
+			withHandler.registerBDIAction(ActionList.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
+
+			// register new action
+			withHandler.registerBDIAction(ActionList.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
+		}
+	}
+
+	/**
+	 * Randomly assign dependent persons to be picked up. Uses
+	 * Pk ({@link Config#getProportionWithKids()}) and
+	 * Pr ({@link
+	 * @param bdiModel TODO
+	 * @param bdiAgent
+	 */
+	public static void assignDependentPersons(List<String> bdiAgentsIDs, BDIModel bdiModel) {
+		for (String agentId : bdiAgentsIDs) {
+			EvacResident bdiAgent = bdiModel.getBDICounterpart(agentId);
+			if( ScenarioTwoData.totPickups <= Config.getMaxPickUps() ) {
+				double[] pDependents = {Config.getProportionWithKids(), Config.getProportionWithRelatives()};
+				pDependents = Util.normalise(pDependents);
+				Random random = Global.getRandom();
+
+				if (random.nextDouble() < pDependents[0]) {
+					// Allocate dependent children
+					ScenarioTwoData.agentsWithKids++;
+					double[] sclCords = Config.getRandomSchoolCoords(bdiAgent.getId(),bdiAgent.startLocation);
+					if(sclCords != null) {
+						bdiAgent.kidsNeedPickUp = true;
+						bdiAgent.schoolLocation = sclCords;
+						bdiAgent.prepared_to_evac_flag = false;
+						ScenarioTwoData.totPickups++;
+						bdiAgent.log("has children at school coords "
+								+ sclCords[0] + "," +sclCords[1]);
+					}
+					else{
+						bdiAgent.log("has children but there are no schools nearby");
+						ScenarioTwoData.agentsWithKidsNoSchools++;
+					}
+				}
+				if (random.nextDouble() < pDependents[1]) {
+					// Allocate dependent adults
+					ScenarioTwoData.agentsWithRels++;
+					bdiAgent.relsNeedPickUp = true;
+					bdiAgent.prepared_to_evac_flag = false;
+					ScenarioTwoData.totPickups++;
+					bdiAgent.log("has relatives");
+				}
+				if (!bdiAgent.relsNeedPickUp && !bdiAgent.kidsNeedPickUp) {
+					bdiAgent.log("has neither children nor relatives");
+				}
+			}
+		}
+	}
 }

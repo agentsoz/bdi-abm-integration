@@ -39,7 +39,7 @@ import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
 
-final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
+public final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");
 
 	private final BDIModel bdiModel;

@@ -56,13 +56,13 @@ import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
 
-final class CONNECT_TOActionHandler implements BDIActionHandler {
+public final class CONNECT_TOActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");
 
 	private final BDIModel bdiModel;
 	private final MATSimModel model;
 
-	CONNECT_TOActionHandler(BDIModel bdiModel, MATSimModel model) {
+	public CONNECT_TOActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
 		this.model = model;
 	}

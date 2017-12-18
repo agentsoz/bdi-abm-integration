@@ -51,7 +51,7 @@ import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import scenarioTWO.agents.EvacResident;
 
-final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
+public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 	private static final Logger logger = Logger.getLogger(DRIVETO_AND_PICKUPActionHandler.class) ;
 
 	private final BDIModel bdiModel;
