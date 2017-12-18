@@ -37,8 +37,7 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.bushfiretute.BushfireMain;
 import io.github.agentsoz.bushfiretute.Config;
-import io.github.agentsoz.util.Global;
-import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 
 /* The BDI Model class handles passing percepts and actions to and
  * from the resident agents, passing simulation setup data (locations, routes
@@ -71,16 +70,16 @@ public class BDIModel extends JACKModel {  //DataSource
 	@Override
 	public void takeControl(AgentDataContainer adc) {
 
+		double timeInSecs = dataServer.getTime();
 		// on receiving the fire alert, insert a global percept into the agent data containers
 		if (dataServer.getTime() == 4.0 && !firePerceptAdded ) {
 			adc.getOrCreate("global").getPerceptContainer()
 					.put(PerceptList.FIRE_ALERT, "bushfire started");
-			logger.debug("broadcasted fire alert global percept at timestep : {}",dataServer.getTime());
+			logger.debug("broadcasted fire alert global percept at timestep : {}", timeInSecs);
 			firePerceptAdded = true;
 
 		}
-		
-		//GlobalTime.increaseNewTime();
+		adc.getOrCreate(PerceptList.BROADCAST).getPerceptContainer().put(PerceptList.TIME, timeInSecs);
 		super.takeControl(adc);
 		
 		checkDepartureFromHome(adc);
@@ -199,7 +198,11 @@ public class BDIModel extends JACKModel {  //DataSource
 	public void handlePercept(Agent agent, String perceptID, Object params) {
 
 		EvacResident resident = (EvacResident) agent;
-		if (perceptID.equals(PerceptList.FIRE_ALERT) && resident.fireResponse == false) {
+		if (perceptID.equals(PerceptList.TIME)) {
+			if (params instanceof Double) {
+				resident.setCurrentTime((double)params);
+			}
+		} else if (perceptID.equals(PerceptList.FIRE_ALERT) && resident.fireResponse == false) {
 			// dataServer.publish(DataTypes.FIRE_ALERT, null);
 			resident.log("received alert " + params);
 			resident.postEvacAlert("fire started");

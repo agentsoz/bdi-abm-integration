@@ -37,7 +37,7 @@ import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
-import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 
 public final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");

@@ -56,7 +56,7 @@ import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdimatsim.MATSimModel;
 import io.github.agentsoz.bushfiretute.bdi.BDIModel;
 import io.github.agentsoz.util.Global;
-import scenarioTWO.agents.EvacResident;
+import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 
 public class BushfireMain {
 	// Defaults
