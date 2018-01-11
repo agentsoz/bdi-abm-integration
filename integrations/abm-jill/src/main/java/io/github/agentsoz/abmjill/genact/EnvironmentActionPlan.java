@@ -22,7 +22,7 @@ package io.github.agentsoz.abmjill.genact;
  * #L%
  */
 
-import java.util.HashMap;
+import java.util.Map;
 
 import io.github.agentsoz.abmjill.JillModel;
 import io.github.agentsoz.jill.lang.Agent;
@@ -43,7 +43,7 @@ public class EnvironmentActionPlan extends Plan {
 	}
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> vars) {
+	public void setPlanVariables(Map<String, Object> vars) {
 	}
 
 	PlanStep[] steps = { new PlanStep() {

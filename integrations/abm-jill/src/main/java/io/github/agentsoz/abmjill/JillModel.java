@@ -40,7 +40,7 @@ import java.util.*;
 
 public abstract class JillModel implements BDIServerInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger("");
+	private static final Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
