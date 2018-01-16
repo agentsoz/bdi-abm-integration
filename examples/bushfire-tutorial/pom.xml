@@ -215,7 +215,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.6</version>
         <configuration>
           <archive>
             <manifest>
@@ -228,7 +227,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.3</version>
         <configuration>
           <descriptors>
           <descriptor>src/assembly/dep.xml</descriptor>
@@ -248,18 +246,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>1.8</version>
         <configuration>
-          <!-- Ignore MATSim network files (take forever to process) -->
-          <!-- Can't seem to get excludes (below) to work so using
-               <roots> to get around this by ignoring src/main/resources
-               where the network files are.
-          -->
-          <!--
-          <excludes>
-           <exclude>*network*.xml</exclude>
-          </excludes>
-          -->
           <roots>
            <root>src/main/java</root>
           </roots>
@@ -269,111 +256,18 @@
 	<!--I want to be sure that it is running in separate JVMs. kai, nov'17-->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-surefire-plugin</artifactId>
-	<version>2.10</version>
 	<configuration>
 	  <excludes>
 	    <exclude>**/*$*</exclude> <!-- exclude all inner classes -->
 	  </excludes>
-
 	  <!--execute each test in separate JVM (slow, but otherwise it does not-->
 	  <!--work, and no problem as long as there are only integration tests):-->
-	  <forkMode>always</forkMode>
-	  <!--formMode is deprecated; replaced since 2.14 by following options (BUT NOTE OUR VERSION!):-->
 	  <forkCount>1</forkCount>
 	  <reuseForks>false</reuseForks>
-
 	  <!-- avoid out of memory errors: -->
 	  <argLine>-Xmx2000m -Djava.awt.headless=true -Dmatsim.preferLocalDtds=true </argLine>
 	</configuration>
       </plugin>
     </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      org.codehaus.mojo
-                    </groupId>
-                    <artifactId>
-                      license-maven-plugin
-                    </artifactId>
-                    <versionRange>
-                      [1.8,)
-                    </versionRange>
-                    <goals>
-                      <goal>
-                        update-project-license
-                      </goal>
-                      <goal>
-                        update-file-header
-                      </goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <versionRange>[1.2.1,)</versionRange>
-                    <goals>
-                      <goal>exec</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute>
-                      <runOnIncremental>true</runOnIncremental>
-                    </execute>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>
-                      build-helper-maven-plugin
-                    </artifactId>
-                    <versionRange>[1.9.1,)</versionRange>
-                    <goals>
-                      <goal>add-source</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute>
-                      <runOnIncremental>true</runOnIncremental>
-                    </execute>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <versionRange>[1.3,)</versionRange>
-                    <goals>
-                      <goal>run</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute>
-                      <runOnIncremental>true</runOnIncremental>
-                    </execute>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 </project>
