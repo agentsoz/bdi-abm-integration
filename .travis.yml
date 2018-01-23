@@ -9,7 +9,7 @@ before_install:
 #  - cd $HOME/matsim && git checkout kaibranch && git log -1
 #  - cd $HOME/matsim/examples && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true
 #  - cd $HOME/matsim/matsim && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true
-  - cd $HOME && git clone --depth=1 --branch=dev git@github.com:agentsoz/jill.git
+  - cd $HOME && git clone --depth=1 --branch=dev https://github.com/agentsoz/jill.git
   - cd $HOME/jill && git checkout dev && git log -1
   - cd $HOME/jill && mvn clean install
 
