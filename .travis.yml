@@ -11,7 +11,7 @@ before_install:
 #  - cd $HOME/matsim/matsim && mvn clean install -DskipTests -Dmaven.test.skip -Dmaven.javadoc.skip -Dsource.skip -Dassembly.skipAssembly=true
   - cd $HOME && git clone --depth=1 --branch=dev https://github.com/agentsoz/jill.git
   - cd $HOME/jill && git checkout dev && git log -1
-  - cd $HOME/jill && mvn clean install
+  - cd $HOME/jill/jill && mvn clean install
 
 script:
   - cd $TRAVIS_BUILD_DIR && mvn package -B -Dmatsim.preferLocalDtds=true
