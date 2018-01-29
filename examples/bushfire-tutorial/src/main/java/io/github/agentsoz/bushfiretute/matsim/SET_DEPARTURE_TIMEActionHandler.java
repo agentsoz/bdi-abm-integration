@@ -39,14 +39,14 @@ import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 
-public final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
+public final class SET_DEPARTURE_TIMEActionHandler implements BDIActionHandler {
 	private static final Logger logger = LoggerFactory.getLogger("");
 
 	private final BDIModel bdiModel;
 
 	private final MATSimModel model;
-
-	public SET_DRIVE_TIMEActionHandler(BDIModel bdiModel, MATSimModel model) {
+	
+	public SET_DEPARTURE_TIMEActionHandler(BDIModel bdiModel, MATSimModel model) {
 		this.bdiModel = bdiModel;
 		this.model = model;
 	}
@@ -71,6 +71,8 @@ public final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	/**
 	 * The way I found this, "newTime" is added to "currentTime", and that is the new end time.  I don't find this particularly
 	 * intuitive, especially for future activities.  kai, nov'17
+	 * <br/>
+	 * Also look into {@link DRIVETOActionHandler} for syntax. kai, jan'18
 	 */
 	static final boolean changeActivityEndTimeByActivityType(Id<Person> agentId, String actType, double newTime, MATSimModel model) {
 		
@@ -102,25 +104,5 @@ public final class SET_DRIVE_TIMEActionHandler implements BDIActionHandler {
 	
 		return true;
 	}
-	/*
-	void insertTempActivity(Id<Person> agentId) {
-		// possibly never used
-		
-		Map<Id<Person>, MobsimAgent> mapping = model.getMobsimAgentMap();
-		MobsimAgent agent = mapping.get(agentId);
-		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
-	
-		List<PlanElement> planElements = plan.getPlanElements() ;
-	
-		Activity evacAct = (Activity) planElements.get(2);
-		//Temp Activivity 
-		Activity tempAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId("Temp", evacAct.getLinkId() ) ;
-		tempAct.setEndTime(5.0);
-	
-		planElements.add(2,tempAct);
-	
-		WithinDayAgentUtils.resetCaches(agent);
-		this.qsim.rescheduleActivityEnd(agent);
-	}
-	*/
+
 }
