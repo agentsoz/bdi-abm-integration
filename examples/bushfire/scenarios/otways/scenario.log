@@ -1,24 +1,21 @@
-2018-01-18 14:56:56,231 WARN [main] Caller+0	 at io.github.agentsoz.ees.Main.start(Main.java:97)
+2018-01-29 03:49:53,765 WARN [main] Caller+0	 at io.github.agentsoz.ees.Main.start(Main.java:97)
 setup=blockage
 
-2018-01-18 14:56:56,235 INFO [main] Caller+0	 at io.github.agentsoz.ees.SimpleConfig.readConfig(SimpleConfig.java:181)
+2018-01-29 03:49:53,768 INFO [main] Caller+0	 at io.github.agentsoz.ees.SimpleConfig.readConfig(SimpleConfig.java:181)
 Loading configuration from './scenarios/otways/scenario_main.xml'
 
-2018-01-18 14:56:56,292 INFO [main] Caller+0	 at io.github.agentsoz.ees.SimpleConfig.readGeography(SimpleConfig.java:248)
+2018-01-29 03:49:53,827 INFO [main] Caller+0	 at io.github.agentsoz.ees.SimpleConfig.readGeography(SimpleConfig.java:248)
 Loading geography from 'scenarios/otways/scenario_geography.xml'
 
-2018-01-18 14:56:56,307 INFO [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.loadGeoJson(PhoenixFireModule.java:69)
+2018-01-29 03:49:53,843 INFO [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.loadGeoJson(PhoenixFireModule.java:67)
 Loading GeoJSON fire file: scenarios/otways/scenario_fire.json
 
-2018-01-18 14:56:56,380 WARN [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.convertLatLongToUtm(PhoenixFireModule.java:143)
+2018-01-29 03:49:53,916 WARN [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.convertLatLongToUtm(PhoenixFireModule.java:141)
 Function not implemented yet!
 
-2018-01-18 14:57:27,037 INFO [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.getNewData(PhoenixFireModule.java:106)
+2018-01-29 03:50:16,911 INFO [main] Caller+0	 at io.github.agentsoz.ees.PhoenixFireModule.getNewData(PhoenixFireModule.java:104)
 step 46801 (780 mins): sending fire alert!!
 
-2018-01-18 14:57:27,832 INFO [main] Caller+0	 at io.github.agentsoz.ees.JillBDIModel.takeControl(JillBDIModel.java:129)
+2018-01-29 03:50:17,519 INFO [main] Caller+0	 at io.github.agentsoz.ees.JillBDIModel.takeControl(JillBDIModel.java:129)
 Scheduling evacuation starting at 13: 0 and peaking 120 mins after start
-
-2018-01-18 14:59:25,219 INFO [main] Caller+0	 at io.github.agentsoz.ees.Main.writeSafeLineMonitors(Main.java:303)
-Writing safe line statistics to file: ./scenarios/otways/safeline..out
 
