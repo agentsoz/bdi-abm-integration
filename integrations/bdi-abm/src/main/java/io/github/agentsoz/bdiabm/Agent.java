@@ -63,5 +63,16 @@ public interface Agent {
 	 * Terminates the agent
 	 */
 	public abstract void kill();
-	
+
+	/**
+	 * Sets the implementation for the {@link QueryPerceptInterface}
+	 */
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface);
+
+	/**
+	 * Returns an object that implements {@link QueryPerceptInterface}
+	 * @return the implementing object
+	 */
+	public QueryPerceptInterface getQueryPerceptInterface();
+
 }

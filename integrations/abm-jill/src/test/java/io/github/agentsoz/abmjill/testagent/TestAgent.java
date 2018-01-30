@@ -1,5 +1,6 @@
 package io.github.agentsoz.abmjill.testagent;
 
+import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 
@@ -84,6 +85,17 @@ public class TestAgent extends Agent implements io.github.agentsoz.bdiabm.Agent 
 
 	@Override
 	public void kill() {
-		// TODO Auto-generated method stub
+		// Intentionally left empty
 	}
+
+	@Override
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface) {
+		// Intentionally left empty
+	}
+
+	@Override
+	public QueryPerceptInterface getQueryPerceptInterface() {
+		return null;
+	}
+
 }

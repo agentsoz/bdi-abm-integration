@@ -35,5 +35,6 @@ public final class PerceptList {
 	public static final String LEAVENOW = "leave now";
 	public static final String PICKED_UP = "picked up";
 	public static final String TIME = "time";
+    public static final String REQUEST_LOCATION = "request_location";
 }
 
