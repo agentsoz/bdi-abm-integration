@@ -361,7 +361,7 @@ public class BushfireMain {
 			withHandler.registerBDIAction(ActionList.DRIVETO_AND_PICKUP, new DRIVETO_AND_PICKUPActionHandler(bdiModel, matsimModel));
 
 			// register new action
-			withHandler.registerBDIAction(ActionList.SET_DRIVE_TIME, new SET_DRIVE_TIMEActionHandler(bdiModel, matsimModel));
+			withHandler.registerBDIAction(ActionList.SET_DRIVE_TIME, new SET_DEPARTURE_TIMEActionHandler(bdiModel, matsimModel));
 		}
 	}
 
