@@ -108,8 +108,11 @@ public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 //		System.exit(-1) ;
 		return true;
 	}
-
-	static final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime, MATSimModel model ) {
+	
+	/**
+	 * Look into {@link DRIVETOActionHandler} for syntax that does not need the indices. kai, jan'18
+	 */
+	private static final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime, MATSimModel model) {
 		// called at least once
 		
 		logger.debug("starting addNewLegAndActvityToPlan method..");

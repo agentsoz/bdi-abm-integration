@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.*;
+import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.dataInterface.DataClient;
 import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.util.evac.PerceptList;
@@ -28,8 +29,9 @@ import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.PlayPauseSimulationControl;
 import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.network.NetworkChangeEvent;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.NetworkRoutingProvider;
-import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutilityFactory;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
@@ -74,11 +76,10 @@ import javax.inject.Singleton;
 /**
  * @author QingyuChen, KaiNagel, Dhi Singh
  */
-public final class MATSimModel implements ABMServerInterface, DataClient {
+public final class MATSimModel implements ABMServerInterface, QueryPerceptInterface, DataClient {
 	private static final Logger log = LoggerFactory.getLogger(MATSimModel.class);
 	//private static final Logger log = Logger..getLogger(MATSimModel.class) ;
 	public static final String MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR = "--matsim-output-directory";
-	static final String FIRE_DATA_MSG = "fire_data";
 	private final EvacConfig evacConfig;
 	private final FireWriter fireWriter;
 	private final Config config;
@@ -337,8 +338,7 @@ public final class MATSimModel implements ABMServerInterface, DataClient {
 		return this.replanner ;
 	}
 
-	@Override
-	public final void takeControl(AgentDataContainer agentDataContainer){
+	@Override public final void takeControl(AgentDataContainer agentDataContainer){
 		runUntil( (int)(playPause.getLocalTime() + 1), agentDataContainer ) ;
 	}
 	
@@ -376,30 +376,30 @@ public final class MATSimModel implements ABMServerInterface, DataClient {
 		this.eventHandlers = eventHandlers;
 	}
 	
-	//	private final void setFreeSpeedExample(){
-//		// example how to set the freespeed of some link to zero:
-//		final double now = this.qSim.getSimTimer().getTimeOfDay();
-//		if ( now == 0.*3600. + 6.*60. ) {
-//			NetworkChangeEvent event = new NetworkChangeEvent( now ) ;
-//			event.setFreespeedChange(new ChangeValue( ChangeType.ABSOLUTE_IN_SI_UNITS,  0. ));
-//			event.addLink( scenario.getNetwork().getLinks().get( Id.createLinkId( 51825 )));
-//			NetworkUtils.addNetworkChangeEvent( scenario.getNetwork(),event);
-//
-//			for ( MobsimAgent agent : this.getMobsimDataProvider().getAgents().values() ) {
-//				if ( !(agent instanceof MATSimStubAgent) ) {
-//					this.getReplanner().reRouteCurrentLeg(agent, now);
-//				}
-//			}
-//		}
-//	}
+	private final void setFreeSpeedExample(){
+		// example how to set the freespeed of some link to zero:
+		final double now = this.qSim.getSimTimer().getTimeOfDay();
+		if ( now == 0.*3600. + 6.*60. ) {
+			NetworkChangeEvent event = new NetworkChangeEvent( now ) ;
+			event.setFreespeedChange(new NetworkChangeEvent.ChangeValue( NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS,  0. ));
+			event.addLink( scenario.getNetwork().getLinks().get( Id.createLinkId( 51825 )));
+			NetworkUtils.addNetworkChangeEvent( scenario.getNetwork(),event);
+
+			for ( MobsimAgent agent : this.getMobsimDataProvider().getAgents().values() ) {
+				if ( !(agent instanceof MATSimStubAgent) ) {
+					this.getReplanner().reRouteCurrentLeg(agent, now);
+				}
+			}
+		}
+	}
 
 	public final void registerDataServer( DataServer server ) {
 		// some blackboardy thing that sits between ABM and BDI
 		server.subscribe(this, PerceptList.FIRE_DATA);
+		server.subscribe(this, PerceptList.DISRUPTION);
 	}
 
-	@Override
-	public boolean dataUpdate(double time, String dataType, Object data) {
+	@Override public boolean dataUpdate(double time, String dataType, Object data) {
 		if ( time+1 < getTime() || time-1 > getTime() ) {
 			log.error( "given time in dataUpdate is {}, simulation time is {}.  " +
 							   "Don't know what that means.  Will use simulation time.",
@@ -411,8 +411,12 @@ public final class MATSimModel implements ABMServerInterface, DataClient {
 
 		// Normally only one polygon per time step.  Might want to test for this, and get rid of multi-polygon code
 		// below.  On other hand, probably does not matter much.  kai, dec'17
-		
-		if (! PerceptList.FIRE_DATA.equals(dataType)) {
+
+		if (PerceptList.DISRUPTION.equals(dataType)) {
+			// FIXME: do something with the disruptions data coming in
+			log.warn("receiving at time={} disruptions data={}", (now/3600), data);
+			return true;
+		} else if (! PerceptList.FIRE_DATA.equals(dataType)) {
 			return false;
 		}
 
@@ -466,8 +470,8 @@ public final class MATSimModel implements ABMServerInterface, DataClient {
 		return this.qSim.getSimTimer().getTimeOfDay() ;
 	}
 
-	@Override public Object queryPercept(String agentID, String perceptID) {
-		// TODO Auto-generated method stub
+	@Override public Object queryPercept(String agentID, String perceptID, Object args) {
+		log.warn("received query from agent {} for percept {} with args {}; not implemented yet!", agentID, perceptID, args);
 		return null;
 	}
 

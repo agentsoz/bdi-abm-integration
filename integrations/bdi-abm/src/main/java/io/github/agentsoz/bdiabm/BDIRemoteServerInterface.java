@@ -28,6 +28,7 @@ import io.github.agentsoz.bdiabm.data.AgentStateList;
 
 import java.rmi.RemoteException;
 
+@Deprecated
 public interface BDIRemoteServerInterface extends java.rmi.Remote
 {
 	public final static String ADDRESS = "rmi://localhost:1205/BDIServer";

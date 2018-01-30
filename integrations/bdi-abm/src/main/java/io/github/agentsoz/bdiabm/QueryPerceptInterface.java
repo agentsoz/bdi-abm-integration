@@ -1,10 +1,10 @@
 package io.github.agentsoz.bdiabm;
 
-/*
+/*-
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2018 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,9 +22,23 @@ package io.github.agentsoz.bdiabm;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.PerceptContent;
+/**
+ * Interface to provide BDI query percepts
+ */
+public interface QueryPerceptInterface {
+    /**
+     * This is the ad hoc method for query percept.
+     *
+     * Example query: agentsID: agentX, perceptID: REQUEST_LOCATION,
+     * returns the response: coordinates of agentX
+     *
+     * @param agentID
+     *            ID of the agent
+     * @param perceptID
+     *            the percept to retrieve
+     * @param args
+     * @return the response for the query
+     */
+    Object queryPercept(String agentID, String perceptID, Object args);
 
-public interface ABMServerInterface {
-	public void takeControl(AgentDataContainer agentDataContainer);
 }

@@ -27,6 +27,7 @@ import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 
 import java.rmi.RemoteException;
 
+@Deprecated
 public interface ABMRemoteServerInterface extends java.rmi.Remote
 {
 	public final static String ADDRESS = "rmi://localhost:1205/ABMServerK";
