@@ -24,7 +24,7 @@ package io.github.agentsoz.util;
 
 import com.google.gson.Gson;
 
-public class Disruption {
+public class  Disruption {
     private String description;
     private String startHHMM;
     private String endHHMM;
