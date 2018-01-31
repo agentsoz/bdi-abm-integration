@@ -1,6 +1,0 @@
-2018-01-29 03:50:08,013  WARN MGC:175 Assuming that coordinates are in longitude first notation, i.e. (longitude, latitude).
-2018-01-29 03:50:08,566  WARN MGC:175 Assuming that coordinates are in longitude first notation, i.e. (longitude, latitude).
-2018-01-29 03:50:13,614  WARN QueueWithBuffer:331 Link 51825 too small: enlarge storage capacity from: 0.2777777777777778 Vehicles to: Infinity Vehicles.  This is not fatal, but modifies the traffic flow dynamics.
-2018-01-29 03:50:13,615  WARN QueueWithBuffer:331 Link 51825 too small: enlarge storage capacity from: 0.2777777777777778 Vehicles to: Infinity Vehicles.  This is not fatal, but modifies the traffic flow dynamics.
-2018-01-29 03:50:16,913  WARN MGC:175 Assuming that coordinates are in longitude first notation, i.e. (longitude, latitude).
-2018-01-29 03:50:16,917  WARN MGC:175 Assuming that coordinates are in longitude first notation, i.e. (longitude, latitude).
