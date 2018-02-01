@@ -23,17 +23,18 @@ package io.github.agentsoz.util.evac;
  */
 
 public final class PerceptList {
-	public static final String ARRIVED = "Arrived";
-	public static final String ARRIVED_CONNECT_TO = "Arrived to connect to";
-	public static final String ARRIVED_AND_PICKED_UP = "arrived and picked up";
-	public static final String BLOCKED = "Blocked";
+	public static final String ARRIVED = "arrived";
+	public static final String ARRIVED_CONNECT_TO = "arrived_to_connect_to";
+	public static final String ARRIVED_AND_PICKED_UP = "arrived_and_picked_up";
+	public static final String BLOCKED = "blocked";
 	public static final String BROADCAST = "global";
+	public static final String CONGESTION = "congestion";
 	public static final String DISRUPTION = "disruption";
 	public static final String FIRE = "fire";
 	public static final String FIRE_ALERT = "fire_alert";
 	public static final String FIRE_DATA  = "fire_data";
-	public static final String LEAVENOW = "leave now";
-	public static final String PICKED_UP = "picked up";
+	public static final String LEAVENOW = "leave_now";
+	public static final String PICKED_UP = "picked_up";
 	public static final String TIME = "time";
     public static final String REQUEST_LOCATION = "request_location";
 }
