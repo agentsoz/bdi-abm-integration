@@ -28,6 +28,7 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -55,16 +56,17 @@ public class NetworkGenerator {
 	 * 
 	 * The default value is set to the ESRI WKT of MGA zone 54
 	 */
-	private static String esriWkt = "PROJCS[\"GDA94 / MGA zone 54\","
-			+ "GEOGCS[\"GDA94\"," + "DATUM[\"D_GDA_1994\","
-			+ "SPHEROID[\"GRS_1980\",6378137,298.257222101]],"
-			+ "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],"
-			+ "PROJECTION[\"Transverse_Mercator\"],"
-			+ "PARAMETER[\"latitude_of_origin\",0],"
-			+ "PARAMETER[\"central_meridian\",141],"
-			+ "PARAMETER[\"scale_factor\",0.9996],"
-			+ "PARAMETER[\"false_easting\",500000],"
-			+ "PARAMETER[\"false_northing\",10000000]," + "UNIT[\"Meter\",1]]";
+//	private static String esriWkt = "PROJCS[\"GDA94 / MGA zone 54\","
+//			+ "GEOGCS[\"GDA94\"," + "DATUM[\"D_GDA_1994\","
+//			+ "SPHEROID[\"GRS_1980\",6378137,298.257222101]],"
+//			+ "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],"
+//			+ "PROJECTION[\"Transverse_Mercator\"],"
+//			+ "PARAMETER[\"latitude_of_origin\",0],"
+//			+ "PARAMETER[\"central_meridian\",141],"
+//			+ "PARAMETER[\"scale_factor\",0.9996],"
+//			+ "PARAMETER[\"false_easting\",500000],"
+//			+ "PARAMETER[\"false_northing\",10000000]," + "UNIT[\"Meter\",1]]";
+	private static String esriWkt = "EPSG:28355";
 
 	public static void main(String[] args) {
 
@@ -79,6 +81,7 @@ public class NetworkGenerator {
 		 * .getCoordinateTransformation(TransformationFactory.WGS84,
 		 * TransformationFactory.WGS84);
 		 */
+		System.out.println("Coordinate sytem for output is: " + esriWkt);
 		CoordinateTransformation ct = TransformationFactory
 				.getCoordinateTransformation(TransformationFactory.WGS84,
 						esriWkt);
@@ -103,7 +106,16 @@ public class NetworkGenerator {
 		onr.setKeepPaths(true);
 		onr.parse(osmfile);
 		new NetworkCleaner().run(net);
+		// Simplify but don't make links greater than 500m, else bends look too straight.
+		// This is really just more for asethetics, and does not impact the simulation results.
+		// But since we also visualise the results on a map for EES, it is important to find
+		// a good balance between detail (accurate looking network but can be VERY big) and
+		// speed (simplified network with less nodes and links). DS 7/Feb/18.
+		new NetworkSimplifier().run(net,500);
+		new NetworkCleaner().run(net);
 		new NetworkWriter(net).write(xmlfile);
+
+		System.out.println("Finished writing MATSim network to " + xmlfile);
 	}
 
 	private static String usage() {
@@ -113,10 +125,8 @@ public class NetworkGenerator {
 				+ "  -i <input_osm_file>   simulation configuration file\n"
 				+ "  -o <output_xml_file>  arguments to pass to MATSim\n"
 				+ "  -wkt <coordinate transformation string> the ESRI well known string \n "
-				+ "		based on the UTM zone of the network. For Australia, the ESRI WKT \n "
-				+ "		can be generated using menu in lower left of \n"
-				+ "		http://spatialreference.org/ref/epsg/28354/ page.\n"
-				+ "		Default value is set to MGA zone 54\n";
+				+ "		based on the UTM zone of the network. See http://spatialreference.org;\n"
+				+ "		Default value is "+esriWkt+"\n";
 	}
 
 	private static void parse(String[] args) {
