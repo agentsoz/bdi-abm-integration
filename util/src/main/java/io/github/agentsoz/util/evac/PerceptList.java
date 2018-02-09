@@ -37,5 +37,6 @@ public final class PerceptList {
 	public static final String PICKED_UP = "picked_up";
 	public static final String TIME = "time";
     public static final String REQUEST_LOCATION = "request_location";
+	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to";
 }
 
