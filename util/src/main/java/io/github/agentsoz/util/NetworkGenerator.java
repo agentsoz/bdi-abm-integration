@@ -87,20 +87,79 @@ public class NetworkGenerator {
 						esriWkt);
 		OsmNetworkReader onr = new OsmNetworkReader(net, ct);
 
-		// Explicitly specify the defaults for Australian roads
+        /**
+         * Defaults last accessed by DS on 13 Feb 2018.
+         *
+         * For OSM recommendation on Australian defaults see:
+         * https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed#Australia
+         * Values pasted below:
+         * highway=motorway - 100 km/h usually, 110 km/h only where sign-posted
+         * highway=primary - 80 to 90 km/h
+         * highway=secondary - 50 to 70 km/h
+         * highway=tertiary - 50 km/h
+         * highway=residential - 50 km/h, usually 40 km/h in school zones
+         *
+         * Also the OSM tagging guidelines for Australia
+         * https://wiki.openstreetmap.org/wiki/Australian_Tagging_Guidelines#Regional_Roads say:
+         *
+         * Regional Roads
+         * highway=motorway Motorways, freeways, and freeway-like roads.
+         *      Divided roads with 2 or 3 lanes in each direction, limited access via interchanges, no traffic lights.
+         *      Generally 100 or 110 km/h speed limit. For example: Hume Freeway. In states with the Alphanumeric
+         *      system, these are 'M' roads if they are of freeway standard.
+         * highway=trunk National highways connecting major population centres.
+         *      For example the Bruce Highway north of Cooroy. State strategic road network for example:
+         *      Pacific Highway. In states with the Alphanumeric system, these are 'A' roads. 'M' roads which aren't
+         *      of freeway standard are also classified as a trunk road. In other states, these are signposted with
+         *      a white National Road shield, or a Green National Highway shield.
+         * highway=primary State maintained roads linking major population centers to each other and to
+         *      the trunk network. In states with the Alphanumeric system, these are 'B' roads. In other states,
+         *      these are generally State routes signposted with blue shields.
+         * highway=secondary District roads that are generally council maintained roads linking smaller population
+         *      centres to each other and to the primary network. In states with the Alphanumeric system,
+         *      these are 'C' roads.
+         * highway=tertiary Other roads linking towns, villages and Points of Interest to each other and the
+         *      secondary network. In South Australia, roads that are classified as a 'D' route under the
+         *      Alphanumeric system use this classification.
+         * highway=residential Local streets found in and around cities, suburbs and towns as well as in rural areas.
+         * highway=unclassified Other named minor roads.
+         * highway=track Gravel fire trails, forest drives, 4WD trails and similar roads. Gravel roads connecting
+         *      towns etc. should be tagged as appropriate (secondary, tertiary or unclassified), along with
+         *      the 'surface=unpaved' tag.
+         * highway=service Unnamed access roads. e.g. Entranceways and roads in parks, government properties,
+         *      beach access etc. Use a short service road where you may want to mark the entrance to a
+         *      private/government area, but not map the interior private roads in detail.
+         * Use the surface=unpaved tag to indicate where roads are not sealed.
+         * Use the ref=* tag to indicate a route number that is signposted according to the standard below, or
+         *      use a route relation. Omit non-signposted, anachronistic or historical route numbers.
+         * highway=safe_t_cam Use this tag to mark the position of the NSW and SA Safe - T - Cam system
+         *
+         * Urban Areas
+         * highway=motorway The metropolitan motorway network. 'M' classified roads in cities where they exist.
+         * highway=trunk "Metroads" or 'A' classified roads in the cities where they exist, or other similar
+         *      cross-city trunk routes in cities where they do not.
+         * highway=primary Other main cross city and arterial routes. 'B' classified roads in cities
+         *      where they exist. Major connecting roads in larger rural cities.
+         * highway=secondary Major through routes within a local area, often connecting neighbouring suburbs.
+         * highway=tertiary Minor through routes within a local area, often feeders to residential streets.
+         * highway=residential Residential streets.
+         * highway=unclassified Other streets. Not generally through routes.
+         * highway=service Un-named service and access roads. Also used for small named rear-access lanes.
+         *
+         */
 		onr.setHighwayDefaults(1, "motorway",      2, 110.0/3.6, 1.0, 2000, true);
-		onr.setHighwayDefaults(1, "motorway_link", 1,  80.0/3.6, 1.0, 1500, true);
-		onr.setHighwayDefaults(2, "trunk",         1,  80.0/3.6, 1.0, 2000);
-		onr.setHighwayDefaults(2, "trunk_link",    1,  50.0/3.6, 1.0, 1500);
-		onr.setHighwayDefaults(3, "primary",       1,  80.0/3.6, 1.0, 1500);
-		onr.setHighwayDefaults(3, "primary_link",  1,  60.0/3.6, 1.0, 1500);
-		onr.setHighwayDefaults(4, "secondary",     1,  30.0/3.6, 1.0, 1000);
-		onr.setHighwayDefaults(4, "secondary_link",     1,  30.0/3.6, 1.0, 1000);
-		onr.setHighwayDefaults(5, "tertiary",      1,  25.0/3.6, 1.0,  600);
-		onr.setHighwayDefaults(5, "tertiary_link",      1,  25.0/3.6, 1.0,  600);
-		onr.setHighwayDefaults(6, "unclassified",  1,  15.0/3.6, 1.0,  600);
-		onr.setHighwayDefaults(7, "residential",   1,  15.0/3.6, 1.0,  600);
-		onr.setHighwayDefaults(8, "living_street", 1,  10.0/3.6, 1.0,  300);
+		onr.setHighwayDefaults(1, "motorway_link", 1, 80.0/3.6, 1.0, 1500, true);
+		onr.setHighwayDefaults(2, "trunk",         1, 100.0/3.6, 1.0, 2000);
+		onr.setHighwayDefaults(2, "trunk_link",    1, 80.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(3, "primary",       1, 80.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(3, "primary_link",  1, 60.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(4, "secondary",     1, 60.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(4, "secondary_link",1, 60.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(5, "tertiary",      1, 50.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(5, "tertiary_link", 1, 50.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(6, "unclassified",  1, 50.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(7, "residential",   1, 50.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(8, "living_street", 1, 50.0/3.6, 1.0,  300);
 
 
 		onr.setKeepPaths(true);
