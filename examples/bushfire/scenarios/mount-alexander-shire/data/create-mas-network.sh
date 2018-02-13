@@ -76,6 +76,8 @@ if [ ! -f $DIR/.mas-merged-network.osm ] ; then
 printf "\nMerging the two into a final map...\n\n"
 $OSMOSIS_EXE --rb file=$DIR/.mas-allroads.pbf --rb file=$DIR/.mas-bigroads.pbf --merge \
   --wx $DIR/.mas-merged-network.osm
+  cp $DIR/.mas-merged-network.osm $DIR/mount_alexander_shire_network.osm
+
 fi
 
 # Generate the MATSim network from the final map
@@ -86,6 +88,5 @@ mvn exec:java -Dexec.mainClass="io.github.agentsoz.util.NetworkGenerator" \
   -Dexec.args="-i .mas-merged-network.osm -o mount_alexander_shire_network.xml -wkt EPSG:28355"
 cd -
 rm -f $DIR/../../../.mas-merged-network.osm
-mv $DIR/.mas-merged-network.osm $DIR/mount_alexander_shire_network.osm
 mv $DIR/../../../mount_alexander_shire_network.xml $DIR
 printf "\nAll done. New Mount Alexander Shire network is in $DIR/mount_alexander_shire_network.{xml,osm}\n\n"
