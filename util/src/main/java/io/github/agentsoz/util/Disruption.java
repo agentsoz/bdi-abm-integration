@@ -72,6 +72,9 @@ public class Disruption {
     public double[] getLatLon() {
         return latLon;
     }
+    public double[] getLonLat() {
+        return new double[] { latLon[1], latLon[0]} ;
+    }
 
     public double getImpactRadiusMtrs() {
         return impactRadiusMtrs;
