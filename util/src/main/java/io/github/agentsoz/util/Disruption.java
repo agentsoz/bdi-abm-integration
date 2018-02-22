@@ -10,12 +10,12 @@ package io.github.agentsoz.util;
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
@@ -30,23 +30,20 @@ public class Disruption {
     private String endHHMM;
     private double effectiveSpeed;
     private String effectiveSpeedUnit;
-    private double[] latLon;
-    private double impactRadiusMtrs;
+    private String[] impactedLinks;
 
     public Disruption(String description,
                       String startHHMM,
                       String endHHMM,
                       double effectiveSpeed,
                       String effectiveSpeedUnit,
-                      double[] latLon,
-                      double impactRadiusMtrs) {
+                      String[] impactedLinks) {
         this.description = description;
         this.startHHMM = startHHMM;
         this.endHHMM = endHHMM;
         this.effectiveSpeed = effectiveSpeed;
         this.effectiveSpeedUnit = effectiveSpeedUnit;
-        this.latLon = latLon;
-        this.impactRadiusMtrs = impactRadiusMtrs;
+        this.impactedLinks = impactedLinks;
     }
 
     public String getDescription() {
@@ -69,15 +66,8 @@ public class Disruption {
         return effectiveSpeedUnit;
     }
 
-    public double[] getLatLon() {
-        return latLon;
-    }
-    public double[] getLonLat() {
-        return new double[] { latLon[1], latLon[0]} ;
-    }
-
-    public double getImpactRadiusMtrs() {
-        return impactRadiusMtrs;
+    public String[] getImpactLinks() {
+        return impactedLinks;
     }
 
     @Override
