@@ -29,37 +29,16 @@ libraries.
 
 ### Command Line
 
-1.  Build the bdi-abm-integration layer: In the source repository `/`, do
-    `mvn clean install -N`
-2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
-    for instructions
-3.  Build the BDI-GAMS library: See `/integrations/bdi-gams/README.md`
-    for instructions
-4.  Build the ABM-JILL library: See `/integrations/abm-jill/README.md`
-    for instructions
-5.  Build the Bushfire application: In `/examples/conservation`, do
-    `mvn clean install`
-
-### Eclipse
-
-Ensure that you have the corrent version of Eclipse installed. See
-`../../README.md` for details. Then import and build the following
-Eclipse projects:
-
-*  `/integrations/bdi-abm`
-*  `/integrations/abm-jack`
-*  `/integrations/bdi-gams`
-*  `/examples/conservation`
-
-
+```
+$ make
+```
 
 ## How to Run
 
-
-To run from the command line (note, this may take a while):
-
-        > cd ./test; ./qsub-run-samples.sh --local ./output
-
+If you have a full version of GAMS installed, then run from the command line (note, this may take a while):
+```
+$ cd ./test; ./qsub-run-samples.sh --local ./output
+```
 This will run, one by one, the configured "samples" for the configured
 number of "replicates" and place the output in the directories
 `test/output/log/archive-S-R/` where `S` is the sample number and `R` is the
@@ -76,6 +55,12 @@ The relevant settings that control the samples/replicates are:
    the model which will typically cause each replicate run to produce
    slightly different results. This variable should be set to a value
    greater than 20 to allow for statistical analysis.
+
+
+If you only have a demo version of GAMS installed, then there are limits to what you can do. To simply test that all is well, try a small run using:
+   ```
+   PBS_O_WORKDIR=test NUMPACKAGES=5 ./test/model.sh 12345 10 25 75 20 0.75 0.75 0 0 0
+   ```
 
 
 ## Documentation
@@ -103,4 +88,3 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 For contact information, see AUTHORS file.
-
