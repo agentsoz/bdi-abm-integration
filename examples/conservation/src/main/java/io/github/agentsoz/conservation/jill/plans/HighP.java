@@ -23,20 +23,19 @@ package io.github.agentsoz.conservation.jill.plans;
  */
 
 import io.github.agentsoz.conservation.ConservationUtils;
-import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.LandholderHistory.BidResult;
+import io.github.agentsoz.conservation.Main;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.jill.goals.UpdateProfitMotivationGoal;
 import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.Goal;
 import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * PM increases proportional to highest profit.
@@ -65,7 +64,7 @@ public class HighP extends Plan {
 	}
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> vars) {
+	public void setPlanVariables(Map<String, Object> vars) {
 
 	}
 

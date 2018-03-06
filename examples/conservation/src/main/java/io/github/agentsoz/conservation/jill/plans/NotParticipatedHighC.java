@@ -33,7 +33,7 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class NotParticipatedHighC extends Plan {
 	}
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> vars) {
+	public void setPlanVariables(Map<String, Object> vars) {
 
 	}
 
