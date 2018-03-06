@@ -185,7 +185,7 @@ public class AuctioneerModel extends GAMSModel {
 				for (Object object : acc.getParameters()) {
 					Bid bid = (Bid) object;
 					String agentName = ((Landholder) landholderModel
-							.getAgent(Integer.parseInt(agentId))).gamsID();
+							.getLandholder(Integer.parseInt(agentId))).gamsID();
 					bids.add(String.format("%d,%s,%s,%011.9f", bid.id,
 							agentName, Main.packages[bid.id - 1].description,
 							bid.price));

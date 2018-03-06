@@ -68,10 +68,4 @@ public class GAMSModel implements ABMServerInterface {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public Object queryPercept(String agentID, String perceptID) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
