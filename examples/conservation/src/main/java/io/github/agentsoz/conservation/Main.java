@@ -883,7 +883,7 @@ public class Main {
 				}
 				break;
 			case "--":
-				setJillArgsIndex(i);
+				setJillArgsIndex(i+1);
 				// stop processing args any further
 				i = args.length;
 				break;
