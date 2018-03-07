@@ -136,7 +136,7 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 			//2-insert a leg:
 			Leg newLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
 			newLeg.setDepartureTime(now);	
-			model.getReplanner().editRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+			model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
 			planElements.add(currentPlanIndex+1,newLeg);
 			logger.debug(" added a new leg to current index");
 	
@@ -157,7 +157,7 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 				logger.debug("reRouting the leg after the added activity..");
 				Leg nextLeg = (Leg)planElements.get(currentPlanIndex+3);
 				Activity nextAct = (Activity)planElements.get(currentPlanIndex+4);
-				model.getReplanner().editRoutes().relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
+				model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
 				logger.debug("addNewActivityToPlan - leg info after reroute : " + nextLeg.toString());
 			}
 	

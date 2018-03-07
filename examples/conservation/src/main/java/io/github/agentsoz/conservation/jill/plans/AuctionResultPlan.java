@@ -36,7 +36,7 @@ import io.github.agentsoz.jill.lang.PlanInfo;
 import io.github.agentsoz.jill.lang.PlanStep;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This plan is executed when the "AuctionResultGoal" event is triggered by the
@@ -68,7 +68,7 @@ public class AuctionResultPlan extends Plan {
 	}
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> vars) {
+	public void setPlanVariables(Map<String, Object> vars) {
 
 	}
 

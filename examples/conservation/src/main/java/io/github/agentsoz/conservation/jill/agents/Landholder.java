@@ -22,6 +22,7 @@ package io.github.agentsoz.conservation.jill.agents;
  * #L%
  */
 
+import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.conservation.AuctionResultSet;
 import io.github.agentsoz.conservation.ConservationUtils;
@@ -476,6 +477,16 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	@Override
 	public void kill() {
 		super.finish();
+	}
+
+	@Override
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface) {
+		// not used
+	}
+
+	@Override
+	public QueryPerceptInterface getQueryPerceptInterface() {
+		return null; // not used
 	}
 
 	/**

@@ -25,7 +25,7 @@ package io.github.agentsoz.conservation.jill.plans;
  * #L%
  */
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class MeetExtensionOfficerPlan extends Plan {
 	}
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> arg0) {
+	public void setPlanVariables(Map<String, Object> arg0) {
 	}
 
 	PlanStep[] steps = { 

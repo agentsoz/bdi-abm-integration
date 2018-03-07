@@ -135,7 +135,7 @@ public class LandholderModel extends JillModel {
 		// Test
 		int numHighCEAgents = 0;
 		for (int i = 0; i < Main.numLandholders(); i++) {
-			Landholder landholder = (Landholder) getAgent(i);
+			Landholder landholder = getLandholder(i);
 			if (landholder.isConservationEthicHigh()) {
 				numHighCEAgents++;
 			}
@@ -149,5 +149,9 @@ public class LandholderModel extends JillModel {
 			System.exit(0);
 		}
 		return result;
+	}
+
+	public Landholder getLandholder(int i) {
+		return (Landholder) getAgent(i);
 	}
 }
