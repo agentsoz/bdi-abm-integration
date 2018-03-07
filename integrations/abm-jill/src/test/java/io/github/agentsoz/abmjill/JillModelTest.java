@@ -186,13 +186,6 @@ public class JillModelTest {
 				}
 			}
 		}
-
-		@Override
-		public Object queryPercept(String agentID, String perceptID) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
 	}
 	
 }

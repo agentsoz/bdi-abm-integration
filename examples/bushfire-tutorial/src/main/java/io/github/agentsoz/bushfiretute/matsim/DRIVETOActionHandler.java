@@ -75,8 +75,8 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 			throw new RuntimeException("Destination coordinates are not given");
 		}
 
-		final String dest = (String) args[2];
-		DRIVETOActionHandler.moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, dest, model);
+		final String activityType = (String) args[2];
+		DRIVETOActionHandler.moveToWaitAtOtherLocation(Id.createPersonId(agentID), newLinkId, activityType, model);
 
 		// Now register a event handler for when the agent arrives at the destination
 		PAAgent agent = model.getAgentManager().getAgent( agentID );
@@ -95,8 +95,10 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 						Object[] params = { linkId.toString() , Double.toString(bdiAgent.getCurrentTime())};
 
 						agent.getActionContainer().register(ActionList.DRIVETO, params);
-						// (yyyy probably does not make a difference in terms of current results, but: Shouldn't this be
+						// (probably does not make a difference in terms of current results, but: Shouldn't this be
 						// called earlier, maybe around where the replanner is called?  kai, oct'17)
+						// (I now think it says somewhere that keeping such actions in the actionContainer
+						// would make passing around the actionContainer overly expensive. kai, jan'18)
 						
 						agent.getActionContainer().get(ActionList.DRIVETO).setState(ActionContent.State.PASSED);
 						agent.getPerceptContainer().put(PerceptList.ARRIVED, params);
@@ -107,47 +109,8 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 		return true;
 	}
 
-	/*
-		final void insertPickupAndWaitAtCurrentLocation(Id<Person> agentId,int pickupTime) {
-			// probably never called
-			
-			logger.debug("started addNewActivityToPlan method..");
-			double now = model.getTime() ; 
 	
-			MobsimAgent agent = model.getMobsimAgentMap().get(agentId);
-			Plan plan = WithinDayAgentUtils.getModifiablePlan(agent) ;
-			List<PlanElement> planElements = plan.getPlanElements() ;
-			int currentPlanIndex  = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
-	
-			logger.trace("number of plan elements : " + planElements.size());
-			logger.trace("current plan index : " + currentPlanIndex);
-	
-			//1-ending the current activity
-			PlanElement currentPE = planElements.get(currentPlanIndex);
-			if( !(currentPE instanceof Activity) ) { 
-				logger.error("currently exceuting plan element is not an activity");		
-				return ;
-			}
-			Activity currentAct = (Activity) currentPE;
-			currentAct.setEndTime(now);
-	
-			//2-ADDING PICKUP ACTIVITY
-			Activity newAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId("PICKUP", currentAct.getLinkId() ) ;
-			newAct.setMaximumDuration(pickupTime);
-			planElements.add(currentPlanIndex+1,newAct);
-			logger.debug(" added a new {} activity",newAct.getType());
-	
-			//3-ADDING Wait ACTIVITY
-			Activity waitAct = this.model.getScenario().getPopulation().getFactory().createActivityFromLinkId("Wait", currentAct.getLinkId() ) ;
-			waitAct.setEndTime( Double.POSITIVE_INFINITY ) ;
-			logger.debug(" added {} type activity with INFINITY end time..",waitAct.getType());
-			planElements.add(currentPlanIndex+2,waitAct);
-	
-			WithinDayAgentUtils.resetCaches(agent);
-			this.qsim.rescheduleActivityEnd(agent);
-		}
-		*/
-		final static void moveToWaitAtOtherLocation(Id<Person> agentId,Id<Link> newActivityLinkId, String dest, MATSimModel model) {
+		final static void moveToWaitAtOtherLocation(Id<Person> agentId,Id<Link> newActivityLinkId, String activityType, MATSimModel model) {
 			// called at least once
 			
 			logger.debug("agent {} | started addNewLegToPlan method..", agentId);
@@ -173,12 +136,12 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 			//2-insert a leg:
 			Leg newLeg = model.getScenario().getPopulation().getFactory().createLeg(TransportMode.car);
 			newLeg.setDepartureTime(now);	
-			model.getReplanner().editRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
+			model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId,((HasPerson)agent).getPerson() );
 			planElements.add(currentPlanIndex+1,newLeg);
 			logger.debug(" added a new leg to current index");
 	
 			//3-ADDING wait ACTIVITY
-			Activity newAct = model.getScenario().getPopulation().getFactory().createActivityFromLinkId(dest, newActivityLinkId ) ;
+			Activity newAct = model.getScenario().getPopulation().getFactory().createActivityFromLinkId(activityType, newActivityLinkId ) ;
 //			newAct.setEndTime(Double.POSITIVE_INFINITY);
 			newAct.setEndTime(Double.MAX_VALUE);
 			planElements.add(currentPlanIndex+2,newAct);
@@ -194,7 +157,7 @@ public final class DRIVETOActionHandler implements BDIActionHandler {
 				logger.debug("reRouting the leg after the added activity..");
 				Leg nextLeg = (Leg)planElements.get(currentPlanIndex+3);
 				Activity nextAct = (Activity)planElements.get(currentPlanIndex+4);
-				model.getReplanner().editRoutes().relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
+				model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(nextLeg,newActivityLinkId,nextAct.getLinkId(),((HasPerson)agent).getPerson() ) ;
 				logger.debug("addNewActivityToPlan - leg info after reroute : " + nextLeg.toString());
 			}
 	

@@ -30,7 +30,7 @@ import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
 import io.github.agentsoz.jill.util.Log;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class PlanA extends Plan { 
 
@@ -69,7 +69,7 @@ public class PlanA extends Plan {
 	};
 
 	@Override
-	public void setPlanVariables(HashMap<String, Object> vars) {
+	public void setPlanVariables(Map<String, Object> vars) {
 		// TODO Auto-generated method stub
 		
 	}

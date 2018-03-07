@@ -199,8 +199,7 @@ public class Main {
 			// save a reference to all agents
 			landholders = new ArrayList<Landholder>();
 			for (int i = 0; i < numLandholders; i++) {
-				landholders.add((Landholder) landholderModel
-						.getAgent(i));
+				landholders.add((Landholder) landholderModel.getLandholder(i));
 			}
 
 			// set target
@@ -884,7 +883,7 @@ public class Main {
 				}
 				break;
 			case "--":
-				setJillArgsIndex(i);
+				setJillArgsIndex(i+1);
 				// stop processing args any further
 				i = args.length;
 				break;

@@ -52,12 +52,12 @@ public class Bushfire1Test {
 //			TestUtils.checkSeveral(expecteds, actualEvents);
 //			log.warn("checking events files was successful") ;
 //		}
-		{
-			List<Long> expecteds = Bushfire5Test.getExpectedsFromFiles(utils.getInputDirectory(), "run0.output_plans.xml.gz");
-			log.warn("done with retrieving expecteds") ;
-			TestUtils.checkSeveral(expecteds, actualPlans);
-			log.warn("checking plans files was successful") ;
-		}
+//		{
+//			List<Long> expecteds = Bushfire5Test.getExpectedsFromFiles(utils.getInputDirectory(), "run0.output_plans.xml.gz");
+//			log.warn("done with retrieving expecteds") ;
+//			TestUtils.checkSeveral(expecteds, actualPlans);
+//			log.warn("checking plans files was successful") ;
+//		}
 		
 	}
 	

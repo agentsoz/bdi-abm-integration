@@ -54,4 +54,14 @@ public interface BDIServerInterface
 	 */
 	public void finish();
 
+	/**
+	 * Sets the implementation for the {@link QueryPerceptInterface}
+	 */
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface);
+
+	/**
+	 * Returns an object that implements {@link QueryPerceptInterface}
+	 * @return the implementing object
+	 */
+	public QueryPerceptInterface getQueryPerceptInterface();
 }

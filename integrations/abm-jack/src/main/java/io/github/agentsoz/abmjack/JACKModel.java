@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	private AgentDataContainer nextContainer = new AgentDataContainer();
 
 	public final String GLOBAL_AGENT = "global";
+	private QueryPerceptInterface queryInterface;
 
 	@Override
 	// set up connections and get any needed parameters from the ABM server
@@ -94,6 +96,15 @@ public abstract class JACKModel implements BDIServerInterface, ActionManager {
 	public void start() {
 	};
 
+	@Override
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface) {
+		this.queryInterface = queryInterface;
+	}
+
+	@Override
+	public QueryPerceptInterface getQueryPerceptInterface() {
+		return queryInterface;
+	}
 	public Agent[] getAgents() {
 
 		Iterator<Map.Entry<String, Agent>> it = agents.entrySet().iterator();

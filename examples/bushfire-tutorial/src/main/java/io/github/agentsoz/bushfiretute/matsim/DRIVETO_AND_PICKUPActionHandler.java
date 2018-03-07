@@ -108,8 +108,11 @@ public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 //		System.exit(-1) ;
 		return true;
 	}
-
-	static final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime, MATSimModel model ) {
+	
+	/**
+	 * Look into {@link DRIVETOActionHandler} for syntax that does not need the indices. kai, jan'18
+	 */
+	private static final void insertPickupAndWaitAtOtherLocation(Id<Person> agentId, Id<Link> newActivityLinkId, int pickupTime, MATSimModel model) {
 		// called at least once
 		
 		logger.debug("starting addNewLegAndActvityToPlan method..");
@@ -139,7 +142,7 @@ public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		
 		// leg/route from current activity/position to pickup activity:
 		Leg newLeg = pf.createLeg(TransportMode.car);
-		model.getReplanner().editRoutes().relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId, ((HasPerson) agent).getPerson());
+		model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(newLeg, currentAct.getLinkId(), newActivityLinkId, ((HasPerson) agent).getPerson());
 		logger.debug(" inserting leg into plan..");
 		plan.getPlanElements().add(currentPlanIndex + 1, newLeg);
 		
@@ -161,7 +164,7 @@ public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
 		Leg nextLeg = (Leg) plan.getPlanElements().get(currentPlanIndex + 4);
 		Activity nextAct = (Activity) plan.getPlanElements().get(currentPlanIndex + 5);
 		logger.trace("all evac activity info : {} " + nextAct.toString());
-		model.getReplanner().editRoutes().relocateFutureLegRoute(nextLeg, newActivityLinkId, nextAct.getLinkId(), ((HasPerson) agent).getPerson());
+		model.getReplanner().editRoutes(MATSimModel.EvacRoutingMode.carFreespeed).relocateFutureLegRoute(nextLeg, newActivityLinkId, nextAct.getLinkId(), ((HasPerson) agent).getPerson());
 		
 		logger.trace("number of plan elements after adding pickup, wait, new leg : " + plan.getPlanElements().size());
 		

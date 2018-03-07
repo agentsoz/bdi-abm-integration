@@ -25,6 +25,7 @@ package io.github.agentsoz.abmjill;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.Agent;
 import io.github.agentsoz.bdiabm.BDIServerInterface;
+import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.*;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.jill.Main;
@@ -40,14 +41,15 @@ import java.util.*;
 
 public abstract class JillModel implements BDIServerInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger("");
+	private static final Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
 	private static AgentDataContainer lastContainer;
 
 	private Config config;
-	
+	private QueryPerceptInterface queryInterface;
+
 	public JillModel() {
 	}
 
@@ -75,6 +77,16 @@ public abstract class JillModel implements BDIServerInterface {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface) {
+		this.queryInterface = queryInterface;
+	}
+
+	@Override
+	public QueryPerceptInterface getQueryPerceptInterface() {
+		return queryInterface;
 	}
 
 	@Override
