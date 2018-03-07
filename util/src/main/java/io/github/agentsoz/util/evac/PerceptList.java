@@ -36,6 +36,19 @@ public final class PerceptList {
 	public static final String LEAVENOW = "leave_now";
 	public static final String PICKED_UP = "picked_up";
 	public static final String TIME = "time";
+
+	// BDI Query Percept strings
     public static final String REQUEST_LOCATION = "request_location";
-}
+	/**
+	 * REQUEST_DRIVING_DISTANCE_TO works as follows:
+	 * <ul>
+	 *     <li>Requires double[] coordinates to calculate the distance to; </li>
+	 *     <li>start location is assumed to be the "from node" of the agent's current link; since the agent is already on
+	 *     this link, then the result is somewhat pessimistic</li>
+	 *     <li>end location is assumed to be the "from node" of the link closest to the destination coordinates;</li>
+	 *     <li>uses the free speed router to calculate the least cost distance to the destination</li>
+	 * </ul>
+	 */
+	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to"
+;}
 
