@@ -3,6 +3,7 @@
 **/.classpath
 **/*.orig
 /target
+.DS_Store
 
 # IntelliJ ignores
 .idea/
