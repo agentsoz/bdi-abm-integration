@@ -3,7 +3,8 @@ title: "Analysis of example trips for Surf Coast Shire"
 author: Dhirendra Singh
 date: 12 April, 2018
 output:
-  html_document
+  html_document:
+    keep_md: yes
 #  md_document:
 #    variant: markdown_github
 ---
