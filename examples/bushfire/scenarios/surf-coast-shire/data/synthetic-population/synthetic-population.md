@@ -49,6 +49,11 @@ The suggested approach would be to instead specify the initial population and it
 
 Below is an example showing what two such distribution might look like:
 
+
+```
+## Warning: package 'ggplot2' was built under R version 3.3.2
+```
+
 ![](synthetic-population_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -57,7 +62,7 @@ Activity | Resident | Regular Visitor | Tourist
 ----- | ----- | ----- | -----
 `At Home` | - | - | -
 `At Work` | - | - | - 
-`At beach` | 0.3 | 0.7 | 0.9 
+`At Beach` | 0.3 | 0.7 | 0.9 
 `At Shops` | 0.5 | 0.7 | 0.9 
 `At Other Location` | - | - | - 
 

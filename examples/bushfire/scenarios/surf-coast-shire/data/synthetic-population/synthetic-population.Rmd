@@ -53,22 +53,32 @@ Below is an example showing what two such distribution might look like:
 library(ggplot2)
 
 x<-seq(from=0, to=23,length.out=1000)
-y<-dnorm(x, mean=14, sd=2)
-y<-y/max(y)
+# y<-dnorm(x, mean=14, sd=2)
+# #y<-y/max(y)
+# a<-rep("At Beach", length(x))
+# df1<-data.frame(Hour=x,Proportion=y, Activity=a)
+# h<-y
+y<-dnorm(x, mean=8, sd=3)
+#y<-y/max(y)
+y2<-dnorm(x, mean=15, sd=3)
+#y2<-y2/max(y2)
+y<-.5*y+.5*y2
+#y<-y/max(y)
 a<-rep("At Beach", length(x))
 df1<-data.frame(Hour=x,Proportion=y, Activity=a)
 
-y<-dnorm(x, mean=11, sd=2)
-y<-y/max(y)
-y2<-dnorm(x, mean=18, sd=3)
-y2<-y2/max(y2)
-y<-y+y2
-y<-y/max(y)
+
+y<-dnorm(x, mean=11, sd=3)
+#y<-y/max(y)
+y2<-dnorm(x, mean=19, sd=2)
+#y2<-y2/max(y2)
+y<-.5*y+.5*y2
+#y<-y/max(y)
 a<-rep("At Shops", length(x))
 df2<-data.frame(Hour=x,Proportion=y, Activity=a)
 
 df<-rbind(df1,df2)
-ggplot(df,aes(x=Hour,y=Proportion, color=Activity)) +labs(y="Proportion", x="Hour of day") +geom_line()
+ggplot(df,aes(x=Hour,y=Proportion, color=Activity))+ggtitle("Activity start times") +labs(y="Proportion", x="Hour of day") +geom_line()
 ```
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -77,7 +87,7 @@ Activity | Resident | Regular Visitor | Tourist
 ----- | ----- | ----- | -----
 `At Home` | - | - | -
 `At Work` | - | - | - 
-`At beach` | 0.3 | 0.7 | 0.9 
+`At Beach` | 0.3 | 0.7 | 0.9 
 `At Shops` | 0.5 | 0.7 | 0.9 
 `At Other Location` | - | - | - 
 
