@@ -47,7 +47,8 @@ The key drawback of this approach is that the preparatory process requires manua
 
 The suggested approach would be to instead specify the initial population and its time-of-day based activities in terms of distributions, that are more amenable to easy manipulation between scenarios. This would remove the manual preprocessing step altogether, since the starting population for any new scenario would be fully described by and built from these distributions alone. For instace, the activity-based behaviours of the population could likely be simplified to being `at home`, `at work`, `at shops`, `at beach`, or `at other location`. These distributions would "look" similar for all types of persons, however the proportion of each type performing those activities would vary. 
 
-Below is an example showing what two such distribution might look like:
+Below is an example showing what three such distributions might look like:
+
 
 
 ```

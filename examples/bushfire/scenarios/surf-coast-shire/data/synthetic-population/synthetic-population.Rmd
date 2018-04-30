@@ -47,38 +47,47 @@ The key drawback of this approach is that the preparatory process requires manua
 
 The suggested approach would be to instead specify the initial population and its time-of-day based activities in terms of distributions, that are more amenable to easy manipulation between scenarios. This would remove the manual preprocessing step altogether, since the starting population for any new scenario would be fully described by and built from these distributions alone. For instace, the activity-based behaviours of the population could likely be simplified to being `at home`, `at work`, `at shops`, `at beach`, or `at other location`. These distributions would "look" similar for all types of persons, however the proportion of each type performing those activities would vary. 
 
-Below is an example showing what two such distribution might look like:
+Below is an example showing what three such distributions might look like:
+
 
 ```{r echo=FALSE, fig.width=8, fig.height=3}
 library(ggplot2)
 
-x<-seq(from=0, to=23,length.out=1000)
-# y<-dnorm(x, mean=14, sd=2)
-# #y<-y/max(y)
-# a<-rep("At Beach", length(x))
-# df1<-data.frame(Hour=x,Proportion=y, Activity=a)
-# h<-y
-y<-dnorm(x, mean=8, sd=3)
-#y<-y/max(y)
-y2<-dnorm(x, mean=15, sd=3)
-#y2<-y2/max(y2)
-y<-.5*y+.5*y2
-#y<-y/max(y)
-a<-rep("At Beach", length(x))
-df1<-data.frame(Hour=x,Proportion=y, Activity=a)
+#Probability of each activity occuring (Resident)
+w=0.8
+b=0.3
+s=0.5
 
 
-y<-dnorm(x, mean=11, sd=3)
+
+x<-seq(from=0, to=24,length.out=960)
+y<-dnorm(x, mean=8, sd=.05)
+
+a<-rep("Leave to Work", length(x))
+df3<-data.frame(Hour=x,Density=y, Activity=a)
+w<-y
+
+y<-dnorm(x, mean=10, sd=2)
+
+y2<-dnorm(x, mean=15, sd=2)
+
+y<-(.5*y+.5*y2)
+
+a<-rep("Leave to Beach", length(x))
+df1<-data.frame(Hour=x,Density=y, Activity=a)
+b<-y
+
+y<-dnorm(x, mean=11, sd=2)
 #y<-y/max(y)
-y2<-dnorm(x, mean=19, sd=2)
+y2<-dnorm(x, mean=19, sd=1.5)
 #y2<-y2/max(y2)
-y<-.5*y+.5*y2
+y<-(.5*y+.5*y2)
 #y<-y/max(y)
-a<-rep("At Shops", length(x))
-df2<-data.frame(Hour=x,Proportion=y, Activity=a)
+a<-rep("Leave to Shops", length(x))
+df2<-data.frame(Hour=x,Density=y, Activity=a)
 
 df<-rbind(df1,df2)
-ggplot(df,aes(x=Hour,y=Proportion, color=Activity))+ggtitle("Activity start times") +labs(y="Proportion", x="Hour of day") +geom_line()
+ggplot(df,aes(x=Hour,y=Density, color=Activity))+ggtitle("Activity start times") +labs(y="Density", x="Hour of day") +scale_x_continuous(breaks=c(0,6,12,18,24)) +geom_line()
 ```
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
