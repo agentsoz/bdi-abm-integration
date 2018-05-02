@@ -47,47 +47,28 @@ The key drawback of this approach is that the preparatory process requires manua
 
 The suggested approach would be to instead specify the initial population and its time-of-day based activities in terms of distributions, that are more amenable to easy manipulation between scenarios. This would remove the manual preprocessing step altogether, since the starting population for any new scenario would be fully described by and built from these distributions alone. For instace, the activity-based behaviours of the population could likely be simplified to being `at home`, `at work`, `at shops`, `at beach`, or `at other location`. These distributions would "look" similar for all types of persons, however the proportion of each type performing those activities would vary. 
 
-Below is an example showing what three such distributions might look like:
-
+Below is an example showing what two such distribution might look like:
 
 ```{r echo=FALSE, fig.width=8, fig.height=3}
 library(ggplot2)
 
-#Probability of each activity occuring (Resident)
-w=0.8
-b=0.3
-s=0.5
-
-
-
-x<-seq(from=0, to=24,length.out=960)
-y<-dnorm(x, mean=8, sd=.05)
-
-a<-rep("Leave to Work", length(x))
-df3<-data.frame(Hour=x,Density=y, Activity=a)
-w<-y
-
-y<-dnorm(x, mean=10, sd=2)
-
-y2<-dnorm(x, mean=15, sd=2)
-
-y<-(.5*y+.5*y2)
-
-a<-rep("Leave to Beach", length(x))
-df1<-data.frame(Hour=x,Density=y, Activity=a)
-b<-y
+x<-seq(from=0, to=23,length.out=1000)
+y<-dnorm(x, mean=14, sd=2)
+y<-y/max(y)
+a<-rep("At Beach", length(x))
+df1<-data.frame(Hour=x,Proportion=y, Activity=a)
 
 y<-dnorm(x, mean=11, sd=2)
-#y<-y/max(y)
-y2<-dnorm(x, mean=19, sd=1.5)
-#y2<-y2/max(y2)
-y<-(.5*y+.5*y2)
-#y<-y/max(y)
-a<-rep("Leave to Shops", length(x))
-df2<-data.frame(Hour=x,Density=y, Activity=a)
+y<-y/max(y)
+y2<-dnorm(x, mean=18, sd=3)
+y2<-y2/max(y2)
+y<-y+y2
+y<-y/max(y)
+a<-rep("At Shops", length(x))
+df2<-data.frame(Hour=x,Proportion=y, Activity=a)
 
 df<-rbind(df1,df2)
-ggplot(df,aes(x=Hour,y=Density, color=Activity))+ggtitle("Activity start times") +labs(y="Density", x="Hour of day") +scale_x_continuous(breaks=c(0,6,12,18,24)) +geom_line()
+ggplot(df,aes(x=Hour,y=Proportion, color=Activity)) +labs(y="Proportion", x="Hour of day") +geom_line()
 ```
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -96,7 +77,7 @@ Activity | Resident | Regular Visitor | Tourist
 ----- | ----- | ----- | -----
 `At Home` | - | - | -
 `At Work` | - | - | - 
-`At Beach` | 0.3 | 0.7 | 0.9 
+`At beach` | 0.3 | 0.7 | 0.9 
 `At Shops` | 0.5 | 0.7 | 0.9 
 `At Other Location` | - | - | - 
 
@@ -105,4 +86,117 @@ Each activity will in turn be associated with a location, a set of locations, or
 The above information could then be used to automatically construct a "daily plan" for a given person. It may include several of the above activities, based on values specified in the ablve table. The information above is sufficient to determine the wherabouts of the full population at any time during the day.
 
 
+---
 
+### Scratchpad
+
+*What is below is work in progress so please ignore for now.*
+
+---
+
+#### Dhi, 2 May 2018
+
+Outputs of agent-based simulation models are inherently very sensitive to the input population. For the GOR DSS, defining where the population is, what it is doing, and what it will do in response to an emergency will strongly influence the outputs. 
+
+This is a proposal for *how the population will be specified by users*. The intent is to:
+
+* make all inputs and assumptions about the underlying population explicit so that they can be more easily critiqued, debated, and agreed upon;
+* allow differences between populations of different scenarios to be easily understood and described;
+* allow users to generate populations for different scenarios easily and quickly; and
+* formalise the method of producing such populations, so that they can be accurately reproduced.
+
+In particular, what is proposed is a process for the construction of the input population with respect to the *expected spread of activites in the day* for a given situation. The *output of the process is a CSV file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population.
+
+We will make the following assumptions with respect to the activities of the population:
+
+1. The choice of activities will be limited to the following fixed set:
+
+Activity | Description
+---------- | -------------------------------------------------------------------
+**`home`** | *performed once in a 24hr period* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
+**`work`** | *performed once in a 24hr period* at locations designated as work areas in the region; persons will be assigned arbitrary work location coordinates in these areas; <mark>supplied by Surf Coast Shire Council</mark>
+**`shop`** | *performed potentially once in a 24hr period* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially once in a 24hr* period at areas designated as key destinations along the coast; people visiting beaches will have equal preference for all beaches; <mark>supplied by Surf Coast Shire Council</mark> 
+**`other`** | *performed potentially several times in a 24hr period*; this is a catch-all activity type to capture the fact that any given time of the day some proportion of the population will be at locations other than the above (not including commuting); people performing this activity will be placed at arbitrary locations in the region; this activity will also be used as needed twithin daily plans in order to make them coherent.
+
+1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
+    1. The proportions in which subgroups perform activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
+    1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
+    1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
+
+1. Overall, individuals will differ in the makeup of their daily activity plans with respect to which activities they perform, when, for how long, and in which order.
+
+1. Each activity will be fully described by two distributions specifying (1) the expected start times in the day for the activity and (2) the duration of the activity; these will differ for different situations such as between weekdays and weekends, and also for subgroups, such as residents and tourists. Each scenario, such as "typical weekday" , will therefore be fully specified by six distributons (2 activity distributions x 3 subgroups). Each new scenario, such as "weekend", "crowded beach day with FFDI of 100" will require additional 6 distributions. This will literally take the form of six graphs on a single page that are to be discussed and agreed upon for every new scenario, so is not expected to be too onerous for users.
+
+1. No change is proposed (yet) to the relationship between cars and persons. Currently in the model there is a one-to-one mapping from persons to vehicles such that every person drives in a separate vehicle. This means that *no consideration is given to family units and carpooling; also walking to vehicle which might be at a distance is not currently modelled* (but might be something that should be modelled, given the importance of beaches in the region).
+
+
+#### Dhi, 1 May 2018
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+suppressMessages(require(reshape2))
+require(ggplot2)
+
+# Function to plot a matrix of activities, where
+# cols represent activities (such that each col adds up to 100%)
+# rows represent time of day (hours)
+# Assumes 12 entries per row (for each 2 hour interval)
+plotActivities <- function (plotTitle, x_lab, y_lab, activities) {
+df<-melt(activities)
+colnames(df)<-c("Activity", "Hour", "Proportion")
+df$Hour<-df$Hour*2 # get the time of day correct
+ggplot(df, aes(Hour, Proportion, fill=Activity)) +
+  geom_col() +
+  ggtitle(plotTitle) + 
+  scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
+  scale_x_continuous(name=y_lab, limits=c(1,25), breaks=seq(2,24,2)) +
+  theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
+}
+
+```
+
+The plots below show what the distribution of activities might look like for the identified groups *on a typical weekday*.  
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+
+### Resident
+
+#hour   = c(  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24)
+r_home  = c(900, 900, 850, 750, 300, 200, 150, 100, 200, 450, 700, 850)
+r_work  = c( 50,  50, 100, 150, 500, 600, 600, 500, 500, 400, 200, 100)
+r_beach = c(  0,   0,   0,   0,  50, 50,  100, 150,  50,   0,   0,   0)
+r_shops = c(  0,   0,   0,   0, 100, 100, 100, 200, 200, 100,  50,   0)
+r_other = 1000 - (r_home + r_work + r_beach + r_shops)
+r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
+n_activities = 100 * (r_activities / colSums(r_activities))
+show(n_activities)
+plotActivities("Resident", "Percentage", "Time of day", n_activities)
+
+
+### Regular Visitor
+
+#hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
+r_home  = c(900, 950, 950, 850, 800, 650, 300, 250, 300, 400, 600, 700)
+r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+r_beach = c(  0,   0,   0,  50, 100, 100, 300, 400, 300, 100,  50,   0)
+r_shops = c(  0,   0,   0,   0,  50, 100, 350, 200, 150, 400, 200,   0)
+r_other = 1000 - (r_home + r_work + r_beach + r_shops)
+r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
+n_activities = 100 * (r_activities / colSums(r_activities))
+show(n_activities)
+plotActivities("Regular Visitor", "Percentage", "Time of day", n_activities)
+
+### Tourist
+
+#hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
+r_home  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+r_beach = c(  0,   0,   0,  100, 200, 600, 700, 600, 300, 100,  50,   0)
+r_shops = c(  0,   0,   0,  100, 200, 300, 200, 200, 600, 500, 200,   0)
+r_other = 1000 - (r_home + r_work + r_beach + r_shops)
+r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
+n_activities = 100 * (r_activities / colSums(r_activities))
+show(n_activities)
+plotActivities("Tourist", "Percentage", "Time of day", n_activities)
+
+```
