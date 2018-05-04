@@ -161,15 +161,21 @@ The plots below show what the distribution of activities might look like for the
 
 ### Resident
 
-#hour   = c(  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24)
+hour<-c(rep(c(2,4,6,8,10,12,14,16,18,20,22,24),each=5))
+activity<-c(rep(c("home","work","beach","shops","other"),times=12))
 r_home  = c(900, 900, 850, 750, 300, 200, 150, 100, 200, 450, 700, 850)
 r_work  = c( 50,  50, 100, 150, 500, 600, 600, 500, 500, 400, 200, 100)
 r_beach = c(  0,   0,   0,   0,  50, 50,  100, 150,  50,   0,   0,   0)
 r_shops = c(  0,   0,   0,   0, 100, 100, 100, 200, 200, 100,  50,   0)
 r_other = 1000 - (r_home + r_work + r_beach + r_shops)
 r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
+percentage<-as.vector(r_activities/10)
+Data<-data.frame(hour,activity,percentage)
+Data$activity<-relevel(Data$activity,"home")
+duration<-c("0-2",6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4)
 n_activities = 100 * (r_activities / colSums(r_activities))
 show(n_activities)
+ggplot(Data, aes(x = hour, y = percentage, fill = activity, label = duration)) + geom_bar(stat = "identity") +theme(legend.position = "bottom") + geom_text(size = 3, position = position_stack(vjust = 0.5))
 plotActivities("Resident", "Percentage", "Time of day", n_activities)
 
 

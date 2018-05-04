@@ -49,6 +49,11 @@ The suggested approach would be to instead specify the initial population and it
 
 Below is an example showing what two such distribution might look like:
 
+
+```
+## Warning: package 'ggplot2' was built under R version 3.3.2
+```
+
 ![](synthetic-population_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -127,7 +132,7 @@ The plots below show what the distribution of activities might look like for the
 ## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -138,7 +143,7 @@ The plots below show what the distribution of activities might look like for the
 ## other   10    5    5   10    5   15    5   15   25    10    15    30
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -149,4 +154,4 @@ The plots below show what the distribution of activities might look like for the
 ## other  100  100  100   80   60   10   10   20   10    40    75   100
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-4.png)<!-- -->
