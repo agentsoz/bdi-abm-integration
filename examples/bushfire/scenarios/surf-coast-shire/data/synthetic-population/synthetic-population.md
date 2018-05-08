@@ -74,7 +74,10 @@ The above information could then be used to automatically construct a "daily pla
 
 ---
 
-#### Dhi, 2 May 2018
+
+
+
+#### Dhi, ver 0.2
 
 Outputs of agent-based simulation models are inherently very sensitive to the input population. For the GOR DSS, defining where the population is, what it is doing, and what it will do in response to an emergency will strongly influence the outputs. 
 
@@ -82,10 +85,10 @@ This is a proposal for *how the population will be specified by users*. The inte
 
 * make all inputs and assumptions about the underlying population explicit so that they can be more easily critiqued, debated, and agreed upon;
 * allow differences between populations of different scenarios to be easily understood and described;
-* allow users to generate populations for different scenarios easily and quickly; and
+* allow users to generate populations for different scenarios easily; and
 * formalise the method of producing such populations, so that they can be accurately reproduced.
 
-In particular, what is proposed is a process for the construction of the input population with respect to the *expected spread of activites in the day* for a given situation. The *output of the process is a CSV file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population.
+In particular, what is proposed is a process for the construction of the input population with respect to the *expected spread of activites in the day* for different situations. The *output of the process is a CSV file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population.
 
 We will make the following assumptions with respect to the activities of the population:
 
@@ -93,27 +96,61 @@ We will make the following assumptions with respect to the activities of the pop
 
 Activity | Description
 ---------- | -------------------------------------------------------------------
-**`home`** | *performed once in a 24hr period* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
-**`work`** | *performed once in a 24hr period* at locations designated as work areas in the region; persons will be assigned arbitrary work location coordinates in these areas; <mark>supplied by Surf Coast Shire Council</mark>
-**`shop`** | *performed potentially once in a 24hr period* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
-**`beach`** | *performed potentially once in a 24hr* period at areas designated as key destinations along the coast; people visiting beaches will have equal preference for all beaches; <mark>supplied by Surf Coast Shire Council</mark> 
-**`other`** | *performed potentially several times in a 24hr period*; this is a catch-all activity type to capture the fact that any given time of the day some proportion of the population will be at locations other than the above (not including commuting); people performing this activity will be placed at arbitrary locations in the region; this activity will also be used as needed twithin daily plans in order to make them coherent.
+**`home`** | *performed twice a day (morning, night)* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
+**`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`); 
+**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
+**`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
 1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
-    1. The proportions in which subgroups perform activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
+    1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
     1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
     1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
 
-1. Overall, individuals will differ in the makeup of their daily activity plans with respect to which activities they perform, when, for how long, and in which order.
+1. Overall, individuals in the full population will differ in the makeup of their daily activity plans with respect to which activities they perform, when, for how long, and in which order.
 
-1. Each activity will be fully described by two distributions specifying (1) the expected start times in the day for the activity and (2) the duration of the activity; these will differ for different situations such as between weekdays and weekends, and also for subgroups, such as residents and tourists. Each scenario, such as "typical weekday" , will therefore be fully specified by six distributons (2 activity distributions x 3 subgroups). Each new scenario, such as "weekend", "crowded beach day with FFDI of 100" will require additional 6 distributions. This will literally take the form of six graphs on a single page that are to be discussed and agreed upon for every new scenario, so is not expected to be too onerous for users.
+1. Each activity will be fully described by (1) a distribution specifying the expected start times in the day for the activity and (2) the *typical duration* of the activity (more on this below); these will differ for different situations such as between weekdays and weekends, and also for subgroups, such as between residents and tourists. Each scenario, such as "typical weekday" , will therefore be fully specified by three distributons (one per subgroup) and three activity durations. Each new scenario, such as "weekend", "40 degree day" will require three new distributions (and activity durations) each, so is not expected to be too onerous for users.
 
-1. No change is proposed (yet) to the relationship between cars and persons. Currently in the model there is a one-to-one mapping from persons to vehicles such that every person drives in a separate vehicle. This means that *no consideration is given to family units and carpooling; also walking to vehicle which might be at a distance is not currently modelled* (but might be something that should be modelled, given the importance of beaches in the region).
+  1. The `typical duration` of an activity is the time a person will spend performing that activity under normal conditions, for instance 8hrs for `work`. The actual duration might get squeezed or stretched depending on how things play out during the simulation, such as due to traffic congestion. Details of the precise algorithm for this can be found in the MATSim user guide. 
+  
+  1. Currently in the model *persons* are synonomous with *vehicles*. In other words, all vehicles accommodate a single person (the driver) and drivers are assumed to be co-located with their vehicles. For SCS, it *might be important to model persons walking to activities from their parked vehicles and back at the end of the activity*. This might be important for the `beach` activity in particular, where the time spent in walking from/to the parked vehicle might be significant; <mark>Discuss with working group</mark>.
+
+The following graphs show what the activity start time distributions and durations might look like for a "typical weekday":
+
+![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```
+## [1] "Activity start times (24hrs split over columns)"
+```
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home   100    0    0    0    0    0    0    0    0     0     0     0
+## work     0    0   30   70    0    0    0    0    0     0     0     0
+## beach    0    0    5   10    0    0    0    0   10     5     0     0
+## shops    0    0    0    5    5    5    5   10   20    20     5     0
+## other    0    5   10   10    5   15   10   10   10    10     5     0
+```
+
+```
+## Row sums (can exceed 100 if performed multiple times in the day): 100 100 30 75 90
+```
+
+```
+## Col sums (should not exceed 100): 100 5 45 95 10 20 15 20 40 35 10 0
+```
+
+```
+##   activity typical_duration
+## 1     home               12
+## 2     work                8
+## 3    beach                2
+## 4    shops                1
+## 5    other                1
+```
 
 
-#### Dhi, 1 May 2018
-
-
+#### Dhi, v0.1
 
 The plots below show what the distribution of activities might look like for the identified groups *on a typical weekday*.  
 
@@ -127,7 +164,7 @@ The plots below show what the distribution of activities might look like for the
 ## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -138,7 +175,7 @@ The plots below show what the distribution of activities might look like for the
 ## other   10    5    5   10    5   15    5   15   25    10    15    30
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-4-2.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -149,4 +186,4 @@ The plots below show what the distribution of activities might look like for the
 ## other  100  100  100   80   60   10   10   20   10    40    75   100
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-4-3.png)<!-- -->
