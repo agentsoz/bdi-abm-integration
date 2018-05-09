@@ -83,7 +83,7 @@ The above information could then be used to automatically construct a "daily pla
 
 #### Dhi, ver 0.3
 
-The idea described in `v0.2` below works ok algorithmically, but is not user friendly, because specifying the start time distributions manully is not intuitive and is likely to be error-prone. Certainly, the kinds of distributions drawn in `v0.1`, that capture what people are doing at different times of the day, make more sense for users.
+The idea described in `v0.2` below works ok algorithmically, but is not user friendly, because specifying the start time distributions manully is not intuitive and is likely to be error-prone. Certainly, the kinds of distributions drawn in `v0.1`, that capture what people are doing at different times of the day, make more sense for users. 
 
 One option is to get users to specify the input in `v0.1`-like along with typical durations of activities, and then derive from those, the distributions required by the algorithm, i.e., `v0.2`-like. Here is an attempt at that.
 
@@ -162,9 +162,9 @@ We will make the following assumptions with respect to the activities of the pop
 Activity | Description
 ---------- | -------------------------------------------------------------------
 **`home`** | *performed twice a day (morning, night)* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
-**`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`);
-**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark>
-**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches;
+**`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`); 
+**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
 **`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
 1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
@@ -176,8 +176,8 @@ Activity | Description
 
 1. Each activity will be fully described by (1) a distribution specifying the expected start times in the day for the activity and (2) the *typical duration* of the activity (more on this below); these will differ for different situations such as between weekdays and weekends, and also for subgroups, such as between residents and tourists. Each scenario, such as "typical weekday" , will therefore be fully specified by three distributons (one per subgroup) and three activity durations. Each new scenario, such as "weekend", "40 degree day" will require three new distributions (and activity durations) each, so is not expected to be too onerous for users.
 
-  1. The `typical duration` of an activity is the time a person will spend performing that activity under normal conditions, for instance 8hrs for `work`. The actual duration might get squeezed or stretched depending on how things play out during the simulation, such as due to traffic congestion. Details of the precise algorithm for this can be found in the MATSim user guide.
-
+  1. The `typical duration` of an activity is the time a person will spend performing that activity under normal conditions, for instance 8hrs for `work`. The actual duration might get squeezed or stretched depending on how things play out during the simulation, such as due to traffic congestion. Details of the precise algorithm for this can be found in the MATSim user guide. 
+  
   1. Currently in the model *persons* are synonomous with *vehicles*. In other words, all vehicles accommodate a single person (the driver) and drivers are assumed to be co-located with their vehicles. For SCS, it *might be important to model persons walking to activities from their parked vehicles and back at the end of the activity*. This might be important for the `beach` activity in particular, where the time spent in walking from/to the parked vehicle might be significant; <mark>Discuss with working group</mark>.
 
 The following graphs show what the activity start time distributions and durations might look like for a "typical weekday":
@@ -222,22 +222,22 @@ The plots below show what the distribution of activities might look like for the
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   100   90   85   75   30   20   15   10   20    45    70   100
-## work     0    5   10   15   50   60   60   50   50    40    20     0
+## home    90   90   85   75   30   20   15   10   20    45    70    85
+## work     5    5   10   15   50   60   60   50   50    40    20    10
 ## beach    0    0    0    0    5    5   10   15    5     0     0     0
 ## shops    0    0    0    0   10   10   10   20   20    10     5     0
-## other    0    5    5   10    5    5    5    5    5     5     5     0
+## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   100   95   95   85   80   65   30   25   30    40    60   100
+## home    90   95   95   85   80   65   30   25   30    40    60    70
 ## work     0    0    0    0    0    0    0    0    0     0     0     0
 ## beach    0    0    0    5   10   10   30   40   30    10     5     0
 ## shops    0    0    0    0    5   10   35   20   15    40    20     0
-## other    0    5    5   10    5   15    5   15   25    10    15     0
+## other   10    5    5   10    5   15    5   15   25    10    15    30
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
