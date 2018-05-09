@@ -208,7 +208,7 @@ plotActivities("Tourist", "Percentage", "Time of day", n_activities)
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 #timestep
-i=.25 
+i=2
 
 
 ### DURATIONS in hours (home,work,beach,shops,other)
