@@ -144,12 +144,12 @@ require(ggplot2)
 plotActivities <- function (plotTitle, x_lab, y_lab, activities) {
 df<-melt(activities)
 colnames(df)<-c("Activity", "Hour", "Proportion")
-df$Hour<-df$Hour*2 # get the time of day correct
+df$Hour<-(df$Hour-0.5)*2 # get the time of day correct
 ggplot(df, aes(Hour, Proportion, fill=Activity)) +
   geom_col() +
   ggtitle(plotTitle) + 
   scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
-  scale_x_continuous(name=y_lab, limits=c(1,25), breaks=seq(2,24,2)) +
+  scale_x_continuous(name=y_lab, limits=c(0,24), breaks=seq(0,24,2)) +
   theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
 }
 
@@ -159,50 +159,91 @@ The plots below show what the distribution of activities might look like for the
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 
+### DURATIONS
+durations<-c(2,8,4,4,2)
+
+
+
 ### Resident
 
-hour<-c(rep(c(2,4,6,8,10,12,14,16,18,20,22,24),each=5))
-activity<-c(rep(c("home","work","beach","shops","other"),times=12))
-r_home  = c(900, 900, 850, 750, 300, 200, 150, 100, 200, 450, 700, 850)
-r_work  = c( 50,  50, 100, 150, 500, 600, 600, 500, 500, 400, 200, 100)
+#hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
+r_home  = c(1000, 900, 850, 750, 300, 200, 150, 100, 200, 450, 700, 1000)
+r_work  = c( 0,  50, 100, 150, 500, 600, 600, 500, 500, 400, 200, 0)
 r_beach = c(  0,   0,   0,   0,  50, 50,  100, 150,  50,   0,   0,   0)
 r_shops = c(  0,   0,   0,   0, 100, 100, 100, 200, 200, 100,  50,   0)
 r_other = 1000 - (r_home + r_work + r_beach + r_shops)
 r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-percentage<-as.vector(r_activities/10)
-Data<-data.frame(hour,activity,percentage)
-Data$activity<-relevel(Data$activity,"home")
-duration<-c("0-2",6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4,2,6,"","",4)
 n_activities = 100 * (r_activities / colSums(r_activities))
 show(n_activities)
-ggplot(Data, aes(x = hour, y = percentage, fill = activity, label = duration)) + geom_bar(stat = "identity") +theme(legend.position = "bottom") + geom_text(size = 3, position = position_stack(vjust = 0.5))
 plotActivities("Resident", "Percentage", "Time of day", n_activities)
 
 
 ### Regular Visitor
 
 #hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
-r_home  = c(900, 950, 950, 850, 800, 650, 300, 250, 300, 400, 600, 700)
-r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_beach = c(  0,   0,   0,  50, 100, 100, 300, 400, 300, 100,  50,   0)
-r_shops = c(  0,   0,   0,   0,  50, 100, 350, 200, 150, 400, 200,   0)
-r_other = 1000 - (r_home + r_work + r_beach + r_shops)
-r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-n_activities = 100 * (r_activities / colSums(r_activities))
+v_home  = c(1000, 950, 950, 850, 800, 650, 300, 250, 300, 400, 600, 1000)
+v_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+v_beach = c(  0,   0,   0,  50, 100, 100, 300, 400, 300, 100,  50,   0)
+v_shops = c(  0,   0,   0,   0,  50, 100, 350, 200, 150, 400, 200,   0)
+v_other = 1000 - (v_home + v_work + v_beach + v_shops)
+v_activities = rbind(home=v_home, work=v_work, beach=v_beach, shops=v_shops, other=v_other)
+n_activities = 100 * (v_activities / colSums(v_activities))
 show(n_activities)
 plotActivities("Regular Visitor", "Percentage", "Time of day", n_activities)
 
 ### Tourist
 
 #hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
-r_home  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_beach = c(  0,   0,   0,  100, 200, 600, 700, 600, 300, 100,  50,   0)
-r_shops = c(  0,   0,   0,  100, 200, 300, 200, 200, 600, 500, 200,   0)
-r_other = 1000 - (r_home + r_work + r_beach + r_shops)
-r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-n_activities = 100 * (r_activities / colSums(r_activities))
+t_home  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+t_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+t_beach = c(  0,   0,   0,  100, 200, 600, 700, 600, 300, 100,  50,   0)
+t_shops = c(  0,   0,   0,  100, 200, 300, 200, 200, 600, 500, 200,   0)
+t_other = 1000 - (t_home + t_work + t_beach + t_shops)
+t_activities = rbind(home=t_home, work=t_work, beach=t_beach, shops=t_shops, other=t_other)
+n_activities = 100 * (t_activities / colSums(t_activities))
 show(n_activities)
 plotActivities("Tourist", "Percentage", "Time of day", n_activities)
+
+```
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+#timestep
+i=.25 
+
+
+### DURATIONS in hours (home,work,beach,shops,other)
+durations<-c(i,8,4,4,4)
+
+dur<-(durations/i)
+n=24/i
+p=n/12
+#RESIDENTS
+res<-r_activities/1000
+res<-1-(1-res)^(1/p)
+res<-apply(res,2,cumsum)
+res<-replicate(p,res)
+res<-lapply(1:ncol(res),function(x)cbind(res[,x,]))
+res<-Reduce(cbind,res)
+
+roll<-runif(n)
+res<-apply(res,1,function(x){roll<x})
+res<-apply(res,1,cumsum)
+res[res>1]=0
+res<-dur*res
+z=rep(0,5)
+s=0
+for (j in 1:n)
+{
+ if(s>0)
+   {res[,j]=z
+   s=s-1}
+  else {s=sum(res[,j])-1}
+}
+
+# p=0.5
+# q=1-p
+# x=p^8+q*p^7+q^2*p^6+q^3*p^5+q^4*p^4+q^5*p^3+q^6*p^2+q^7*p+q^8 +p^7+q*p^6+q^2*p^5+q^3*p^4+ q^4*p^3+q^5*p^2+q^6*p+q^7 +p^6+q*p^5+q^2*p^4+q^3*p^3+q^4*p^2+q^5*p+q^6 +p^5+q*p^4+q^2*p^3+q^3*p^2+ q^4*p+q^5 +p^4+q*p^3+q^2*p^2+q^3*p+q^4 +p^3+q*p^2+q^2*p+q^3 +p^2+q*p+q^2 +p+q
+
+
 
 ```

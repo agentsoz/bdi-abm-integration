@@ -125,25 +125,25 @@ The plots below show what the distribution of activities might look like for the
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home    90   90   85   75   30   20   15   10   20    45    70    85
-## work     5    5   10   15   50   60   60   50   50    40    20    10
+## home   100   90   85   75   30   20   15   10   20    45    70   100
+## work     0    5   10   15   50   60   60   50   50    40    20     0
 ## beach    0    0    0    0    5    5   10   15    5     0     0     0
 ## shops    0    0    0    0   10   10   10   20   20    10     5     0
-## other    5    5    5   10    5    5    5    5    5     5     5     5
+## other    0    5    5   10    5    5    5    5    5     5     5     0
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home    90   95   95   85   80   65   30   25   30    40    60    70
+## home   100   95   95   85   80   65   30   25   30    40    60   100
 ## work     0    0    0    0    0    0    0    0    0     0     0     0
 ## beach    0    0    0    5   10   10   30   40   30    10     5     0
 ## shops    0    0    0    0    5   10   35   20   15    40    20     0
-## other   10    5    5   10    5   15    5   15   25    10    15    30
+## other    0    5    5   10    5   15    5   15   25    10    15     0
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -154,4 +154,6 @@ The plots below show what the distribution of activities might look like for the
 ## other  100  100  100   80   60   10   10   20   10    40    75   100
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-3-4.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
+
+
