@@ -254,3 +254,54 @@ The plots below show what the distribution of activities might look like for the
 ![](synthetic-population_files/figure-html/unnamed-chunk-10-3.png)<!-- -->
 
 
+### Joel, plan algorithm (based off v0.1)
+
+The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
+
+
+For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
+
+
+
+The output at present is in a binary matrix form, but is easily convertible to a matsim plan.xml file. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+
+Here is an example plan for a resident, with durations 
+
+```
+##  home  work beach shops other 
+##     4     8     4     4     4
+```
+and only `work` is non-repeatable:
+
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     1    1    1    1    1    1    1    1    1     1     1     1
+## work     0    0    0    0    0    0    0    0    0     0     0     0
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     0     0     0
+```
+
+One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
+
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home   907  907  817  817  270  270  116  116  227   227   625   625
+## work    48   48  137  137  514  514  701  701  429   429   265   265
+## beach    0    0    0    0   50   50   69   69   54    54     5     5
+## shops    0    0    0    0  110  110   80   80  228   228    68    68
+## other   45   45   46   46   56   56   34   34   62    62    37    37
+```
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     7    7  -33   67  -30   70  -34   16   27  -223   -75  -225
+## work    -2   -2   37  -13   14  -86  101  201  -71    29    65   165
+## beach    0    0    0    0    0    0  -31  -81    4    54     5     5
+## shops    0    0    0    0   10   10  -20 -120   28   128    18    68
+## other   -5   -5   -4  -54    6    6  -16  -16   12    12   -13   -13
+```
+A potential solution is to scale the allocations based on duration.
