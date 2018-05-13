@@ -134,6 +134,11 @@ The derived start times are not perfect, since it may not always be possible to 
 
 And here is the difference between the original and reconstructed `work` activity:
 
+
+```
+## Warning: Removed 3 rows containing missing values (position_stack).
+```
+
 ![](synthetic-population_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ```
@@ -265,3 +270,56 @@ The plots below show what the distribution of activities might look like for the
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-12-3.png)<!-- -->
+
+
+### Joel, plan algorithm (based off v0.1)
+
+The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
+
+
+For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
+
+
+
+The output at present is in a binary matrix form, but is easily convertible to a matsim plan.xml file. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+
+Here is an example plan for a resident, with durations 
+
+```
+##  home  work beach shops other 
+##     4     8     4     4     4
+```
+and only `work` is non-repeatable:
+
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     1    1    0    0    0    0    0    0    0     0     0     0
+## work     0    0    1    1    1    1    0    0    1     1     1     1
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    1    1    0     0     0     0
+```
+
+One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
+
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home   922  922  805  805  256  256  115  115  236   236   596   596
+## work    45   45  147  147  561  561  724  724  407   407   279   279
+## beach    0    0    0    0   46   46   55   55   52    52     7     7
+## shops    0    0    0    0   98   98   80   80  233   233    62    62
+## other   33   33   48   48   39   39   26   26   72    72    56    56
+```
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    22   22  -45   55  -44   56  -35   15   36  -214  -104  -254
+## work    -5   -5   47   -3   61  -39  124  224  -93     7    79   179
+## beach    0    0    0    0   -4   -4  -45  -95    2    52     7     7
+## shops    0    0    0    0   -2   -2  -20 -120   33   133    12    62
+## other  -17  -17   -2  -52  -11  -11  -24  -24   22    22     6     6
+```
+A potential solution is to scale the allocations based on duration.

@@ -52,23 +52,26 @@ Below is an example showing what two such distribution might look like:
 ```{r echo=FALSE, fig.width=8, fig.height=3}
 library(ggplot2)
 
-x<-seq(from=0, to=23,length.out=1000)
-y<-dnorm(x, mean=14, sd=2)
-y<-y/max(y)
+x<-seq(from=0, to=24,length.out=1000)
+y<-dnorm(x, mean=10, sd=1)
+
+y2<-dnorm(x, mean=15, sd=1.5)
+
+y<-0.2*y+0.8*y2
 a<-rep("At Beach", length(x))
 df1<-data.frame(Hour=x,Proportion=y, Activity=a)
 
 y<-dnorm(x, mean=11, sd=2)
-y<-y/max(y)
-y2<-dnorm(x, mean=18, sd=3)
-y2<-y2/max(y2)
-y<-y+y2
-y<-y/max(y)
+
+y2<-dnorm(x, mean=18, sd=1.5)
+
+y<-0.5*y+0.5*y2
+
 a<-rep("At Shops", length(x))
 df2<-data.frame(Hour=x,Proportion=y, Activity=a)
 
 df<-rbind(df1,df2)
-ggplot(df,aes(x=Hour,y=Proportion, color=Activity)) +labs(y="Proportion", x="Hour of day") +geom_line()
+ggplot(df,aes(x=Hour,y=Proportion, color=Activity)) +labs(y="Density", x="Hour of day") +geom_line()+scale_x_continuous( limits=c(0,24), breaks=seq(2,24,2))
 ```
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -105,12 +108,13 @@ require(ggplot2)
 plotActivities <- function (plotTitle, x_lab, y_lab, activities) {
 df<-melt(activities)
 colnames(df)<-c("Activity", "Hour", "Proportion")
-df$Hour<-df$Hour*2 # get the time of day correct
+df$Hour<-(df$Hour-0.5)*2 # get the time of day correct
 ggplot(df, aes(Hour, Proportion, fill=Activity)) +
   geom_col() +
   ggtitle(plotTitle) + 
-  #scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
-  scale_x_continuous(name=y_lab, limits=c(1,25), breaks=seq(2,24,2)) +
+  scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
+  #scale_x_continuous(name=y_lab, limits=c(1,25), breaks=seq(2,24,2)) +
+  scale_x_continuous(name=y_lab, limits=c(0,24), breaks=seq(2,24,2)) +
   theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
 }
 
@@ -330,27 +334,142 @@ plotActivities("Resident", "Percentage", "Time of day", n_activities)
 ### Regular Visitor
 
 #hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
-r_home  = c(900, 950, 950, 850, 800, 650, 300, 250, 300, 400, 600, 700)
-r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_beach = c(  0,   0,   0,  50, 100, 100, 300, 400, 300, 100,  50,   0)
-r_shops = c(  0,   0,   0,   0,  50, 100, 350, 200, 150, 400, 200,   0)
-r_other = 1000 - (r_home + r_work + r_beach + r_shops)
-r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-n_activities = 100 * (r_activities / colSums(r_activities))
+v_home  = c(900, 950, 950, 850, 800, 650, 300, 250, 300, 400, 600, 700)
+v_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+v_beach = c(  0,   0,   0,  50, 100, 100, 300, 400, 300, 100,  50,   0)
+v_shops = c(  0,   0,   0,   0,  50, 100, 350, 200, 150, 400, 200,   0)
+v_other = 1000 - (v_home + v_work + v_beach + v_shops)
+v_activities = rbind(home=v_home, work=v_work, beach=v_beach, shops=v_shops, other=v_other)
+n_activities = 100 * (v_activities / colSums(v_activities))
 show(n_activities)
 plotActivities("Regular Visitor", "Percentage", "Time of day", n_activities)
 
 ### Tourist
 
 #hour   = c(  2,   4,   6,   8,   10,  12,  14,  16,  18,  20,  22,  24)
-r_home  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-r_beach = c(  0,   0,   0,  100, 200, 600, 700, 600, 300, 100,  50,   0)
-r_shops = c(  0,   0,   0,  100, 200, 300, 200, 200, 600, 500, 200,   0)
-r_other = 1000 - (r_home + r_work + r_beach + r_shops)
-r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-n_activities = 100 * (r_activities / colSums(r_activities))
+t_home  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+t_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
+t_beach = c(  0,   0,   0,  100, 200, 600, 700, 600, 300, 100,  50,   0)
+t_shops = c(  0,   0,   0,  100, 200, 300, 200, 200, 600, 500, 200,   0)
+t_other = 1000 - (t_home + t_work + t_beach + t_shops)
+t_activities = rbind(home=t_home, work=t_work, beach=t_beach, shops=t_shops, other=t_other)
+n_activities = 100 * (t_activities / colSums(t_activities))
 show(n_activities)
 plotActivities("Tourist", "Percentage", "Time of day", n_activities)
 
 ```
+
+
+### Joel, plan algorithm (based off v0.1)
+
+The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
+
+
+For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+
+###Algorithm to generate a resident plan (based on ver 0.1)
+
+#timestep
+i=2
+
+### DURATIONS in hours>0 (home,work,beach,shops,other)
+durations<-c(4,8,4,4,4)
+
+#REPEAT- can activity reoccur in day? (binary)
+rept<-c(T,F,T,T,T)
+rept<-(rept-1)*-1 #invert repeat vector
+
+dur<-(durations/i) #duration in terms of timesteps
+n=24/i #number of timesteps
+p=n/12 # timesteps per 2 hr block
+
+#RESIDENT PROB MATRIX
+p_resident<-r_activities/1000 #turn into probabilities
+p_resident<-1-(1-p_resident)^(1/p) #(for timesteps!=2 trying to spread prob according to timestep- a bit dodgy)
+p_resident<-apply(p_resident,2,cumsum) #cumulative sums for each column
+
+#for timesteps !=2, creating a column for each timestep
+p_resident<-replicate(p,p_resident) 
+p_resident<-lapply(1:ncol(p_resident),function(x)cbind(p_resident[,x,]))
+p_resident<-Reduce(cbind,p_resident)
+
+N<-1000 #number of residents
+RESIDENTS<-list() #store each resident's plan here
+#GENERATE RESIDENT PLAN
+for (h in 1:N)
+  
+{
+
+roll<-runif(n) #roll for each timestep 
+
+#activity is allocated at each timestep
+res<-apply(p_resident,1,function(x){roll<x}) 
+res<-apply(res,1,cumsum) 
+res[res>1]=0
+
+res<-dur*res #insert durations into matrix
+z=rep(0,5) #blank vector
+s=0  #block flag
+r=z  #repeat flag
+
+#cycle through to see which potential activities actually occur
+for (j in 1:n)
+{
+ if(s>0)
+   {
+      res[,j]=res[,j-1] #block timesteps following activity.
+      s=s-1
+ }
+  
+  else #at this point, the timestep changes to it's activity
+    {
+      while (sum(r*res[,j])>0) #check if unrepeatable activity has already occurred
+    {
+      res[,j]<-dur*(abs(cumsum(p_resident[,9]>runif(1))-1)<1)#reroll
+      r=res[,j]*rept #check repeat again
+      }
+      
+      s=sum(res[,j])-1 # if a new activity is activated, set its       block duration
+      r=res[,j]*rept #check repeat
+        
+       } 
+}
+RESIDENTS[[h]]<-res/dur
+}
+
+#count who is where when
+R_activities<-Reduce('+',RESIDENTS)
+
+#Compare with expected percentages
+
+```
+
+The output at present is in a binary matrix form, but is easily convertible to a matsim plan.xml file. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+
+Here is an example plan for a resident, with durations 
+```{r echo=FALSE, fig.width=5, fig.height=3}
+d=res[,1]*z+durations
+d
+``` 
+and only `work` is non-repeatable:
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+RESIDENTS[[1]]
+
+```
+
+One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+
+R_activities
+
+```
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+```{r echo=FALSE, fig.width=5, fig.height=3}
+(R_activities-r_activities)
+
+```
+A potential solution is to scale the allocations based on duration.
