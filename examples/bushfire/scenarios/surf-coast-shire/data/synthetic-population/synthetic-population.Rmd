@@ -109,7 +109,7 @@ df$Hour<-df$Hour*2 # get the time of day correct
 ggplot(df, aes(Hour, Proportion, fill=Activity)) +
   geom_col() +
   ggtitle(plotTitle) + 
-  scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
+  #scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
   scale_x_continuous(name=y_lab, limits=c(1,25), breaks=seq(2,24,2)) +
   theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
 }
@@ -158,22 +158,22 @@ plotActivities("Residents at work (user input)", "Percentage", "Time of day", n_
 derive_start_time <- function (n_activity) {
   activity_name<-rownames(n_activity)[1]
   s_activity=matrix(0, nrow = dim(n_activity)[1], ncol = dim(n_activity)[2], dimnames=dimnames(n_activity)) # matrix to store start times
-  t_work<-n_activity # temp copy of work matrix
-  #print("t_work"); print(t_work)
+  t_activity<-n_activity # temp copy of activity matrix
+  #print("t_activity"); print(t_activity)
   typical_duration<-durations[,activity_name]
   block_size<-24/length(n_activity[activity_name,])
   for(h in 1:length(n_activity[activity_name,])) {
-    h_work<-t_work[activity_name,h] # find out how many started work this hour
-    #cat("h_work", h_work, "\n")
-    s_activity[activity_name,h]<-h_work # save the start times for this hour
+    h_activity<-t_activity[activity_name,h] # find out how many started activity this hour
+    #cat("h_activity", h_activity, "\n")
+    s_activity[activity_name,h]<-h_activity # save the start times for this hour
     #print("s_activity"); print(s_activity)
     block<-typical_duration/block_size # towards future bins to impact 
     block<-min(length(n_activity[activity_name,])-h+1, block) # towards future bins to impact
     bins<-h:(h+block-1) # ids of bins impacted
     #cat("bins impacted:", bins, "\n")
-    t_work[activity_name, bins]<-t_work[activity_name, bins]-h_work # remove those who started work this hour
-    t_work[t_work<0]<-0 # don't go below zero
-    #print("t_work"); print(t_work)
+    t_activity[activity_name, bins]<-t_activity[activity_name, bins]-h_activity # remove those who started activity this hour
+    t_activity[t_activity<0]<-0 # don't go below zero
+    #print("t_activity"); print(t_activity)
   }
   return(s_activity)
 }
@@ -188,7 +188,43 @@ plotActivities("Residents starting work (derived)", "Percentage", "Time of day",
 show(s_work)
 ```
 
-Here is the same algorithm now applied to all the activities:
+The derived start times are not perfect, since it may not always be possible to remove the required proportions from future bins when there is not enough to go around. One way to measure the quality of the output would be to reconstruct the original distribution using the derived one and compare the difference. Here is what the re-constructed original distribution looks like, using the derived one as input:
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+derive_activity <- function (s_activity) {
+  activity_name<-rownames(s_activity)[1]
+  n_activity=matrix(0, nrow = dim(s_activity)[1], ncol = dim(s_activity)[2], dimnames=dimnames(s_activity)) # matrix to store activity times
+  typical_duration<-durations[,activity_name]
+  block_size<-24/length(s_activity[activity_name,])
+  for(h in 1:length(s_activity[activity_name,])) {
+    h_activity<-s_activity[activity_name,h] # find out how many started activity this hour
+    #cat("h_activity", h_activity, "\n")
+    #n_activity[activity_name,h]<-n_activity[activity_name,h]+h_activity # save the start times for this hour
+    #print("n_activity"); print(n_activity)
+    block<-typical_duration/block_size # towards future bins to impact 
+    block<-min(length(s_activity[activity_name,])-h+1, block) # towards future bins to impact
+    bins<-h:(h+block-1) # ids of bins impacted
+    #cat("bins impacted:", bins, "\n")
+    n_activity[activity_name, bins]<-n_activity[activity_name, bins]+h_activity # remove those who started activity this hour
+  }
+  return(n_activity)
+}
+n_work<-matrix(n_activities["work",], nrow=1, ncol=length(n_activities["work",]), dimnames=list("work"))
+s_work<-derive_start_time(n_work)
+d_work<-derive_activity(s_work)
+plotActivities("Residents at work (re-constructed)", "Percentage", "Time of day", d_work)
+show(d_work)
+```
+
+And here is the difference between the original and reconstructed `work` activity:
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+diff_work<-n_work-d_work
+plotActivities("Residents at work (difference)", "Percentage", "Time of day", diff_work)
+show(diff_work)
+```
+
+Here is the algorithm now applied to all the activities:
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 s_times<-matrix(0, nrow=nrow(n_activities), ncol=ncol(n_activities), dimnames=dimnames(n_activities))

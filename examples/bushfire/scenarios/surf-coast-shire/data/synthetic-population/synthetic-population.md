@@ -123,9 +123,27 @@ The idea would be to cycle through the time bins for the day, and for each bin, 
 ## work    5    0    5    5   40   10    5    0   35     0     0     0
 ```
 
-Here is the same algorithm now applied to all the activities:
+The derived start times are not perfect, since it may not always be possible to remove the required proportions from future bins when there is not enough to go around. One way to measure the quality of the output would be to reconstruct the original distribution using the derived one and compare the difference. Here is what the re-constructed original distribution looks like, using the derived one as input:
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## work    5    5   10   15   50   60   60   55   50    40    35    35
+```
+
+And here is the difference between the original and reconstructed `work` activity:
+
+![](synthetic-population_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## work    0    0    0    0    0    0    0   -5    0     0   -15   -25
+```
+
+Here is the algorithm now applied to all the activities:
+
+![](synthetic-population_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -177,7 +195,7 @@ Activity | Description
 
 The following graphs show what the activity start time distributions and durations might look like for a "typical weekday":
 
-![](synthetic-population_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ```
 ## [1] "Activity start times (24hrs split over columns)"
@@ -224,7 +242,7 @@ The plots below show what the distribution of activities might look like for the
 ## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -235,7 +253,7 @@ The plots below show what the distribution of activities might look like for the
 ## other   10    5    5   10    5   15    5   15   25    10    15    30
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-2.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -246,4 +264,4 @@ The plots below show what the distribution of activities might look like for the
 ## other  100  100  100   80   60   10   10   20   10    40    75   100
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-3.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-3.png)<!-- -->
