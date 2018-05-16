@@ -49,11 +49,6 @@ The suggested approach would be to instead specify the initial population and it
 
 Below is an example showing what two such distribution might look like:
 
-
-```
-## Warning: package 'ggplot2' was built under R version 3.3.2
-```
-
 ![](synthetic-population_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 Proportion of the population of each type, likely to perform a given activity during the day (will be applied to the time-of-day distributions above):
@@ -105,7 +100,7 @@ As well as the following typical durations:
 
 ```
 ##       home work beach shops other
-## hours    2    8     2     4     4
+## hours   12    8     2     1     1
 ```
 
 Now, let's just work with the `work` activity which has a typical duration `8` and looks like:
@@ -128,17 +123,40 @@ The idea would be to cycle through the time bins for the day, and for each bin, 
 ## work    5    0    5    5   40   10    5    0   35     0     0     0
 ```
 
-Here is the same algorithm now applied to all the activities:
+The derived start times are not perfect, since it may not always be possible to remove the required proportions from future bins when there is not enough to go around. One way to measure the quality of the output would be to reconstruct the original distribution using the derived one and compare the difference. Here is what the re-constructed original distribution looks like, using the derived one as input:
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 ```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## work    5    5   10   15   50   60   60   55   50    40    35    35
+```
+
+And here is the difference between the original and reconstructed `work` activity:
+
+
+```
+## Warning: Removed 3 rows containing missing values (position_stack).
+```
+
+![](synthetic-population_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## work    0    0    0    0    0    0    0   -5    0     0   -15   -25
+```
+
+Here is the algorithm now applied to all the activities:
+
+![](synthetic-population_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home    90   90   85   75   30   20   15   10   20    45    70    85
+## home    90    0    0    0    0    0   15    0    5    25    25    15
 ## work     5    0    5    5   40   10    5    0   35     0     0     0
 ## beach    0    0    0    0    5    5   10   15    5     0     0     0
-## shops    0    0    0    0   10    0   10   10   10     0     5     0
-## other    5    0    5    5    0    5    0    5    0     5     0     5
+## shops    0    0    0    0   10   10   10   20   20    10     5     0
+## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
 
@@ -182,7 +200,7 @@ Activity | Description
 
 The following graphs show what the activity start time distributions and durations might look like for a "typical weekday":
 
-![](synthetic-population_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ```
 ## [1] "Activity start times (24hrs split over columns)"
@@ -229,7 +247,7 @@ The plots below show what the distribution of activities might look like for the
 ## other    5    5    5   10    5    5    5    5    5     5     5     5
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -240,7 +258,7 @@ The plots below show what the distribution of activities might look like for the
 ## other   10    5    5   10    5   15    5   15   25    10    15    30
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-2.png)<!-- -->
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
@@ -251,7 +269,7 @@ The plots below show what the distribution of activities might look like for the
 ## other  100  100  100   80   60   10   10   20   10    40    75   100
 ```
 
-![](synthetic-population_files/figure-html/unnamed-chunk-10-3.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-12-3.png)<!-- -->
 
 
 ### Joel, plan algorithm (based off v0.1)
@@ -269,18 +287,18 @@ Here is an example plan for a resident, with durations
 
 ```
 ##  home  work beach shops other 
-##     2     8     2     4     4
+##     4     8     4     4     4
 ```
 and only `work` is non-repeatable:
 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    0    0    0    0    1    0     1     1     0
-## work     0    0    0    1    1    1    1    0    0     0     0     1
-## beach    0    0    0    0    0    0    0    0    1     0     0     0
+## home     1    1    0    0    0    0    0    0    0     0     0     0
+## work     0    0    1    1    1    1    0    0    1     1     1     1
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
 ## shops    0    0    0    0    0    0    0    0    0     0     0     0
-## other    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    1    1    0     0     0     0
 ```
 
 One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
@@ -288,26 +306,20 @@ One issue currently is that over a population of agents, activities with longer 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   904  820  749  611  205   80   69   49  185   240   414   546
-## work    46   86  162  272  555  690  758  737  497   459   398   357
-## beach    0    0    0    0   39   21   27   53   40     4     1     2
-## shops    0    0    0    0   83  139  104  127  231   240   130    43
-## other   50   94   89  117  118   70   42   34   47    57    57    52
+## home   922  922  805  805  256  256  115  115  236   236   596   596
+## work    45   45  147  147  561  561  724  724  407   407   279   279
+## beach    0    0    0    0   46   46   55   55   52    52     7     7
+## shops    0    0    0    0   98   98   80   80  233   233    62    62
+## other   33   33   48   48   39   39   26   26   72    72    56    56
 ```
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 
 ```
-##         [,1]   [,2]   [,3]   [,4]   [,5]   [,6]   [,7]   [,8]   [,9]
-## home   0.004 -0.080 -0.101 -0.139 -0.095 -0.120 -0.081 -0.051 -0.015
-## work  -0.004  0.036  0.062  0.122  0.055  0.090  0.158  0.237 -0.003
-## beach  0.000  0.000  0.000  0.000 -0.011 -0.029 -0.073 -0.097 -0.010
-## shops  0.000  0.000  0.000  0.000 -0.017  0.039  0.004 -0.073  0.031
-## other  0.000  0.044  0.039  0.017  0.068  0.020 -0.008 -0.016 -0.003
-##        [,10]  [,11]  [,12]
-## home  -0.210 -0.286 -0.304
-## work   0.059  0.198  0.257
-## beach  0.004  0.001  0.002
-## shops  0.140  0.080  0.043
-## other  0.007  0.007  0.002
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    22   22  -45   55  -44   56  -35   15   36  -214  -104  -254
+## work    -5   -5   47   -3   61  -39  124  224  -93     7    79   179
+## beach    0    0    0    0   -4   -4  -45  -95    2    52     7     7
+## shops    0    0    0    0   -2   -2  -20 -120   33   133    12    62
+## other  -17  -17   -2  -52  -11  -11  -24  -24   22    22     6     6
 ```
 A potential solution is to scale the allocations based on duration.
