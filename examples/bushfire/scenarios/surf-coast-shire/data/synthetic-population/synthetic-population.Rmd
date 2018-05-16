@@ -145,7 +145,7 @@ plotActivities("Resident", "Percentage", "Time of day", n_activities)
 
 As well as the following typical durations:
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-durations<-matrix(c(12,8,2,1,1), nrow=1, dimnames=list(c("hours"), c("home","work","beach","shops","other")))
+durations<-matrix(c(2,8,2,4,4), nrow=1, dimnames=list(c("hours"), c("home","work","beach","shops","other")))
 show(durations)
 ```
 
@@ -338,7 +338,7 @@ For a given resident, the algorithm allocates an activity for each time block. I
 i=2
 
 ### DURATIONS in hours>0 (home,work,beach,shops,other)
-durations<-c(4,8,4,4,4)
+durations<-c(2,8,2,4,4)
 
 #REPEAT- can activity reoccur in day? (binary)
 rept<-c(T,F,T,T,T)
@@ -350,13 +350,39 @@ p=n/12 # timesteps per 2 hr block
 
 #RESIDENT PROB MATRIX
 p_resident<-r_activities/1000 #turn into probabilities
+
+#matrix showing when durations from previous timesteps end
+x=matrix(1:12,5,12,byrow = T)-dur
+x[x<0]<-0
+x[,1]=1
+A<-matrix(1,1,12)
+
+# # for (h in 2:12)
+# h=2
+# # {
+#   # while (sum(x[,h])>0)
+#   # if (sum(x[,h])>0)
+#    # {
+#     a=matrix(rep(x[,h],12),5,12)/matrix(1:12,5,12,byrow = T)
+#     a[a!=1]=0
+#     b=rowSums(a*p_resident)
+#     c=sum(a*p_resident)
+#     A[h]=c*A[h]
+#     A
+#     p_resident[,h]=(p_resident[,h]-rowSums(p_resident[,1:(h-1)]))/c
+#     p_resident
+#     #x[,h][x[,h]==m]<-0
+#    # }
+#   
+# # }
+
 p_resident<-1-(1-p_resident)^(1/p) #(for timesteps!=2 trying to spread prob according to timestep- a bit dodgy)
 p_resident<-apply(p_resident,2,cumsum) #cumulative sums for each column
 
-#for timesteps !=2, creating a column for each timestep
-p_resident<-replicate(p,p_resident) 
-p_resident<-lapply(1:ncol(p_resident),function(x)cbind(p_resident[,x,]))
-p_resident<-Reduce(cbind,p_resident)
+# #for timesteps !=2, creating a column for each timestep
+# p_resident<-replicate(p,p_resident) 
+# p_resident<-lapply(1:ncol(p_resident),function(x)cbind(p_resident[,x,]))
+# p_resident<-Reduce(cbind,p_resident)
 
 N<-1000 #number of residents
 RESIDENTS<-list() #store each resident's plan here
@@ -432,7 +458,7 @@ R_activities
 ```
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-(R_activities-r_activities)
+(R_activities/N-r_activities/1000)
 
 ```
 A potential solution is to scale the allocations based on duration.

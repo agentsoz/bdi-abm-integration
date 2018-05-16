@@ -105,7 +105,7 @@ As well as the following typical durations:
 
 ```
 ##       home work beach shops other
-## hours   12    8     2     1     1
+## hours    2    8     2     4     4
 ```
 
 Now, let's just work with the `work` activity which has a typical duration `8` and looks like:
@@ -134,11 +134,11 @@ Here is the same algorithm now applied to all the activities:
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home    90    0    0    0    0    0   15    0    5    25    25    15
+## home    90   90   85   75   30   20   15   10   20    45    70    85
 ## work     5    0    5    5   40   10    5    0   35     0     0     0
 ## beach    0    0    0    0    5    5   10   15    5     0     0     0
-## shops    0    0    0    0   10   10   10   20   20    10     5     0
-## other    5    5    5   10    5    5    5    5    5     5     5     5
+## shops    0    0    0    0   10    0   10   10   10     0     5     0
+## other    5    0    5    5    0    5    0    5    0     5     0     5
 ```
 
 
@@ -269,16 +269,16 @@ Here is an example plan for a resident, with durations
 
 ```
 ##  home  work beach shops other 
-##     4     8     4     4     4
+##     2     8     2     4     4
 ```
 and only `work` is non-repeatable:
 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    1    1    1    1    1     1     1     1
-## work     0    0    0    0    0    0    0    0    0     0     0     0
-## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## home     1    1    1    0    0    0    0    1    0     1     1     0
+## work     0    0    0    1    1    1    1    0    0     0     0     1
+## beach    0    0    0    0    0    0    0    0    1     0     0     0
 ## shops    0    0    0    0    0    0    0    0    0     0     0     0
 ## other    0    0    0    0    0    0    0    0    0     0     0     0
 ```
@@ -288,20 +288,26 @@ One issue currently is that over a population of agents, activities with longer 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   907  907  817  817  270  270  116  116  227   227   625   625
-## work    48   48  137  137  514  514  701  701  429   429   265   265
-## beach    0    0    0    0   50   50   69   69   54    54     5     5
-## shops    0    0    0    0  110  110   80   80  228   228    68    68
-## other   45   45   46   46   56   56   34   34   62    62    37    37
+## home   904  820  749  611  205   80   69   49  185   240   414   546
+## work    46   86  162  272  555  690  758  737  497   459   398   357
+## beach    0    0    0    0   39   21   27   53   40     4     1     2
+## shops    0    0    0    0   83  139  104  127  231   240   130    43
+## other   50   94   89  117  118   70   42   34   47    57    57    52
 ```
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 
 ```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     7    7  -33   67  -30   70  -34   16   27  -223   -75  -225
-## work    -2   -2   37  -13   14  -86  101  201  -71    29    65   165
-## beach    0    0    0    0    0    0  -31  -81    4    54     5     5
-## shops    0    0    0    0   10   10  -20 -120   28   128    18    68
-## other   -5   -5   -4  -54    6    6  -16  -16   12    12   -13   -13
+##         [,1]   [,2]   [,3]   [,4]   [,5]   [,6]   [,7]   [,8]   [,9]
+## home   0.004 -0.080 -0.101 -0.139 -0.095 -0.120 -0.081 -0.051 -0.015
+## work  -0.004  0.036  0.062  0.122  0.055  0.090  0.158  0.237 -0.003
+## beach  0.000  0.000  0.000  0.000 -0.011 -0.029 -0.073 -0.097 -0.010
+## shops  0.000  0.000  0.000  0.000 -0.017  0.039  0.004 -0.073  0.031
+## other  0.000  0.044  0.039  0.017  0.068  0.020 -0.008 -0.016 -0.003
+##        [,10]  [,11]  [,12]
+## home  -0.210 -0.286 -0.304
+## work   0.059  0.198  0.257
+## beach  0.004  0.001  0.002
+## shops  0.140  0.080  0.043
+## other  0.007  0.007  0.002
 ```
 A potential solution is to scale the allocations based on duration.
