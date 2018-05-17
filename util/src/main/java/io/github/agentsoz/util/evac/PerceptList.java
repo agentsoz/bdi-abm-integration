@@ -34,6 +34,7 @@ public final class PerceptList {
 	public static final String FIRE_ALERT = "fire_alert";
 	public static final String FIRE_DATA  = "fire_data";
 	public static final String LEAVENOW = "leave_now";
+	public static final String EMERGENCY_MESSAGE = "emergency_message";
 	public static final String PICKED_UP = "picked_up";
 	public static final String TIME = "time";
 
@@ -49,6 +50,6 @@ public final class PerceptList {
 	 *     <li>uses the free speed router to calculate the least cost distance to the destination</li>
 	 * </ul>
 	 */
-	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to"
-;}
+	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to";
+}
 

@@ -5,8 +5,11 @@ import java.util.*;
 import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.*;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.dataInterface.DataClient;
+import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.Disruption;
+import io.github.agentsoz.util.EmergencyMessage;
 import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.util.evac.PerceptList;
 import io.github.agentsoz.util.Location;
@@ -16,7 +19,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -35,7 +37,6 @@ import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.NetworkRoutingProvider;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
@@ -410,6 +411,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		// some blackboardy thing that sits between ABM and BDI
 		server.subscribe(this, PerceptList.FIRE_DATA);
 		server.subscribe(this, PerceptList.DISRUPTION);
+		server.subscribe(this, PerceptList.EMERGENCY_MESSAGE);
 	}
 
 	@Override public boolean dataUpdate(double time, String dataType, Object data) {
@@ -426,6 +428,8 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 						penaltyFactorsOfLinksForEmergencyVehicles, fireWriter);
 			case PerceptList.DISRUPTION:
 				return processDisruptionData(data, now, scenario, disruptionWriter);
+			case PerceptList.EMERGENCY_MESSAGE:
+				return processEmergencyMessageData(data, now, scenario);
 			default:
 				throw new RuntimeException("not implemented") ;
 		}
@@ -436,9 +440,9 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		log.info( new Gson().toJson(data) ) ;
 
-		Map<Double,Disruption> timeMapOfDisrupions = (Map<Double,Disruption>)data;
+		Map<Double,Disruption> timeMapOfDisruptions = (Map<Double,Disruption>)data;
 
-		for (Disruption dd : timeMapOfDisrupions.values()) {
+		for (Disruption dd : timeMapOfDisruptions.values()) {
 
 			double speedInMpS = 0;
 			switch (dd.getEffectiveSpeedUnit()) {
@@ -476,6 +480,55 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 					disruptionWriter.write(startTime, link.getId(), link.getCoord(), prevSpeed);
 				}
 			}
+		}
+		return true ;
+	}
+
+	private boolean processEmergencyMessageData(Object data, double now, Scenario scenario) {
+		log.info("receiving emergency message data at time={}", (now/3600) ); ;
+
+		log.info( new Gson().toJson(data) ) ;
+
+		Map<Double,EmergencyMessage> timeMapOfEmergencyMessages = (Map<Double,EmergencyMessage>)data;
+
+		// FIXME: Assumes incoming is WSG84 format. See https://github.com/agentsoz/bdi-abm-integration/issues/34
+		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(
+				TransformationFactory.WGS84, scenario.getConfig().global().getCoordinateSystem());
+
+		// The key is time, value is a message
+		for (EmergencyMessage msg : timeMapOfEmergencyMessages.values()) {
+			// For each zone in this message
+			List<Id<Person>> personsInZones = new ArrayList<>();
+
+			for (String zoneId : msg.getBroadcastZones().keySet()) {
+				int personsMatched = 0;
+				Double[][] pairs = msg.getBroadcastZones().get(zoneId);
+				List<Coord> coords = new ArrayList<>() ;
+				for (Double[] pair : pairs) {
+					coords.add(transform.transform(new Coord(pair[0], pair[1])));
+				}
+				// Create a polygon for this zone
+				Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
+				// And find everyone inside it
+				for(Id<Person> personId : scenario.getPopulation().getPersons().keySet()) {
+					final Id<Link> linkId = this.getMobsimDataProvider().getAgent(personId).getCurrentLinkId();
+					final Link link = scenario.getNetwork().getLinks().get(linkId);
+					Point fromPoint = GeometryUtils.createGeotoolsPoint(link.getFromNode().getCoord());
+					if (polygon.contains(fromPoint)) { // coming from polygon area
+						// this agent is in (or has potentially just exited) the messaging area
+						personsMatched++;
+						personsInZones.add(personId);
+					}
+				}
+				log.info("For zone " + zoneId + ", found "+personsMatched+" persons currently within it");
+			}
+			log.info("Message " + msg.getType() + " will be sent to " + personsInZones.size() + " persons in zones " + msg.getBroadcastZones().keySet());
+			// package the messages up to send to the BDI side
+			for (Id<Person> personId : personsInZones) {
+				PAAgent agent = this.getAgentManager().getAgent(personId.toString());
+				agent.getPerceptContainer().put(PerceptList.EMERGENCY_MESSAGE, msg.getType());
+			}
+
 		}
 		return true ;
 	}
@@ -569,7 +622,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	}
 
 	@Override public Object queryPercept(String agentID, String perceptID, Object args) {
-		log.debug("received query from agent {} for percept {} with args {}; not implemented yet!", agentID, perceptID, args);
+		log.debug("received query from agent {} for percept {} with args {}", agentID, perceptID, args);
 		switch(perceptID) {
 			case PerceptList.REQUEST_LOCATION:
 				if (args == null || !(args instanceof String)) {
