@@ -24,6 +24,8 @@ package io.github.agentsoz.util;
 
 import com.google.gson.Gson;
 
+import java.util.Map;
+
 public class EmergencyMessage {
 
     public enum EmergencyMessageType {
@@ -36,12 +38,14 @@ public class EmergencyMessage {
 
     private String content;
     private String broadcastHHMM;
-    private String[] broadcastZones;
+    private Map<String,Double[][]> broadcastZones;
 
     public EmergencyMessage(EmergencyMessageType type,
+                            String content,
                             String broadcastHHMM,
-                            String[] broadcastZones) {
+                            Map<String,Double[][]> broadcastZones) {
         this.type = type;
+        this.content = content;
         this.broadcastHHMM = broadcastHHMM;
         this.broadcastZones = broadcastZones;
     }
@@ -54,11 +58,15 @@ public class EmergencyMessage {
         return broadcastHHMM;
     }
 
-    public String[] getBroadcastZones() {
+    public Map<String,Double[][]> getBroadcastZones() {
         return broadcastZones;
     }
 
     public String getContent() { return content; }
+
+    public void setBroadcastZones(Map<String, Double[][]> broadcastZones) {
+        this.broadcastZones = broadcastZones;
+    }
 
     @Override
     public String toString() {
