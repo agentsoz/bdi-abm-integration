@@ -25,6 +25,7 @@ package io.github.agentsoz.util;
 import com.google.gson.Gson;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 public class EmergencyMessage {
 
@@ -38,12 +39,12 @@ public class EmergencyMessage {
 
     private String content;
     private String broadcastHHMM;
-    private Map<String,Double[][]> broadcastZones;
+    private TreeMap<String,Double[][]> broadcastZones;
 
     public EmergencyMessage(EmergencyMessageType type,
                             String content,
                             String broadcastHHMM,
-                            Map<String,Double[][]> broadcastZones) {
+                            TreeMap<String,Double[][]> broadcastZones) {
         this.type = type;
         this.content = content;
         this.broadcastHHMM = broadcastHHMM;
@@ -58,13 +59,13 @@ public class EmergencyMessage {
         return broadcastHHMM;
     }
 
-    public Map<String,Double[][]> getBroadcastZones() {
+    public TreeMap<String,Double[][]> getBroadcastZones() {
         return broadcastZones;
     }
 
     public String getContent() { return content; }
 
-    public void setBroadcastZones(Map<String, Double[][]> broadcastZones) {
+    public void setBroadcastZones(TreeMap<String, Double[][]> broadcastZones) {
         this.broadcastZones = broadcastZones;
     }
 
