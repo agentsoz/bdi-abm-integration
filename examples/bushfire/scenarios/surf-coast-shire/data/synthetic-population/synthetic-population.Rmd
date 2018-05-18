@@ -416,7 +416,7 @@ for (j in 1:n)
     {
       while (sum(r*res[,j])>0) #check if unrepeatable activity has already occurred
     {
-      res[,j]<-dur*(abs(cumsum(p_resident[,9]>runif(1))-1)<1)#reroll
+      res[,j]<-dur*(abs(cumsum(p_resident[,j]>runif(1)))<1)#reroll
       r=res[,j]*rept #check repeat again
       }
       
