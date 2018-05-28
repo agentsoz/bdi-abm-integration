@@ -336,6 +336,22 @@ For a given resident, the algorithm allocates an activity for each time block. I
 
 ###Algorithm to generate a resident plan (based on ver 0.1)
 
+#function to generate counts based on probability
+generate_count<-function(prob,number)
+  
+{
+ count<-prob*number
+ decimal<-count-floor(count)
+ M<-apply(count,2,which.max)
+ # decimal[decimal==0]<-1
+ # m<-apply(decimal,2,which.min)
+ # Floor<-floor(count[cbind(m,seq_along(m))])
+ # Ceiling<-ceiling(count[cbind(M,seq_along(M))])
+ count<-floor(count)
+ count[cbind(M,seq_along(M))]<-count[cbind(M,seq_along(M))]+colSums(decimal)
+ # count[cbind(m,seq_along(m))]<-Floor
+return(count)    
+}
 #timestep
 i=2
 
@@ -356,25 +372,25 @@ start<-s_times/100
 shift<-matrix(colSums(start),5,12,byrow=T)
 saveshift<-shift
 #nonrepeat correction
-for (i in 1:5)
-{
-  if (rept[i]>0)
-  {
-    len=(rept*dur)[i]
-    for (g in (1+len+len):12)
-    {
-    subj=shift[i,g]-(start[i,(g-len)])
-    cont=(shift[i,g]-start[i,g])/(1-(start[i,g]/(subj)))
-    shift[,g]=cont
-    shift[i,g]=subj
-    }
-  }
-    
-}
-prob=start/shift
-
+# for (i in 1:5)
+# {
+#   if (rept[i]>0)
+#   {
+#     len=(rept*dur)[i]
+#     for (g in (1+len):12)
+#     {
+#     subj=shift[i,g]-(start[i,(g-len)])
+#     cont=(shift[i,g]-start[i,g])/(1-(start[i,g]/(subj)))
+#     shift[,g]=cont
+#     shift[i,g]=subj
+#     }
+#   }
+#     
+# }
+# prob=start/shift
+prob=r_activities/1000
 # p_resident<-1-(1-p_resident)^(1/p) #(for timesteps!=2 trying to spread prob according to timestep- a bit dodgy)
-p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
+# p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
 
 # #for timesteps !=2, creating a column for each timestep
 # p_resident<-replicate(p,p_resident) 
@@ -383,10 +399,17 @@ p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
 
 N<-1000 #number of residents
 RESIDENTS<-list() #store each resident's plan here
+count<-generate_count(prob,N)
 #GENERATE RESIDENT PLAN
-for (h in 1:N)
+for (h in 1:(N))
   
 {
+  
+
+#new prob matrix
+prob<-sweep(count,2,colSums(count),'/') 
+  
+p_resident<-apply(prob,2,cumsum)
 
 roll<-runif(n) #roll for each timestep 
 
@@ -430,10 +453,14 @@ for (j in 1:n)
         
        } 
 }
-RESIDENTS[[h]]<-res/dur
+res<-res/dur
+print(h)
+RESIDENTS[[h]]<-res
+count<-count-res
+if(sum(colSums(res))>12){break}
 }
 
-check<-lapply(RESIDENTS,rowSums)
+check<-lapply(RESIDENTS,colSums)
 
 max(sapply(check,'[[',2))
 #count who is where when
