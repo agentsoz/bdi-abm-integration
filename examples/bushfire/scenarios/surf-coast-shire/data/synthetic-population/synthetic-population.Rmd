@@ -132,15 +132,16 @@ Say we start with the following input distribution in the `v0.1` style:
 ### Resident
 
 #hour   = c( 2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24)
-r_home  = c(90, 90, 85, 75, 30, 20, 15, 10, 20, 45, 70, 85)
-r_work  = c( 5,  5, 10, 15, 50, 60, 60, 50, 50, 40, 20, 10)
+r_home  = c(90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85)
+r_work  = c( 5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10)
 r_beach = c( 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0)
-r_shops = c( 0,  0,  0,  0, 10, 10, 10, 20, 20, 10,  5,  0)
+r_shops = c( 0,  0,  0,  0, 10, 10, 10, 20, 25, 10,  5,  0)
 r_other = 100 - (r_home + r_work + r_beach + r_shops)
 r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
 n_activities = 100 * (r_activities / colSums(r_activities))
 show(n_activities)
 plotActivities("Resident", "Percentage", "Time of day", n_activities)
+input<-plotActivities("Resident Input", "Percentage", "Time of day", n_activities)
 ```
 
 As well as the following typical durations:
@@ -333,25 +334,11 @@ The plan algorithm takes the user directed input (i.e. the expected distribution
 For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-
+require(dplyr)
+library(dplyr)
 ###Algorithm to generate a resident plan (based on ver 0.1)
 
-#function to generate counts based on probability
-generate_count<-function(prob,number)
-  
-{
- count<-prob*number
- decimal<-count-floor(count)
- M<-apply(count,2,which.max)
- # decimal[decimal==0]<-1
- # m<-apply(decimal,2,which.min)
- # Floor<-floor(count[cbind(m,seq_along(m))])
- # Ceiling<-ceiling(count[cbind(M,seq_along(M))])
- count<-floor(count)
- count[cbind(M,seq_along(M))]<-count[cbind(M,seq_along(M))]+colSums(decimal)
- # count[cbind(m,seq_along(m))]<-Floor
-return(count)    
-}
+
 #timestep
 i=2
 
@@ -372,25 +359,26 @@ start<-s_times/100
 shift<-matrix(colSums(start),5,12,byrow=T)
 saveshift<-shift
 #nonrepeat correction
-# for (i in 1:5)
-# {
-#   if (rept[i]>0)
-#   {
-#     len=(rept*dur)[i]
-#     for (g in (1+len):12)
-#     {
-#     subj=shift[i,g]-(start[i,(g-len)])
-#     cont=(shift[i,g]-start[i,g])/(1-(start[i,g]/(subj)))
-#     shift[,g]=cont
-#     shift[i,g]=subj
-#     }
-#   }
-#     
-# }
-# prob=start/shift
-prob=r_activities/1000
+for (i in 1:5)
+{
+  if (rept[i]>0)
+  {
+    len=(rept*dur)[i]
+    for (g in (1+len):12)
+    {
+    
+      subj=shift[i,g]-sum(start[i,1:(g-len)])#sum(start[i,1:(g-len)])
+    cont=(shift[i,g]-start[i,g])/(1-(start[i,g]/(subj)))
+    shift[,g]=cont
+    shift[i,g]=subj
+    }
+  }
+    
+}
+prob=start/shift
+
 # p_resident<-1-(1-p_resident)^(1/p) #(for timesteps!=2 trying to spread prob according to timestep- a bit dodgy)
-# p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
+p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
 
 # #for timesteps !=2, creating a column for each timestep
 # p_resident<-replicate(p,p_resident) 
@@ -399,17 +387,11 @@ prob=r_activities/1000
 
 N<-1000 #number of residents
 RESIDENTS<-list() #store each resident's plan here
-count<-generate_count(prob,N)
+PLANS<-list()
 #GENERATE RESIDENT PLAN
-for (h in 1:(N))
+for (h in 1:N)
   
 {
-  
-
-#new prob matrix
-prob<-sweep(count,2,colSums(count),'/') 
-  
-p_resident<-apply(prob,2,cumsum)
 
 roll<-runif(n) #roll for each timestep 
 
@@ -453,15 +435,29 @@ for (j in 1:n)
         
        } 
 }
-res<-res/dur
-print(h)
+res=res/dur
 RESIDENTS[[h]]<-res
-count<-count-res
-if(sum(colSums(res))>12){break}
+names<-row.names(res)
+re=res
+for (i in 2:12)
+{
+  re[,i]=res[,i]-res[,i-1]
 }
-
-check<-lapply(RESIDENTS,colSums)
-
+re[re<1]=0
+re=colSums(re*(row(re)))
+activity=names[re]
+re=as.matrix(re)
+leave_time=re*(2*row(re)-1)*100/re
+leave_time=leave_time[complete.cases(leave_time*0),,drop=FALSE]
+leave_time=as.integer(leave_time)
+person=rep(h,length(leave_time))
+plan=data.frame(cbind(person,activity,leave_time))
+plan[]<-lapply(plan,as.character)
+PLANS[[h]]<-plan
+}
+suppressMessages(plan<-bind_rows(PLANS))
+write.csv(plan,file="plan.csv",row.names = F)
+check<-lapply(RESIDENTS,rowSums)
 max(sapply(check,'[[',2))
 #count who is where when
 R_activities<-Reduce('+',RESIDENTS)
@@ -489,11 +485,15 @@ One issue currently is that over a population of agents, activities with longer 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 
 R_activities
-
+n_activities = 100*(R_activities)/N
+plotActivities("Resident Plans", "Percentage", "Time of day", n_activities)
+input
 ```
+
+
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 (R_activities/N-r_activities/1000)
 
 ```
-A potential solution is to scale the allocations based on duration.
+
