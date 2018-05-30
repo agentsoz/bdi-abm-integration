@@ -12,14 +12,20 @@ output:
 ## Contents 
 <!-- NOTE: table of contents should to be manually updated when headings are added/updated -->
 * [Latest working model](#latest-working-model)
+    * [Population subgroups](#population-subgroups)
+    * [Activity types](#activity-types)
+    * [Model assumptions](#model-assumptions)
+    * [Model description](#model-description)
     * [Plan generation algorithm](#plan-algorithm-based-off-v0.1-joel)
-* [Progression of thinking](#progression-of-thinking)
+* [Background discussion](#background-discussion)
     * [V0.3](#v0.3-dhi)
     * [V0.2](#v0.2-dhi)
     * [V0.1](#v0.1-dhi)
     * [V0.0](#v0.0-initial-proposal-anglesea-april-2018)
 
-# Progression of thinking
+---
+
+# Background discussion
 
 ## V0.3: Dhi
 
@@ -260,6 +266,62 @@ The above information could then be used to automatically construct a "daily pla
 # Latest working model
 
 
+[Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup due to the high number of visitors to townships around the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). On a given summer day for instance, Angleasea that has a [resident population around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045) can have as many as `15000` persons in the township.  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.
+
+
+## Population subgroups
+
+Within the model, we will account for the following groups of people (based on input from regional stakeholders):
+
+* `resident` : as captured by the [ABS census data](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/LGA26490); several methods exist for creating a synthetic population for this cohort, and one that could be readily applied here is the [algorithm from Wicramasinghe et al.](https://github.com/agentsoz/synthetic-population) from RMIT University. 
+* `regular visitor` : people that regularly visit the region during the summer months, camping or in *holiday homes*, and have a working knowledge of local roads and destinations; some information on this cohort could be derived from [VISTA data](https://transport.vic.gov.au/data-and-research/vista/). (<mark>Any other dataset that might give stats on this group?</mark>)
+* `tourist` : people that visit the region for the day or on a short-stay visit, and generally do not know the area well; some information on this cohort could be derived from [VISTA data](https://transport.vic.gov.au/data-and-research/vista/). (<mark>Any other dataset that might give stats on this group?</mark>)
+
+## Activity types
+
+The [initial work done by Surf Cost Shire Council](https://github.com/agentsoz/bdi-abm-integration/blob/kaibranch/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz) looked at the following types of activites (counts): 
+`Base`(144456)
+`Beach`(5578)
+`Business`(39399)
+`Camp`(189)
+`Caravan`(7986)
+`EvacZone`(48370)
+`Golf`(1508)
+`Hotel`(2057)
+`Kindergarten`(333)
+`Primary`(1123)
+`Secondary`(972)
+`Shops`(36193)
+`Tafe`(378)
+`University`(370)
+
+In the new model, the choice of activities is limited to the following fixed set (<mark>TODO: add `Education` category</mark>):
+
+Activity | Description
+---------- | -------------------------------------------------------------------
+**`home`** | *performed twice a day (morning, night)* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
+**`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`); 
+**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
+**`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
+
+## Model assumptions
+
+1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
+    1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
+    1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
+    1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
+
+1. Overall, individuals in the full population will differ in the makeup of their daily activity plans with respect to which activities they perform, when, for how long, and in which order.
+
+  1. The `typical duration` of an activity is the time a person will spend performing that activity under normal conditions, for instance 8hrs for `work`. The actual duration might get squeezed or stretched depending on how things play out during the simulation, such as due to traffic congestion. Details of the precise algorithm for this can be found in the [MATSim user guide](http://ci.matsim.org:8080/job/MATSim-Book/ws/partOne-latest.pdf). 
+  
+  1. Currently in the model *persons are synonomous with vehicles*. In other words, all vehicles accommodate a single person (the driver) and drivers are assummed to be co-located with their vehicles. For SCS, it *might be important to model persons walking to activities from their parked vehicles and back at the end of the activity*. This might be important for the `beach` activity in particular, where the time spent in walking from/to the parked vehicle might be significant; <mark>Discuss with working group</mark>.
+
+## Model description
+
+...
+
 ## Plan algorithm based off V0.1, Joel
 
 The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
@@ -306,11 +368,11 @@ and only `work` is non-repeatable:
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    1    1    0    0    0     0     1     1
-## work     0    0    0    0    0    0    1    1    1     1     0     0
+## home     1    1    1    1    0    0    0    0    0     1     1     0
+## work     0    0    0    0    1    1    1    1    0     0     0     0
 ## beach    0    0    0    0    0    0    0    0    0     0     0     0
 ## shops    0    0    0    0    0    0    0    0    0     0     0     0
-## other    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    1     0     0     1
 ```
 
 One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
@@ -318,11 +380,11 @@ One issue currently is that over a population of agents, activities with longer 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   919  916  866  763  297  200  151   85  240   503   661   702
-## work    36   36   90  135  497  604  606  561  414   307   251   251
-## beach    0    0    0    0   46   46  103  140   43     0     0     0
-## shops    0    0    0    0  113  100   99  178  254    91    45     0
-## other   45   48   44  102   47   50   41   36   49    99    43    47
+## home   886  904  849  752  299  209  153   96  237   498   685   712
+## work    51   51  106  152  486  587  590  544  397   296   238   238
+## beach    0    0    0    0   55   53   99  124   49     0     0     0
+## shops    0    0    0    0  115  103   99  189  264    95    40     0
+## other   63   45   45   96   45   48   59   47   53   111    37    50
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-14-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
@@ -332,16 +394,16 @@ If we compare this to the expected allocations, we see that late in the day, `ho
 
 ```
 ##         [,1]   [,2]   [,3]   [,4]   [,5]   [,6]   [,7]   [,8]   [,9]
-## home   0.019  0.016  0.016  0.013 -0.003  0.000  0.001 -0.015  0.040
-## work  -0.014 -0.014 -0.010 -0.015 -0.003  0.004  0.006  0.061 -0.086
-## beach  0.000  0.000  0.000  0.000 -0.004 -0.004  0.003 -0.010 -0.007
-## shops  0.000  0.000  0.000  0.000  0.013  0.000 -0.001 -0.022  0.054
-## other -0.005 -0.002 -0.006  0.002 -0.003  0.000 -0.009 -0.014 -0.001
+## home  -0.014  0.004 -0.001  0.002 -0.001  0.009  0.003 -0.004  0.037
+## work   0.001  0.001  0.006  0.002 -0.014 -0.013 -0.010  0.044 -0.103
+## beach  0.000  0.000  0.000  0.000  0.005  0.003 -0.001 -0.026 -0.001
+## shops  0.000  0.000  0.000  0.000  0.015  0.003 -0.001 -0.011  0.064
+## other  0.013 -0.005 -0.005 -0.004 -0.005 -0.002  0.009 -0.003  0.003
 ##        [,10]  [,11]  [,12]
-## home   0.053 -0.039 -0.148
-## work  -0.093  0.051  0.151
+## home   0.048 -0.015 -0.138
+## work  -0.104  0.038  0.138
 ## beach  0.000  0.000  0.000
-## shops -0.009 -0.005  0.000
-## other  0.049 -0.007 -0.003
+## shops -0.005 -0.010  0.000
+## other  0.061 -0.013  0.000
 ```
 
