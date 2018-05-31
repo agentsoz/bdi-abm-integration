@@ -24,16 +24,16 @@ output:
 
 
 * [Background discussion](#background-discussion)
-    * [V0.3](#v0.3-dhi)
-    * [V0.2](#v0.2-dhi)
-    * [V0.1](#v0.1-dhi)
-    * [V0.0](#v0.0-initial-proposal-anglesea-april-2018)
+    * [V0.3](#v0.3)
+    * [V0.2](#v0.2)
+    * [V0.1](#v0.1)
+    * [V0.0](#v0.0)
 
 ---
 
 # Background discussion
 
-## V0.3: Dhi
+## V0.3
 
 
 
@@ -98,7 +98,7 @@ Here is the same algorithm now applied to all the activities:
 ```
 
 
-## V0.2: Dhi
+## V0.2
 
 Outputs of agent-based simulation models are inherently very sensitive to the input population. For the GOR DSS, defining where the population is, what it is doing, and what it will do in response to an emergency will strongly influence the outputs. 
 
@@ -171,7 +171,7 @@ The following graphs show what the activity start time distributions and duratio
 ```
 
 
-## V0.1: Dhi
+## V0.1
 
 The plots below show what the distribution of activities might look like for the identified groups *on a typical weekday*.  
 
@@ -210,7 +210,7 @@ The plots below show what the distribution of activities might look like for the
 ![](synthetic-population_files/figure-html/unnamed-chunk-9-3.png)<!-- -->
 
 
-## V0.0: Initial proposal (Anglesea, April 2018)
+## V0.0
 
 [Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup on a given summer day, due to the significant high number of tourists in and around the townships that line the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). For instance, accounts from emergency services personnel suggest that the population of Angleasea can be as high as `15000` persons on a summer day, when the [resident population of Anglesea according to the 2016 census is around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045).  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling then, it is importnat that the significantly high volume of traffic from tourism related activities in the area is accounted for. Further, the behaviour of tourists in case of an emergency is likely to differ from local residents, at least as far as knowledge of local roads is concerned.
 
@@ -409,11 +409,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    0    0    0    0    0     0     1     1
+## home     1    0    1    1    0    0    0    0    0     1     1     1
 ## work     0    0    0    0    1    1    1    1    0     0     0     0
 ## beach    0    0    0    0    0    0    0    0    0     0     0     0
-## shops    0    0    0    0    0    0    0    0    1     1     0     0
-## other    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    1    0    0    0    0    0    0    1     0     0     0
 ```
 
 ```
@@ -428,11 +428,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   879  902  842  709  305  185  152   75  235   518   679   725
-## work    65   65  117  161  493  605  603  559  394   282   232   232
-## beach    0    0    0    0   37   58   93  122   51     0     0     0
-## shops    0    0    0    0  116   89  102  197  270   106    51     0
-## other   56   33   41  130   49   63   50   47   50    94    38    43
+## home   894  897  847  767  327  206  153  102  240   487   654   699
+## work    48   48   91  129  478  585  594  556  420   313   261   261
+## beach    0    0    0    0   46   46   95  136   50     0     0     0
+## shops    0    0    0    0  106  113  109  154  241    86    39     0
+## other   58   55   62  104   43   50   49   52   49   114    46    40
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->

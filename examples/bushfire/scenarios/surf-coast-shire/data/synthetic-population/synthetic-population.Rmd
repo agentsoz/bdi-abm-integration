@@ -24,16 +24,16 @@ output:
 
 
 * [Background discussion](#background-discussion)
-    * [V0.3](#v0.3-dhi)
-    * [V0.2](#v0.2-dhi)
-    * [V0.1](#v0.1-dhi)
-    * [V0.0](#v0.0-initial-proposal-anglesea-april-2018)
+    * [V0.3](#v0.3)
+    * [V0.2](#v0.2)
+    * [V0.1](#v0.1)
+    * [V0.0](#v0.0)
 
 ---
 
 # Background discussion
 
-## V0.3: Dhi
+## V0.3
 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -149,7 +149,7 @@ show(s_times)
 ```
 
 
-## V0.2: Dhi
+## V0.2
 
 Outputs of agent-based simulation models are inherently very sensitive to the input population. For the GOR DSS, defining where the population is, what it is doing, and what it will do in response to an emergency will strongly influence the outputs. 
 
@@ -218,7 +218,7 @@ show(durations)
 ```
 
 
-## V0.1: Dhi
+## V0.1
 
 The plots below show what the distribution of activities might look like for the identified groups *on a typical weekday*.  
 
@@ -267,7 +267,7 @@ plotActivities("Tourist", "Percentage", "Time of day", n_activities)
 ```
 
 
-## V0.0: Initial proposal (Anglesea, April 2018)
+## V0.0
 
 [Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup on a given summer day, due to the significant high number of tourists in and around the townships that line the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). For instance, accounts from emergency services personnel suggest that the population of Angleasea can be as high as `15000` persons on a summer day, when the [resident population of Anglesea according to the 2016 census is around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045).  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling then, it is importnat that the significantly high volume of traffic from tourism related activities in the area is accounted for. Further, the behaviour of tourists in case of an emergency is likely to differ from local residents, at least as far as knowledge of local roads is concerned.
 
