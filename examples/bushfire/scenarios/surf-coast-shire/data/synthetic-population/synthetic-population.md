@@ -16,7 +16,11 @@ output:
     * [Activity types](#activity-types)
     * [Model assumptions](#model-assumptions)
     * [Model description](#model-description)
-    * [Plan generation algorithm](#plan-algorithm-based-off-v0.1-joel)
+    * [Model inputs](#model-inputs)
+    * [Model outputs](#model-outputs)
+    * [Daily plans generation algorithm](#daily-plans-generation-algorithm)
+    * [Quality of the output plans](#quality-of-the-output-plans)
+
 * [Background discussion](#background-discussion)
     * [V0.3](#v0.3-dhi)
     * [V0.2](#v0.2-dhi)
@@ -299,10 +303,10 @@ In the new model, the choice of activities is limited to the following fixed set
 
 Activity | Description
 ---------- | -------------------------------------------------------------------
-**`home`** | *performed twice a day (morning, night)* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
+**`home`** | *performed twice a day (morning, night)* at the home location of a person (MATSim requirement); these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
 **`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`); 
-**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
-**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
+**`shop`** | *performed potentially several times a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially several times a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
 **`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
 ## Model assumptions
@@ -320,90 +324,118 @@ Activity | Description
 
 ## Model description
 
-...
+The purpose of the model is to allow users to specify the makeup of the population for specific situations, such as "Typical summer weekday/weekend", ":"Falls Festival day with FFDI=100, and so on. The intent is to:
 
-## Plan algorithm based off V0.1, Joel
+* make all inputs and assumptions about the underlying population explicit so that they can be more easily critiqued, debated, and agreed upon;
+* allow differences between populations of different scenarios to be easily understood and described;
+* allow users to generate populations for different scenarios easily and automatically; and
+* formalise the method of producing such populations, so that they can be accurately reproduced.
 
-The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
+## Model inputs
 
+*For each situation, for each population subgroup, users specify three inputs*:
 
-For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
+* The distribution of activites through the day;
+* the typical durations of activities; and
+* which activities are repeatable within the day.
 
+For instance, on a "typical summer weekday", the input for the `resident` subgroup might look like:
+
+![](synthetic-population_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ```
-## Loading required package: dplyr
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
+## [1] "Resident activities (above graph in numbers; rows add to 100%)"
 ```
 
 ```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    90   90   85   75   30   20   15   10   25    50    80    85
+## work     5    5   10   15   50   60   60   50   40    30    10    10
+## beach    0    0    0    0    5    5   10   15    5     0     0     0
+## shops    0    0    0    0   10   10   10   20   25    10     5     0
+## other    5    5    5   10    5    5    5    5    5    10     5     5
 ```
 
 ```
-## [1] 4
+## [1] "Typical duration of activities"
 ```
 
-The output at present is in a binary matrix form, but is easily convertible to a matsim plan.xml file. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+```
+##       home work beach shops other
+## hours    2    8     2     2     2
+```
 
-Here is an example plan for a resident, with durations 
+```
+## [1] "Repeatability of activities within the day"
+```
+
+```
+##       home work beach shops other
+## hours    1    0     1     1     1
+```
+
+
+
+## Model outputs
+
+The *output of the process is a CSV file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An [example output CSV file is here](./plan.csv). The output can *easily be converted to a MATSim population plans XML file*.
+
+
+## Daily plans generation algorithm
+
+
+The algorithm takes as input the activities distributions and typical durations, and first derives the start times distribution for each activity. Here is what this looks like for the `resident` example:
+
+![](synthetic-population_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    90   90   85   75   30   20   15   10   25    50    80    85
+## work     5    0    5    5   40   10    5    0   25     0     0     0
+## beach    0    0    0    0    5    5   10   15    5     0     0     0
+## shops    0    0    0    0   10   10   10   20   25    10     5     0
+## other    5    5    5   10    5    5    5    5    5    10     5     5
+```
+
+
+Next, the plan algorithm takes this distribution and iteratively constructs a plan for each agent, taking into account the repeatability constraints for activities. For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+
+
+
+Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
+
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     1    1    1    1    0    0    0    0    1     1     1     1
+## work     0    0    0    0    1    1    1    1    0     0     0     0
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     0     0     0
+```
 
 ```
 ##  home  work beach shops other 
 ##     2     8     2     2     2
 ```
-and only `work` is non-repeatable:
+
+## Quality of the output plans
+
+*One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents:
 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    0    0    0    0    0     1     1     0
-## work     0    0    0    0    1    1    1    1    0     0     0     0
-## beach    0    0    0    0    0    0    0    0    0     0     0     0
-## shops    0    0    0    0    0    0    0    0    0     0     0     0
-## other    0    0    0    0    0    0    0    0    1     0     0     1
+## home   903  894  860  761  320  203  138   79  270   514   669   720
+## work    46   46   93  150  501  612  620  563  398   287   232   232
+## beach    0    0    0    0   44   35   86  146   48     0     0     0
+## shops    0    0    0    0   89   99   97  166  235   103    51     0
+## other   51   60   47   89   46   51   59   46   49    96    48    48
 ```
 
-One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
-
-
-```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   886  904  849  752  299  209  153   96  237   498   685   712
-## work    51   51  106  152  486  587  590  544  397   296   238   238
-## beach    0    0    0    0   55   53   99  124   49     0     0     0
-## shops    0    0    0    0  115  103   99  189  264    95    40     0
-## other   63   45   45   96   45   48   59   47   53   111    37    50
-```
-
-![](synthetic-population_files/figure-html/unnamed-chunk-14-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
 
 
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
-
-```
-##         [,1]   [,2]   [,3]   [,4]   [,5]   [,6]   [,7]   [,8]   [,9]
-## home  -0.014  0.004 -0.001  0.002 -0.001  0.009  0.003 -0.004  0.037
-## work   0.001  0.001  0.006  0.002 -0.014 -0.013 -0.010  0.044 -0.103
-## beach  0.000  0.000  0.000  0.000  0.005  0.003 -0.001 -0.026 -0.001
-## shops  0.000  0.000  0.000  0.000  0.015  0.003 -0.001 -0.011  0.064
-## other  0.013 -0.005 -0.005 -0.004 -0.005 -0.002  0.009 -0.003  0.003
-##        [,10]  [,11]  [,12]
-## home   0.048 -0.015 -0.138
-## work  -0.104  0.038  0.138
-## beach  0.000  0.000  0.000
-## shops -0.005 -0.010  0.000
-## other  0.061 -0.013  0.000
-```
+![](synthetic-population_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 

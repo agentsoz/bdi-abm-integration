@@ -16,7 +16,11 @@ output:
     * [Activity types](#activity-types)
     * [Model assumptions](#model-assumptions)
     * [Model description](#model-description)
-    * [Plan generation algorithm](#plan-algorithm-based-off-v0.1-joel)
+    * [Model inputs](#model-inputs)
+    * [Model outputs](#model-outputs)
+    * [Daily plans generation algorithm](#daily-plans-generation-algorithm)
+    * [Quality of the output plans](#quality-of-the-output-plans)
+
 * [Background discussion](#background-discussion)
     * [V0.3](#v0.3-dhi)
     * [V0.2](#v0.2-dhi)
@@ -38,16 +42,19 @@ require(ggplot2)
 # cols represent activities (such that each col adds up to 100%)
 # rows represent time of day (hours)
 # Assumes 12 entries per row (for each 2 hour interval)
-plotActivities <- function (plotTitle, x_lab, y_lab, activities) {
+plotActivities <- function (plotTitle, x_lab, y_lab, activities, limitY=TRUE) {
 df<-melt(activities)
 colnames(df)<-c("Activity", "Hour", "Proportion")
 df$Hour<-(df$Hour-0.5)*2 # get the time of day correct
-ggplot(df, aes(Hour, Proportion, fill=Activity)) +
+gg<-ggplot(df, aes(Hour, Proportion, fill=Activity)) +
   geom_col() +
   ggtitle(plotTitle) + 
-  scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10)) +
   scale_x_continuous(name=y_lab, limits=c(0,24), breaks=seq(2,24,2)) +
   theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
+if(limitY) {
+  gg<-gg +   scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10))
+}
+gg
 }
 
 ```
@@ -376,10 +383,10 @@ In the new model, the choice of activities is limited to the following fixed set
 
 Activity | Description
 ---------- | -------------------------------------------------------------------
-**`home`** | *performed twice a day (morning, night)* at the home location of a person; these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
+**`home`** | *performed twice a day (morning, night)* at the home location of a person (MATSim requirement); these locations could either be random locations in the region, or random selections from known street addresses in the region (data available from LandVic); <mark>other suggestions welcome</mark>;
 **`work`** | *performed once a day* at locations designated as work areas in the region (<mark>supplied by Surf Coast Shire Council</mark>); persons will be assigned arbitrary work location coordinates in these areas; the proportion of the resident population that forms the working cohort will be based on census data for the region (`ABS 2016: SCS had 90.6% employed of which 66% drive to work`); 
-**`shop`** | *performed potentially once a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
-**`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
+**`shop`** | *performed potentially several times a day* at locations that represent retail and grocery shops as well as dining places; <mark>supplied by Surf Coast Shire Council</mark> 
+**`beach`** | *performed potentially several times a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
 **`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
 ## Model assumptions
@@ -397,18 +404,70 @@ Activity | Description
 
 ## Model description
 
-...
+The purpose of the model is to allow users to specify the makeup of the population for specific situations, such as "Typical summer weekday/weekend", ":"Falls Festival day with FFDI=100, and so on. The intent is to:
 
-## Plan algorithm based off V0.1, Joel
+* make all inputs and assumptions about the underlying population explicit so that they can be more easily critiqued, debated, and agreed upon;
+* allow differences between populations of different scenarios to be easily understood and described;
+* allow users to generate populations for different scenarios easily and automatically; and
+* formalise the method of producing such populations, so that they can be accurately reproduced.
 
-The plan algorithm takes the user directed input (i.e. the expected distribution of activities for each two hour block) and iteratively constructs a plan for each agent. In addition, the user must also specify typical durations, and whether or not an activity can be repeated or not.
+## Model inputs
 
+*For each situation, for each population subgroup, users specify three inputs*:
 
-For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured.  
+* The distribution of activites through the day;
+* the typical durations of activities; and
+* which activities are repeatable within the day.
+
+For instance, on a "typical summer weekday", the input for the `resident` subgroup might look like:
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-require(dplyr)
-library(dplyr)
+
+### Resident
+
+#hour   = c( 2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24)
+r_home  = c(90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85)
+r_work  = c( 5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10)
+r_beach = c( 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0)
+r_shops = c( 0,  0,  0,  0, 10, 10, 10, 20, 25, 10,  5,  0)
+r_other = 100 - (r_home + r_work + r_beach + r_shops)
+r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
+n_activities = 100 * (r_activities / colSums(r_activities))
+plotActivities("Resident", "Percentage", "Time of day", n_activities)
+input<-plotActivities("Resident activities (Input)", "Percentage", "Time of day", n_activities)
+show("Resident activities (above graph in numbers; rows add to 100%)"); show(n_activities)
+
+DURATIONS<-c(2,8,2,2,2)
+durations<-matrix(DURATIONS, nrow=1, dimnames=list(c("hours"), c("home","work","beach","shops","other")))
+show("Typical duration of activities"); show(durations)
+
+REPEATING<-c(1,0,1,1,1)
+repeating<-matrix(REPEATING, nrow=1, dimnames=list(c("hours"), c("home","work","beach","shops","other")))
+show("Repeatability of activities within the day");show(repeating)
+```
+
+
+
+## Model outputs
+
+The *output of the process is a CSV file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An [example output CSV file is here](./plan.csv). The output can *easily be converted to a MATSim population plans XML file*.
+
+
+## Daily plans generation algorithm
+
+
+The algorithm takes as input the activities distributions and typical durations, and first derives the start times distribution for each activity. Here is what this looks like for the `resident` example:
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+plotActivities("Residents starting activities (derived)", "Percentage", "Time of day", s_times)
+show(s_times)
+```
+
+
+Next, the plan algorithm takes this distribution and iteratively constructs a plan for each agent, taking into account the repeatability constraints for activities. For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
+
+```{r echo=FALSE, fig.width=5, fig.height=3}
+suppressMessages(library(dplyr))
 ###Algorithm to generate a resident plan (based on ver 0.1)
 
 
@@ -531,7 +590,9 @@ PLANS[[h]]<-plan
 suppressMessages(plan<-bind_rows(PLANS))
 write.csv(plan,file="plan.csv",row.names = F)
 check<-lapply(RESIDENTS,rowSums)
-max(sapply(check,'[[',2))
+
+#max(sapply(check,'[[',2)) # Dhi disabled this; was showing "## [1] 4" in output
+
 #count who is where when
 R_activities<-Reduce('+',RESIDENTS)
 
@@ -539,34 +600,31 @@ R_activities<-Reduce('+',RESIDENTS)
 
 ```
 
-The output at present is in a binary matrix form, but is easily convertible to a matsim plan.xml file. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
-
-Here is an example plan for a resident, with durations 
-```{r echo=FALSE, fig.width=5, fig.height=3}
-d=res[,1]*z+durations
-d
-``` 
-and only `work` is non-repeatable:
+Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 RESIDENTS[[1]]
-
+d=res[,1]*z+durations
+d
 ```
 
-One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on. Over a run of 1000 residents, we see the following distribution of activities:
+## Quality of the output plans
 
-```{r echo=FALSE, fig.width=5, fig.height=3}
+*One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents:
+
+```{r echo=FALSE, fig.width=4, fig.height=3}
 
 R_activities
 n_activities = 100*(R_activities)/N
-plotActivities("Resident Plans", "Percentage", "Time of day", n_activities)
 input
+plotActivities("Resident activities (Output)", "Percentage", "Time of day", n_activities)
 ```
 
 
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-(R_activities/N-r_activities/1000)
-
+#(R_activities/N-r_activities/1000)
+diff_activities<-n_activities-r_activities
+plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE)
 ```
 
