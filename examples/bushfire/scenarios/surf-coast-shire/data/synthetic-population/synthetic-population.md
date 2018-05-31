@@ -20,6 +20,8 @@ output:
     * [Model outputs](#model-outputs)
     * [Daily plans generation algorithm](#daily-plans-generation-algorithm)
     * [Quality of the output plans](#quality-of-the-output-plans)
+    * [Activity distributions in original SCS plans file](#activity-distributions-in-original-scs-plans-file)
+
 
 * [Background discussion](#background-discussion)
     * [V0.3](#v0.3-dhi)
@@ -121,7 +123,7 @@ Activity | Description
 **`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
 **`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
-1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
+1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourist`) will differ in how they perform the above activities in the following ways:
     1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
     1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
     1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
@@ -407,10 +409,10 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    0    0    0    0    1     1     1     1
+## home     1    1    1    1    0    0    0    0    0     0     1     1
 ## work     0    0    0    0    1    1    1    1    0     0     0     0
 ## beach    0    0    0    0    0    0    0    0    0     0     0     0
-## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    1     1     0     0
 ## other    0    0    0    0    0    0    0    0    0     0     0     0
 ```
 
@@ -426,11 +428,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   903  894  860  761  320  203  138   79  270   514   669   720
-## work    46   46   93  150  501  612  620  563  398   287   232   232
-## beach    0    0    0    0   44   35   86  146   48     0     0     0
-## shops    0    0    0    0   89   99   97  166  235   103    51     0
-## other   51   60   47   89   46   51   59   46   49    96    48    48
+## home   879  902  842  709  305  185  152   75  235   518   679   725
+## work    65   65  117  161  493  605  603  559  394   282   232   232
+## beach    0    0    0    0   37   58   93  122   51     0     0     0
+## shops    0    0    0    0  116   89  102  197  270   106    51     0
+## other   56   33   41  130   49   63   50   47   50    94    38    43
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
@@ -439,3 +441,27 @@ Here is an example plan for a resident, with durations, and where only `work` is
 If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
 ![](synthetic-population_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
+
+## Activity distributions in original SCS plans file
+
+Here is what the distributions of activity **end times** in the [initial population from Surf Coast Shire Council](https://github.com/agentsoz/bdi-abm-integration/blob/kaibranch/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz) look like, as well as after mapping to our activity classes as follows:
+
+  * `home=Base`
+  * `beach=Beach`
+  * `education=Kindergarten,Primary,Secondary,Tafe,University`
+  * `other=[Camp,Caravan Park,Golf Club,Hotel,EvacZone]`
+  * `shops=Shops` 
+  * `work=Business District`
+
+
+![](synthetic-population_files/figure-html/unnamed-chunk-17-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-17-2.png)<!-- -->
+
+```
+## [1] "Number of unique persons"
+```
+
+```
+## [1] 144452
+```
+
+This is just for information so we can get some sense of what the new inputs requirements are compared to the original.  <mark>Discuss with SCS next steps for constructing the input distributions.</mark>

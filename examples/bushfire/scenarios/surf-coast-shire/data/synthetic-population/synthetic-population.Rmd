@@ -20,6 +20,8 @@ output:
     * [Model outputs](#model-outputs)
     * [Daily plans generation algorithm](#daily-plans-generation-algorithm)
     * [Quality of the output plans](#quality-of-the-output-plans)
+    * [Activity distributions in original SCS plans file](#activity-distributions-in-original-scs-plans-file)
+
 
 * [Background discussion](#background-discussion)
     * [V0.3](#v0.3-dhi)
@@ -172,7 +174,7 @@ Activity | Description
 **`beach`** | *performed potentially once a day* at areas designated as beach destinations along the coast (<mark>supplied by Surf Coast Shire Council</mark>); the population will have equal preference for all beaches; 
 **`other`** | *performed potentially several times a day* at arbitrary locations other than those above (not including commuting); will be used as needed to make daily plans coherent.
 
-1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
+1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourist`) will differ in how they perform the above activities in the following ways:
     1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
     1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
     1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
@@ -628,3 +630,55 @@ diff_activities<-n_activities-r_activities
 plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE)
 ```
 
+
+## Activity distributions in original SCS plans file
+
+Here is what the distributions of activity **end times** in the [initial population from Surf Coast Shire Council](https://github.com/agentsoz/bdi-abm-integration/blob/kaibranch/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz) look like, as well as after mapping to our activity classes as follows:
+
+  * `home=Base`
+  * `beach=Beach`
+  * `education=Kindergarten,Primary,Secondary,Tafe,University`
+  * `other=[Camp,Caravan Park,Golf Club,Hotel,EvacZone]`
+  * `shops=Shops` 
+  * `work=Business District`
+
+
+```{r echo=FALSE, fig.width=4.2, fig.height=4}
+
+### Resident (derived from SCS initial plans file)
+csv <- read.csv(gzfile("../from-scsc-201804/trips-scs.csv.gz"), header=T, sep=",")
+
+isFactor <- sapply(csv, is.factor)
+csv[isFactor] <- lapply(csv[isFactor], as.character)
+a <- strptime(csv[,"act.end_time"], format="%H:%M:%S")
+b<-as.numeric(difftime(a,strptime(0,"%H"), units = "hours"))
+csv[,"act.end_time"]<-b
+end_times<-csv[,c("act.end_time","type")]
+ggplot(end_times, aes(x=act.end_time, fill=type)) + geom_histogram(bins=12) +
+  theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
+
+# Try to map to our activties
+df<-end_times
+df$type[df$type=="Base"]<-"home"
+df$type[df$type=="Business District"]<-"work"
+df$type[df$type=="Beach"]<-"beach"
+df$type[df$type=="Shops"]<-"shops"
+df$type[df$type=="Kindergarten"]<-"education"
+df$type[df$type=="Primary"]<-"education"
+df$type[df$type=="Secondary"]<-"education"
+df$type[df$type=="Tafe"]<-"education"
+df$type[df$type=="University"]<-"education"
+df$type[df$type=="Camp"]<-"other"
+df$type[df$type=="Caravan Park"]<-"other"
+df$type[df$type=="Golf Club"]<-"other"
+df$type[df$type=="Hotel"]<-"other"
+df$type[df$type=="EvacZone"]<-"other" # ??
+ggplot(df, aes(x=act.end_time, fill=type)) + geom_histogram(bins=12) +
+  theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
+
+show("Number of unique persons")
+length(unique(csv$person.id))
+
+```
+
+This is just for information so we can get some sense of what the new inputs requirements are compared to the original.  <mark>Discuss with SCS next steps for constructing the input distributions.</mark>
