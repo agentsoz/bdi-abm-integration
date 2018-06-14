@@ -5,3 +5,5 @@
 AU.pbf
 AU.tar.bz2
 osmosis/
+.RData
+.Rhistory
