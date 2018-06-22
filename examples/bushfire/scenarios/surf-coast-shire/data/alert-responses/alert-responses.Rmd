@@ -1,0 +1,141 @@
+---
+title: "Agent response to a fire alert"
+author: Joel Robertson
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+
+
+## Fire alerts and Behavioural States
+
+**What is a fire alert?**
+A fire alert is defined as any percept that informs or reminds the agent of an imminent fire threat. This includes the various levels of messaging, the evacuation of neighbouring agents, doorknocking, and visual cues like smoke, embers and flames.
+An agent's response to a fire alert will be dependent on what state they are in when they receive the alert. We define three possible states:
+
+* **Routine**: The agent is currently implementing their regular day plan. They may be aware of the fire threat, but have not yet acted upon any warnings they have received.
+
+* **Prepare**: The agent has changed their plan to prepare themselves for the threat. They may be attending to dependents, stocking up on supplies, and preparing their accommodation. This state includes those who are choosing to stay and defend, but this does not preclude them from deciding to evacuate on a later (more severe) fire alert.
+
+* **Evacuate**: The agent has decided to leave to a place of congregation. They may be going to their accommodation or attending to dependents prior to leaving, but the decision to evacuate is already made.
+
+
+Notice that these three states are distinguished by what an agent plans to do in the future, rather than the activity they are currently engaged in. 
+
+If we assume that those agents already in the **Evacuate** state will not revert to another state if given further evidence of danger, then an agent will progress through the states in this order:  
+
+
+```{r fig.align="center",echo=FALSE }
+library(DiagrammeR)
+DiagrammeR::mermaid("
+graph LR
+                    
+R(Routine) --> P(Prepare)
+P --> E(Evacuate)
+
+classDef Green fill:#3e8;
+classDef Orange fill:#e90;
+classDef Red fill:#f10;
+
+class R Green
+class P Orange
+class E Red
+
+",height=100)
+
+
+```
+What we are interested in, then, is two cases: when an alert triggers an agent completing their routine to start preparing, and when an alert triggers a preparing agent to evacuate. In each case, a change of state will see the agent formulate new plan for the rest of their day. 
+
+
+## Thresholds
+Identifying when an alert should trigger a change of state is clearly a crucial component of the model. Using a probabilistic method raises a few issues. Firstly, it does not allow for an agent to have a consistent response in the face of multiple messages of the same type. Even if an agent had a say 5% chance of changing state under a certain alert, with enough trials they will invariably react to the alert at some point. There is also a significant assumption about the nature of decision making when using random generated variables to model human decision making, and it may not necessarily correlate with observed behaviours (Kennedy 2012). Finally, it makes it difficult to isolate the affect of a specific fire alert has on agents in different states.        
+A different approach is to assign each fire alert a characteristic vector that gives it a significance relative to the other alerts. These values would be on some arbritary scale (say, 1 to 5). For example:
+
+Alert | (To_Prepare,To_Evacuate)
+------|--------------------
+Advice Message| `(1,0)`
+Watch and Act Message|`(2,0)`
+Evacuate Now Message|`(3,3)`
+Others Evacuate Observed|`(3,4)`
+Smoke Observed|`(4,2)`
+Fire Observed|`(5,2)`
+
+In turn, each agent will also have a threshold vector `(x,y)` with a value in `[1,5]` assigned for each state. An agent's basic response to a fire alert is then completely determined by their tolerance, or threshold value, in their current state; if the alert's value is equal or greater than the agent's threshold, the agent will begin to prepare or evacuate accordingly.      
+
+
+ASSUMPTIONS
+-No cumulative effect as yet (is this important?)
+-
+
+## Behaviour Profiles
+
+The allocation of these threshold vectors will allow the population of agents to have a varying response amongst different subgroups. The population will firstly be broken up into 4 distinct types: 
+
+* **Resident**: These agents represent people who live in the region and have a strong knowledge of local roads and places of congregation. In addition to this, they will have connections to others in the community, and are likely to have a concern for relatives, pets, and property. 
+
+* **Regular Visitor**: These are agents who (for example) have holiday homes and may only be in the region for several months a year. Agents of this type are also familiar with the area, but do not have much of a community network. They are less likely to be prepared for a bushfire threat, and will be less likely to defend property. 
+
+* **Overnight Visitor**: These agents are unfamiliar with the area, and have short term accommodation (motel, AirBnB, caravan park) that they will not defend. However, they are likely to return there first to gather belongings, and then follow the evacuation instructions of authorities or leave the region. 
+
+* **Day Visitor**: These agents are also unfamiliar with local roads and places of congregation, and will most likely seek to leave the region when informed of a bushfire threat.
+  
+*Note that from  now on "accommodation" refers more generally to the homes of residents, holiday homes of regular visitors and the short-term lodgings of overnight visitors.*
+
+In terms of thresholds, these 4 types will have clear distinctions. For instance, all `Overnight Visitors` and `Day Visitors` would have a threshold of `(x,0)` i.e. these agents will immediately move to the `Evacuate` state once they acknowledge the fire threat.
+
+The threshold values will also allow further distinctions to be made within each of the subgroups, based on demographic data. For example, elderly male residents would be more likely to have a `To_Evacuate` value between 3-5, or a horse owner may have some modifier `+(-2,2)` applied to their vector, indicating they are more likley to begin defending and less likely to leave. 
+
+## Replanning 
+
+Once an agent has changed state, they then need to formulate a new plan. An agent's behaviour profile will also play an important role in that process. The distinct type of `Resident`, `Regular Visitor`,`Overnight Visitor` or `Day Visitor` will restrict an agent's possible actions, and demographic data will conditionally shape the plan to match the agent's individual characteristics.
+
+Programmatically, the plan creation will look like this:
+
+```
+if (Agent_To_Prepare!>Alert_To_Prepare)             ##Check Threshold
+  Agent_State=Prepare                               ##Update State
+  if (Agent_To_Evacuate!>Alert_To_Evacuate)         ##Check Threshold
+    Agent_State=Evacuate                              ##Update State
+      ...                                             ##TBC
+      
+      
+    else
+    latent_time=rand(0:60)                            ## How long does agent wait before acting?  
+      
+      if Resident==True                               ## Is agent a resident?
+        if At_Accom!=True                             ##Does resident need to go home?
+          Accom=True                                  ##Add trip home to plan
+          if rand(0,1)<Agent_Detour_Prob              ##Does resident go home via store?
+            Via=True                                  ##Add detour on way home to plan
+            Agent_Stock_Prob=Agent_Stock_Prob*0.5     ##Lessen chance of Agent going out again
+        if Dependent==True                            ##Does resident have any dependents to attend to?
+          Go_to_Dependent=True                        ##Add trip to dependent to plan (will automatically return home)
+        if Horse==True                                ##Does resident have any horses to attend to?
+          Go_to_Dependent=True                        ##Add trip to horses to plan (will automatically return home)
+        if rand(0,1)<Agent_Stock_Prob                 ##Does resident need to get supplies?
+          Stock=True                                  ##Add stock trip to plan (will automatically return home)
+  
+      elseif Regular_Visitor==True
+        ...                                           ##TBC
+        
+      elseif Overnight_Visitor==True
+        ...                                           ##TBC
+      
+      if Day_Visitor==True
+        ...                                           ##TBC
+```
+
+
+
+
+
+
+ 
+
+
+
+ 
