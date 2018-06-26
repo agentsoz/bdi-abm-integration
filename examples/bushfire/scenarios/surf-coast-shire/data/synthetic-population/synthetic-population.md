@@ -403,20 +403,17 @@ The algorithm takes as input the activities distributions and typical durations,
 Next, the plan algorithm takes this distribution and iteratively constructs a plan for each agent, taking into account the repeatability constraints for activities. For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
 
 
-```
-## Warning: package 'dplyr' was built under R version 3.3.2
-```
 
 Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
 
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    1    1    1    0    1    0    0     0     0     0
-## work     0    0    0    0    0    0    0    0    1     1     1     1
-## beach    0    0    0    0    0    0    0    0    0     0     0     0
-## shops    0    0    0    0    0    0    0    1    0     0     0     0
-## other    0    0    0    0    0    1    0    0    0     0     0     0
+## home     1    1    1    1    0    0    0    0    0     1     1     1
+## work     0    0    0    0    0    1    1    1    1     0     0     0
+## beach    0    0    0    0    1    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     0     0     0
 ```
 
 ```
@@ -431,11 +428,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home   891  902  857  757  299  191  143   94  251   528   695   733
-## work    52   52  100  153  509  620  615  562  384   273   230   230
-## beach    0    0    0    0   45   48  103  107   58     0     0     0
-## shops    0    0    0    0  100   97   96  198  254   100    37     0
-## other   57   46   43   90   47   44   43   39   53    99    38    37
+## home   901  903  844  769  303  204  138  101  264   477   639   667
+## work    43   43   87  148  503  588  596  535  417   332   280   280
+## beach    0    0    0    0   56   62  108  156   42     0     0     0
+## shops    0    0    0    0   90  105  112  163  233    92    38     0
+## other   56   54   69   83   48   41   46   45   44    99    43    53
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
@@ -456,12 +453,6 @@ Here is what the distributions of activity **end times** in the [initial populat
   * `shops=Shops` 
   * `work=Business District`
 
-
-
-```
-## Warning in strptime(csv[, "act.end_time"], format = "%H:%M:%S"): unknown
-## timezone 'zone/tz/2018c.1.0/zoneinfo/Australia/Melbourne'
-```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-17-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-17-2.png)<!-- -->
 
