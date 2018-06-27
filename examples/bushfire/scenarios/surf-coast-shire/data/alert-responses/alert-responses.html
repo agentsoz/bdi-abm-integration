@@ -2784,8 +2784,8 @@ $(document).ready(function () {
 </ul>
 <p>Notice that these three states are distinguished by what an agent plans to do in the future, rather than the activity they are currently engaged in.</p>
 <p>If we assume that those agents already in the <strong>Evacuate</strong> state will not revert to another state if given further evidence of danger, then an agent will progress through the states in this order:</p>
-<p><div id="htmlwidget-137a80139dedeeb2e914" style="width:672px;height:100px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-137a80139dedeeb2e914">{"x":{"diagram":"\ngraph LR\n                    \nR(Routine) --> P(Prepare)\nP --> E(Evacuate)\n\nclassDef Green fill:#3e8;\nclassDef Orange fill:#e90;\nclassDef Red fill:#f10;\n\nclass R Green\nclass P Orange\nclass E Red\n\n"},"evals":[],"jsHooks":[]}</script> What we are interested in, then, is two cases: when an alert triggers an agent completing their routine to start preparing, and when an alert triggers a preparing agent to evacuate. In each case, a change of state will see the agent formulate new plan for the rest of their day.</p>
+<p><div id="htmlwidget-10f9502ea620115f1f49" style="width:672px;height:100px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-10f9502ea620115f1f49">{"x":{"diagram":"\ngraph LR\n                    \nR(Routine) --> P(Prepare)\nP --> E(Evacuate)\n\nclassDef Green fill:#3e8;\nclassDef Orange fill:#e90;\nclassDef Red fill:#f10;\n\nclass R Green\nclass P Orange\nclass E Red\n\n"},"evals":[],"jsHooks":[]}</script> What we are interested in, then, is two cases: when an alert triggers an agent completing their routine to start preparing, and when an alert triggers a preparing agent to evacuate. In each case, a change of state will see the agent formulate new plan for the rest of their day.</p>
 </div>
 <div id="thresholds" class="section level2">
 <h2>Thresholds</h2>

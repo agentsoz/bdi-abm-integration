@@ -393,7 +393,7 @@ Activity | Description
 
 ## Model assumptions
 
-1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourust`) will differ in how they perform the above activities in the following ways:
+1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourist`) will differ in how they perform the above activities in the following ways:
     1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
     1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
     1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
@@ -603,14 +603,15 @@ re=as.matrix(re)
 start_time=re*(2*row(re)-1)*100/re
 start_time=start_time[complete.cases(start_time*0),,drop=FALSE]
 start_time=as.integer(start_time)
-person=rep(h,length(start_time))
-plan=data.frame(cbind(person,activity,start_time))
+start_time=start_time+sample(c(-99:-40,0:59),length(start_time))
+perse=rep(h,length(start_time))
+plan=data.frame(cbind(perse,activity,start_time))
 plan[]<-lapply(plan,as.character)
 
 ##Ensure resident starts and ends at home
 header<-plan[1,]
 header[2]<-"home"
-header[3]<-0
+header[3]<-"0000"
 if (plan[1,2]=="home")
 {
  plan[1,3]=0
@@ -620,13 +621,47 @@ if (plan[1,2]=="home")
 }
 
 footer<-header
-footer[3]<-2330
+footer[3]<-"2359"
 if (tail(plan,1)[2]!="home")
 {
   plan<-rbind(plan,footer)
 }
+
+##add zeros
+for (yy in 1:nrow(plan))
+{
+  lenn<-4-nchar(plan[yy,3])
+  if(lenn>0)
+    
+  {
+    for (yyy in 1:lenn)
+    {
+      plan[yy,3]<-paste0("0",plan[yy,3])
+    }
+  }
+}
+
+
 ##choose home location
 home<-home_locations[sample(nrow(home_locations),1),]
+
+
+
+base_boundary<-5752511
+top_boundary<-5764423
+left_boundary<-770598
+right_boundary<-788160
+home[3]<-sample(base_boundary:top_boundary,1)
+home[2]<-sample(left_boundary:right_boundary,1)
+# if(home[3]<5729194){home[2]<-sample(left_boundary:752929,1)}
+# else if(home[3]<5738141){home[2]<-sample(left_boundary:759270,1)}
+# else if(home[3]<5742132){home[2]<-sample(left_boundary:771193,1)}
+# else if(home[3]<5744745){home[2]<-sample(left_boundary:777230,1)}
+# else if(home[3]<5745565){home[2]<-sample(left_boundary:779478,1)}
+# else if(home[3]<5747801){home[2]<-sample(left_boundary:783727,1)}
+# else if(home[3]<5750705){home[2]<-sample(left_boundary:785814,1)}
+# else if(home[3]<5753911){home[2]<-sample(left_boundary:789393,1)}
+# else if(home[3]<5756781){home[2]<-sample(left_boundary:793240,1)}
 plan$xcoord=matrix(home[2],nrow(plan))
 plan$ycoord=matrix(home[3],nrow(plan))
 plan$xcoord=unlist(plan$xcoord)
@@ -681,6 +716,7 @@ PLANS[[h]]<-plan
 
 ##WRite plan to XML
   id=h
+  print(id)
   names(id)<-"id"
   names(plan)<-c("id","type","start_time","x","y")
   person<-newXMLNode("person", attrs=id,parent=root)
@@ -699,18 +735,18 @@ PLANS[[h]]<-plan
     else
     {
      newXMLNode("act", attrs=plan[j,c(2,4,5)],parent=pl)
-      
+
     }
   }
-  
+
 
 }
 dtd<-newXMLDTDNode("plans",systemID = "http://www.matsim.org/files/dtd/plans_v4.dtd",addFinalizer = T)
 doc<-newXMLDoc(dtd = dtd,addFinalizer = T,name="plans",node=root)
-saveXML(doc,"plans.xml")
+saveXML(doc,"plans_fuzz.xml")
 
 suppressMessages(plans<-bind_rows(PLANS))
-write.csv(plans,file="plans.csv",row.names = F)
+write.csv(plans,file="plans_fuzz.csv",row.names = F)
 check<-lapply(RESIDENTS,rowSums)
 
 #max(sapply(check,'[[',2)) # Dhi disabled this; was showing "## [1] 4" in output
