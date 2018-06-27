@@ -538,7 +538,7 @@ p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
 # p_resident<-lapply(1:ncol(p_resident),function(x)cbind(p_resident[,x,]))
 # p_resident<-Reduce(cbind,p_resident)
 
-N<-1000 #number of residents
+N<-10000 #number of residents yyyyy
 RESIDENTS<-list() #store each resident's plan here
 PLANS<-list()
 #GENERATE RESIDENT PLAN
@@ -603,7 +603,7 @@ re=as.matrix(re)
 start_time=re*(2*row(re)-1)*100/re
 start_time=start_time[complete.cases(start_time*0),,drop=FALSE]
 start_time=as.integer(start_time)
-start_time=start_time+sample(c(-99:-40,0:59),length(start_time))
+start_time=start_time+sample(c(-99:-41,0:59),length(start_time))
 perse=rep(h,length(start_time))
 plan=data.frame(cbind(perse,activity,start_time))
 plan[]<-lapply(plan,as.character)
@@ -644,24 +644,26 @@ for (yy in 1:nrow(plan))
 
 ##choose home location
 home<-home_locations[sample(nrow(home_locations),1),]
+	
+#find a random point in region for home
+base_boundary<-5720833.61
+top_boundary<-5768396.15
+left_boundary<-730836.84
+right_boundary<-800760.82
 
 
-
-base_boundary<-5752511
-top_boundary<-5764423
-left_boundary<-770598
-right_boundary<-788160
+#rudimentary polygon coverage of region
 home[3]<-sample(base_boundary:top_boundary,1)
-home[2]<-sample(left_boundary:right_boundary,1)
-# if(home[3]<5729194){home[2]<-sample(left_boundary:752929,1)}
-# else if(home[3]<5738141){home[2]<-sample(left_boundary:759270,1)}
-# else if(home[3]<5742132){home[2]<-sample(left_boundary:771193,1)}
-# else if(home[3]<5744745){home[2]<-sample(left_boundary:777230,1)}
-# else if(home[3]<5745565){home[2]<-sample(left_boundary:779478,1)}
-# else if(home[3]<5747801){home[2]<-sample(left_boundary:783727,1)}
-# else if(home[3]<5750705){home[2]<-sample(left_boundary:785814,1)}
-# else if(home[3]<5753911){home[2]<-sample(left_boundary:789393,1)}
-# else if(home[3]<5756781){home[2]<-sample(left_boundary:793240,1)}
+if(home[3]<5726653.13){home[2]<-sample(left_boundary:752986.88,1)}
+else if(home[3]<5735039.79){home[2]<-sample(left_boundary:758086.83,1)}
+else if(home[3]<5739007.31){home[2]<-sample(left_boundary:762321.79,1)}
+else if(home[3]<5742042.88){home[2]<-sample(left_boundary:771685.48,1)}
+else if(home[3]<5745592.95){home[2]<-sample(left_boundary:777087.77,1)}
+else if(home[3]<5750622.83){home[2]<-sample(left_boundary:783519.07,1)}
+else if(home[3]<5754527.65){home[2]<-sample(left_boundary:789417.10,1)}
+else if(home[3]<5757917.72){home[2]<-sample(left_boundary:794088.29,1)}
+else {home[2]<-sample(left_boundary:right_boundary,1)}
+
 plan$xcoord=matrix(home[2],nrow(plan))
 plan$ycoord=matrix(home[3],nrow(plan))
 plan$xcoord=unlist(plan$xcoord)
@@ -734,6 +736,13 @@ PLANS[[h]]<-plan
     }
     else
     {
+    if (j==1)
+      {
+        attributes[3]<-"12:00:00"
+        newXMLNode("act", attrs=c(plan[j,c(2,4,5)],attributes[3]),parent=pl)
+        newXMLNode("leg",attrs=attributes[2],parent=pl)
+      
+      }
      newXMLNode("act", attrs=plan[j,c(2,4,5)],parent=pl)
 
     }
@@ -743,10 +752,10 @@ PLANS[[h]]<-plan
 }
 dtd<-newXMLDTDNode("plans",systemID = "http://www.matsim.org/files/dtd/plans_v4.dtd",addFinalizer = T)
 doc<-newXMLDoc(dtd = dtd,addFinalizer = T,name="plans",node=root)
-saveXML(doc,"plans_fuzz.xml")
+saveXML(doc,"plans.xml")
 
 suppressMessages(plans<-bind_rows(PLANS))
-write.csv(plans,file="plans_fuzz.csv",row.names = F)
+write.csv(plans,file="plans.csv",row.names = F)
 check<-lapply(RESIDENTS,rowSums)
 
 #max(sapply(check,'[[',2)) # Dhi disabled this; was showing "## [1] 4" in output
