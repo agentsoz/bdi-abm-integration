@@ -403,60 +403,145 @@ The algorithm takes as input the activities distributions and typical durations,
 Next, the plan algorithm takes this distribution and iteratively constructs a plan for each agent, taking into account the repeatability constraints for activities. For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
 
 
+```
+## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10
+## [1] 11
+## [1] 12
+## [1] 13
+## [1] 14
+## [1] 15
+## [1] 16
+## [1] 17
+## [1] 18
+## [1] 19
+## [1] 20
+## [1] 21
+## [1] 22
+## [1] 23
+## [1] 24
+## [1] 25
+## [1] 26
+## [1] 27
+## [1] 28
+## [1] 29
+## [1] 30
+## [1] 31
+## [1] 32
+## [1] 33
+## [1] 34
+## [1] 35
+## [1] 36
+## [1] 37
+## [1] 38
+## [1] 39
+## [1] 40
+## [1] 41
+## [1] 42
+## [1] 43
+## [1] 44
+## [1] 45
+## [1] 46
+## [1] 47
+## [1] 48
+## [1] 49
+## [1] 50
+## [1] 51
+## [1] 52
+## [1] 53
+## [1] 54
+## [1] 55
+## [1] 56
+## [1] 57
+## [1] 58
+## [1] 59
+## [1] 60
+## [1] 61
+## [1] 62
+## [1] 63
+## [1] 64
+## [1] 65
+## [1] 66
+## [1] 67
+## [1] 68
+## [1] 69
+## [1] 70
+## [1] 71
+## [1] 72
+## [1] 73
+## [1] 74
+## [1] 75
+## [1] 76
+## [1] 77
+## [1] 78
+## [1] 79
+## [1] 80
+## [1] 81
+## [1] 82
+## [1] 83
+## [1] 84
+## [1] 85
+## [1] 86
+## [1] 87
+## [1] 88
+## [1] 89
+## [1] 90
+## [1] 91
+## [1] 92
+## [1] 93
+## [1] 94
+## [1] 95
+## [1] 96
+## [1] 97
+## [1] 98
+## [1] 99
+## [1] 100
+```
 
+Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-First choose the number of each type you would like
 
 ```
-##          Resident       PT Resident   Regular Visitor Overnight Visitor 
-##                20                20                20                20 
-##       Day Visitor 
-##                20
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     1    1    1    1    0    0    0    0    1     0     1     1
+## work     0    0    0    0    1    1    1    1    0     0     0     0
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     1     0     0
 ```
 
-Now choose how you would like each subpopulation to be distributed over the 12 2-hr time blocks
+```
+##  home  work beach shops other 
+##     2     8     2     2     2
+```
 
-<!-- COMMENTED OUT DUE TO DEPRECEATION -->
-<!-- Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row): -->
+## Quality of the output plans
 
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- RESIDENTS[[1]] -->
-<!-- d=res[,1]*z+durations -->
-<!-- d -->
-<!-- ``` -->
-
-<!-- ## Quality of the output plans -->
-
-<!-- *One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents: -->
-
-<!-- ```{r echo=FALSE, fig.width=4, fig.height=3} -->
-
-<!-- R_activities -->
-<!-- n_activities = 100*(R_activities)/N -->
-<!-- input -->
-<!-- plotActivities("Resident activities (Output)", "Percentage", "Time of day", n_activities) -->
-<!-- ``` -->
+*One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents:
 
 
-<!-- If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected:  -->
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- #(R_activities/N-r_activities/1000) -->
-<!-- diff_activities<-n_activities-r_activities -->
-<!-- plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE) -->
-<!-- ``` -->
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    95   93   93   73   24   18    9    5   28    49    66    73
+## work     1    1    5   10   59   69   66   61   35    25    24    24
+## beach    0    0    0    0    2    2   12   14   11     0     0     0
+## shops    0    0    0    0   10    7   10   14   23    12     5     0
+## other    4    6    2   17    5    4    3    6    3    14     5     3
+```
+
+![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
+
+
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+![](synthetic-population_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 
 ## Activity distributions in original SCS plans file
@@ -471,7 +556,7 @@ Here is what the distributions of activity **end times** in the [initial populat
   * `work=Business District`
 
 
-![](synthetic-population_files/figure-html/unnamed-chunk-21-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-21-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-17-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-17-2.png)<!-- -->
 
 ```
 ## [1] "Number of unique persons"
