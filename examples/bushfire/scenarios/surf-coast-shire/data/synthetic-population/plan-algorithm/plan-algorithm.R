@@ -82,6 +82,7 @@ plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
   n<-ncol(probability_matrix)
   nAct<-nrow(probability_matrix)
   PLANS<-list()
+  AGENTS<-list()
   for (h in 1:N)
     
   {
@@ -128,6 +129,7 @@ plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
       } 
     }
     agent=agent/dur
+    AGENTS[[h]]<-agent
     names<-row.names(agent)
     re=agent
     for (i in 2:12)
@@ -181,7 +183,10 @@ plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
     }
     PLANS[[h]]<-plan
   }
-  return(PLANS)
+  Agents<-Reduce('+',AGENTS)
+  Agents<-100*Agents/number_of_agents
+  output<-list(Agents=Agents,Plans=PLANS)
+  return(output)
 }
 
 location_map<-function (locations_csv_file,location_type_title,xcoord_title,ycoord_title,location_names)
@@ -269,6 +274,12 @@ type_plan<-function (n_activities,number_of_agents,location_csv_file,location_na
   #switching durations and repeating off for now (making them uniform)
   durations<-rep(2,nrow(n_activities))
   names(durations)<-rownames(n_activities)
+  
+#WORK EXCEPTION
+  if ("work" %in% rownames(n_activities))
+  {
+    durations["work"]<-4
+  }
   repeating<-rep(1,nrow(n_activities))
   names(repeating)<-rownames(n_activities)
   
@@ -283,9 +294,28 @@ type_plan<-function (n_activities,number_of_agents,location_csv_file,location_na
   ## If locations csv file is altered, the names of the relevant columns might need to be changed here
   activity_locations<-location_map(locations_csv_file = location_csv_file,location_type_title = "LandUse",xcoord_title = "xcoord",ycoord_title = "ycoord",location_names=location_names)
   
-  PLANS<-plan_locations(plan_times = plan_times_type,activity_locations =activity_locations)  
-  
-  return(PLANS)
+  PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations)  
+  output<-list(Agents=plan_times_type$Agents,Plans=PLANS)
+  return(output)
+}
+
+write_log<-function (AGENTS,DISTRIBUTIONS)
+{
+  print("Writing to log file...")
+  log<-file("log.txt", open = "w+")
+  cat("DIFFERENCE TABLES:\nThese tables show the percentage error at each 2 hour time block.",
+      file = log, append=FALSE, sep = "\n")
+  for (Type in names(AGENTS))
+  {
+    
+    diff<-round(AGENTS[[Type]]-DISTRIBUTIONS[[Type]],2)
+    cat(paste0("\n",Type),file = log, append=FALSE, sep = "\n")
+    write.table(diff, file=log, row.names=TRUE,sep="\t", col.names=NA)
+    
+    
+  }
+    
+  close(log) 
 }
 
 write_xml<-function (PLANS,output_location)
@@ -301,10 +331,12 @@ write_xml<-function (PLANS,output_location)
   ct=0
   for (Type in names(PLANS))
   {
+    type<-gsub(" ","_",Type)
+    type<-gsub("-","_",type)
     for (i in 1:length(PLANS[[Type]]))
     {
       plan<-as.data.frame(PLANS[[Type]][i])
-      person<-paste0('  <person id= "',ct,'" >\n    <plan selected="yes">\n      ')
+      person<-paste0('  <person id= "',ct,'" >\n    <attributes>\n      <attribute name="BDIAgentType" class="java.lang.String" >io.github.agentsoz.ees.agents.',type,'</attribute>\n    </attributes>\n    <plan selected="yes">\n      ')
       for (j in 1:nrow(plan))
       {
         if (j<nrow(plan))
@@ -333,14 +365,14 @@ write_xml<-function (PLANS,output_location)
   close(plans) 
 }
 
-inputs<-function(input_file)
+distributions<-function(distributions_file)
 {
-  df<-read.csv(input_file,header = F,sep=',',stringsAsFactors = F,strip.white = T)
+df<-read.csv(distributions_file,header = F,sep=',',stringsAsFactors = F,strip.white = T)
 DISTRIBUTIONS<-list()
-NUMBER<-vector()
-LOCATIONS<-list()
 activities=vector()
-locations<-list()
+# NUMBER<-vector()
+# LOCATIONS<-list()
+# locations<-list()
 count=0
 for (row in 1:nrow(df))
 {
@@ -348,19 +380,9 @@ for (row in 1:nrow(df))
   #non-numeric rows:
   if (anyNA(df[row,])==T)
   {
-    #to identify location mappings:
-    first<-as.character(df[row,][1])
-    if (substring(first,1,1)=="(")
-    {
-      locs<-df[row,][!is.na(df[row,])]
-      locs<-locs[locs!=""]
-      locs[1]<-substring(locs[1],2)
-      locs[length(locs)]<-substring(locs[length(locs)],1,nchar(locs[length(locs)])-1)
-      locations[[Activity]]<-locs
     
-    }
-    #otherwise we have a new type on our hands:  
-    else 
+    first<-as.character(df[row,][1])
+    
     {
       if (count>0) #first wrtie in the finished previous one
         {
@@ -368,13 +390,13 @@ for (row in 1:nrow(df))
           colnames(DISTRIBUTIONS[[Type]])<-c("01:00","03:00","05:00","07:00",
                                              "09:00","11:00","13:00","15:00",
                                              "17:00","19:00","21:00","23:00")
-          LOCATIONS[[Type]]<-locations
+          # LOCATIONS[[Type]]<-locations
           activities<-vector()
-          locations<-list()
+          # locations<-list()
       }
       #now refresh
       Type=first
-      NUMBER=cbind(NUMBER,as.integer(df[row,][2]))
+      # NUMBER=cbind(NUMBER,as.integer(df[row,][2]))
       count=count+1
     }
   }
@@ -420,27 +442,116 @@ for (row in 1:nrow(df))
 # rownames(REPEATING)<-c("Resident","PT Resident","Regular Visitor","Overnight Visitor","Day Visitor")
 # colnames(REPEATING)<-rownames(DISTRIBUTIONS$Resident)
 DISTRIBUTIONS[[Type]]=activities
-LOCATIONS[[Type]]<-locations
-NUMBER<-as.vector(NUMBER)
-names(NUMBER)<-names(DISTRIBUTIONS)
-INPUT<-list(number=NUMBER,distributions=DISTRIBUTIONS,locations=LOCATIONS)
-return(INPUT)
+colnames(DISTRIBUTIONS[[Type]])<-c("01:00","03:00","05:00","07:00",
+                                   "09:00","11:00","13:00","15:00",
+                                   "17:00","19:00","21:00","23:00")
+return(DISTRIBUTIONS)
+}
+
+locations<-function(location_maps_file,types)
+{
+  df<-read.csv(location_maps_file,header = F,fill=T,sep=',',col.names = (1:20), stringsAsFactors = F,strip.white = T)
+ 
+  
+  LOCATIONS<-list()
+  locations<-list()
+  count=0
+  for (row in 1:nrow(df))
+  {
+    #identify headers:
+    if (df[row,1] %in% types)
+    {
+      
+        if (count>0) #first wrtie in the finished previous one
+        {
+        
+          LOCATIONS[[Type]]<-locations
+          locations<-list()
+        }
+        #now refresh
+        Type=df[row,1]
+        # NUMBER=cbind(NUMBER,as.integer(df[row,][2]))
+        count=count+1
+      
+    }
+    else #write the location vectors in according to activity type
+    {
+      locs<-df[row,]
+      locs<-locs[locs!=""]
+      locs<-locs[!is.na(locs)]
+      if(length(locs)<2)
+      {
+        print(paste0("ERROR: activity '",locs[1],"' for type '",Type,"' has not been assigned any locations in the locations map."))
+              return()
+      }
+      
+      Activity<-locs[1]
+      locations[[Activity]]<-locs[2:length(locs)]
+    }
+  }
+  
+  LOCATIONS[[Type]]=locations
+  
+  return(LOCATIONS)
+}
+
+numbers<- function(numbers_file,types)
+{
+  df<-read.csv(numbers_file,header = F,sep=',', stringsAsFactors = F,strip.white = T)
+  NUMBERS<-vector()
+  
+  for (row in 1:nrow(df))
+  {
+   
+   if (df[row,1] %in% types)
+   {
+    Type<-df[row,1] 
+   }
+   else
+   {
+     number<-as.numeric(df[row,1])
+     names(number)<-Type 
+     NUMBERS<-c(NUMBERS,number)
+   }
+      
+  }
+  return(NUMBERS)
+  
+}
+
+inputs<-function (distributions_file,locations_file,numbers_file)
+{
+DISTRIBUTIONS<-distributions(distributions_file)
+type<-names(DISTRIBUTIONS)
+LOCATIONS<-locations(locations_file,type)
+NUMBERS<-numbers(numbers_file,type)
+  
+INPUT<-list(numbers=NUMBERS,distributions=DISTRIBUTIONS,locations=LOCATIONS)
+return(INPUT)  
 }
 
 main<-function ()
 {
 args<-commandArgs(trailingOnly = T)
-inputfile<-args[1]
-location_csv_file<-args[2]
-input<-inputs(input_file = inputfile)  
+
+
+input<-inputs(args[1],args[2],args[3])  
+location_csv_file<-args[4]
 PLANS<-list()
-for (Type in names(input$number))
+AGENTS<-list()
+for (Type in names(input$numbers))
 {
-  PLANS[[Type]]<-type_plan(input$distributions[[Type]],input$number[Type],location_csv_file,input$locations[[Type]],Type)
+  run<-type_plan(input$distributions[[Type]],input$numbers[Type],location_csv_file,input$locations[[Type]],Type)
+  PLANS[[Type]]<-run$Plans
+  AGENTS[[Type]]<-run$Agents
 }
 
-#write xml (to working directory)
-write_xml(PLANS,args[3])
+
+#write plan.xml (to working directory)
+write_xml(PLANS,args[5])
+
+write_log(AGENTS,input$distributions)
+
 print("Finished.")
 }
 

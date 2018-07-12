@@ -1,53 +1,31 @@
-Resident, 100
+Resident,
 home, 90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85
-					       		(EvacZone)
 work,  5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10
-							(Business District,Caravan Park,Hotel,Golf Club)
 beach, 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0
-							(Beach)
 shops, 0,  0,  0,  5, 10, 10, 10, 20, 25, 15,  5,  0
-							(Shops)
 other, 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5
-							(University,Secondary,Tafe,Kindergarten,Primary)
 
-Part-time Resident, 100
+Part-time Resident,
 home, 95, 95, 90, 75, 35, 20, 15, 10, 35, 60, 80, 85
-							(EvacZone)
 work,  0,  0,  5, 10, 10, 20, 20, 20, 10, 10, 10,  0
-			 				(Business District,Caravan Park,Hotel,Golf Club)
 beach, 0,  0,  0,  5, 25, 25, 30, 20,  5,  0,  0,  0
-							(Beach)
 shops, 0,  0,  0,  5, 20, 20, 25, 30, 25, 20,  5, 10
-							(Shops)
 other, 5,  5,  5,  5, 10, 15, 10, 20, 25, 10,  5,  5
-							(University,Secondary,Tafe,Kindergarten,Primary)
 
-Regular Visitor, 100
+Regular Visitor,
 home,  90, 95, 95, 85, 70, 65, 30, 25, 30, 40, 70, 90
-						 	(EvacZone)
 beach,  0,  0,  0, 10, 10, 10, 30, 40, 30, 10,  5,  0
-							(Beach)
 shops,  0,  0,  0,  0, 10, 15, 30, 25, 25, 40, 20,  5
-							(Shops)
 other, 10,  5,  5,  5, 10, 10, 10, 10, 15, 10,  5,  5
-            					 	(Camp,NSP)
 
-Overnight Visitor, 100
+Overnight Visitor,
 home,  95, 95, 80, 50, 10,  0,  0, 10, 20, 40, 60,100
-							(Caravan Park,Hotel,Golf Club,Camp)
 beach,  0,  0, 15, 10, 20, 60, 70, 50, 20, 10,  5,  0
-		 					(Beach)
 shops,  5,  5,  0, 10, 20, 30, 20, 20, 40, 40, 20,  0
-							(Shops)
 other,  0,  0,  5, 30, 50, 10, 10, 20, 20, 10, 15,  0
-							(Camp,NSP)
 
-Day Visitor, 100
+Day Visitor,
 home, 100,100, 90, 20, 10,  0,  0, 10, 20, 40, 60,100
-						 	(Colac,Geelong)
 beach,  0,  0,  5, 10, 20, 40, 50, 40, 20, 10,  5,  0
-							(Beach)
 shops,  0,  0,  0, 10, 20, 30, 20, 20, 40, 40, 20,  0
-							(Shops)
 other,  0,  0,  5, 60, 50, 30, 30, 30, 20, 10, 15,  0
-							(Camp,NSP)

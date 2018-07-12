@@ -6,35 +6,30 @@ The Locations.csv file is exported directly from a Locations.shp file in QGIS, a
 trips to and from. The only information in it that the algorithm needs is the columns "LandUse", "xcoord" and "ycoord". If the user would like 
 to use a different csv to the example provided, these three bits of informations should have titles matching "LandUse", "xcoord" and "ycoord".  
 
-The input.csv file is where the distribution tables are stored. For example, an agent type "Resident" might have the following distribution table:
+There are 3 other required input files: "distributions", "location_maps", and "numbers".
+The distributions file specifies where each agent type is. For example, an agent type "Resident" might have the following distribution table:
 
-Resident, 100
+Resident
 home, 90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85
-						    (EvacZone)
 work,  5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10
-						    (Business District,Caravan Park,Hotel,Golf Club)
 beach, 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0
-					            (Beach)
 shops, 0,  0,  0,  5, 10, 10, 10, 20, 25, 15,  5,  0
-						    (Shops)
 other, 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5
-				                    (University,Secondary,Tafe,Kindergarten,Primary)
+				                    
+where each column represents a two hour block of the 24 hour period, and the numbers in the table represent the percentage of the "Resident" 
+population undertaking the activity at that time. Each table column must sum to 100 (the algorithm checks this).
 
-The first line denotes the type "Resident" and the desired number of this agent type (can be zero).
-
-The subesquent line pairs denote an activity, its distribution and the "LandUse" locations in the Locations.csv file that this activity is associated 
-with. (These locations should always be in brackets).
-
-An activity may have any label, but must match with one of the specified activities in the MATSim config file. In general, it is easier to keep 
-activity labels consistent across agent types, and instead vary the "LandUse" locations that they map to.
+Each row represents an activity that that agent type can do. An activity may have any label, but must match with one of the specified activities 
+in the MATSim config file. In general, it is easier to keep activity labels consistent across agent types, and instead vary the "LandUse" locations 
+that they map to. NB at present, "home" is reserved as the first and last destination for ALL agents. This means that every agent should have their 
+first activity listed as "home". The activity "work" is coded to have double duration, to make more realistic plans.  
  
-It is not crucial to have the "LandUse" locations tabbed to the end of the distribution table, but is done so for formatting/readability of the distribution table.
+The location_maps file is necessary to map the activities defined in the distributions file to locations in the Locations.csv file. 
 
-Each table column must sum to 100 (the algorithm checks this).
-
+The numbers file simply denotes the required number of each agent type.
 #RUNNING THE ALGORITHM
 The algorithm may be run on the command line with the arguments
-"Rscript plan-algorithm.R *input file* *locations file* *output file*"
+"Rscript plan-algorithm.R *distributions file* *location_maps file* *numbers file* *Locations file* *output file*"
 
 Note that the output file will be in XML format, and ready to run in MATSim.
 
