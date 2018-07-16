@@ -52,8 +52,10 @@ public class ExtensionOffice {
     SUCCESSFUL_ONLY, 
     SUCCESSFUL_AND_UNSUCCESSFUL_ONLY, 
     SUCCESSFUL_AND_UNSUCCESSFUL_MIDBAND, 
-    SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND, 
-    ALL, 
+    SUCCESSFUL_AND_UNSUCCESSFUL_LOWBAND,
+    SUCCESSFUL_PLUS_UNSUCCESSFUL_MIDBAND,
+    SUCCESSFUL_PLUS_UNSUCCESSFUL_LOWBAND,
+    ALL,
   }
 
   private static final int maxVisitsPerLandholderPerRound = 5;
@@ -187,6 +189,42 @@ public class ExtensionOffice {
           if (shouldVisit) {
             // Direct visits to landholders in the low band of the S-curve.
             // We do this by calculating how far they are from the lowest point 0. 
+            // Then the closer they are to 0, the more likely they are to be visited.
+            double visitLikelihood = (100 - agent.getConservationEthicBarometer())/100;
+            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
+              shouldVisit = false;
+            }
+          }
+          break;
+        case SUCCESSFUL_PLUS_UNSUCCESSFUL_MIDBAND:
+          if (active > 0) {
+            // always cover the successful ones
+            shouldVisit = true;
+          } else if (agent.getCurrentAuctionRound() != null &&
+                  agent.getCurrentAuctionRound().isParticipated() &&
+                  !agent.getCurrentAuctionRound().isWon()) {
+            // cover the unsuccessful ones
+            shouldVisit = true;
+            // Direct visits to landholders in the middle band of the S-curve.
+            // We do this by calculating how far they are from the mid point of 50.
+            // Then the closer they are to 50, the more likely they are to be visited.
+            double visitLikelihood = (50 - Math.abs(50 - agent.getConservationEthicBarometer()))/50.0;
+            if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
+              shouldVisit = false;
+            }
+          }
+          break;
+        case SUCCESSFUL_PLUS_UNSUCCESSFUL_LOWBAND:
+          if (active > 0) {
+            // cover the successful ones
+            shouldVisit = true;
+          } else if (agent.getCurrentAuctionRound() != null &&
+                  agent.getCurrentAuctionRound().isParticipated() &&
+                  !agent.getCurrentAuctionRound().isWon()) {
+            // cover the unsuccessful ones
+            shouldVisit = true;
+            // Direct visits to landholders in the low band of the S-curve.
+            // We do this by calculating how far they are from the lowest point 0.
             // Then the closer they are to 0, the more likely they are to be visited.
             double visitLikelihood = (100 - agent.getConservationEthicBarometer())/100;
             if (ConservationUtils.getGlobalRandom().nextDouble() > visitLikelihood) {
