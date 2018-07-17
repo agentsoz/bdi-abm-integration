@@ -409,11 +409,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home     1    1    0    1    1    0    0    0    0     0     1     1
-## work     0    0    0    0    0    0    1    1    1     1     0     0
+## home     1    1    1    1    0    0    0    0    1     0     1     1
+## work     0    0    0    0    1    1    1    1    0     0     0     0
 ## beach    0    0    0    0    0    0    0    0    0     0     0     0
-## shops    0    0    0    0    0    1    0    0    0     0     0     0
-## other    0    0    1    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     1     0     0
 ```
 
 ```
@@ -428,11 +428,11 @@ Here is an example plan for a resident, with durations, and where only `work` is
 
 ```
 ##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
-## home    89   90   84   72   33   18   16    7   18    55    60    75
-## work     4    4   13   15   49   61   58   56   42    30    24    24
-## beach    0    0    0    0    2    5   10   17    3     0     0     0
-## shops    0    0    0    0   10    7    7   16   29     8     8     0
-## other    7    6    3   13    6    9    9    4    8     7     8     1
+## home    90   90   82   73   30   20   15   10   32    51    59    69
+## work     4    4   13   16   49   57   52   49   39    31    27    27
+## beach    0    0    0    0    4    4   11   17    3     0     0     0
+## shops    0    0    0    0   15   14   19   20   23    10    10     0
+## other    6    6    5   11    2    5    3    4    3     8     4     4
 ```
 
 ![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->

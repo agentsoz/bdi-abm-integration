@@ -27,7 +27,9 @@ first activity listed as "home". The activity "work" is coded to have double dur
 The location_maps file is necessary to map the activities defined in the distributions file to locations in the Locations.csv file. 
 
 The numbers file simply denotes the required number of each agent type.
-#RUNNING THE ALGORITHM
+
+##RUNNING THE ALGORITHM
+
 The algorithm may be run on the command line with the arguments
 "Rscript plan-algorithm.R *distributions file* *location_maps file* *numbers file* *Locations file* *output file*"
 
