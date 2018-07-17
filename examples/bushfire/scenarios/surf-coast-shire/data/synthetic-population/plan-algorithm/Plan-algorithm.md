@@ -79,56 +79,28 @@ The purpose of the model is to allow users to specify the makeup of the populati
 
 
 For instance, on a "typical summer weekday", the distribution input for the `resident` subgroup might look like:
-```{r message=FALSE, warning=FALSE, include=FALSE}
-suppressMessages(require(reshape2))
-require(ggplot2)
 
-# Function to plot a matrix of activities, where
-# cols represent activities (such that each col adds up to 100%)
-# rows represent time of day (hours)
-# Assumes 12 entries per row (for each 2 hour interval)
-plotActivities <- function (plotTitle, x_lab, y_lab, activities, limitY=TRUE) {
-df<-melt(activities)
-colnames(df)<-c("Activity", "Hour", "Proportion")
-# df$Hour<-(df$Hour-0.5)*2 # get the time of day correct
-gg<-ggplot(df, aes(Hour, Proportion, fill=Activity)) +
-  geom_col() +
-  ggtitle(plotTitle) + 
-  # scale_x_continuous(name=y_lab, limits=c(0,24), breaks=seq(2,24,2)) +
-  theme(legend.position = "bottom", legend.title=element_text(size=8), legend.text=element_text(size=7), legend.key.size = unit(0.6, "line")) 
-if(limitY) {
-  gg<-gg +   scale_y_continuous(name=x_lab, limits=c(0,100), breaks=seq(0,100,10))
-}
-gg
-}
+
 
 ```
-
-```{r echo=FALSE, fig.width=5, fig.height=3}
-source("plan-algorithm-functions.R")
-dist<-distributions("typical summer weekday/distributions.csv")
-# show(dist[[1]])
-pseudo_csv<-sapply(1:nrow(dist[[1]]),function (x) as.vector(c(rownames(dist[[1]])[x],unlist(dist[[1]][x,]))))
-pseudo_csv<-t(pseudo_csv)
-for (i in 1:length(pseudo_csv))
-     {
-       if (nchar(pseudo_csv[i])%in% c(1,4))
-       {
-        pseudo_csv[i]<-paste0(" ",pseudo_csv[i]) 
-       }
-     }
-pseudo_csv<-sapply(1:nrow(pseudo_csv),function (x) cat(pseudo_csv[x,],sep = ",", fill = T))
-
-
-plotActivities("Resident", "Percentage", "Time of day", dist[[1]])
+##  home,90,90,85,75,30,20,15,10,25,50,80,85
+##  work, 5, 5,10,15,50,60,60,50,40,30,10,10
+## beach, 0, 0, 0, 0, 5, 5,10,15, 5, 0, 0, 0
+## shops, 0, 0, 0, 5,10,10,10,20,25,15, 5, 0
+## other, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 ```
+
+![](Plan-algorithm_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 and the location mappings input for `resident` would be established by:
 
-```{r echo=FALSE, fig.width=5, fig.height=3}
-maps<-locations("typical summer weekday/location_maps.csv",names(dist))
-pseudo_csv<-sapply(1:length(maps[[1]]),function (x) as.vector(c(names(maps[[1]][x]),unlist(maps[[1]][x]))))
-pseudo_csv<-sapply(pseudo_csv,function (x) cat(x,sep = ",", fill = T))
+
+```
+## home,EvacZone
+## work,Business District,Caravan Park,Hotel,Golf Club
+## beach,Beach
+## shops,Shops
+## other,University,Secondary,Tafe,Kindergarten,Primary
 ```
 
 ## Model outputs
