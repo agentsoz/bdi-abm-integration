@@ -38,7 +38,12 @@ public final class PerceptList {
 	public static final String PICKED_UP = "picked_up";
 	public static final String TIME = "time";
 
-	// BDI Query Percept strings
+	//diffusion model percepts
+	public static final String DIFFUSION = "diffusion";
+    public static final String BDI_STATE_UPDATES    = "bdi_state_updates";
+
+
+    // BDI Query Percept strings
     public static final String REQUEST_LOCATION = "request_location";
 	/**
 	 * REQUEST_DRIVING_DISTANCE_TO works as follows:
