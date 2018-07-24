@@ -1,4 +1,4 @@
-package io.github.agentsoz.socialnetwork.util;
+package io.github.agentsoz.util;
 
 /*-
  * #%L
