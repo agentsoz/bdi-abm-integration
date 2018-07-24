@@ -41,6 +41,7 @@ public final class PerceptList {
 	//diffusion model percepts
 	public static final String DIFFUSION = "diffusion";
     public static final String BDI_STATE_UPDATES    = "bdi_state_updates";
+	public static final String SOCIAL_NETWORK_MSG = "social_nework_message";
 
 
     // BDI Query Percept strings
