@@ -27,11 +27,11 @@ import java.util.HashMap;
 public class DiffusedContent {
 
     // contenttype, active agents IDs
-    HashMap<String,Integer[]> oneStepSpreadMap;
+    HashMap<String,String[]> oneStepSpreadMap;
 
     public DiffusedContent()
     {
-        this.oneStepSpreadMap = new HashMap<String,Integer[]>();
+        this.oneStepSpreadMap = new HashMap<String,String[]>();
     }
 
     public int getTotalDiffusionContents() {
@@ -47,12 +47,12 @@ public class DiffusedContent {
             return 0; // no agent has adopted the content
         }
     }
-    public void setContentSpreadMap(HashMap<String,Integer[]> currentSpreadMap) {
+    public void setContentSpreadMap(HashMap<String,String[]> currentSpreadMap) {
 
         this.oneStepSpreadMap = currentSpreadMap;
     }
 
-    public HashMap<String,Integer[]> getcontentSpreadMap() {
+    public HashMap<String,String[]> getcontentSpreadMap() {
         return this.oneStepSpreadMap;
     }
 
