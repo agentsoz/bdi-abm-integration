@@ -91,10 +91,6 @@ As well as the following typical durations:
 DURATIONS<-c(2,8,2,2,2)
 durations<-matrix(DURATIONS, nrow=1, dimnames=list(c("hours"), c("home","work","beach","shops","other")))
 show(durations)
-
-#Added by Joel (to keep doc compatible)
-durations<-DURATIONS
-names(durations)<-c("home","work","beach","shops","other")
 ```
 
 Now, let's just work with the `work` activity which has a typical duration ``r durations[,"work"]`` and looks like:
@@ -102,17 +98,16 @@ Now, let's just work with the `work` activity which has a typical duration ``r d
 n_work<-matrix(n_activities["work",], nrow=1, ncol=length(n_activities["work",]), dimnames=list("work"))
 show(n_work)
 plotActivities("Residents at work (user input)", "Percentage", "Time of day", n_work)
-
 ```
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 
-derive_start_time <- function (n_activity,durations) {
+derive_start_time <- function (n_activity) {
   activity_name<-rownames(n_activity)[1]
   s_activity=matrix(0, nrow = dim(n_activity)[1], ncol = dim(n_activity)[2], dimnames=dimnames(n_activity)) # matrix to store start times
   t_work<-n_activity # temp copy of work matrix
   #print("t_work"); print(t_work)
-  typical_duration<-durations[activity_name]
+  typical_duration<-durations[,activity_name]
   block_size<-24/length(n_activity[activity_name,])
   for(h in 1:length(n_activity[activity_name,])) {
     h_work<-t_work[activity_name,h] # find out how many started work this hour
@@ -135,7 +130,7 @@ The idea would be to cycle through the time bins for the day, and for each bin, 
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 n_work<-matrix(n_activities["work",], nrow=1, ncol=length(n_activities["work",]), dimnames=list("work"))
-s_work<-derive_start_time(n_work,durations)
+s_work<-derive_start_time(n_work)
 plotActivities("Residents starting work (derived)", "Percentage", "Time of day", s_work)
 show(s_work)
 ```
@@ -146,7 +141,7 @@ Here is the same algorithm now applied to all the activities:
 s_times<-matrix(0, nrow=nrow(n_activities), ncol=ncol(n_activities), dimnames=dimnames(n_activities))
 for(activity in rownames(n_activities)) {
   n_activity<-matrix(n_activities[activity,], nrow=1, ncol=length(n_activities[activity,]), dimnames=list(activity))
-  s_activity<-derive_start_time(n_activity,durations)
+  s_activity<-derive_start_time(n_activity)
   s_times[activity,]<-s_activity
 }
 plotActivities("Residents starting activities (derived)", "Percentage", "Time of day", s_times)
@@ -364,9 +359,11 @@ The above information could then be used to automatically construct a "daily pla
 
 Within the model, we will account for the following groups of people (based on input from regional stakeholders):
 
-* `resident` : as captured by the [ABS census data](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/LGA26490); several methods exist for creating a synthetic population for this cohort, and one that could be readily applied here is the [algorithm from Wicramasinghe et al.](https://github.com/agentsoz/synthetic-population) from RMIT University. 
+* `resident` : as captured by the [ABS census data](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/LGA26490); several methods exist for creating a synthetic population for this cohort, and one that could be readily applied here is the [algorithm from Wicramasinghe et al.](https://github.com/agentsoz/synthetic-population) from RMIT University.
+* `part-time resident` : people that own a property and spend an extended period of time in the region, but are not permanently based there. 
 * `regular visitor` : people that regularly visit the region during the summer months, camping or in *holiday homes*, and have a working knowledge of local roads and destinations; some information on this cohort could be derived from [VISTA data](https://transport.vic.gov.au/data-and-research/vista/). (<mark>Any other dataset that might give stats on this group?</mark>)
-* `tourist` : people that visit the region for the day or on a short-stay visit, and generally do not know the area well; some information on this cohort could be derived from [VISTA data](https://transport.vic.gov.au/data-and-research/vista/). (<mark>Any other dataset that might give stats on this group?</mark>)
+*`overnight visitor` : people that are visiting and staying the region for a short period of time in accommodation but do not have any knowledge of the area.
+* `day visitor` : people that visit the region for the day or on a short-stay visit, and generally do not know the area well; some information on this cohort could be derived from [VISTA data](https://transport.vic.gov.au/data-and-research/vista/). (<mark>Any other dataset that might give stats on this group?</mark>)
 
 ## Activity types
 
@@ -398,8 +395,8 @@ Activity | Description
 
 ## Model assumptions
 
-1. Each population subgroup (i.e, `resident`, `regular visitor`, `tourist`) will differ in how they perform the above activities in the following ways:
-    1. The proportions in which subgroups perform different activities will be different; for instance tourists might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
+1. Each population subgroup <!-- (i.e, `resident`, `regular visitor`, `tourist`)--> will differ in how they perform the above activities in the following ways: 
+    1. The proportions in which subgroups perform different activities will be different; for instance tourists (`overnight visitor`,`day visitor`) might be more likely to go to the beach than residents; another example is that all residents will perform the home activity while none of the tourists will.
     1. The times at which subgroups perform activities will be different: for instance, tourists might be more likely to visit the beach around noon, whereas residents might be more inclined to go to the beach in the mornings and evenings to avoid the rush.
     1. The durations for which each subgroup performs activites will be different: for instance, tourists might spend more time at the beach than residents.
 
@@ -473,39 +470,51 @@ show(s_times)
 
 Next, the plan algorithm takes this distribution and iteratively constructs a plan for each agent, taking into account the repeatability constraints for activities. For a given resident, the algorithm allocates an activity for each time block. It then iterates over the day and rules out those activities that are overlapped by the duration of a previous activity, as well as the unrepreatable activities that have already occured. Each plan would start and end at `home`, with any new activity set to start (or more precisely, the previous activity to end) at the midpoint of each bin.
 
-
-
-
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-prob_matrix<-function (n_activities,durations,repeating,type)
-{
+suppressMessages(library(dplyr))
+###Algorithm to generate a resident plan (based on ver 0.1)
 
-if (sum(colSums(n_activities)-100)!=0)
-{
-  print("ERROR: one or more columns in distribution table do not sum to 100%")
-  break
-}  
-  
-s_times<-matrix(0, nrow=nrow(n_activities), ncol=ncol(n_activities), dimnames=dimnames(n_activities))
-for(activity in rownames(n_activities)) {
-  n_activity<-matrix(n_activities[activity,], nrow=1, ncol=length(n_activities[activity,]), dimnames=list(activity))
-  s_activity<-derive_start_time(n_activity,durations)
-  s_times[activity,]<-s_activity
-}
+##Get Location Coordinates
+homes<-read.csv("~/Maths/Honours/Research/LocationsData/population.csv")
+locs<-read.csv("~/Maths/Honours/Research/LocationsData/Locations.csv")
+locations<-locs[,c("LandUse","xcoord","ycoord")]
+names(homes)<-names(locations)
+homes[,1]<-"home"
+locations<-rbind(locations,homes)
+
+#Activity Locations
+home_locations<-locations[locations[1]=="home",]
+work_locations<-rbind(locations[(locations[1]=="Business District"),],locations[(locations[1]=="Caravan Park"),],locations[(locations[1]=="Hotel"),],locations[(locations[1]=="Golf Club"),])
+beach_locations<-locations[locations[1]=="Beach",]
+shop_locations<-locations[locations[1]=="Shops",]
+other_locations<-rbind(locations[(locations[1]=="University"),],locations[(locations[1]=="Secondary"),],locations[(locations[1]=="Tafe"),],locations[(locations[1]=="Kindergarten"),],locations[(locations[1]=="Primary"),])
+
+##Create XML
+library(XML)
+root<-newXMLNode("plans")
+
+
+#timestep
+i=2
+
+### DURATIONS in hours>0 (home,work,beach,shops,other)
+durations<-DURATIONS
+
+#REPEAT- can activity reoccur in day? (binary)
+rept<-c(T,F,T,T,T)
+rept<-(rept-1)*-1 #invert repeat vector
+
+dur<-(durations/i) #duration in terms of timesteps
+n=24/i #number of timesteps
+p=n/12 # timesteps per 2 hr block
+
+#RESIDENT PROB MATRIX
+
 start<-s_times/100
-shift<-matrix(colSums(start),nrow(n_activities),12,byrow=T)
+shift<-matrix(colSums(start),5,12,byrow=T)
 saveshift<-shift
-rept<-(repeating-1)*-1 #invert repeat vector
-if(sum(rowSums(rept*start)>1))
-{
-  problem<-which(rowSums(rept*start)>1)
-  print(paste0("ERROR: non-repeatable activity ",names(problem)," cannot be completed by ",rowSums(rept*start)[problem]*100,"% of the ",type," population. Try increasing duration time for activity, reducing overall distribution of activity, or making activity repeatable."))
-  break
-}
-
-dur<-durations
 #nonrepeat correction
-for (i in 1:nrow(n_activities))
+for (i in 1:5)
 {
   if (rept[i]>0)
   {
@@ -524,21 +533,17 @@ for (i in 1:nrow(n_activities))
 prob=start/shift
 
 # p_resident<-1-(1-p_resident)^(1/p) #(for timesteps!=2 trying to spread prob according to timestep- a bit dodgy)
-cum_prob<-apply(prob,2,cumsum) #cumulative sums for each column
-return(cum_prob)
-}
-```
+p_resident<-apply(prob,2,cumsum) #cumulative sums for each column
 
+# #for timesteps !=2, creating a column for each timestep
+# p_resident<-replicate(p,p_resident) 
+# p_resident<-lapply(1:ncol(p_resident),function(x)cbind(p_resident[,x,]))
+# p_resident<-Reduce(cbind,p_resident)
 
-```{r echo=FALSE, fig.width=5, fig.height=3}
-##Returns a list of plans for the agent type with start times allocated to each activity.
-plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
-{  
-dur<-as.vector(durations)/2
-rept<-(repeating-1)*-1
-N<-number_of_agents
-n<-ncol(probability_matrix)
+N<-100 #number of residents yyyyy
+RESIDENTS<-list() #store each resident's plan here
 PLANS<-list()
+#GENERATE RESIDENT PLAN
 for (h in 1:N)
   
 {
@@ -546,11 +551,11 @@ for (h in 1:N)
 roll<-runif(n) #roll for each timestep 
 
 #activity is allocated at each timestep
-agent<-apply(probability_matrix,1,function(x){roll<x}) 
-agent<-apply(agent,1,cumsum) 
-agent[agent>1]=0
+res<-apply(p_resident,1,function(x){roll<x}) 
+res<-apply(res,1,cumsum) 
+res[res>1]=0
 
-agent<-dur*agent #insert durations into matrix
+res<-dur*res #insert durations into matrix
 z=rep(0,5) #blank vector
 s=0  #block flag
 r=z  #repeat flag
@@ -560,36 +565,38 @@ for (j in 1:n)
 {
  if(s>0)
    {
-      agent[,j]=agent[,j-1] #block timesteps following activity.
+      res[,j]=res[,j-1] #block timesteps following activity.
       s=s-1
  }
+  
   else #at this point, the timestep changes to it's activity
     {
-      if (sum(r*agent[,j])>0) #check if unrepeatable activity has already occurred
+      if (sum(r*res[,j])>0) #check if unrepeatable activity has already occurred
     {
       pass=r
-        while(sum(pass*agent[,j])>0)
+
+        while(sum(pass*res[,j])>0)
           {
-          
-      agent[,j]<-dur*(abs(cumsum(probability_matrix[,j]>runif(1))-1)<1)#reroll
-      pass=agent[,j]*rept #check repeat again
+      res[,j]<-dur*(abs(cumsum(p_resident[,j]>runif(1))-1)<1)#reroll
+      pass=res[,j]*rept #check repeat again
 
       }
 
       }
 
-      s=sum(agent[,j])-1 # if a new activity is activated, set its       block duration
-      r=r+agent[,j]*rept #check repeat
+      s=sum(res[,j])-1 # if a new activity is activated, set its       block duration
+      r=r+res[,j]*rept #check repeat
       
         
        } 
 }
-agent=agent/dur
-names<-row.names(agent)
-re=agent
+res=res/dur
+RESIDENTS[[h]]<-res
+names<-row.names(res)
+re=res
 for (i in 2:12)
 {
-  re[,i]=agent[,i]-agent[,i-1]
+  re[,i]=res[,i]-res[,i-1]
 }
 re[re<1]=0
 re=colSums(re*(row(re)))
@@ -598,9 +605,9 @@ re=as.matrix(re)
 start_time=re*(2*row(re)-1)*100/re
 start_time=start_time[complete.cases(start_time*0),,drop=FALSE]
 start_time=as.integer(start_time)
-start_time=start_time+c(-99,sample(c(-99:-41,0:59),length(start_time)-1))
-person=rep(h,length(start_time))
-plan=data.frame(cbind(person,activity,start_time))
+start_time=start_time+sample(c(-99:-41,0:59),length(start_time))
+perse=rep(h,length(start_time))
+plan=data.frame(cbind(perse,activity,start_time))
 plan[]<-lapply(plan,as.character)
 
 ##Ensure resident starts and ends at home
@@ -622,7 +629,7 @@ if (tail(plan,1)[2]!="home")
   plan<-rbind(plan,footer)
 }
 
-##add zero characters if necessary 
+##add zeros
 for (yy in 1:nrow(plan))
 {
   lenn<-4-nchar(plan[yy,3])
@@ -634,61 +641,30 @@ for (yy in 1:nrow(plan))
       plan[yy,3]<-paste0("0",plan[yy,3])
     }
   }
-  plan[yy,3]<-paste0(substr(plan[yy,3],0,nchar(plan[yy,3])-2),":",substr(plan[yy,3],nchar(plan[yy,3])-1,nchar(plan[yy,3])),":00")
 }
-PLANS[[h]]<-plan
-}
-return(PLANS)
-}
-```
 
-```{r echo=FALSE, fig.width=5, fig.height=3}
-location_map<-function (locations_csv_file,location_type_title,xcoord_title,ycoord_title,location_names)
-{ 
-  ##Get Location Coordinates
-locs<-read.csv(locations_csv_file)
-locations<-locs[,c(location_type_title,xcoord_title,ycoord_title)]
-LOCATIONS<-list()
-for (activity in names(location_names))
-{
-  LOCATIONS[[activity]]<-locations[locations[[location_type_title]] %in% location_names[[activity]],]
-  
-}  
 
-return(LOCATIONS)
-}
-```
+##choose home location
+home<-home_locations[sample(nrow(home_locations),1),]
+	
+#find a random point in region for home
+base_boundary<-5720833.61
+top_boundary<-5768396.15
+left_boundary<-730836.84
+right_boundary<-800760.82
 
-```{r echo=FALSE, fig.width=5, fig.height=3}
-plan_locations<-function (plan_times,activity_locations)
-{
-PLANS<-plan_times  
-for (h in 1:length(PLANS))
-{
-plan<-PLANS[[h]]  
 
-#choose home location
-home<-activity_locations$home[sample(nrow(activity_locations$home),1),]
-
-##OUTDATED- find random location in region for home##
-# #find a random point in region for home
-# base_boundary<-5720833.61
-# top_boundary<-5768396.15
-# left_boundary<-730836.84
-# right_boundary<-800760.82
-# 
-# 
-# #rudimentary polygon coverage of region
-# home[3]<-sample(base_boundary:top_boundary,1)
-# if(home[3]<5726653.13){home[2]<-sample(left_boundary:752986.88,1)}
-# else if(home[3]<5735039.79){home[2]<-sample(left_boundary:758086.83,1)}
-# else if(home[3]<5739007.31){home[2]<-sample(left_boundary:762321.79,1)}
-# else if(home[3]<5742042.88){home[2]<-sample(left_boundary:771685.48,1)}
-# else if(home[3]<5745592.95){home[2]<-sample(left_boundary:777087.77,1)}
-# else if(home[3]<5750622.83){home[2]<-sample(left_boundary:783519.07,1)}
-# else if(home[3]<5754527.65){home[2]<-sample(left_boundary:789417.10,1)}
-# else if(home[3]<5757917.72){home[2]<-sample(left_boundary:794088.29,1)}
-# else {home[2]<-sample(left_boundary:right_boundary,1)}
+#rudimentary polygon coverage of region
+home[3]<-sample(base_boundary:top_boundary,1)
+if(home[3]<5726653.13){home[2]<-sample(left_boundary:752986.88,1)}
+else if(home[3]<5735039.79){home[2]<-sample(left_boundary:758086.83,1)}
+else if(home[3]<5739007.31){home[2]<-sample(left_boundary:762321.79,1)}
+else if(home[3]<5742042.88){home[2]<-sample(left_boundary:771685.48,1)}
+else if(home[3]<5745592.95){home[2]<-sample(left_boundary:777087.77,1)}
+else if(home[3]<5750622.83){home[2]<-sample(left_boundary:783519.07,1)}
+else if(home[3]<5754527.65){home[2]<-sample(left_boundary:789417.10,1)}
+else if(home[3]<5757917.72){home[2]<-sample(left_boundary:794088.29,1)}
+else {home[2]<-sample(left_boundary:right_boundary,1)}
 
 plan$xcoord=matrix(home[2],nrow(plan))
 plan$ycoord=matrix(home[3],nrow(plan))
@@ -698,282 +674,127 @@ plan$ycoord=unlist(plan$ycoord)
 ##find appropriate location for other activities (using probability based on 1/distance^2)
 for (i in 1:nrow(plan))
 {
-  activity<-plan[i,2]
-  if (activity!="home")
+  if (plan[i,2]=="work")
   {
-  #find Euclidean distance between home and potential destinations  
-  distances=activity_locations[[activity]][,2:3]-unlist(matrix(home[2:3],nrow(activity_locations[[activity]]),2,byrow = T))
+  distances=work_locations[,2:3]-unlist(matrix(home[2:3],nrow(work_locations),2,byrow = T))
   distances=distances^2
   distances=sqrt(rowSums(distances))
-  
-  #choose based on inverse square law ##ASSUMPTION
-  place=sample(distances,1,prob = 1/(distances^2))
-  place=activity_locations[[activity]][which(rownames(activity_locations[[activity]])==names(place)),]
-  plan[i,4:5]=place[2:3]
+  work=sample(distances,1,prob = 1/(distances^2))
+  work=work_locations[which(rownames(work_locations)==names(work)),]
+  plan[i,4:5]=work[2:3]
   }
-}
-PLANS[[h]]<-plan
-}
-return(PLANS)
-}
-```
-
-
-```{r echo=FALSE, fig.width=5, fig.height=3}
-type_plan<-function (n_activities,number_of_agents,durations,repeating,location_csv_file,location_names,type)
-{
-probability_matrix<-prob_matrix(n_activities,durations,repeating,type)
-plan_times_type<-plan_times(number_of_agents,probability_matrix,durations,repeating)
-
-## If locations csv file is altered, the names of the relevant columns might need to be changed here
-activity_locations<-location_map(locations_csv_file,location_type_title = "LandUse",xcoord_title = "xcoord",ycoord_title = "ycoord",location_names=location_names)
-
-PLANS<-plan_locations(plan_times = plan_times_type,activity_locations =activity_locations)  
-  
-return(PLANS)
-}
-```
-
-```{r echo=FALSE, fig.width=5, fig.height=3}
-write_xml<-function (PLANS)
-{
-  plans<-file("plans.xml", open = "w+")
-  head<-'<?xml version="1.0" ?>
-<!DOCTYPE plans SYSTEM "http://www.matsim.org/files/dtd/plans_v4.dtd">
-<plans>
-<!-- ====================================================================== -->'
-  cat(head,file = plans, append=FALSE, sep = "\n")
-  
-  ct=0
-  for (Type in names(PLANS))
+if (plan[i,2]=="beach")
   {
-    for (i in 1:length(PLANS[[Type]]))
+  distances=beach_locations[,2:3]-unlist(matrix(home[2:3],nrow(beach_locations),2,byrow = T))
+  distances=distances^2
+  distances=sqrt(rowSums(distances))
+  beach=sample(distances,1,prob = 1/(distances^2))
+  beach=beach_locations[which(rownames(beach_locations)==names(beach)),]
+  plan[i,4:5]=beach[2:3]
+}
+  if (plan[i,2]=="shops")
+  {
+  distances=shop_locations[,2:3]-unlist(matrix(home[2:3],nrow(shop_locations),2,byrow = T))
+  distances=distances^2
+  distances=sqrt(rowSums(distances))
+  shop=sample(distances,1,prob = 1/(distances^2))
+  shop=shop_locations[which(rownames(shop_locations)==names(shop)),]
+  plan[i,4:5]=shop[2:3]
+  }
+  if (plan[i,2]=="other")
+  {
+  distances=other_locations[,2:3]-unlist(matrix(home[2:3],nrow(other_locations),2,byrow = T))
+  distances=distances^2
+  distances=sqrt(rowSums(distances))
+  other=sample(distances,1,prob = 1/(distances^2))
+  other=other_locations[which(rownames(other_locations)==names(other)),]
+  plan[i,4:5]=other[2:3]
+  
+  }
+  
+}
+
+
+#Store Plans
+PLANS[[h]]<-plan
+
+##WRite plan to XML
+  id=h
+  names(id)<-"id"
+  names(plan)<-c("id","type","start_time","x","y")
+  person<-newXMLNode("person", attrs=id,parent=root)
+  attributes<-c("yes","car",0)
+  names(attributes)<-c("selected","mode","end_time")
+  pl<-newXMLNode("plan", attrs=attributes[1],parent=person)
+  for (j in 1:nrow(plan))
+  {
+    if (j<nrow(plan))
     {
-      plan<-as.data.frame(PLANS[[Type]][i])
-      person<-paste0('  <person id= "',ct,'" >\n    <plan selected="yes">\n      ')
-      for (j in 1:nrow(plan))
-        {
-          if (j<nrow(plan))
-        {
-          person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="',plan[j+1,3],'" />\n      <leg mode="car" />\n      ')
-          
-        }
-        else
-        {
-        if (j==1)
-          {
-           person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="06:00:00" />\n      <leg mode="car" />\n      ')
-          }
-         person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" />\n    </plan>\n  </person>\n  ')
-    
-        }
-        }
-		cat(person, file = plans, append=FALSE, sep = "\n")
-      ct=ct+1
+      end<-plan[j+1,3]
+      attributes[3]<-paste0(substr(end,0,nchar(end)-2),":",substr(end,nchar(end)-1,nchar(end)),":00")
+      newXMLNode("act", attrs=c(plan[j,c(2,4,5)],attributes[3]),parent=pl)
+      newXMLNode("leg",attrs=attributes[2],parent=pl)
+    }
+    else
+    {
+    if (j==1)
+      {
+        attributes[3]<-"12:00:00"
+        newXMLNode("act", attrs=c(plan[j,c(2,4,5)],attributes[3]),parent=pl)
+        newXMLNode("leg",attrs=attributes[2],parent=pl)
+      
+      }
+     newXMLNode("act", attrs=plan[j,c(2,4,5)],parent=pl)
+
     }
   }
- foot<-'<!-- ====================================================================== -->
 
-</plans>'
- cat(foot, file = plans, append=FALSE, sep = "\n")
- close(plans) 
+
 }
+# dtd<-newXMLDTDNode("plans",systemID = "http://www.matsim.org/files/dtd/plans_v4.dtd",addFinalizer = T)
+# doc<-newXMLDoc(dtd = dtd,addFinalizer = T,name="plans",node=root)
+# saveXML(doc,"plans.xml")
+# 
+# suppressMessages(plans<-bind_rows(PLANS))
+# write.csv(plans,file="plans.csv",row.names = F)
+# check<-lapply(RESIDENTS,rowSums)
+
+#max(sapply(check,'[[',2)) # Dhi disabled this; was showing "## [1] 4" in output
+
+#count who is where when
+R_activities<-Reduce('+',RESIDENTS)
+
+#Compare with expected percentages
+
 ```
+
+Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-
-###Algorithm to generate a resident plan (based on ver 0.1)
-#****(To navigate, search for the step by step options with '****' )
-#################################################################
-##INPUTS
-
-#**** 1. Choose the number of each agent type:
-NUMBER<-c(20,20,20,20,20)
-names(NUMBER)<-c("Resident","PT Resident","Regular Visitor","Overnight Visitor","Day Visitor")
-
-#**** 2. Set how each subpopulation will be distributed over the 12 2-hr time block:s
-DISTRIBUTIONS<-list()
-
-### Resident
-#hour   = c( 2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24)
-r_home  = c(90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85)
-r_work  = c( 5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10)
-r_beach = c( 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0)
-r_shops = c( 0,  0,  0,  0, 10, 10, 10, 20, 25, 10,  5,  0)
-r_other = 100 - (r_home + r_work + r_beach + r_shops)
-r_activities = rbind(home=r_home, work=r_work, beach=r_beach, shops=r_shops, other=r_other)
-DISTRIBUTIONS[["Resident"]]= 100 * (r_activities / colSums(r_activities))
-
-### Part-time Resident
-#hour   = c( 2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24)
-p_home  = c(90, 90, 85, 75, 30, 20, 15, 10, 25, 50, 80, 85)
-p_work  = c( 5,  5, 10, 15, 50, 60, 60, 50, 40, 30, 10, 10)
-p_beach = c( 0,  0,  0,  0,  5,  5, 10, 15,  5,  0,  0,  0)
-p_shops = c( 0,  0,  0,  0, 10, 10, 10, 20, 25, 10,  5,  0)
-p_other = 100 - (p_home + p_work + p_beach + p_shops)
-p_activities = rbind(home=p_home, work=p_work, beach=p_beach, shops=p_shops, other=p_other)
-DISTRIBUTIONS[["PT Resident"]]= 100 * (p_activities / colSums(p_activities))
-
-### Regular Visitor
-#hour   = c( 2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24)
-v_home  = c(90, 95, 95, 85, 80, 65, 30, 25, 30, 40, 60, 70)
-v_work  = c( 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0)
-v_beach = c( 0,  0,  0, 50, 10, 10, 30, 40, 30, 10,  5,  0)
-v_shops = c( 0,  0,  0,  0, 50, 10, 35, 20, 15, 40, 20,  0)
-v_other = 100 - (v_home + v_work + v_beach + v_shops)
-v_activities = rbind(home=v_home, work=v_work, beach=v_beach, shops=v_shops, other=v_other)
-DISTRIBUTIONS[["Regular Visitor"]]= 100 * (v_activities / colSums(v_activities))
-
-
-### Overnight Visitor
-#hour   = c(  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24)
-o_home  = c( 95,  95,  80,  50,  10,   0,   0,  10,  20,  40,  60, 100)
-o_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-o_beach = c(  0,   0,  15,  10,  20,  60,  70,  50,  20,  10,   5,   0)
-o_shops = c(  5,   0,   0,  10,  20,  30,  20,  20,  40,  40,  20,   0)
-o_other = 100 - (o_home + o_work + o_beach + o_shops)
-o_activities = rbind(home=o_home, work=o_work, beach=o_beach, shops=o_shops, other=o_other)
-DISTRIBUTIONS[["Overnight Visitor"]]= 100 * (o_activities / colSums(o_activities))
-
-### Day Visitor
-#hour   = c(  2,   4,   6,   8,  10,  12,  14,  16,  18,  20,  22,  24)
-d_home  = c(100, 100,  90,  20,  10,   0,   0,  10,  20,  40,  60, 100)
-d_work  = c(  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0)
-d_beach = c(  0,   0,   5,  10,  20,  40,  50,  40,  20,  10,   5,   0)
-d_shops = c(  0,   0,   0,  10,  20,  30,  20,  20,  40,  40,  20,   0)
-d_other = 100 - (d_home + d_work + d_beach + d_shops)
-d_activities = rbind(home=d_home, work=d_work, beach=d_beach, shops=d_shops, other=d_other)
-DISTRIBUTIONS[["Day Visitor"]]= 100 * (d_activities / colSums(d_activities))
-
-
-#**** 3. Set the duration of each activity, for each type (MUST BE A MULTIPLE OF 2):                               
-DURATIONS<-matrix(c(
-                  #RESIDENT 
-                  c(2,8,2,2,2),
-                  #PT RESIDENT
-                  c(2,8,2,2,2),
-                  #REG. VISITOR
-                  c(2,8,2,2,2),
-                  #O'N VISITOR
-                  c(8,8,2,2,2),
-                  #DAY VISITOR  
-                  c(2,8,4,2,2)),      nrow =5,byrow = T)
-rownames(DURATIONS)<-c("Resident","PT Resident","Regular Visitor","Overnight Visitor","Day Visitor")
-colnames(DURATIONS)<-rownames(DISTRIBUTIONS$Resident)
-         
-#**** 4. Set the repeating behaviour for each activity, for each type (MUST HAVE AT LEAST ONE REPEATING ACTIVITY PER TYPE):         
-REPEATING<-matrix(c(
-                  #RESIDENT 
-                  c(1,0,1,1,1),
-                  #PT RESIDENT
-                  c(1,0,0,0,0),
-                  #REG. VISITOR
-                  c(1,0,1,1,1),
-                  #O'N VISITOR
-                  c(1,0,1,1,1),
-                  #DAY VISITOR  
-                  c(1,0,0,1,1)),      nrow =5,byrow = T)
-rownames(REPEATING)<-c("Resident","PT Resident","Regular Visitor","Overnight Visitor","Day Visitor")
-colnames(REPEATING)<-rownames(DISTRIBUTIONS$Resident)
-
-#**** 5.Specify the path to locations csv file (exported from Locations shp file): 
-locations_csv_file ="Locations.csv"
-
-#**** 6. Map the csv locations to the activities specified for each type:
-LOCATIONS<-list()
-
-###Resident
-r_location_names<-list()
-r_location_names[["home"]]<-c("EvacZone")
-r_location_names[["work"]]<-c("Business District","Caravan Park","Hotel","Golf Club")
-r_location_names[["beach"]]<-c("Beach")
-r_location_names[["shops"]]<-c("Shops")
-r_location_names[["other"]]<-c("University","Secondary","Tafe","Kindergarten","Primary")
-LOCATIONS[["Resident"]]<-r_location_names
-
-###Part-time Resident
-p_location_names<-list()
-p_location_names[["home"]]<-c("EvacZone")
-p_location_names[["work"]]<-c("Business District","Caravan Park","Hotel","Golf Club")
-p_location_names[["beach"]]<-c("Beach")
-p_location_names[["shops"]]<-c("Shops")
-p_location_names[["other"]]<-c("University","Secondary","Tafe","Kindergarten","Primary")
-LOCATIONS[["PT Resident"]]<-p_location_names
-
-###Regular Visitor
-v_location_names<-list()
-v_location_names[["home"]]<-c("EvacZone")
-v_location_names[["work"]]<-c("Business District","Caravan Park","Hotel","Golf Club")
-v_location_names[["beach"]]<-c("Beach")
-v_location_names[["shops"]]<-c("Shops")
-v_location_names[["other"]]<-c("University","Secondary","Tafe","Kindergarten","Primary")
-LOCATIONS[["Regular Visitor"]]<-v_location_names
-
-###Overnight Visitor
-o_location_names<-list()
-o_location_names[["home"]]<-c("Caravan Park","Hotel","Golf Club","Camp")
-o_location_names[["work"]]<-c("Business District","Caravan Park","Hotel","Golf Club")
-o_location_names[["beach"]]<-c("Beach")
-o_location_names[["shops"]]<-c("Shops")
-o_location_names[["other"]]<-c("University","Secondary","Tafe","Kindergarten","Primary")
-LOCATIONS[["Overnight Visitor"]]<-o_location_names
-
-###Day Visitor
-d_location_names<-list()
-d_location_names[["home"]]<-c("Colac","Geelong")
-d_location_names[["work"]]<-c("Business District","Caravan Park","Hotel","Golf Club")
-d_location_names[["beach"]]<-c("Beach")
-d_location_names[["shops"]]<-c("Shops")
-d_location_names[["other"]]<-c("Camp","NSP")
-LOCATIONS[["Day Visitor"]]<-d_location_names
-
-
-######################################################################
-#**** 7. Run code using (ctrl+alt+R) the first time (slow, but loads in functions), and then (ctrl+shift+enter) after that
-
-
-
-
-#main
-PLANS<-list()
-for (Type in names(NUMBER))
-{
-PLANS[[Type]]<-type_plan(DISTRIBUTIONS[[Type]],NUMBER[Type],DURATIONS[Type,],REPEATING[Type,],location_csv_file,LOCATIONS[[Type]],Type)
-}
-
-#write xml (to working directory)
-write_xml(PLANS)
-
-
+RESIDENTS[[1]]
+d=res[,1]*z+durations
+d
 ```
-<!-- COMMENTED OUT DUE TO DEPRECEATION -->
-<!-- Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row): -->
 
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- RESIDENTS[[1]] -->
-<!-- d=res[,1]*z+durations -->
-<!-- d -->
-<!-- ``` -->
+## Quality of the output plans
 
-<!-- ## Quality of the output plans -->
+*One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents:
 
-<!-- *One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents: -->
+```{r echo=FALSE, fig.width=4, fig.height=3}
 
-<!-- ```{r echo=FALSE, fig.width=4, fig.height=3} -->
-
-<!-- R_activities -->
-<!-- n_activities = 100*(R_activities)/N -->
-<!-- input -->
-<!-- plotActivities("Resident activities (Output)", "Percentage", "Time of day", n_activities) -->
-<!-- ``` -->
+R_activities
+n_activities = 100*(R_activities)/N
+input
+plotActivities("Resident activities (Output)", "Percentage", "Time of day", n_activities)
+```
 
 
-<!-- If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected:  -->
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- #(R_activities/N-r_activities/1000) -->
-<!-- diff_activities<-n_activities-r_activities -->
-<!-- plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE) -->
-<!-- ``` -->
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+```{r echo=FALSE, fig.width=5, fig.height=3}
+#(R_activities/N-r_activities/1000)
+diff_activities<-n_activities-r_activities
+plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE)
+```
 
 
 ## Activity distributions in original SCS plans file

@@ -404,59 +404,42 @@ Next, the plan algorithm takes this distribution and iteratively constructs a pl
 
 
 
+Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-First choose the number of each type you would like
 
 ```
-##          Resident       PT Resident   Regular Visitor Overnight Visitor 
-##                20                20                20                20 
-##       Day Visitor 
-##                20
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home     1    1    1    1    0    0    0    0    1     0     1     1
+## work     0    0    0    0    1    1    1    1    0     0     0     0
+## beach    0    0    0    0    0    0    0    0    0     0     0     0
+## shops    0    0    0    0    0    0    0    0    0     0     0     0
+## other    0    0    0    0    0    0    0    0    0     1     0     0
 ```
 
-Now choose how you would like each subpopulation to be distributed over the 12 2-hr time blocks
+```
+##  home  work beach shops other 
+##     2     8     2     2     2
+```
 
-<!-- COMMENTED OUT DUE TO DEPRECEATION -->
-<!-- Here is an example plan for a resident, with durations, and where only `work` is non-repeatable. A cell with a `1` indicates a 2-hr block in the day (column) where the resident is performing an activity (row): -->
+## Quality of the output plans
 
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- RESIDENTS[[1]] -->
-<!-- d=res[,1]*z+durations -->
-<!-- d -->
-<!-- ``` -->
-
-<!-- ## Quality of the output plans -->
-
-<!-- *One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents: -->
-
-<!-- ```{r echo=FALSE, fig.width=4, fig.height=3} -->
-
-<!-- R_activities -->
-<!-- n_activities = 100*(R_activities)/N -->
-<!-- input -->
-<!-- plotActivities("Resident activities (Output)", "Percentage", "Time of day", n_activities) -->
-<!-- ``` -->
+*One issue currently is that over a population of agents, activities with longer durations tend to dominate over those with shorter durations as the day goes on.* The issue can be seen below in a comparison between the input activities distributions and the distributions calculated from the produced output plans, for 1000 residents:
 
 
-<!-- If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected:  -->
-<!-- ```{r echo=FALSE, fig.width=5, fig.height=3} -->
-<!-- #(R_activities/N-r_activities/1000) -->
-<!-- diff_activities<-n_activities-r_activities -->
-<!-- plotActivities("Resident activities (Output - Input)", "Percentage", "Time of day", diff_activities, limitY=FALSE) -->
-<!-- ``` -->
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+## home    90   90   82   73   30   20   15   10   32    51    59    69
+## work     4    4   13   16   49   57   52   49   39    31    27    27
+## beach    0    0    0    0    4    4   11   17    3     0     0     0
+## shops    0    0    0    0   15   14   19   20   23    10    10     0
+## other    6    6    5   11    2    5    3    4    3     8     4     4
+```
+
+![](synthetic-population_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
+
+
+If we compare this to the expected allocations, we see that late in the day, `home` tends to be down and `work` up from expected: 
+![](synthetic-population_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 
 ## Activity distributions in original SCS plans file
@@ -471,7 +454,7 @@ Here is what the distributions of activity **end times** in the [initial populat
   * `work=Business District`
 
 
-![](synthetic-population_files/figure-html/unnamed-chunk-21-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-21-2.png)<!-- -->
+![](synthetic-population_files/figure-html/unnamed-chunk-17-1.png)<!-- -->![](synthetic-population_files/figure-html/unnamed-chunk-17-2.png)<!-- -->
 
 ```
 ## [1] "Number of unique persons"
