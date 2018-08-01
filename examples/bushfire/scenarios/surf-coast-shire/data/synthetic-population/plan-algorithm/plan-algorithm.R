@@ -322,9 +322,9 @@ write_xml<-function (PLANS,output_location)
 {
   print("Writing plans to XML file...")
   plans<-file(output_location, open = "w+")
-  head<-'<?xml version="1.0" ?>
-  <!DOCTYPE plans SYSTEM "http://www.matsim.org/files/dtd/plans_v4.dtd">
-  <plans>
+  head<-'<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
+  <population>
   <!-- ====================================================================== -->'
   cat(head,file = plans, append=FALSE, sep = "\n")
   
@@ -360,7 +360,7 @@ write_xml<-function (PLANS,output_location)
   }
   foot<-'<!-- ====================================================================== -->
   
-  </plans>'
+  </population>'
   cat(foot, file = plans, append=FALSE, sep = "\n")
   close(plans) 
 }
