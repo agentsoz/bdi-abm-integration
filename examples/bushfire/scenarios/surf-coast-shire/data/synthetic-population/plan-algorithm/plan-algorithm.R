@@ -322,9 +322,9 @@ write_xml<-function (PLANS,output_location)
 {
   print("Writing plans to XML file...")
   plans<-file(output_location, open = "w+")
-  head<-'<?xml version="1.0" ?>
-  <!DOCTYPE plans SYSTEM "http://www.matsim.org/files/dtd/plans_v4.dtd">
-  <plans>
+  head<-'<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
+  <population>
   <!-- ====================================================================== -->'
   cat(head,file = plans, append=FALSE, sep = "\n")
   
@@ -341,16 +341,16 @@ write_xml<-function (PLANS,output_location)
       {
         if (j<nrow(plan))
         {
-          person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="',plan[j+1,3],'" />\n      <leg mode="car" />\n      ')
+          person<-paste0(person,'<activity type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="',plan[j+1,3],'" />\n      <leg mode="car" />\n      ')
           
         }
         else
         {
           if (j==1)
           {
-            person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="06:00:00" />\n      <leg mode="car" />\n      ')
+            person<-paste0(person,'<activity type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" end_time="06:00:00" />\n      <leg mode="car" />\n      ')
           }
-          person<-paste0(person,'<act type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" />\n    </plan>\n  </person>\n  ')
+          person<-paste0(person,'<activity type="',plan[j,2],'" x="',plan[j,4],'" y="',plan[j,5],'" />\n    </plan>\n  </person>\n  ')
           
         }
       }
@@ -360,7 +360,7 @@ write_xml<-function (PLANS,output_location)
   }
   foot<-'<!-- ====================================================================== -->
   
-  </plans>'
+  </population>'
   cat(foot, file = plans, append=FALSE, sep = "\n")
   close(plans) 
 }

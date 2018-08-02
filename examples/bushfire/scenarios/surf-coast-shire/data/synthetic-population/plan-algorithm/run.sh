@@ -1,2 +1,10 @@
-cd "typical summer weekday"
-Rscript ../plan-algorithm.R distributions.csv location_maps.csv numbers.csv ../Locations.csv plans.xml
+DIR=$(dirname "$0") # directory of this script
+SCENARIO=$DIR/typical-summer-weekday # scenario location relative to script
+
+# Call the plan generation script with the required parameters
+Rscript $DIR/plan-algorithm.R \
+  $SCENARIO/distributions.csv \
+  $SCENARIO/location_maps.csv \
+  $SCENARIO/numbers.csv \
+  $SCENARIO/../Locations.csv \
+  $SCENARIO/plans.xml
