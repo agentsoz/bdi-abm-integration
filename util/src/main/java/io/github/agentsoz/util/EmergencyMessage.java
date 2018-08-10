@@ -30,9 +30,19 @@ import java.util.TreeMap;
 public class EmergencyMessage {
 
     public enum EmergencyMessageType {
-        ADVICE,
-        WATCH_AND_ACT,
-        EVACUATE_NOW
+        ADVICE(0.1),
+        WATCH_AND_ACT(0.2),
+        EVACUATE_NOW(0.3);
+
+        private final double value;
+
+        private EmergencyMessageType(double value) {
+            this.value = value;
+        }
+
+        public double getValue() {
+            return value;
+        }
     }
 
     private EmergencyMessageType type;
