@@ -292,7 +292,7 @@ type_plan<-function (n_activities,number_of_agents,location_csv_file,location_na
   plan_times_type<-plan_times(number_of_agents,probability_matrix,durations,repeating)
   
   ## If locations csv file is altered, the names of the relevant columns might need to be changed here
-  activity_locations<-location_map(locations_csv_file = location_csv_file,location_type_title = "LandUse",xcoord_title = "xcoord",ycoord_title = "ycoord",location_names=location_names)
+  activity_locations<-location_map(locations_csv_file = location_csv_file,location_type_title = "Type",xcoord_title = "xcoord",ycoord_title = "ycoord",location_names=location_names)
   
   PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations)  
   output<-list(Agents=plan_times_type$Agents,Plans=PLANS)
@@ -532,8 +532,12 @@ inputs<-function (distributions_file,locations_file,numbers_file)
 
 main<-function ()
 {
-  args<-commandArgs(trailingOnly = T)
-  
+  #args<-commandArgs(trailingOnly = T)
+  args<-c("typical-summer-weekday/distributions.csv",
+          "typical-summer-weekday/location_maps.csv",
+          "typical-summer-weekday/numbers.csv",
+          "Locations.csv",
+          "typical-summer-weekday/plans.xml")
   
   input<-inputs(args[1],args[2],args[3])  
   location_csv_file<-args[4]
