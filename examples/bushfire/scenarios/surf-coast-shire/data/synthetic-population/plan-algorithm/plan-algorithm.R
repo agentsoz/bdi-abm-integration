@@ -90,7 +90,7 @@ plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
     roll<-runif(n) #roll for each timestep 
     
     #activity is allocated at each timestep
-    agent<-apply(probability_matrix,1,function(x){roll<x}) 
+    agent<-apply(probability_matrix,1,function(x){roll<x})  
     agent<-apply(agent,1,cumsum) 
     agent[agent>1]=0
     
@@ -189,20 +189,26 @@ plan_times<-function (number_of_agents,probability_matrix,durations,repeating)
   return(output)
 }
 
-location_map<-function (locations_csv_file,location_type_title,xcoord_title,ycoord_title,location_names)
+location_map<-function (locations_from_csv,location_names,subgroup)
 { 
   ##Get Location Coordinates
-  locs<-read.csv(locations_csv_file)
-  locations<-locs[,c(location_type_title,xcoord_title,ycoord_title)]
+  location_type_title<-names(locations_from_csv)[1]
   LOCATIONS<-list()
   for (activity in names(location_names))
   {
-    LOCATIONS[[activity]]<-locations[locations[[location_type_title]] %in% location_names[[activity]],]
-    
+    LOCATIONS[[activity]]<-locations_from_csv[locations_from_csv[[location_type_title]] %in% location_names[[activity]],]
+    if (length(unique(LOCATIONS[[activity]][[location_type_title]]))!=length(location_names[[activity]]))
+    {
+      print(paste0("ERROR: activity '",activity,"' for type '",subgroup,"' has been assigned locations that do not exist in the locations data. Please change the location map. Possible locations are:"))
+      show(levels(locations_from_csv[[location_type_title]]))    
+      return()
+    }
   }  
   
   return(LOCATIONS)
 }
+
+
 
 plan_locations<-function (plan_times,activity_locations)
 {
@@ -234,10 +240,10 @@ plan_locations<-function (plan_times,activity_locations)
     # else if(home[3]<5757917.72){home[2]<-sample(left_boundary:794088.29,1)}
     # else {home[2]<-sample(left_boundary:right_boundary,1)}
     
+    plan$ycoord=unlist(plan$ycoord)
     plan$xcoord=matrix(home[2],nrow(plan))
     plan$ycoord=matrix(home[3],nrow(plan))
     plan$xcoord=unlist(plan$xcoord)
-    plan$ycoord=unlist(plan$ycoord)
     
     ##find appropriate location for other activities (using probability based on 1/distance^2)
     for (i in 1:nrow(plan))
@@ -262,7 +268,7 @@ plan_locations<-function (plan_times,activity_locations)
   return(PLANS)
 }
 
-type_plan<-function (n_activities,number_of_agents,location_csv_file,location_names,type)
+type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_names,type)
 {
   if (number_of_agents==0)
   {
@@ -288,11 +294,11 @@ type_plan<-function (n_activities,number_of_agents,location_csv_file,location_na
   # location_names<-LOCATIONS[[Type]]
   # type<-Type
   # 
-  probability_matrix<-prob_matrix(n_activities,durations,repeating,type)
-  plan_times_type<-plan_times(number_of_agents,probability_matrix,durations,repeating)
+  probability_matrix<-prob_matrix(n_activities = n_activities,durations = durations,repeating = repeating,type = type)
+  plan_times_type<-plan_times(number_of_agents = number_of_agents,probability_matrix = probability_matrix,durations = durations,repeating)
   
   ## If locations csv file is altered, the names of the relevant columns might need to be changed here
-  activity_locations<-location_map(locations_csv_file = location_csv_file,location_type_title = "Type",xcoord_title = "xcoord",ycoord_title = "ycoord",location_names=location_names)
+  activity_locations<-location_map(locations_from_csv =locations_from_csv,location_names=location_names,subgroup=type)
   
   PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations)  
   output<-list(Agents=plan_times_type$Agents,Plans=PLANS)
@@ -323,7 +329,7 @@ write_xml<-function (PLANS,output_location)
   print("Writing plans to XML file...")
   plans<-file(output_location, open = "w+")
   head<-'<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
+  <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
   <population>
   <!-- ====================================================================== -->'
   cat(head,file = plans, append=FALSE, sep = "\n")
@@ -365,7 +371,7 @@ write_xml<-function (PLANS,output_location)
   close(plans) 
 }
 
-distributions<-function(distributions_file)
+read_distributions<-function(distributions_file)
 {
   df<-read.csv(distributions_file,header = F,sep=',',stringsAsFactors = F,strip.white = T)
   DISTRIBUTIONS<-list()
@@ -448,9 +454,9 @@ distributions<-function(distributions_file)
   return(DISTRIBUTIONS)
 }
 
-locations<-function(location_maps_file,types)
+read_locations<-function(s_file,types)
 {
-  df<-read.csv(location_maps_file,header = F,fill=T,sep=',',col.names = (1:20), stringsAsFactors = F,strip.white = T)
+  df<-read.csv(s_file,header = F,fill=T,sep=',',col.names = (1:20), stringsAsFactors = F,strip.white = T)
   
   
   LOCATIONS<-list()
@@ -495,7 +501,7 @@ locations<-function(location_maps_file,types)
   return(LOCATIONS)
 }
 
-numbers<- function(numbers_file,types)
+read_numbers<- function(numbers_file,types)
 {
   df<-read.csv(numbers_file,header = F,sep=',', stringsAsFactors = F,strip.white = T)
   NUMBERS<-vector()
@@ -519,12 +525,24 @@ numbers<- function(numbers_file,types)
   
 }
 
+read_locations_from_csv<-function(locations_csv_file)
+{
+  print("Reading locations from Locations.csv...")
+  location_type_title = "Type"
+  xcoord_title = "xcoord"
+  ycoord_title = "ycoord"
+  locs<-read.csv(locations_csv_file)
+  locations<-locs[,c(location_type_title,xcoord_title,ycoord_title)]
+  return(locations)
+}
+
 inputs<-function (distributions_file,locations_file,numbers_file)
 {
-  DISTRIBUTIONS<-distributions(distributions_file)
-  type<-names(DISTRIBUTIONS)
-  LOCATIONS<-locations(locations_file,type)
-  NUMBERS<-numbers(numbers_file,type)
+  DISTRIBUTIONS<-read_distributions(distributions_file)
+  
+  types<-names(DISTRIBUTIONS)
+  LOCATIONS<-read_locations(locations_file,types)
+  NUMBERS<-read_numbers(numbers_file,types)
   
   INPUT<-list(numbers=NUMBERS,distributions=DISTRIBUTIONS,locations=LOCATIONS)
   return(INPUT)  
@@ -532,29 +550,30 @@ inputs<-function (distributions_file,locations_file,numbers_file)
 
 main<-function ()
 {
-  #args<-commandArgs(trailingOnly = T)
-  args<-c("typical-summer-weekday/distributions.csv",
-          "typical-summer-weekday/location_maps.csv",
-          "typical-summer-weekday/numbers.csv",
-          "Locations.csv",
-          "typical-summer-weekday/plans.xml")
-  
-  input<-inputs(args[1],args[2],args[3])  
-  location_csv_file<-args[4]
+  args<-commandArgs(trailingOnly = T)
+  #args<-c("typical-summer-weekday/distributions.csv",
+          # "typical-summer-weekday/location_maps.csv",
+          # "typical-summer-weekday/numbers.csv",
+          # "Locations.csv",
+          # "typical-summer-weekday/plans.xml")
+          # 
+  input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
+  locations_csv<-read_locations_from_csv(args[4])
   PLANS<-list()
   AGENTS<-list()
+  
   for (Type in names(input$numbers))
   {
-    run<-type_plan(input$distributions[[Type]],input$numbers[Type],location_csv_file,input$locations[[Type]],Type)
+    run<-type_plan(n_activities = input$distributions[[Type]],number_of_agents =input$numbers[Type],locations_from_csv = locations_csv,location_names = input$locations[[Type]],type = Type)
     PLANS[[Type]]<-run$Plans
     AGENTS[[Type]]<-run$Agents
   }
   
   
   #write plan.xml (to working directory)
-  write_xml(PLANS,args[5])
+  write_xml(PLANS = PLANS,output_location = args[5])
   
-  write_log(AGENTS,input$distributions)
+  write_log(AGENTS = AGENTS,DISTRIBUTIONS = input$distributions)
   
   print("Finished.")
 }
