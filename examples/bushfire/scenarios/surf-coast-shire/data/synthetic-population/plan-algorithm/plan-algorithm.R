@@ -208,7 +208,20 @@ location_map<-function (locations_from_csv,location_names,subgroup)
   return(LOCATIONS)
 }
 
-
+allocation_checker<-function(activity_locations,number_of_agents,subgroup)
+{
+    # for (activity in names(activity_locations))
+    activity="home" ##allocations only in place for home location at the moment
+    {
+      if (sum(activity_locations[[activity]][,2])<number_of_agents)
+      {
+        print(paste0("WARNING: number of ",subgroup,"s exeeds total allocation for the corresponding ",activity," location map. Adjusting each mapped allocation to ",number_of_agents,". To avoid this, change the allocations in the locations SHP file and run again."))
+        activity_locations[[activity]][,2]=number_of_agents
+      }
+      
+    }
+  return(activity_locations)
+}
 
 plan_locations<-function (plan_times,activity_locations)
 {
@@ -218,28 +231,13 @@ plan_locations<-function (plan_times,activity_locations)
     plan<-PLANS[[h]]  
     
     #choose home location
-    home<-activity_locations$home[sample(nrow(activity_locations$home),1),]
+    valid<-activity_locations[[1]][activity_locations[[1]][2]>0,c(1,3,4)]
+    choice<-sample(nrow(valid),1)
+    home<-valid[choice,]
+    #change allocation for that home
+    activity_locations[[1]][rownames(home),][2]=activity_locations[[1]][rownames(home),][2]-1
     
-    ##OUTDATED- find random location in region for home##
-    # #find a random point in region for home
-    # base_boundary<-5720833.61
-    # top_boundary<-5768396.15
-    # left_boundary<-730836.84
-    # right_boundary<-800760.82
-    # 
-    # 
-    # #rudimentary polygon coverage of region
-    # home[3]<-sample(base_boundary:top_boundary,1)
-    # if(home[3]<5726653.13){home[2]<-sample(left_boundary:752986.88,1)}
-    # else if(home[3]<5735039.79){home[2]<-sample(left_boundary:758086.83,1)}
-    # else if(home[3]<5739007.31){home[2]<-sample(left_boundary:762321.79,1)}
-    # else if(home[3]<5742042.88){home[2]<-sample(left_boundary:771685.48,1)}
-    # else if(home[3]<5745592.95){home[2]<-sample(left_boundary:777087.77,1)}
-    # else if(home[3]<5750622.83){home[2]<-sample(left_boundary:783519.07,1)}
-    # else if(home[3]<5754527.65){home[2]<-sample(left_boundary:789417.10,1)}
-    # else if(home[3]<5757917.72){home[2]<-sample(left_boundary:794088.29,1)}
-    # else {home[2]<-sample(left_boundary:right_boundary,1)}
-    
+    #add home to plan
     plan$ycoord=unlist(plan$ycoord)
     plan$xcoord=matrix(home[2],nrow(plan))
     plan$ycoord=matrix(home[3],nrow(plan))
@@ -252,7 +250,7 @@ plan_locations<-function (plan_times,activity_locations)
       if (activity!="home")
       {
         #find Euclidean distance between home and potential destinations  
-        distances=activity_locations[[activity]][,2:3]-unlist(matrix(home[2:3],nrow(activity_locations[[activity]]),2,byrow = T))
+        distances=activity_locations[[activity]][,3:4]-unlist(matrix(home[2:3],nrow(activity_locations[[activity]]),2,byrow = T))
         distances=distances^2
         distances=sqrt(rowSums(distances))
         distances=distances[distances!=0] #remove home from activity list if it is there
@@ -260,7 +258,7 @@ plan_locations<-function (plan_times,activity_locations)
         
         place=sample(distances,1,prob = 1/(distances^2))
         place=activity_locations[[activity]][which(rownames(activity_locations[[activity]])==names(place)),]
-        plan[i,4:5]=place[2:3]
+        plan[i,4:5]=place[3:4]
       }
     }
     PLANS[[h]]<-plan
@@ -297,9 +295,9 @@ type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_n
   probability_matrix<-prob_matrix(n_activities = n_activities,durations = durations,repeating = repeating,type = type)
   plan_times_type<-plan_times(number_of_agents = number_of_agents,probability_matrix = probability_matrix,durations = durations,repeating)
   
-  ## If locations csv file is altered, the names of the relevant columns might need to be changed here
-  activity_locations<-location_map(locations_from_csv =locations_from_csv,location_names=location_names,subgroup=type)
   
+  activity_locations<-location_map(locations_from_csv =locations_from_csv,location_names=location_names,subgroup=type)
+  activity_locations<-allocation_checker(activity_locations,number_of_agents,subgroup = type)
   PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations)  
   output<-list(Agents=plan_times_type$Agents,Plans=PLANS)
   return(output)
@@ -527,12 +525,14 @@ read_numbers<- function(numbers_file,types)
 
 read_locations_from_csv<-function(locations_csv_file)
 {
+  ## If Locations csv file is altered (i.e. a new source shp file), the names of the relevant columns might need to be changed here
   print("Reading locations from Locations.csv...")
   location_type_title = "Type"
   xcoord_title = "xcoord"
   ycoord_title = "ycoord"
+  allocation_title="Count"
   locs<-read.csv(locations_csv_file)
-  locations<-locs[,c(location_type_title,xcoord_title,ycoord_title)]
+  locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title)]
   return(locations)
 }
 
@@ -551,12 +551,12 @@ inputs<-function (distributions_file,locations_file,numbers_file)
 main<-function ()
 {
   args<-commandArgs(trailingOnly = T)
-  #args<-c("typical-summer-weekday/distributions.csv",
-          # "typical-summer-weekday/location_maps.csv",
-          # "typical-summer-weekday/numbers.csv",
-          # "Locations.csv",
-          # "typical-summer-weekday/plans.xml")
-          # 
+  # args<-c("typical-summer-weekday/distributions.csv",
+  # "typical-summer-weekday/location_maps.csv",
+  # "typical-summer-weekday/numbers.csv",
+  # "Locations.csv",
+  # "typical-summer-weekday/plans.xml")
+
   input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
   locations_csv<-read_locations_from_csv(args[4])
   PLANS<-list()
