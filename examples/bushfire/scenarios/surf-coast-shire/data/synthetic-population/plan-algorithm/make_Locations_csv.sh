@@ -1,4 +1,5 @@
-INPUT=$1
+unzip Shpfile.zip
+INPUT=Shpfile/shpfile.shp
 echo write each feature to text file
 ogrinfo -al $INPUT > shp_file.txt
 echo get coordinate for each instance
@@ -22,6 +23,11 @@ paste -d, test2.csv test.csv > Locations.csv
 echo remove junk
 rm shp_file.txt 
 rm test*
+rm -r Shpfile/
 echo Fix dodgy "Type" entries
-sed -i '' 's/House,,/House,Residential,/g' Locations.csv
+sed -i '' 's/House,,1/House,Residential,0/g' Locations.csv
 sed -i '' 's/Business district/Business District/g' Locations.csv
+echo Add "Out of Region" locations
+echo '"999998","0","0","0",COLAC,,,,,,,,,,,,Out of Region,3,726428.3187297015,5706161.232068798' >> Locations.csv
+echo '"999999","0","0","0",GEELONG,,,,,,,,,,,,Out of Region,3,832586.4912659925,5813503.546867735' >> Locations.csv
+
