@@ -29,7 +29,7 @@ import java.util.TreeMap;
 
 public class EmergencyMessage {
 
-    public enum EmergencyMessageType {
+    public enum EmergencyMessageType { // FIXME: move to config
         ADVICE(0.1),
         WATCH_AND_ACT(0.2),
         EVACUATE_NOW(0.3);
