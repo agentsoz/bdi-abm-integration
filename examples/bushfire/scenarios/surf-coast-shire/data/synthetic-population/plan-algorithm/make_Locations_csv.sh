@@ -25,7 +25,7 @@ rm shp_file.txt
 rm test*
 rm -r Shpfile/
 echo Fix dodgy "Type" entries
-sed -i '' 's/House,,1/House,Residential,0/g' Locations.csv
+sed -i '' 's/House,,1/House,Residential,1/g' Locations.csv
 sed -i '' 's/Business district/Business District/g' Locations.csv
 echo Add "Out of Region" locations
 echo '"999998","0","0","0",COLAC,,,,,,,,,,,,Out of Region,3,726428.3187297015,5706161.232068798' >> Locations.csv
