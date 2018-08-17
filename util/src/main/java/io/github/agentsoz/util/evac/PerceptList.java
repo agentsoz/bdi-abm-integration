@@ -38,6 +38,8 @@ public final class PerceptList {
 	public static final String FIRE_DATA  = "fire_data";
 	public static final String LEAVENOW = "leave_now";
 	public static final String PICKED_UP = "picked_up";
+	public static final String SIGHTED_EMBERS= "sighted_embers";
+	public static final String SIGHTED_FIRE= "sighted_fire";
 	public static final String TIME = "time";
 
 	// BDI Query Percept strings
