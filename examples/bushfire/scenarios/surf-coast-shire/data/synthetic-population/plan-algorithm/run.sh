@@ -10,4 +10,4 @@ Rscript $DIR/plan-algorithm.R \
   $SCENARIO/plans.xml
 
 unzip matsim*
-java -cp matsim-0.10.1/matsim-0.10.1.jar org.matsim.run.Controler config.xml
+java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml

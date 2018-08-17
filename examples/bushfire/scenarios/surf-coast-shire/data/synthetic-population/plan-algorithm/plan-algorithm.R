@@ -550,12 +550,12 @@ inputs<-function (distributions_file,locations_file,numbers_file)
 
 main<-function ()
 {
-  args<-commandArgs(trailingOnly = T)
-  # args<-c("typical-summer-weekday/distributions.csv",
-  # "typical-summer-weekday/location_maps.csv",
-  # "typical-summer-weekday/numbers.csv",
-  # "Locations.csv",
-  # "typical-summer-weekday/plans.xml")
+  # args<-commandArgs(trailingOnly = T)
+  args<-c("typical-summer-weekday/distributions.csv",
+  "typical-summer-weekday/location_maps.csv",
+  "typical-summer-weekday/numbers.csv",
+  "Locations.csv",
+  "typical-summer-weekday/plans.xml")
 
   input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
   locations_csv<-read_locations_from_csv(args[4])
