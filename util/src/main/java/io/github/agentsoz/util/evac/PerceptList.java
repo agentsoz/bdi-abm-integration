@@ -33,6 +33,7 @@ public final class PerceptList {
 	public static final String EMERGENCY_MESSAGE = "emergency_message";
 	public static final String FIELD_OF_VIEW = "field_of-view";
 	public static final String FIRE = "fire";
+	public static final String EMBERS_DATA = "embers_data";
 	public static final String FIRE_ALERT = "fire_alert";
 	public static final String FIRE_DATA  = "fire_data";
 	public static final String LEAVENOW = "leave_now";
