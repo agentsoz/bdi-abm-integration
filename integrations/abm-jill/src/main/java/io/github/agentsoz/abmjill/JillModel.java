@@ -101,7 +101,7 @@ public abstract class JillModel implements BDIServerInterface {
 
 	// package new agent action into the agent data container
 	public static void packageAgentAction(String agentID, String actionID,
-			Object[] parameters) {
+										  Object[] parameters, String actionState) {
 		
 		getAgent(Integer.valueOf(agentID)).packageAction(actionID, parameters);
 
@@ -110,7 +110,18 @@ public abstract class JillModel implements BDIServerInterface {
 		boolean isNewAction = ac.register(actionID, parameters);
 		if (!isNewAction) {
 			ac.get(actionID).setParameters(parameters);
-			ac.get(actionID).setState(ActionContent.State.INITIATED);
+			ActionContent.State state = ActionContent.State.INITIATED;
+			if (actionState != null) {
+				try {
+					state = ActionContent.State.valueOf(actionState);
+				} catch (Exception e) {
+					logger.warn("ignoring unknown action state: "
+							+ " agent:" + agentID
+							+ ", action id:" + actionID
+							+ ", content:" + ac.get(actionID));
+				}
+			}
+			ac.get(actionID).setState(state);
 		}
 		logger.debug("added " + ((isNewAction) ? "new action" : "")
 				+ " into ActionContainer: agent:" + agentID + ", action id:"
