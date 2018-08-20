@@ -1,31 +1,31 @@
 Resident,
-home,EvacZone
-work,Business District,Caravan Park,Hotel,Golf Club
+home,Residential
+work,Business District
 beach,Beach
 shops,Shops
-other,University,Secondary,Tafe,Kindergarten,Primary
+other,School
 
 Part-time Resident,
-home,EvacZone
-work,Business District,Caravan Park,Hotel,Golf Club
+home,Residential
+work,Business District
 beach,Beach
 shops,Shops
-other,University,Secondary,Tafe,Kindergarten,Primary
+other,School
 
 Regular Visitor,
-home,EvacZone
+home,Residential
 beach,Beach
 shops,Shops
-other,Camp,NSP
+other,NSP
 
 Overnight Visitor,
-home,Caravan Park,Hotel,Golf Club,Camp
+home,Caravan Park,Hotel,Golf Club
 beach,Beach
 shops,Shops
-other,Camp,NSP
+other,Open Air,NSP, River
 
 Day Visitor,
-home,Colac,Geelong
+home,Out of Region
 beach,Beach
 shops,Shops
-other,Camp,NSP
+other,Open Air,NSP

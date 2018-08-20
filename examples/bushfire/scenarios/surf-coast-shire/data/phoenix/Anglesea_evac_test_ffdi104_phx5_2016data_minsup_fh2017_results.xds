@@ -1,0 +1,56 @@
+<?xml version="1.0" standalone="yes"?>
+<xs:schema id="Simulation_Log" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="Simulation_Log" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Simulation">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Simulation_Name" type="xs:string" minOccurs="0" />
+              <xs:element name="Start_Time" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="End_Time" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Area_Burnt" type="xs:double" minOccurs="0" />
+              <xs:element name="Criticality_Score" type="xs:double" minOccurs="0" />
+              <xs:element name="Max_McArthurs_Spotting_Distance" type="xs:double" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Progress">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Hour" type="xs:double" minOccurs="0" />
+              <xs:element name="Area_Burnt" type="xs:double" minOccurs="0" />
+              <xs:element name="Fire_Count" type="xs:int" minOccurs="0" />
+              <xs:element name="Convective_Output" type="xs:int" minOccurs="0" />
+              <xs:element name="A_1" type="xs:double" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Fuel">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Fuel_Type" type="xs:int" minOccurs="0" />
+              <xs:element name="Desc" type="xs:string" minOccurs="0" />
+              <xs:element name="Percentage" type="xs:double" minOccurs="0" />
+              <xs:element name="Area_Ha" type="xs:double" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Weather">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Weather_Time" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Temperature" type="xs:double" minOccurs="0" />
+              <xs:element name="Rel_Humidity" type="xs:double" minOccurs="0" />
+              <xs:element name="Wind_Speed" type="xs:double" minOccurs="0" />
+              <xs:element name="Wind_Direction" type="xs:double" minOccurs="0" />
+              <xs:element name="Percent_Curing" type="xs:double" minOccurs="0" />
+              <xs:element name="Drought_Factor" type="xs:double" minOccurs="0" />
+              <xs:element name="Cloud_Cover" type="xs:double" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

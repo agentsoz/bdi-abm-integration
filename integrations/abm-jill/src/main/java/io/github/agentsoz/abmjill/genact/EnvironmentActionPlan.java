@@ -50,7 +50,7 @@ public class EnvironmentActionPlan extends Plan {
 		public void step() {
 			EnvironmentAction goal = (EnvironmentAction) getGoal();
 			JillModel.packageAgentAction(Integer.toString(getAgent().getId()),
-					goal.getActionID(), goal.getActionParameters());
+					goal.getActionID(), goal.getActionParameters(), goal.getActionState());
 		}
 	}, };
 

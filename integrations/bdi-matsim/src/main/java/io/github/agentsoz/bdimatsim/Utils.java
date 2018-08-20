@@ -23,18 +23,19 @@ package io.github.agentsoz.bdimatsim;
  */
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import io.github.agentsoz.util.Location;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
@@ -59,7 +60,63 @@ public final class Utils {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
-	public static List<String> getBDIAgentIDs( Scenario scenario ) {
+    /**
+     * Returns a map of agent IDs to specified attributes
+     * Input should be of form given below:
+     * <pre>{@code
+     * <person id="2">
+     *   <attributes>
+     *     <attribute name="key" class="java.lang.String" >value</attribute>
+     *   </attributes>
+     *   <plan selected="yes">
+     *     ...
+     *   </plan>
+     * </person>
+     * }</pre>
+     *
+     * @param scenario MATSim scenario reference
+     * @return the map or else an empty map if no BDI agent types were found
+     */
+    public static Map<String,List<String[]>> getAgentsFromMATSimPlansFile(Scenario scenario ) {
+        Map<String,List<String[]>> map = new HashMap<>();
+        for (Person person : scenario.getPopulation().getPersons().values()) {
+
+			// Get all person attributes
+			// Below seems the only ugly way to get attributes list out
+			String args = person.getAttributes().toString();
+			List<String[]> initArgs = new ArrayList<>();
+			Pattern logEntry = Pattern.compile("\\{\\s*key\\s*=\\s*(.*?)\\s*;\\s*object\\s*=\\s*(.*?)\\s*\\}");
+			Matcher matchPattern = logEntry.matcher(args);
+			while(matchPattern.find()) {
+				String key = matchPattern.group(1);
+				String val = matchPattern.group(2);
+				initArgs.add(new String[]{key,val});
+			}
+
+			// Also get all activities and locations
+			for (PlanElement element : person.getSelectedPlan().getPlanElements()) {
+				if (element instanceof Activity) {
+					String type = ((Activity)element).getType();
+					String xy = String.format("%f,%f", ((Activity)element).getCoord().getX(), ((Activity)element).getCoord().getY());
+					initArgs.add(new String[]{type,xy});
+				}
+				element.toString();
+			}
+
+			map.put(person.getId().toString(), initArgs);
+        }
+
+        return map;
+    }
+
+	/**
+	 * Deprecated. Use {@link #getAgentsFromMATSimPlansFile} instead.
+	 * Example usage is in {@code examples/bushfire/scenarios/mount-alexander-shire/maldon-100-with-emergency-vehicles}
+	 * @param scenario
+	 * @return
+	 */
+	@Deprecated
+    public static List<String> getBDIAgentIDs( Scenario scenario ) {
 		// this goes through all matsim agents, ignores the stub agents, and returns as many of those agent ids as the
 		// bdi module wants as bdi agents (the remaining agents will, I guess, remain normal matsim agents).  kai, mar'15
 

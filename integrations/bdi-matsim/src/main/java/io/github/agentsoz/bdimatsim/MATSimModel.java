@@ -86,23 +86,47 @@ import javax.inject.Singleton;
  */
 public final class MATSimModel implements ABMServerInterface, QueryPerceptInterface, DataClient {
 	private static final Logger log = LoggerFactory.getLogger(MATSimModel.class);
-	//private static final Logger log = Logger..getLogger(MATSimModel.class) ;
 	public static final String MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR = "--matsim-output-directory";
-	private final EvacConfig evacConfig;
-	private final FireWriter fireWriter;
-	private final DisruptionWriter disruptionWriter;
-	private final Config config;
-	private boolean configLoaded = false ;
+
+	private static final String eGlobalStartHhMm = "startHHMM";
+	private static final String eConfigFile = "configXml";
+	private static final String eOutputDir = "outputDir";
+	private static final String eMaxDistanceForFireVisual = "maxDistanceForFireVisual";
+	private static final String eMaxDistanceForSmokeVisual = "maxDistanceForSmokeVisual";
+	private static final String eFireAvoidanceBufferForVehicles = "fireAvoidanceBufferForVehicles";
+	private static final String eFireAvoidanceBufferForEmergencyVehicles = "fireAvoidanceBufferForEmergencyVehicles";
+	private static final String eCongestionEvaluationInterval = "congestionEvaluationInterval";
+	private static final String eCongestionToleranceThreshold = "congestionToleranceThreshold";
+	private static final String eCongestionReactionProbability = "congestionReactionProbability";
+
+	// Defaults
+	private String optConfigFile = null;
+	private String optOutputDir = null;
+	private double optMaxDistanceForFireVisual = 1000;
+	private double optMaxDistanceForSmokeVisual = 3000;
+	private double optFireAvoidanceBufferForVehicles = 10000;
+	private double optFireAvoidanceBufferForEmergencyVehicles = 1000;
+	private double optStartTimeInSeconds = 1.0;
+	private double optCongestionEvaluationInterval = 180;
+	private double optCongestionToleranceThreshold = 0.25;
+	private double optCongestionReactionProbability = 0.10;
+
+
+	private EvacConfig evacConfig = null;
+	private FireWriter fireWriter = null;
+	private DisruptionWriter disruptionWriter = null;
+	private Config config = null;
+	private boolean configLoaded = false;
 
 	public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
 
-	private final Scenario scenario ;
+	private Scenario scenario = null;
 
 	/**
 	 * A helper class essentially provided by the framework, used here.  The only direct connection to matsim are the event
 	 * monitors, which need to be registered, via the events monitor registry, as a matsim events handler.
 	 */
-	private final PAAgentManager agentManager ;
+	private PAAgentManager agentManager = null;
 
 	/**
 	 * This is in fact a MATSim class that provides a view onto the QSim.
@@ -126,6 +150,53 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
 	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
 
+
+	public MATSimModel(Map<String, String> opts, DataServer dataServer) {
+		this(opts.get(eConfigFile), opts.get(eOutputDir));
+		registerDataServer(dataServer);
+		if (opts == null) {
+			return;
+		}
+		for (String opt : opts.keySet()) {
+			log.info("Found option: {}={}", opt, opts.get(opt));
+			switch(opt) {
+				case eGlobalStartHhMm:
+					optStartTimeInSeconds = convertTimeToSeconds(opts.get(opt).replace(":", ""));
+					break;
+				case eConfigFile:
+					optConfigFile = opts.get(opt);
+					break;
+				case eOutputDir:
+					optOutputDir = opts.get(opt);
+					break;
+				case eMaxDistanceForFireVisual:
+					optMaxDistanceForFireVisual = Double.parseDouble(opts.get(opt));
+					break;
+				case eMaxDistanceForSmokeVisual:
+					optMaxDistanceForSmokeVisual = Double.parseDouble(opts.get(opt));
+					break;
+				case eFireAvoidanceBufferForVehicles:
+					optFireAvoidanceBufferForVehicles = Double.parseDouble(opts.get(opt));
+					break;
+				case eFireAvoidanceBufferForEmergencyVehicles:
+					optFireAvoidanceBufferForVehicles = Double.parseDouble(opts.get(opt));
+					break;
+				case eCongestionEvaluationInterval:
+					optCongestionEvaluationInterval= Double.parseDouble(opts.get(opt));
+					break;
+				case eCongestionToleranceThreshold:
+					optCongestionToleranceThreshold= Double.parseDouble(opts.get(opt));
+					break;
+				case eCongestionReactionProbability:
+					optCongestionReactionProbability= Double.parseDouble(opts.get(opt));
+					break;
+				default:
+					log.warn("Ignoring option: " + opt + "=" + opts.get(opt));
+			}
+		}
+	}
+
+
 	public MATSimModel(String matSimFile, String matsimOutputDirectory) {
 		// not the most elegant way of doing this ...
 		// yy maybe just pass the whole string from above and take apart ourselves?
@@ -147,7 +218,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		config.plans().setActivityDurationInterpretation(ActivityDurationInterpretation.tryEndTimeThenDuration);
 
-		config.qsim().setStartTime( 1.00 );
+		config.qsim().setStartTime( (optStartTimeInSeconds) > 3600 ? optStartTimeInSeconds-3600 : optStartTimeInSeconds  );
 		config.qsim().setSimStarttimeInterpretation( StarttimeInterpretation.onlyUseStarttime );
 
 		config.controler().setWritePlansInterval(1);
@@ -222,6 +293,15 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		scenarioLoaded=true ;
 		return scenario ;
+	}
+
+	public EvacConfig initialiseEvacConfig(Config config) {
+		EvacConfig evacConfig = ConfigUtils.addOrGetModule(config, EvacConfig.class);
+		evacConfig.setSetup(EvacConfig.Setup.standard);
+		evacConfig.setCongestionEvaluationInterval(getOptCongestionEvaluationInterval());
+		evacConfig.setCongestionToleranceThreshold(getOptCongestionToleranceThreshold());
+		evacConfig.setCongestionReactionProbability(getOptCongestionReactionProbability());
+		return evacConfig;
 	}
 
 	public final void init(List<String> bdiAgentIDs) {
@@ -410,6 +490,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	public final void registerDataServer( DataServer server ) {
 		// some blackboardy thing that sits between ABM and BDI
 		server.subscribe(this, PerceptList.FIRE_DATA);
+		server.subscribe(this, PerceptList.EMBERS_DATA);
 		server.subscribe(this, PerceptList.DISRUPTION);
 		server.subscribe(this, PerceptList.EMERGENCY_MESSAGE);
 	}
@@ -426,6 +507,8 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			case PerceptList.FIRE_DATA:
 				return processFireData(data, now, penaltyFactorsOfLinks, scenario,
 						penaltyFactorsOfLinksForEmergencyVehicles, fireWriter);
+			case PerceptList.EMBERS_DATA:
+				return processEmbersData(data, now, scenario, disruptionWriter);
 			case PerceptList.DISRUPTION:
 				return processDisruptionData(data, now, scenario, disruptionWriter);
 			case PerceptList.EMERGENCY_MESSAGE:
@@ -435,10 +518,32 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		}
 	}
 
-	private boolean processDisruptionData( Object data, double now, Scenario scenario, DisruptionWriter disruptionWriter ) {
-		log.info("receiving disruption data at time={}", (now/3600) ); ;
+	private boolean processEmbersData(Object data, double now, Scenario scenario, DisruptionWriter disruptionWriter) {
+		log.info("receiving embers data at time={}", now);
+		log.info( "{}{}", new Gson().toJson(data).substring(0,Math.min(new Gson().toJson(data).length(),200)),
+				"... use DEBUG to see full coordinates list") ;
+		log.debug( "{}", new Gson().toJson(data)) ;
+		Geometry embers = getGeometry((Map<Double, Double[][]>) data, scenario);
+		if (embers == null) {
+			return true;
+		}
+		embers = embers.buffer(optMaxDistanceForSmokeVisual);
+		List<Id<Person>> personsMatched = getPersonsWithin(scenario, embers);
+		log.info("Embers/smoke seen by {} persons: {} ", personsMatched.size(), Arrays.toString(personsMatched.toArray()));
+		// package the messages up to send to the BDI side
+		for (Id<Person> personId : personsMatched) {
+			PAAgent agent = this.getAgentManager().getAgent(personId.toString());
+			if (agent != null) { // only do this if this is a BDI-like agent
+				agent.getPerceptContainer().put(PerceptList.FIELD_OF_VIEW, PerceptList.SIGHTED_EMBERS);
+			}
+		}
 
-		log.info( new Gson().toJson(data) ) ;
+		return true;
+	}
+
+	private boolean processDisruptionData( Object data, double now, Scenario scenario, DisruptionWriter disruptionWriter ) {
+		log.info("receiving disruption data at time={}", now); ;
+		log.info( "{}", new Gson().toJson(data) ) ;
 
 		Map<Double,Disruption> timeMapOfDisruptions = (Map<Double,Disruption>)data;
 
@@ -485,9 +590,11 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	}
 
 	private boolean processEmergencyMessageData(Object data, double now, Scenario scenario) {
-		log.info("receiving emergency message data at time={}", (now/3600) ); ;
+		log.info("receiving emergency message data at time={}", now);
+		log.info( "{}{}", new Gson().toJson(data).substring(0,Math.min(new Gson().toJson(data).length(),200)),
+				"... use DEBUG to see full coordinates list") ;
+		log.debug( "{}", new Gson().toJson(data)) ;
 
-		log.info( new Gson().toJson(data) ) ;
 
 		Map<Double,EmergencyMessage> timeMapOfEmergencyMessages = (Map<Double,EmergencyMessage>)data;
 
@@ -501,7 +608,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			List<Id<Person>> personsInZones = new ArrayList<>();
 
 			for (String zoneId : msg.getBroadcastZones().keySet()) {
-				int personsMatched = 0;
 				Double[][] pairs = msg.getBroadcastZones().get(zoneId);
 				List<Coord> coords = new ArrayList<>() ;
 				for (Double[] pair : pairs) {
@@ -510,27 +616,35 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				// Create a polygon for this zone
 				Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
 				// And find everyone inside it
-				for(Id<Person> personId : scenario.getPopulation().getPersons().keySet()) {
-					final Id<Link> linkId = this.getMobsimDataProvider().getAgent(personId).getCurrentLinkId();
-					final Link link = scenario.getNetwork().getLinks().get(linkId);
-					Point fromPoint = GeometryUtils.createGeotoolsPoint(link.getFromNode().getCoord());
-					if (polygon.contains(fromPoint)) { // coming from polygon area
-						// this agent is in (or has potentially just exited) the messaging area
-						personsMatched++;
-						personsInZones.add(personId);
-					}
-				}
-				log.info("For zone " + zoneId + ", found "+personsMatched+" persons currently within it");
+				List<Id<Person>> personsMatched = getPersonsWithin(scenario, polygon);
+				personsInZones.addAll(personsMatched);
+				log.info("Zone {} has persons: {} ", zoneId, Arrays.toString(personsMatched.toArray()));
 			}
-			log.info("Message " + msg.getType() + " will be sent to " + personsInZones.size() + " persons in zones " + msg.getBroadcastZones().keySet());
+			log.info("Message " + msg.getType() + " will be sent to total " + personsInZones.size() + " persons in zones " + msg.getBroadcastZones().keySet());
 			// package the messages up to send to the BDI side
 			for (Id<Person> personId : personsInZones) {
 				PAAgent agent = this.getAgentManager().getAgent(personId.toString());
-				agent.getPerceptContainer().put(PerceptList.EMERGENCY_MESSAGE, msg.getType());
+				if (agent != null) { // only do this if this is a BDI-like agent
+					agent.getPerceptContainer().put(PerceptList.EMERGENCY_MESSAGE, msg.getType() + "," + msg.getContent());
+				}
 			}
 
 		}
 		return true ;
+	}
+
+	private List<Id<Person>> getPersonsWithin(Scenario scenario, Geometry shape) {
+		List<Id<Person>> personsWithin = new ArrayList<>();
+		for(Id<Person> personId : scenario.getPopulation().getPersons().keySet()) {
+            final Id<Link> linkId = this.getMobsimDataProvider().getAgent(personId).getCurrentLinkId();
+            final Link link = scenario.getNetwork().getLinks().get(linkId);
+            Point fromPoint = GeometryUtils.createGeotoolsPoint(link.getFromNode().getCoord());
+            if (shape.contains(fromPoint)) { // coming from polygon area
+                // this agent is in (or has potentially just exited) the messaging area
+                personsWithin.add(personId);
+            }
+        }
+		return personsWithin;
 	}
 
 	private void addNetworkChangeEvent(double speedInMpS, Link link, double startTime) {
@@ -553,50 +667,36 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		int hours = Integer.parseInt(startHHMM.substring(0, 2));
 		int minutes = Integer.parseInt(startHHMM.substring(2, 4));
 		double startTime = hours * 3600 + minutes * 60;
-		log.info("orig={}, hours={}, min={}, sTime={}", startHHMM, hours, minutes, startTime);
+		log.debug("orig={}, hours={}, min={}, sTime={}", startHHMM, hours, minutes, startTime);
 		return startTime;
 	}
 	
-	private static boolean processFireData(Object data, double now, Map<Id<Link>, Double> penaltyFactorsOfLinks,
+	private boolean processFireData(Object data, double now, Map<Id<Link>, Double> penaltyFactorsOfLinks,
 										   Scenario scenario, Map<Id<Link>, Double> penaltyFactorsOfLinksForEmergencyVehicles,
 										   FireWriter fireWriter) {
-		// Is this called in every time step, or just every 5 min or so?  kai, dec'17
 
-		// Normally only one polygon per time step.  Might want to test for this, and get rid of multi-polygon code
-		// below.  On other hand, probably does not matter much.  kai, dec'17
+		log.info("receiving fire data at time={}", now);
+		log.info( "{}{}", new Gson().toJson(data).substring(0,Math.min(new Gson().toJson(data).length(),200)),
+				"... use DEBUG to see full coordinates list") ;
+		log.debug( "{}", new Gson().toJson(data)) ;
 
-		log.warn("receiving fire data at time={}", now/3600. ) ;
+		Geometry fire = getGeometry((Map<Double, Double[][]>) data, scenario);
 
-		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(
-				TransformationFactory.WGS84, scenario.getConfig().global().getCoordinateSystem());
-
-		final String json = new Gson().toJson(data);
-		log.debug(json);
-
-		//			GeoJSONReader reader = new GeoJSONReader();
-		//			Geometry geometry = reader.read(json);
-		// unfortunately does not work since the incoming data is not typed accordingly. kai, dec'17
-
-		Map<Double, Double[][]> map = (Map<Double, Double[][]>) data;
-		// the map key is time; we just take the superset of all polygons
-		Geometry fire = null ;
-		for ( Double[][] pairs : map.values() ) {
-			List<Coord> coords = new ArrayList<>() ;
-			for (Double[] pair : pairs) {
-				coords.add(transform.transform(new Coord(pair[0], pair[1])));
-			}
-			Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
-			if ( fire==null ) {
-				fire = polygon ;
-			} else {
-				fire = fire.union(polygon);
+		{
+			Geometry buffer = fire.buffer(optMaxDistanceForFireVisual);
+			List<Id<Person>> personsMatched = getPersonsWithin(scenario, buffer);
+			log.info("Fire seen by {} persons: {} ", personsMatched.size(), Arrays.toString(personsMatched.toArray()));
+			// package the messages up to send to the BDI side
+			for (Id<Person> personId : personsMatched) {
+				PAAgent agent = this.getAgentManager().getAgent(personId.toString());
+				if (agent != null) { // only do this if this is a BDI-like agent
+					agent.getPerceptContainer().put(PerceptList.FIELD_OF_VIEW, PerceptList.SIGHTED_FIRE);
+				}
 			}
 		}
-
 //		https://stackoverflow.com/questions/38404095/how-to-calculate-the-distance-in-meters-between-a-geographic-point-and-a-given-p
 		{
-			// FIXME: Using a hardwired 10km buffer for vehicles; move to config
-			final double bufferWidth = 10000.;
+			final double bufferWidth = optFireAvoidanceBufferForVehicles;
 			Geometry buffer = fire.buffer(bufferWidth);
 			penaltyFactorsOfLinks.clear();
 //		Utils.penaltyMethod1(fire, buffer, penaltyFactorsOfLinks, scenario );
@@ -606,8 +706,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			// seems sufficient.  kai, jan'18
 		}
 		{
-			// FIXME: Using a hardwired 1km buffer for emergency services; move to config
-			final double bufferWidth = 1000. ;
+			final double bufferWidth = optFireAvoidanceBufferForEmergencyVehicles;
 			Geometry buffer = fire.buffer(bufferWidth);
 			penaltyFactorsOfLinksForEmergencyVehicles.clear();
 			Utils.penaltyMethod2(fire, buffer, bufferWidth, penaltyFactorsOfLinksForEmergencyVehicles, scenario);
@@ -615,6 +714,28 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		fireWriter.write( now, fire);
 		return true;
+	}
+
+	private Geometry getGeometry(Map<Double, Double[][]> data, Scenario scenario) {
+		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(
+				TransformationFactory.WGS84, scenario.getConfig().global().getCoordinateSystem());
+
+		Map<Double, Double[][]> map = data;
+		// the map key is time; we just take the superset of all polygons
+		Geometry shape = null ;
+		for ( Double[][] pairs : map.values() ) {
+			List<Coord> coords = new ArrayList<>() ;
+			for (Double[] pair : pairs) {
+				coords.add(transform.transform(new Coord(pair[0], pair[1])));
+			}
+			Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
+			if ( shape==null ) {
+				shape = polygon ;
+			} else {
+				shape = shape.union(polygon);
+			}
+		}
+		return shape;
 	}
 
 	public final double getTime() {
@@ -679,4 +800,15 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		return config;
 	}
 
+	public double getOptCongestionEvaluationInterval() {
+		return optCongestionEvaluationInterval;
+	}
+
+	public double getOptCongestionToleranceThreshold() {
+		return optCongestionToleranceThreshold;
+	}
+
+	public double getOptCongestionReactionProbability() {
+		return optCongestionReactionProbability;
+	}
 }

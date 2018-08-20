@@ -8,3 +8,6 @@ Rscript $DIR/plan-algorithm.R \
   $SCENARIO/numbers.csv \
   $SCENARIO/../Locations.csv \
   $SCENARIO/plans.xml
+
+unzip matsim*
+java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml
