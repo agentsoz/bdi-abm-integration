@@ -23,7 +23,7 @@ script:
 # -Dmaven.test.redirectTestOutputToFile # otherwise nearly impossible to debug
 env:
   global:
-    - MAVEN_OPTS="-Xmx4g"
+    - MAVEN_OPTS="-Xmx4g -Xms4g"
 cache:
   directories:
   - $HOME/.m2
