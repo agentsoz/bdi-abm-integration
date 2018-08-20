@@ -531,8 +531,10 @@ read_locations_from_csv<-function(locations_csv_file)
   xcoord_title = "xcoord"
   ycoord_title = "ycoord"
   allocation_title="Count"
+  address_title="EZI_ADDRES"
+  locality_title="LOCALITY_N"
   locs<-read.csv(locations_csv_file)
-  locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title)]
+  locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title,address_title,locality_title)]
   return(locations)
 }
 
@@ -559,6 +561,7 @@ main<-function ()
 
   input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
   locations_csv<-read_locations_from_csv(args[4])
+  
   PLANS<-list()
   AGENTS<-list()
   
