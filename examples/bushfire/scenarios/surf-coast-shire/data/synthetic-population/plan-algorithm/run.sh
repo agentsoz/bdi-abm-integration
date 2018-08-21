@@ -9,5 +9,15 @@ Rscript $DIR/plan-algorithm.R \
   $SCENARIO/../Locations.csv \
   $SCENARIO/plans.xml
 
-unzip matsim*
-java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml
+# Call the attribute generator with required parameters
+
+Rscript $DIR/Attributes.R \
+  $SCENARIO/numbers.csv \
+  $SCENARIO/dependents.csv \
+  $SCENARIO/thresholds.csv \
+  $SCENARIO/stay.csv \
+  $SCENARIO/plans.xml \
+  $SCENARIO/plans.xml
+
+# unzip matsim*
+# java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml

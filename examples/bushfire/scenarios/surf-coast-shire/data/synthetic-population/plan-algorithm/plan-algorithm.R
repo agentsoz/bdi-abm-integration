@@ -1,3 +1,6 @@
+
+options(stringsAsFactors = F)
+
 derive_start_time <- function (n_activity,durations)
 {
   activity_name<-rownames(n_activity)[1]
@@ -223,7 +226,7 @@ allocation_checker<-function(activity_locations,number_of_agents,subgroup)
   return(activity_locations)
 }
 
-plan_locations<-function (plan_times,activity_locations)
+plan_locations<-function (plan_times,activity_locations,locality_distances)
 {
   PLANS<-plan_times  
   for (h in 1:length(PLANS))
@@ -231,39 +234,58 @@ plan_locations<-function (plan_times,activity_locations)
     plan<-PLANS[[h]]  
     
     #choose home location
-    valid<-activity_locations[[1]][activity_locations[[1]][2]>0,c(1,3,4)]
+    valid<-activity_locations[[1]][activity_locations[[1]][2]>0,]
     choice<-sample(nrow(valid),1)
     home<-valid[choice,]
     #change allocation for that home
     activity_locations[[1]][rownames(home),][2]=activity_locations[[1]][rownames(home),][2]-1
     
+    
     #add home to plan
     plan$ycoord=unlist(plan$ycoord)
-    plan$xcoord=matrix(home[2],nrow(plan))
-    plan$ycoord=matrix(home[3],nrow(plan))
+    plan$xcoord=matrix(home[3],nrow(plan))
+    plan$ycoord=matrix(home[4],nrow(plan))
     plan$xcoord=unlist(plan$xcoord)
     
-    ##find appropriate location for other activities (using probability based on 1/distance^2)
+    
+    
+    ##find appropriate location for other activities
+    #home[]<-lapply(home,as.character)
+    locality<-unlist(as.vector(home[6]))
+    
+   
+    
     for (i in 1:nrow(plan))
     {
       activity<-plan[i,2]
       if (activity!="home")
       {
-        #find Euclidean distance between home and potential destinations  
-        distances=activity_locations[[activity]][,3:4]-unlist(matrix(home[2:3],nrow(activity_locations[[activity]]),2,byrow = T))
-        distances=distances^2
-        distances=sqrt(rowSums(distances))
-        distances=distances[distances!=0] #remove home from activity list if it is there
-        #choose based on inverse square law ##ASSUMPTION
+        # 
+        # ## OLD METHOD (using probability based on 1/distance^2)
+        # #find Euclidean distance between home and potential destinations  
+        # distances=activity_locations[[activity]][,3:4]-unlist(matrix(home[2:3],nrow(activity_locations[[activity]]),2,byrow = T))
+        # distances=distances^2
+        # distances=sqrt(rowSums(distances))
+        # distances=distances[distances!=0] #remove home from activity list if it is there
+        # #choose based on inverse square law ##ASSUMPTION
+        # 
+        # place=sample(distances,1,prob = 1/(distances^2))
+        distances<-locality_distances[locality,names(locality_distances[locality,]) %in% unique(activity_locations[[activity]][[6]])]
         
-        place=sample(distances,1,prob = 1/(distances^2))
-        place=activity_locations[[activity]][which(rownames(activity_locations[[activity]])==names(place)),]
+        #set relative likelihood of staying in locality (ASSUMPTION) -- this gives approx 2/3 chance that will stay in locale
+        if(locality %in% names(distances)) {distances[locality]<-1000/(2*sum (1000/distances[names(distances)!=locality]))}
+        
+        choose_locality=sample(distances,1,prob = 1000/(distances))
+        locality=names(choose_locality)
+        choose=sample(nrow(activity_locations[[activity]][activity_locations[[activity]][[6]]==locality,]),1)
+        place=activity_locations[[activity]][activity_locations[[activity]][[6]]==locality,][choose,]
         plan[i,4:5]=place[3:4]
       }
     }
     PLANS[[h]]<-plan
+    pass_plans<-list(PLANS=PLANS,updated_activity_locations=rownames(activity_locations[[1]][activity_locations[[1]][[2]]==0,]))
   }
-  return(PLANS)
+  return(pass_plans)
 }
 
 type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_names,type)
@@ -295,11 +317,12 @@ type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_n
   probability_matrix<-prob_matrix(n_activities = n_activities,durations = durations,repeating = repeating,type = type)
   plan_times_type<-plan_times(number_of_agents = number_of_agents,probability_matrix = probability_matrix,durations = durations,repeating)
   
-  
-  activity_locations<-location_map(locations_from_csv =locations_from_csv,location_names=location_names,subgroup=type)
+
+  activity_locations<-location_map(locations_from_csv =locations_from_csv[[1]],location_names=location_names,subgroup=type)
   activity_locations<-allocation_checker(activity_locations,number_of_agents,subgroup = type)
-  PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations)  
-  output<-list(Agents=plan_times_type$Agents,Plans=PLANS)
+  PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations,locality_distances=locations_from_csv[[2]])  
+  output<-list(Agents=plan_times_type$Agents,Plans=PLANS$PLANS,updated_activity_locations=PLANS$updated_activity_locations)
+  
   return(output)
 }
 
@@ -340,7 +363,8 @@ write_xml<-function (PLANS,output_location)
     for (i in 1:length(PLANS[[Type]]))
     {
       plan<-as.data.frame(PLANS[[Type]][i])
-      person<-paste0('  <person id= "',ct,'" >\n    <attributes>\n      <attribute name="BDIAgentType" class="java.lang.String" >io.github.agentsoz.ees.agents.',type,'</attribute>\n    </attributes>\n    <plan selected="yes">\n      ')
+       person<-paste0('  <person id= "',ct,'" >\n    <plan selected="yes">\n      ')
+      
       for (j in 1:nrow(plan))
       {
         if (j<nrow(plan))
@@ -533,9 +557,24 @@ read_locations_from_csv<-function(locations_csv_file)
   allocation_title="Count"
   address_title="EZI_ADDRES"
   locality_title="LOCALITY_N"
-  locs<-read.csv(locations_csv_file)
+  base_node_id="GPO"
+  
+  #read csv
+  locs<-read.csv(locations_csv_file,stringsAsFactors = F)
+  #get only locations with positive allocations
+  locs<-locs[locs[[allocation_title]]>0,]
+  #reduce to necessary information
   locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title,address_title,locality_title)]
-  return(locations)
+  #distance matrix for all localities
+   
+  d=as.matrix(dist(locations[locations[[location_type_title]]==base_node_id,3:4]))
+  locales<-locations[rownames(d),][[locality_title]]
+  rownames(d)<-locales
+  colnames(d)<-locales
+
+  
+  LOCATIONS<-list(locations=locations,distances=d)
+  return(LOCATIONS)
 }
 
 inputs<-function (distributions_file,locations_file,numbers_file)
@@ -561,15 +600,16 @@ main<-function ()
 
   input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
   locations_csv<-read_locations_from_csv(args[4])
-  
   PLANS<-list()
   AGENTS<-list()
-  
+   
   for (Type in names(input$numbers))
   {
     run<-type_plan(n_activities = input$distributions[[Type]],number_of_agents =input$numbers[Type],locations_from_csv = locations_csv,location_names = input$locations[[Type]],type = Type)
     PLANS[[Type]]<-run$Plans
     AGENTS[[Type]]<-run$Agents
+    locations_csv$locations[run$updated_activity_locations,][[2]]<- locations_csv$locations[run$updated_activity_locations,][[2]]-1
+    
   }
   
   
