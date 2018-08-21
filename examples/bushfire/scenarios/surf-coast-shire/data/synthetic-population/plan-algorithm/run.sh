@@ -19,5 +19,7 @@ Rscript $DIR/Attributes.R \
   $SCENARIO/plans.xml \
   $SCENARIO/plans.xml
 
-# unzip matsim*
-# java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml
+rm -rf ouput/
+unzip matsim*
+java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml
+rm -r matsim-0.9.0/
