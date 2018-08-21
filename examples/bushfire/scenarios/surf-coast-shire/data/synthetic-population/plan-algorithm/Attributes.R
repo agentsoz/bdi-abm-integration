@@ -130,8 +130,8 @@ while (i<length(broke))
           if (agent$dep==1) #HACKYFIX
           {
             home=strsplit(broke[i+2],"\"",fixed=T)
-            depx=as.numeric(home[[1]][4])+(-1)*1*runif(1)
-            depy=as.numeric(home[[1]][6])+(1)*1*runif(1)
+            depx=as.numeric(home[[1]][4])+(-1)*20*runif(1)
+            depy=as.numeric(home[[1]][6])+(1)*20*runif(1)
             dep=paste0(depx,",",depy)
           }
           else
