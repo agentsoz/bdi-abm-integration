@@ -177,22 +177,26 @@ set_attributes<- function(numbers,dependents,thresholds,stay)
     {
     dep=0
     if (runif(1)<dependents[subgroup])
-    {
-      dep=1
-      init_response<-sample(thresholds[[subgroup]][1]:3,1)
-    }
+      {
+        dep=1
+        init_response<-sample(thresholds[[subgroup]][1]:3,1)
+      }
     else
       {
         init_response<-sample(thresholds[[subgroup]][1]:thresholds[[subgroup]][2],1)
       }
-    if (stay[subgroup])
+    if (stay[subgroup]==T)
       {
-        final_response<-sample(init_response:thresholds[[subgroup]][2],1)
+        final_response<-max(init_response,sample(init_response:thresholds[[subgroup]][2],1))
       }
       else
       {
         final_response<-init_response
       }
+    if (final_response<init_response)
+    {
+      print("ERROR: final response is less than initial response")
+    }
     sub<-strsplit(subgroup," ") #HACKY FIX
     sub<-unlist(sub)
     if (length(sub)>1)
@@ -211,12 +215,7 @@ main<-function()
 {
   
   args<-commandArgs(trailingOnly = T)
-  # args<-c("typical-summer-weekday/numbers.csv",
-  # "typical-summer-weekday/dependents.csv",
-  # "typical-summer-weekday/thresholds.csv",
-  # "typical-summer-weekday/stay.csv",
-  # "typical-summer-weekday/plans.xml",
-  # "typical-summer-weekday/test.xml")
+ #args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/plans.xml","typical-summer-weekday/test.xml")
 
   numbers<-read_numbers(numbers_file = args[1])
   dependents<-read_dependents(dependents_file = args[2])
