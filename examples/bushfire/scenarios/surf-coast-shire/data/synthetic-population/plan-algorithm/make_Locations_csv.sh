@@ -1,5 +1,8 @@
-unzip Shpfile.zip
-INPUT=Shpfile/shpfile.shp
+
+SHP="SCS-Addresses-Subset"
+
+unzip $SHP.zip
+INPUT=$SHP'/'*.shp
 echo write each feature to text file
 ogrinfo -al $INPUT > shp_file.txt
 echo get coordinate for each instance
@@ -23,10 +26,22 @@ paste -d, test2.csv test.csv > Locations.csv
 echo remove junk
 rm shp_file.txt
 rm test*
-rm -r Shpfile/
+rm -r $SHP/
 echo Fix dodgy "Type" entries
+#set all residentials to 0
+sed -i '' 's/House,Residential,1/House,Residential,0/g' Locations.csv
+#Select relevant locales
+awk  'BEGIN {OFS=FS=","} {if ($12=="ANGLESEA"&&$17=="Residential") $18=1;print}' Locations.csv> test3.csv
+awk 'BEGIN {OFS=FS=","} {if ($12=="AIREYS INLET"&&$17=="Residential") $18=1;print}' test3.csv > test4.csv
+awk 'BEGIN {OFS=FS=","} {if ($12=="FAIRHAVEN"&&$17=="Residential") $18=1;print}' test4.csv> test3.csv
+awk 'BEGIN {OFS=FS=","} {if ($12=="JAN JUC"&&$17=="Residential") $18=1;print}' test3.csv> test4.csv
+awk 'BEGIN {OFS=FS=","} {if ($12=="TORQUAY"&&$17=="Residential") $18=1;print}' test4.csv> test3.csv
+awk 'BEGIN {OFS=FS=","} {if ($12=="LORNE"&&$17=="Residential") $18=1;print}' test3.csv> Locations.csv
 sed -i '' 's/House,,1/House,Residential,0/g' Locations.csv
 sed -i '' 's/Business district/Business District/g' Locations.csv
 echo Add "Out of Region" locations
-echo '"999998","0","0","0",COLAC,,,,,,,,,,,,Out of Region,3,726428.3187297015,5706161.232068798' >> Locations.csv
-echo '"999999","0","0","0",GEELONG,,,,,,,,,,,,Out of Region,3,832586.4912659925,5813503.546867735' >> Locations.csv
+echo '"999998","0","0","0",,,,,,,,COLAC,,,,,Out of Region,3,726428.3187297015,5706161.232068798' >> Locations.csv
+echo '"999999","0","0","0",,,,,,,,MELBOURNE,,,,,Out of Region,3,841924.6,5808324.9' >> Locations.csv
+echo appending GPO Locations
+cut -d',' -f12 Locations.csv |sort|uniq|tail -n +2|while read -r line; do grep ",$line," BaseLocations.csv >> Locations.csv; done
+rm test*

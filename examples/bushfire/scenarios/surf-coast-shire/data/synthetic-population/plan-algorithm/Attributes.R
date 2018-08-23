@@ -79,21 +79,18 @@ read_thresholds<- function(thresholds_file)
 read_locations_from_csv<-function(locations_csv_file)
 {
   ## If Locations csv file is altered (i.e. a new source shp file), the names of the relevant columns might need to be changed here
-  print("Reading locations from Locations.csv...")
-  location_type_title = "Type"
+  print("Reading locations from Refuges.csv...")
+  location_title = "Name"
   xcoord_title = "xcoord"
   ycoord_title = "ycoord"
-  allocation_title="Count"
-  address_title="EZI_ADDRES"
-  locality_title="LOCALITY_N"
-  base_node_id="GPO"
+  evac_priority_title="Popularity"
   
   #read csv
   locs<-read.csv(locations_csv_file,stringsAsFactors = F)
-  #get only locations with positive allocations
-  locs<-locs[locs[[allocation_title]]>0,]
   #reduce to necessary information
-  locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title,address_title,locality_title)]
+  locations<-locs[,c(location_title,xcoord_title,ycoord_title)]
+  locs<-locs[locs[,evac_priority_title]>3,]
+  evac_locations<-locs[,c(location_title,xcoord_title,ycoord_title)]
   # #distance matrix for all localities
   # 
   # d=as.matrix(dist(locations[locations[[location_type_title]]==base_node_id,3:4]))
@@ -102,14 +99,16 @@ read_locations_from_csv<-function(locations_csv_file)
   # colnames(d)<-locales
   # 
   # 
-  # LOCATIONS<-list(locations=locations,distances=d)
-  return(locations)
+   LOCATIONS<-list(locations=locations,evac_locations=evac_locations)
+  return(LOCATIONS)
 }
 
-write_attribute_plan<- function (plan_attributes,input_location,output_location)
+write_attribute_plan<- function (plan_attributes,locations,input_location,output_location)
 {
 
 base_plan<-read.delim(input_location, header = F,quote="")
+
+
 
 broke<-strsplit(base_plan$V1,"person",fixed=F)
 broke<-unlist(broke)
@@ -121,6 +120,7 @@ while (i<length(broke))
         
         broke[i]=paste0(" <person ",broke[i])
         broke[i-1]=""
+        home=strsplit(broke[i+2],"\"",fixed=T) 
         
         if (length(plan_attributes)>0)
         { 
@@ -129,23 +129,51 @@ while (i<length(broke))
           
           if (agent$dep==1) #HACKYFIX
           {
-            home=strsplit(broke[i+2],"\"",fixed=T)
+            
             depx=as.numeric(home[[1]][4])+(-1)*20*runif(1)
             depy=as.numeric(home[[1]][6])+(1)*20*runif(1)
             dep=paste0(depx,",",depy)
+            deph=1*agent$homer
           }
           else
           {
             dep=""
+            deph=0
           }
+          ghf=1*agent$homer-deph
+          
+          home_loc<-c(as.numeric(home[[1]][4]),as.numeric(home[[1]][6]))
+          #find Euclidean distance between home and potential destinations
+          distances=locations$locations[,2:3]-unlist(matrix(home_loc,nrow(locations$locations),2,byrow = T))
+          distances=distances^2
+          distances=sqrt(rowSums(distances))
+          distances=distances[distances!=0] #remove home from activity list if it is there
+          
+          #choose based on inverse square law ##ASSUMPTION
+          invac_p=sample(distances,1,prob = 1/(distances^2))
+          invac=locations$locations[which(distances==invac_p),]
+          
+          distances=locations$evac_locations[,2:3]-unlist(matrix(home_loc,nrow(locations$evac_locations),2,byrow = T))
+          distances=distances^2
+          distances=sqrt(rowSums(distances))
+          distances=distances[distances!=0] #remove home from activity list if it is there
+          evac_p=sample(distances,1,prob = distances^2)
+          evac=locations$evac_locations[which(distances==evac_p),][1,]
+          ## (Lines added in reverse order)
           broke=append(broke,"    </attributes>",i)
-          broke=append(broke,"      <attribute name=\"InvacLocationPreference\" class=\"java.lang.String\">Anglesea Shops,777471,5742412</attribute>",i)
-          broke=append(broke,"      <attribute name=\"EvacLocationPreference\" class=\"java.lang.String\">Torquay Foreshore,790771,5752462</attribute>",i)
+          var=paste0("      <attribute name=\"InvacLocationPreference\" class=\"java.lang.String\">",invac[1],",",invac[2],",",invac[3],"</attribute>")
+          broke=append(broke,var,i)
+          var=paste0("      <attribute name=\"EvacLocationPreference\" class=\"java.lang.String\">",evac[1],",",evac[2],",",evac[3],"</attribute>")
+          broke=append(broke,var,i)
+          var=paste0('      <attribute name="ProbHomeBeforeLeaving"   class="java.lang.Double" >',ghf,'</attribute>')
+          broke=append(broke,var,i)
+          var=paste0('      <attribute name="ProbHomeAfterDependents"   class="java.lang.Double" >',deph,'</attribute>')
+          broke=append(broke,var,i)  
           var=paste0("      <attribute name=\"FinalResponseThreshold\"   class=\"java.lang.Double\" >0.",agent$final_response,"</attribute>")
           broke=append(broke,var,i)
           var=paste0("      <attribute name=\"InitialResponseThreshold\" class=\"java.lang.Double\" >0.",agent$init_response,"</attribute>")
           broke=append(broke,var,i)
-          var=paste0("      <attribute name=\"hasDependentsAtLocation\" class=\"java.lang.String\" >",dep,"</attribute>")
+          var=paste0("      <attribute name=\"HasDependentsAtLocation\" class=\"java.lang.String\" >",dep,"</attribute>")
           broke=append(broke,var,i)
           var=paste0("      <attribute name=\"BDIAgentType\" class=\"java.lang.String\" >io.github.agentsoz.ees.agents.bushfire.",agent$subgroup,"</attribute>")
           broke=append(broke,var,i)
@@ -168,7 +196,7 @@ cat(head,file = plans, append=FALSE, sep = "\n")
 close(plans)
 }
 
-set_attributes<- function(numbers,dependents,thresholds,stay)
+set_attributes<- function(numbers,dependents,thresholds,stay,ghf)
 {
   AGENTS<-list()
   for (subgroup in names(numbers))
@@ -197,6 +225,15 @@ set_attributes<- function(numbers,dependents,thresholds,stay)
     {
       print("ERROR: final response is less than initial response")
     }
+    
+    if (runif(1)<ghf[subgroup])
+    {
+      homer<-1
+    }
+    else
+    {
+      homer<-0
+    }
     sub<-strsplit(subgroup," ") #HACKY FIX
     sub<-unlist(sub)
     if (length(sub)>1)
@@ -204,7 +241,7 @@ set_attributes<- function(numbers,dependents,thresholds,stay)
       sub<-paste0(sub[2],sub[1])  
     }
     
-    AGENTS[[paste0(subgroup,"_",i)]]<-list(subgroup=sub,dep=dep,init_response=init_response,final_response=final_response)
+    AGENTS[[paste0(subgroup,"_",i)]]<-list(subgroup=sub,dep=dep,init_response=init_response,final_response=final_response,homer=homer)
     }
     
   }
@@ -215,14 +252,16 @@ main<-function()
 {
   
   args<-commandArgs(trailingOnly = T)
- #args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/plans.xml","typical-summer-weekday/test.xml")
+  #args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/prob_go_home.csv","typical-summer-weekday/test.xml","typical-summer-weekday/test.xml","Refuges.csv")
 
   numbers<-read_numbers(numbers_file = args[1])
   dependents<-read_dependents(dependents_file = args[2])
   thresholds<-read_thresholds(thresholds_file = args[3])
   stay<-read_dependents(dependents_file = args[4])
-  plan_attributes<-set_attributes(numbers,dependents,thresholds,stay)
+  go_home_prob<-read_numbers(numbers_file = args[5])
+  locations<-read_locations_from_csv(locations_csv_file = args[8])
+  plan_attributes<-set_attributes(numbers,dependents,thresholds,stay,go_home_prob)
   print("Appending BDI attributes to agents...")
-  write_attribute_plan(plan_attributes,input_location = args[5],output_location = args[6])
+  write_attribute_plan(plan_attributes,locations=locations,input_location = args[6],output_location = args[7])
 }
 main()
