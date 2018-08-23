@@ -16,8 +16,10 @@ Rscript $DIR/Attributes.R \
   $SCENARIO/dependents.csv \
   $SCENARIO/thresholds.csv \
   $SCENARIO/stay.csv \
+  $SCENARIO/prob_go_home.csv \
   $SCENARIO/plans.xml \
-  $SCENARIO/plans.xml
+  $SCENARIO/plans.xml \
+  $SCENARIO/../Refuges.csv
 
 rm -rf output/
 # unzip matsim*
