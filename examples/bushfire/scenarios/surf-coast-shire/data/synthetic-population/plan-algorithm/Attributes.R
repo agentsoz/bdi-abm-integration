@@ -141,6 +141,10 @@ while (i<length(broke))
             deph=0
           }
           ghf=1*agent$homer-deph
+          #convert to boolean
+          boolean<-c("false","true")
+          deph=boolean[deph+1]
+          ghf=boolean[ghf+1]
           
           home_loc<-c(as.numeric(home[[1]][4]),as.numeric(home[[1]][6]))
           #find Euclidean distance between home and potential destinations
@@ -160,24 +164,24 @@ while (i<length(broke))
           evac_p=sample(distances,1,prob = distances^2)
           evac=locations$evac_locations[which(distances==evac_p),][1,]
           ## (Lines added in reverse order)
-          broke=append(broke,"    </attributes>",i)
-          var=paste0("      <attribute name=\"InvacLocationPreference\" class=\"java.lang.String\">",invac[1],",",invac[2],",",invac[3],"</attribute>")
+          broke=append(broke,'    </attributes>',i)
+          var=paste0('      <attribute name="InvacLocationPreference" class="java.lang.String">',invac[1],',',invac[2],',',invac[3],'</attribute>')
           broke=append(broke,var,i)
-          var=paste0("      <attribute name=\"EvacLocationPreference\" class=\"java.lang.String\">",evac[1],",",evac[2],",",evac[3],"</attribute>")
+          var=paste0('      <attribute name="EvacLocationPreference" class="java.lang.String">',evac[1],',',evac[2],',',evac[3],'</attribute>')
           broke=append(broke,var,i)
-          var=paste0('      <attribute name="ProbHomeBeforeLeaving"   class="java.lang.Double" >',ghf,'</attribute>')
+          var=paste0('      <attribute name="WillGoHomeBeforeLeaving" class="java.lang.Boolean" >',ghf,'</attribute>')
           broke=append(broke,var,i)
-          var=paste0('      <attribute name="ProbHomeAfterDependents"   class="java.lang.Double" >',deph,'</attribute>')
+          var=paste0('      <attribute name="WillGoHomeAfterVisitingDependents" class="java.lang.Boolean" >',deph,'</attribute>')
           broke=append(broke,var,i)  
-          var=paste0("      <attribute name=\"FinalResponseThreshold\"   class=\"java.lang.Double\" >0.",agent$final_response,"</attribute>")
+          var=paste0('      <attribute name="FinalResponseThreshold"   class="java.lang.Double" >0.',agent$final_response,'</attribute>')
           broke=append(broke,var,i)
-          var=paste0("      <attribute name=\"InitialResponseThreshold\" class=\"java.lang.Double\" >0.",agent$init_response,"</attribute>")
+          var=paste0('      <attribute name="InitialResponseThreshold" class="java.lang.Double" >0.',agent$init_response,'</attribute>')
           broke=append(broke,var,i)
-          var=paste0("      <attribute name=\"HasDependentsAtLocation\" class=\"java.lang.String\" >",dep,"</attribute>")
+          var=paste0('      <attribute name="HasDependentsAtLocation" class="java.lang.String" >',dep,'</attribute>')
           broke=append(broke,var,i)
-          var=paste0("      <attribute name=\"BDIAgentType\" class=\"java.lang.String\" >io.github.agentsoz.ees.agents.bushfire.",agent$subgroup,"</attribute>")
+          var=paste0('      <attribute name="BDIAgentType" class="java.lang.String" >io.github.agentsoz.ees.agents.bushfire.',agent$subgroup,'</attribute>')
           broke=append(broke,var,i)
-          broke=append(broke,"    <attributes>",i)
+          broke=append(broke,'    <attributes>',i)
           plan_attributes[[1]]<-NULL
         }
       }

@@ -330,7 +330,7 @@ write_log<-function (AGENTS,DISTRIBUTIONS)
 {
   print("Writing to log file...")
   log<-file("log.txt", open = "w+")
-  cat("DIFFERENCE TABLES:\nThese tables show the percentage error at each 2 hour time block.",
+  cat("DIFFERENCE TABLES:\nThese tables show the percentage error from the inputted distribuations at each 2 hour time block (ignore for small populations).",
       file = log, append=FALSE, sep = "\n")
   for (Type in names(AGENTS))
   {
