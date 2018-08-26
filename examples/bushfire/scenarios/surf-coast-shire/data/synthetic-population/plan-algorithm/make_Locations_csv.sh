@@ -40,7 +40,8 @@ awk 'BEGIN {OFS=FS=","} {if ($12=="LORNE"&&$17=="Residential") $18=1;print}' tes
 sed -i '' 's/House,,1/House,Residential,0/g' Locations.csv
 sed -i '' 's/Business district/Business District/g' Locations.csv
 echo Add "Out of Region" locations
-echo '"999998","0","0","0",,,,,,,,APOLLO BAY,,,,,Out of Region,20,726428.3187297015,5706161.232068798' >> Locations.csv
+echo '"999997","0","0","0",,,,,,,,APOLLO BAY,,,,,Out of Region,20,726428.3187297015,5706161.232068798' >> Locations.csv
+echo '"999998","0","0","0",,,,,,,,COLAC,,,,,Out of Region,20,725868.5478,5753291.5198' >> Locations.csv
 echo '"999999","0","0","0",,,,,,,,MELBOURNE,,,,,Out of Region,80,841924.6,5808324.9' >> Locations.csv
 echo appending GPO Locations
 cut -d',' -f12 Locations.csv |sort|uniq|tail -n +2|while read -r line; do grep ",$line," BaseLocations.csv >> Locations.csv; done

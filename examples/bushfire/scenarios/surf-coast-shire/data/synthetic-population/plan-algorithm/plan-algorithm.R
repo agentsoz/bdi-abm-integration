@@ -285,6 +285,7 @@ plan_locations<-function (plan_times,activity_locations,locality_distances)
     PLANS[[h]]<-plan
     
   }
+  #potential problem down the track with large allocations shared across multiple subgroups  
   pass_plans<-list(PLANS=PLANS,updated_activity_locations=rownames(activity_locations[[1]][activity_locations[[1]][[2]]==0,]))
   return(pass_plans)
 }
@@ -592,12 +593,8 @@ inputs<-function (distributions_file,locations_file,numbers_file)
 
 main<-function ()
 {
-  # args<-commandArgs(trailingOnly = T)
-  args<-c("typical-summer-weekday/distributions.csv",
-  "typical-summer-weekday/location_maps.csv",
-  "typical-summer-weekday/numbers.csv",
-  "Locations.csv",
-  "typical-summer-weekday/plans.xml")
+   args<-commandArgs(trailingOnly = T)
+  #args<-c("typical-summer-weekday/distributions.csv","typical-summer-weekday/location_maps.csv","typical-summer-weekday/numbers.csv","Locations.csv","typical-summer-weekday/plans.xml")
 
   input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
   locations_csv<-read_locations_from_csv(args[4])
