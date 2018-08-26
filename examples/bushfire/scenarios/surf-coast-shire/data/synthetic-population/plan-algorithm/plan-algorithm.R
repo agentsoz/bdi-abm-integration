@@ -283,8 +283,9 @@ plan_locations<-function (plan_times,activity_locations,locality_distances)
       }
     }
     PLANS[[h]]<-plan
-    pass_plans<-list(PLANS=PLANS,updated_activity_locations=rownames(activity_locations[[1]][activity_locations[[1]][[2]]==0,]))
+    
   }
+  pass_plans<-list(PLANS=PLANS,updated_activity_locations=rownames(activity_locations[[1]][activity_locations[[1]][[2]]==0,]))
   return(pass_plans)
 }
 
