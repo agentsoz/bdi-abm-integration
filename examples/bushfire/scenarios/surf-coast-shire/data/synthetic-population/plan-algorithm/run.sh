@@ -21,7 +21,7 @@ Rscript $DIR/Attributes.R \
   $SCENARIO/plans.xml \
   $SCENARIO/../Refuges.csv
 
-rm -rf output/
-# unzip matsim*
-# java -cp matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler config.xml
-# rm -r matsim-0.9.0/
+# rm -rf matsim/output/
+# unzip matsim/matsim*
+# java -cp matsim/matsim-0.9.0/matsim-0.9.0.jar org.matsim.run.Controler matsim/config.xml
+# rm -r matsim/matsim-0.9.0/
