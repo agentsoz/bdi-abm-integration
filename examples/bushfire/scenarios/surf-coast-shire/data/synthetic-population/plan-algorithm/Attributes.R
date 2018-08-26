@@ -151,7 +151,7 @@ while (i<length(broke))
           
           #choose based on inverse square law ##ASSUMPTION
           invac_p=sample(distances,1,prob = 1/(distances^2))
-          invac=locations$locations[which(distances==invac_p),]
+          invac=locations$locations[which(distances==invac_p),][1,]
           
           distances=locations$evac_locations[,2:3]-unlist(matrix(home_loc,nrow(locations$evac_locations),2,byrow = T))
           distances=distances^2
