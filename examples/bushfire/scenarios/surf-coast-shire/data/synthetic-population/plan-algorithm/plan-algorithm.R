@@ -600,7 +600,7 @@ main<-function ()
   locations_csv<-read_locations_from_csv(args[4])
   PLANS<-list()
   AGENTS<-list()
-   
+  
   for (Type in names(input$numbers))
   {
     run<-type_plan(n_activities = input$distributions[[Type]],number_of_agents =input$numbers[Type],locations_from_csv = locations_csv,location_names = input$locations[[Type]],type = Type)

@@ -113,12 +113,14 @@ base_plan<-read.delim(input_location, header = F,quote="")
 broke<-strsplit(base_plan$V1,"person",fixed=F)
 broke<-unlist(broke)
 i=1
+plans<-file(output_location, open = "w+")
+
 while (i<length(broke))
 {
-  if (grepl("id=",broke[i],fixed=T))
+if (grepl("id=",broke[i],fixed=T))
       {
         print(broke[i])
-        broke[i]=paste0(" <person ",broke[i])
+        attrib=paste0(" <person",broke[i],'\n')
         broke[i-1]=""
         home=strsplit(broke[i+2],"\"",fixed=T) 
         
@@ -163,40 +165,35 @@ while (i<length(broke))
           distances=distances[distances!=0] #remove home from activity list if it is there
           evac_p=sample(distances,1,prob = distances^2)
           evac=locations$evac_locations[which(distances==evac_p),][1,]
-          ## (Lines added in reverse order)
-          broke=append(broke,'    </attributes>',i)
-          var=paste0('      <attribute name="InvacLocationPreference" class="java.lang.String">',invac[1],',',invac[2],',',invac[3],'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="EvacLocationPreference" class="java.lang.String">',evac[1],',',evac[2],',',evac[3],'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="WillGoHomeBeforeLeaving" class="java.lang.Boolean" >',ghf,'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="WillGoHomeAfterVisitingDependents" class="java.lang.Boolean" >',deph,'</attribute>')
-          broke=append(broke,var,i)  
-          var=paste0('      <attribute name="FinalResponseThreshold"   class="java.lang.Double" >0.',agent$final_response,'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="InitialResponseThreshold" class="java.lang.Double" >0.',agent$init_response,'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="HasDependentsAtLocation" class="java.lang.String" >',dep,'</attribute>')
-          broke=append(broke,var,i)
-          var=paste0('      <attribute name="BDIAgentType" class="java.lang.String" >io.github.agentsoz.ees.agents.bushfire.',agent$subgroup,'</attribute>')
-          broke=append(broke,var,i)
-          broke=append(broke,'    <attributes>',i)
+         
+          attrib=paste0(attrib,'    <attributes>\n')
+          attrib=paste0(attrib,'      <attribute name="BDIAgentType" class="java.lang.String" >io.github.agentsoz.ees.agents.bushfire.',agent$subgroup,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="HasDependentsAtLocation" class="java.lang.String" >',dep,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="InitialResponseThreshold" class="java.lang.Double" >0.',agent$init_response,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="FinalResponseThreshold"   class="java.lang.Double" >0.',agent$final_response,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="WillGoHomeAfterVisitingDependents" class="java.lang.Boolean" >',deph,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="WillGoHomeBeforeLeaving" class="java.lang.Boolean" >',ghf,'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="EvacLocationPreference" class="java.lang.String">',evac[1],',',evac[2],',',evac[3],'</attribute>\n')
+          attrib=paste0(attrib,'      <attribute name="InvacLocationPreference" class="java.lang.String">',invac[1],',',invac[2],',',invac[3],'</attribute>\n')
+          attrib=paste0(attrib,'    </attributes>')
+
+          #broke=append(broke,attrib,i)
+          #broke=c(broke[1:i],attrib,broke[i+1:length(broke)])
           plan_attributes[[1]]<-NULL
         }
       }
   else if (grepl("</",broke[i],fixed=T) & nchar(broke[i])==4 )
   {
-    broke[i]=paste0(broke[i],"person>")
+    attrib=paste0(broke[i],"person>")
     broke[i+1]=""
   }
-  
+  else 
+  {
+    attrib=paste0(broke[i])
+  }
+  cat(attrib,file = plans, append=, sep = "\n")
   i=i+1
 }
-
-plans<-file(output_location, open = "w+")
-head<-broke
-cat(head,file = plans, append=FALSE, sep = "\n")
 close(plans)
 }
 
@@ -254,8 +251,8 @@ set_attributes<- function(numbers,dependents,thresholds,stay,ghf)
 main<-function()
 {
   
-  #args<-commandArgs(trailingOnly = T)
-  args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/prob_go_home.csv","typical-summer-weekday/test.xml","typical-summer-weekday/test.xml","Refuges.csv")
+  args<-commandArgs(trailingOnly = T)
+  #args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/prob_go_home.csv","typical-summer-weekday/plans.xml","typical-summer-weekday/test.xml","Refuges.csv")
 
   numbers<-read_numbers(numbers_file = args[1])
   dependents<-read_dependents(dependents_file = args[2])
