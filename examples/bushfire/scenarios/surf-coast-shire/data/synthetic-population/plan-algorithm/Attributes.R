@@ -117,7 +117,7 @@ while (i<length(broke))
 {
   if (grepl("id=",broke[i],fixed=T))
       {
-        
+        print(broke[i])
         broke[i]=paste0(" <person ",broke[i])
         broke[i-1]=""
         home=strsplit(broke[i+2],"\"",fixed=T) 
@@ -247,7 +247,6 @@ set_attributes<- function(numbers,dependents,thresholds,stay,ghf)
     
     AGENTS[[paste0(subgroup,"_",i)]]<-list(subgroup=sub,dep=dep,init_response=init_response,final_response=final_response,homer=homer)
     }
-    
   }
  return (AGENTS) 
 }
@@ -255,8 +254,8 @@ set_attributes<- function(numbers,dependents,thresholds,stay,ghf)
 main<-function()
 {
   
-  args<-commandArgs(trailingOnly = T)
-  #args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/prob_go_home.csv","typical-summer-weekday/test.xml","typical-summer-weekday/test.xml","Refuges.csv")
+  #args<-commandArgs(trailingOnly = T)
+  args<-c("typical-summer-weekday/numbers.csv","typical-summer-weekday/dependents.csv","typical-summer-weekday/thresholds.csv","typical-summer-weekday/stay.csv","typical-summer-weekday/prob_go_home.csv","typical-summer-weekday/test.xml","typical-summer-weekday/test.xml","Refuges.csv")
 
   numbers<-read_numbers(numbers_file = args[1])
   dependents<-read_dependents(dependents_file = args[2])
