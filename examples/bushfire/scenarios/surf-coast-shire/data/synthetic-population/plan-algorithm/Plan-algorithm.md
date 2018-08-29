@@ -67,6 +67,8 @@ The purpose of the model is to allow users to specify the makeup of the populati
 
 1. Currently in the model *persons are synonomous with vehicles*. In other words, all vehicles accommodate a single person (the driver) and drivers are assummed to be co-located with their vehicles. For SCS, it *might be important to model persons walking to activities from their parked vehicles and back at the end of the activity*. This might be important for the `beach` activity in particular, where the time spent in walking from/to the parked vehicle might be significant; <mark>Discuss with working group</mark>.
 
+1. Departure times for activities are randomly distributed within the two hour time block they are allocated to. This ensures that that traffic is dispersed throughout the day, rather than in centralised pulses, but might not fully capture peak traffic events (e.g. main traffic influx clustered around 9am/5am for work). Could potentially tie departure to expected time to destination, but would need some form of routing. 
+
 1. Home locations are assigned randomly from the selected location options. Locations for each other activity are then selected probabilistically based on their Euclidean distance from the home node. This process could eventually be refined so that probabilities are established as an input for each location node, as per the [initial work done by Surf Cost Shire Council](https://github.com/agentsoz/bdi-abm-integration/blob/ees/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz).
 
 ## Model inputs
@@ -96,11 +98,11 @@ and the location mappings input for `resident` would be established by:
 
 
 ```
-## home,EvacZone
-## work,Business District,Caravan Park,Hotel,Golf Club
+## home,Residential,Isolated Property
+## work,Business District
 ## beach,Beach
 ## shops,Shops
-## other,University,Secondary,Tafe,Kindergarten,Primary
+## other,School
 ```
 
 ## Model outputs

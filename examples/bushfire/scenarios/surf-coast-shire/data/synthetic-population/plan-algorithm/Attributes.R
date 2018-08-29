@@ -115,13 +115,11 @@ broke<-unlist(broke)
 i=1
 plans<-file(output_location, open = "w+")
 
-while (i<length(broke))
+for (i in 1:length(broke))
 {
 if (grepl("id=",broke[i],fixed=T))
       {
-        print(broke[i])
         attrib=paste0(" <person",broke[i],'\n')
-        broke[i-1]=""
         home=strsplit(broke[i+2],"\"",fixed=T) 
         
         if (length(plan_attributes)>0)
@@ -187,12 +185,15 @@ if (grepl("id=",broke[i],fixed=T))
     attrib=paste0(broke[i],"person>")
     broke[i+1]=""
   }
+  else if(broke[i]=="  <")
+  {
+    attrib=""
+  }
   else 
   {
     attrib=paste0(broke[i])
   }
   cat(attrib,file = plans, append=, sep = "\n")
-  i=i+1
 }
 close(plans)
 }
