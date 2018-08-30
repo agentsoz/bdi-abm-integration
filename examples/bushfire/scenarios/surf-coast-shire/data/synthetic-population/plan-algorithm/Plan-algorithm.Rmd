@@ -108,7 +108,7 @@ gg
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
 source("plan-algorithm-functions.R")
-dist<-distributions("typical summer weekday/distributions.csv")
+dist<-distributions("typical-summer-weekday/distributions.csv")
 # show(dist[[1]])
 pseudo_csv<-sapply(1:nrow(dist[[1]]),function (x) as.vector(c(rownames(dist[[1]])[x],unlist(dist[[1]][x,]))))
 pseudo_csv<-t(pseudo_csv)
@@ -128,7 +128,7 @@ plotActivities("Resident", "Percentage", "Time of day", dist[[1]])
 and the location mappings input for `resident` would be established by:
 
 ```{r echo=FALSE, fig.width=5, fig.height=3}
-maps<-locations("typical summer weekday/location_maps.csv",names(dist))
+maps<-locations("typical-summer-weekday/location_maps.csv",names(dist))
 pseudo_csv<-sapply(1:length(maps[[1]]),function (x) as.vector(c(names(maps[[1]][x]),unlist(maps[[1]][x]))))
 pseudo_csv<-sapply(pseudo_csv,function (x) cat(x,sep = ",", fill = T))
 ```
