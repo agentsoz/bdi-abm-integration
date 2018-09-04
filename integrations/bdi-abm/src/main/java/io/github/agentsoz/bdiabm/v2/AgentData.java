@@ -1,10 +1,10 @@
-package io.github.agentsoz.dataInterface;
+package io.github.agentsoz.bdiabm.v2;
 
-/*
+/*-
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2015 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2018 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,14 +22,5 @@ package io.github.agentsoz.dataInterface;
  * #L%
  */
 
-
-public interface DataClient {
-   
-   /**
-    * Receives data of a given type
-    * @param time the time at which the data being received was produced
-    * @param dataType the type identifier for the data being received
-    * @param data the data being received
-    */
-   void receiveData(double time, String dataType, Object data);
+public class AgentData {
 }

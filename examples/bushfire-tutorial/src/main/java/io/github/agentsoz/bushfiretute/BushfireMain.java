@@ -116,7 +116,7 @@ public class BushfireMain {
 		}
 
 		// Create the data and time server
-		DataServer dataServer = DataServer.getServer("BushfireTutorial");
+		DataServer dataServer = DataServer.getInstance("BushfireTutorial");
 		dataServer.setTime(0.0);
 
 		// Create the BDI model

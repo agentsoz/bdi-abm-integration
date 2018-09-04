@@ -1,4 +1,4 @@
-package io.github.agentsoz.dataInterface;
+package io.github.agentsoz.bdiabm.v2;
 
 /*
  * #%L
@@ -22,14 +22,6 @@ package io.github.agentsoz.dataInterface;
  * #L%
  */
 
-
-public interface DataClient {
-   
-   /**
-    * Receives data of a given type
-    * @param time the time at which the data being received was produced
-    * @param dataType the type identifier for the data being received
-    * @param data the data being received
-    */
-   void receiveData(double time, String dataType, Object data);
+public interface AbmModel {
+	public void takeControl(AgentData agentData);
 }

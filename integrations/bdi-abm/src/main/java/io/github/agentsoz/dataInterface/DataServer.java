@@ -30,19 +30,16 @@ public class DataServer {
 
     private double time = 0.0;
     private double timeStep = 1.0;
-    private Map<String, List<DataClient>> subscriptions = new LinkedHashMap<String, List<DataClient>>();
-    private Map<String, List<DataSource>> sources = new LinkedHashMap<String, List<DataSource>>();
-    private SortedMap<Double, Map<String, List<DataSource>>> timedUpdates
-            = new ConcurrentSkipListMap<Double, Map<String, List<DataSource>>>();
-    private static Map<String, DataServer> servers = new LinkedHashMap<String, DataServer>();
+    private Map<String, List<DataClient>> subscriptions = new LinkedHashMap<>();
+    private SortedMap<Double, Map<String, List<DataSource>>> timedUpdates = new ConcurrentSkipListMap<>();
+    private static Map<String, DataServer> servers = new LinkedHashMap<>();
 
-    public DataServer(String name) {
-        servers.put(name, this);
+    private DataServer(String name) {
     }
 
-    public static DataServer getServer(String name) {
+    public static DataServer getInstance(String name) {
         if (!servers.containsKey(name)) {
-            new DataServer(name);
+            servers.put(name, new DataServer(name));
         }
         return servers.get(name);
     }
@@ -57,39 +54,9 @@ public class DataServer {
         if (subscriptions.containsKey(dataType)) {
             subscriptions.get(dataType).add(client);
         } else {
-            List<DataClient> subscribers = new ArrayList<DataClient>();
+            List<DataClient> subscribers = new ArrayList<>();
             subscribers.add(client);
             subscriptions.put(dataType, subscribers);
-        }
-    }
-
-    public void subscribe(DataClient client, String[] dataTypes) {
-        for (String dataType : dataTypes) {
-            subscribe(client, dataType);
-        }
-    }
-
-    public boolean setTimeStep(Double newTimeStep) {
-        if (newTimeStep < 0.0) {
-            return false;
-        }
-        timeStep = newTimeStep;
-        return true;
-    }
-
-    public double getTimeStep() {
-        return timeStep;
-    }
-
-    // register a source for passive (timed) data updates
-    // sources that actively publish data don't need to register
-    public void registerSource(String dataType, DataSource source) {
-        if (sources.containsKey(dataType)) {
-            sources.get(dataType).add(source);
-        } else {
-            List<DataSource> sourcesForType = new ArrayList<DataSource>();
-            sourcesForType.add(source);
-            sources.put(dataType, sourcesForType);
         }
     }
 
@@ -97,39 +64,26 @@ public class DataServer {
     // the data server will query this source at the specified time
     public void registerTimedUpdate(String dataType, DataSource source, double nextUpdate) {
         if (!timedUpdates.containsKey(nextUpdate)) {
-            timedUpdates.put(nextUpdate, new LinkedHashMap<String, List<DataSource>>());
+            timedUpdates.put(nextUpdate, new LinkedHashMap<>());
         }
         if (!timedUpdates.get(nextUpdate).containsKey(dataType)) {
-            timedUpdates.get(nextUpdate).put(dataType, new ArrayList<DataSource>());
+            timedUpdates.get(nextUpdate).put(dataType, new ArrayList<>());
         }
         timedUpdates.get(nextUpdate).get(dataType).add(source);
     }
 
     // when the data server's time moves forward, all data sources are polled for new updates
     // new updates are published immediately
-    void updateTimedSources() {
-        for (String dataType : sources.keySet()) {
-            for (DataSource source : sources.get(dataType)) {
-                Object data = source.getNewData(time, null);
-                if (data != null) {
-                    publish(dataType, data);
-                }
-            }
-        }
+    private void updateTimedSources() {
         // check for new timed updates; publish and retrieve any that are found
         while (!timedUpdates.isEmpty() && timedUpdates.firstKey() < time) {
-
             double t = timedUpdates.firstKey();
             Iterator<Entry<String, List<DataSource>>> i = timedUpdates.get(t).entrySet().iterator();
-
             while (i.hasNext()) {
-
                 Entry<String, List<DataSource>> sourcesForType = i.next();
                 String dataType = sourcesForType.getKey();
-
                 for (DataSource source : sourcesForType.getValue()) {
-
-                    Object data = source.getNewData(time, null);
+                    Object data = source.sendData(time, dataType);
                     if (data != null) {
                         publish(dataType, data);
                     }
@@ -140,61 +94,36 @@ public class DataServer {
     }
 
     public void stepTime() {
-        synchronized (sources) {
-            time += timeStep;
-            updateTimedSources();
-        }
-    }
-
-    // increase time by a given amount and poll for new timed updates
-    public boolean stepTime(double t) {
-        if (t <= 0.0) {
-            return false;
-        }
-        time += t;
+        time += timeStep;
         updateTimedSources();
-        return true;
     }
 
     // manually set the data server's time to a given value and poll for new timed updates
-    public boolean setTime(double t) {
-        if (t <= time) {
-            return false;
+    public void setTime(double t) {
+        if (t < 0) {
+            throw new RuntimeException("Attempt to set time to negative value ("+t+")");
         }
-
         time = t;
-        updateTimedSources();
-        return true;
     }
 
-    public boolean setTimeStep(double t) {
+    public void setTimeStep(double t) {
         if (t <= 0.0) {
-            return false;
+            throw new RuntimeException("Attempt to set time step to zero or less ("+t+")");
         }
         timeStep = t;
-        return true;
     }
 
     public double getTime() {
-        synchronized (sources) {
-            return time;
-        }
+        return time;
     }
 
     // send a new data update to all clients that have subscribed to the data type
-    public boolean publish(String dataType, Object data) {
+    public void publish(String dataType, Object data) {
         if (!subscriptions.containsKey(dataType)) {
-            return false;
+            return;
         }
-        log(dataType, data);
         for (DataClient dc : subscriptions.get(dataType)) {
-            dc.dataUpdate(time, dataType, data);
+            dc.receiveData(time, dataType, data);
         }
-        return true;
-    }
-
-    private void log(String dataType, Object data) {
-        //TODO it might be useful to log all message traffic for testing
-//	      System.out.println("dataServer: " + dataType);
     }
 }
