@@ -23,7 +23,7 @@ package io.github.agentsoz.dataInterface;
  */
 
 
-public interface DataClient {
+public interface DataClient<T> {
    
    /**
     * Receives data of a given type
@@ -31,5 +31,5 @@ public interface DataClient {
     * @param dataType the type identifier for the data being received
     * @param data the data being received
     */
-   void receiveData(double time, String dataType, Object data);
+   void receiveData(double time, String dataType, T data);
 }
