@@ -61,5 +61,12 @@ public final class PerceptList {
 	 * </ul>
 	 */
 	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to";
+
+	// Used to control the simulation run and data passing between BDI and ABM models
+	public static final String TAKE_CONTROL_BDI = "take_control_bdi";
+	public static final String TAKE_CONTROL_ABM = "take_control_abm";
+	public static final String AGENT_DATA_CONTAINER_FROM_BDI = "agent_data_container_from_bdi";
+	public static final String AGENT_DATA_CONTAINER_FROM_ABM = "agent_data_container_from_abm";
+
 }
 
