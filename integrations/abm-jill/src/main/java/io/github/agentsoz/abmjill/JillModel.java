@@ -52,6 +52,7 @@ public abstract class JillModel implements BDIServerInterface {
 	private QueryPerceptInterface queryInterface;
 
 	private static io.github.agentsoz.bdiabm.v2.AgentDataContainer adc; // !! Be warned, this is static
+	private Object sequenceLock;
 
 	public JillModel() {
 	}
@@ -191,6 +192,8 @@ public abstract class JillModel implements BDIServerInterface {
 				}
 			}
 		}
+		// Wait until idle
+		Main.waitUntilIdle();
 	}
 
 	@Override
@@ -294,4 +297,12 @@ public abstract class JillModel implements BDIServerInterface {
 		agentDataContainer.copy(nextContainer); // copies new actions
 		nextContainer.removeAll();
     }
+
+	public void useSequenceLock(Object sequenceLock) {
+		this.sequenceLock = sequenceLock;
+	}
+
+	protected Object getSequenceLock() {
+		return sequenceLock;
+	}
 }
