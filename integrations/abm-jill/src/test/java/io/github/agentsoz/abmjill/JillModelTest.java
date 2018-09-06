@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
@@ -69,6 +70,7 @@ public class JillModelTest {
 	}
 
 	@Test
+	@Ignore
 	public void testDurativeActions() {
 		// number of agents
 		final int nAgents = 3;
