@@ -25,9 +25,7 @@ package io.github.agentsoz.bdiabm.v2;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -54,6 +52,9 @@ public class AgentDataContainer {
     }
 
 
+    public Iterator<String> getAgentIdIterator() {
+        return agentsData.keySet().iterator();
+    }
     /**
      * Gets the requested action's content from the given agent's container.
      * @param agentId the agent's ID
@@ -122,7 +123,7 @@ public class AgentDataContainer {
     /**
      * Retrieves a copy of this agent's actions from the container
      * @param agentId the agent's ID
-     * @return
+     * @return map of actionId to {@link ActionContent}
      */
     public Map<String, ActionContent> getAllActionsCopy(String agentId) {
         final Map<String, ActionContent> content = new HashMap<>();
@@ -151,6 +152,15 @@ public class AgentDataContainer {
             }
         }
         return content;
+    }
+
+    public void clear() {
+        for (String agentId : locks.keySet()) {
+            synchronized (locks.get(agentId)) {
+                //agentsData.get(agentId).clear();
+                agentsData.remove(agentId);
+            }
+        }
     }
 
 
@@ -183,6 +193,11 @@ public class AgentDataContainer {
 
         void putPercept(String perceptId, PerceptContent content) {
             percepts.put(perceptId, content);
+        }
+
+        public void clear() {
+            actions.clear();
+            percepts.clear();
         }
     }
 
