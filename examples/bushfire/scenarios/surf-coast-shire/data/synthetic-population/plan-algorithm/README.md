@@ -1,11 +1,4 @@
----
-title: "Plans algorithm documentation"
-author: "Dhirendra Singh, Joel Robertson"
-date: "05/09/2018"
-output:
-  html_document:
-    keep_md: yes
----
+## Plan Algorithm Documentation
 
 [Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup due to the high number of visitors to townships around the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). On a given summer day for instance, Anglesea that has a [resident population around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045) can have as many as `15000` persons in the township.  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.
 
