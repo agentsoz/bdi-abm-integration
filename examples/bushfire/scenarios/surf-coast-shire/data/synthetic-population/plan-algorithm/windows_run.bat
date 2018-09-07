@@ -8,11 +8,12 @@ REM Call the plan generation script with the required parameters
   %SCENARIO%\distributions.csv ^
   %SCENARIO%\location_maps.csv ^
   %SCENARIO%\numbers.csv ^
+  %SCENARIO%\travel_factor.csv ^
   Locations.csv ^
   %SCENARIO%\plans.xml
 
 REM Call the attribute generator with required parameters
-%RLOC%\Rscript Attributes.R ^
+%RLOC%\Rscript BDI_attributes.R ^
   %SCENARIO%\numbers.csv ^
   %SCENARIO%\dependents.csv ^
   %SCENARIO%\thresholds.csv ^

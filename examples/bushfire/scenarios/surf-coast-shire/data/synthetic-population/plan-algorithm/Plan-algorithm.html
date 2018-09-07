@@ -11,6 +11,7 @@
 
 <meta name="author" content="Dhirendra Singh, Joel Robertson" />
 
+<meta name="date" content="2018-05-09" />
 
 <title>Plans algorithm documentation</title>
 
@@ -308,12 +309,12 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Plans algorithm documentation</h1>
 <h4 class="author"><em>Dhirendra Singh, Joel Robertson</em></h4>
-<h4 class="date"><em>17/07/2018</em></h4>
+<h4 class="date"><em>05/09/2018</em></h4>
 
 </div>
 
 
-<p><a href="https://www.openstreetmap.org/relation/3290432">Surf Coast Shire</a> is unique in its population makeup due to the high number of visitors to townships around the <a href="https://www.openstreetmap.org/relation/6592912">Great Ocean Road</a>. On a given summer day for instance, Angleasea that has a <a href="http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045">resident population around <code>2600</code></a> can have as many as <code>15000</code> persons in the township. In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.</p>
+<p><a href="https://www.openstreetmap.org/relation/3290432">Surf Coast Shire</a> is unique in its population makeup due to the high number of visitors to townships around the <a href="https://www.openstreetmap.org/relation/6592912">Great Ocean Road</a>. On a given summer day for instance, Anglesea that has a <a href="http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045">resident population around <code>2600</code></a> can have as many as <code>15000</code> persons in the township. In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.</p>
 <div id="population-subgroups" class="section level2">
 <h2>Population subgroups</h2>
 <p>Within the model, we will account for the following groups of people (based on input from regional stakeholders):</p>
@@ -382,16 +383,18 @@ $(document).ready(function () {
 <li><p>All activities are assumed to be repeatable and can have a minimum duration of 2 hours (with the exception of <code>work</code>, which has a minimum duration of 4 hours).</p></li>
 <li><p>Currently in the model <em>persons are synonomous with vehicles</em>. In other words, all vehicles accommodate a single person (the driver) and drivers are assummed to be co-located with their vehicles. For SCS, it <em>might be important to model persons walking to activities from their parked vehicles and back at the end of the activity</em>. This might be important for the <code>beach</code> activity in particular, where the time spent in walking from/to the parked vehicle might be significant; <mark>Discuss with working group</mark>.</p></li>
 <li><p>Departure times for activities are randomly distributed within the two hour time block they are allocated to. This ensures that that traffic is dispersed throughout the day, rather than in centralised pulses, but might not fully capture peak traffic events (e.g. main traffic influx clustered around 9am/5am for work). Could potentially tie departure to expected time to destination, but would need some form of routing.</p></li>
-<li><p>Home locations are assigned randomly from the selected location options. Locations for each other activity are then selected probabilistically based on their Euclidean distance from the home node. This process could eventually be refined so that probabilities are established as an input for each location node, as per the <a href="https://github.com/agentsoz/bdi-abm-integration/blob/ees/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz">initial work done by Surf Cost Shire Council</a>.</p></li>
+<li><p>Home locations are now assigned by <strong>allocation</strong>. The shape file now supplies per address location data, and should also specify an allocation for that address. In the simplest terms, this will be either <code>1</code> or <code>0</code>, indicating whether the address is inhabited or not. Once an address has been allocated, the allocation count decreases by one. The <code>day visitor</code> subgroup provides a good illustration of how this process will work when the home location has an allocation greater than <code>1</code>; a <code>day visitor</code> will select a “home” location from one of the <code>Out of Region</code> locations (<code>MELBOURNE</code>, <code>COLAC</code> or <code>APOLLO BAY</code>). Because the counts for these locations are large, multiple agents will be assigned to the same location. The proportion coming in from each place can be shaped by the allocation count as well; say there are <code>100 day visitor</code> agents, and the count for <code>MELBOURNE=80</code> <code>COLAC=10</code> and <code>APOLLO BAY=10</code>. Then 80% of the tourist traffic will come from Melbourne, and 20% from locations west of Anglesea. For a given subgroup, if the total allocation count for all locations that home maps to is less than the number of agents, then the algorithm automatically sets the allocation of each location to the number of agents in that subgroup. This ensures every agent has a home.</p></li>
+<li><p>The choices of location for the activities in a given plan are now selected based on <strong>locality</strong>. This means that instead of basing selection on Euclidean distance from home, agents now select their next activity from within a locality near their <em>current</em> locality; the new locality is selected based on a probability proportional to inverse distance. The current locality is preferred (to a varying degree based on subgroup type). The distance between localities is calculated using an average of all coordinate values for each locality to give a “centroid” node for each locality.</p></li>
 </ol>
 </div>
 <div id="model-inputs" class="section level2">
 <h2>Model inputs</h2>
-<p><em>For each situation, for each population subgroup, users specify three inputs</em>:</p>
+<p><em>For each situation, for each population subgroup, users specify these inputs</em>:</p>
 <ul>
-<li>the number of agents;</li>
-<li>the distribution of activites through the day;</li>
-<li>the locations that each specified activity maps to.</li>
+<li>the number of agents (<code>numbers.csv</code>);</li>
+<li>the distribution of activites through the day<code>distributions.csv</code>;</li>
+<li>the locations that each specified activity maps to (<code>location_map.csv</code>);</li>
+<li>the probability of an agent from subgroup travelling outside of current location (<code>travel_factor.csv</code>).</li>
 </ul>
 <p>For instance, on a “typical summer weekday”, the distribution input for the <code>resident</code> subgroup might look like:</p>
 <pre><code>##  home,90,90,85,75,30,20,15,10,25,50,80,85
@@ -409,7 +412,23 @@ $(document).ready(function () {
 </div>
 <div id="model-outputs" class="section level2">
 <h2>Model outputs</h2>
-<p>The <em>output of the process is a MATSim population (XML) file</em>, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An <a href="./plans.xml">example output XML file is here</a>.</p>
+<p>The output of the process is a <strong>MATSim population (XML) file</strong>, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An <a href="./plans.xml">example output XML file is here</a>.</p>
+</div>
+<div id="adding-ees-bdi-attributes" class="section level2">
+<h2>Adding EES BDI Attributes</h2>
+<p>Attributes can be added to the generated MATSim population file via the <code>BDI_attributes.R</code> script. The script will assign:</p>
+<ul>
+<li><p><strong>A BDI agent class</strong></p>
+<p>Their subgroup type as specified in <code>numbers.csv</code>. The <code>BDI_attributes.R</code> script uses the same numbers input as the plan algorithm, so these numbers should match to the desired number and order in the input plan file (this is only really a concern when appending BDI attributes to an existing/outsourced MATSim plan file).</p></li>
+<li><p><strong>Initial and final response thresholds</strong></p>
+<p>These are determined from a plausible range for each subgroup (<code>thresholds.csv</code>) and additionally, a file <code>stay.csv</code> that indicates <code>true</code> or <code>false</code> for each subgroup whether it is possible for an agent to decide to stay and defend. The final threshold will always be greater than or equal to the initial response (and always equal to if there is no chance of the agent staying and defending).</p></li>
+<li><p><strong>With some probability, a dependent’s location</strong></p>
+<p>The script will identify an agent’s home location as the first location in their plan list. Each subgroup will have a percentage of agents with dependents (<code>dependents.csv</code>) and if an agent is allocated a dependent, the dependent’s lcoation will be placed randomly within 20km of home. If the agent does not have a dependent, this field is empty.</p></li>
+<li><p><strong>A boolean “Will Go Home” attribute</strong></p>
+<p>Again, this is based on a percentage per subgroup (<code>prob_go_home.csv</code>). Currently, the EES requires these to split into two attributes based on whether the agent has a dependent or not, but this will be consolidated in the future. At most one of the two attributes will be <code>true</code>.</p></li>
+<li><p><strong>An invacuation and evacuation preference point</strong></p>
+<p>Currently this requires a separate “Points of Refuge” shapefile, which contains the locations of preferred evacuation and invacuation points (note these should be nodes, not polygon areas). The <code>Refuges.csv</code> input file is then derived from this. For each agent, these are selected based on distance to home with probability either inversely proportional (invacuation) proportional (evacuation).</p></li>
+</ul>
 </div>
 
 
