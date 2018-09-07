@@ -65,7 +65,15 @@ public class Location {
 	        this.attributes = attributes;
 	    }
 
-	
+	public static double distanceBetween(Location from, Location to) {
+		double dist = -1;
+		if (from != null && to != null) {
+			dist = Math.sqrt(Math.pow(from.getX()-to.getX(),2) + Math.pow(from.getY()-to.getY(),2));
+		}
+		return dist;
+	}
+
+
 	public String getName() {
 		return name;
 	}

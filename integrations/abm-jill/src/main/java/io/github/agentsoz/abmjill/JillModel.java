@@ -176,6 +176,7 @@ public abstract class JillModel implements BDIServerInterface {
 							getAgent(id).handlePercept(content.getPercept_type(), content.getValue());
 						} catch (Exception e) {
 							logger.error("While handling percept for Agent {}: {}", agentId, e.getMessage());
+							e.printStackTrace();
 						}
 					}
 				}
