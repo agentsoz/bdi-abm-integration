@@ -160,7 +160,7 @@ public abstract class JillModel implements BDIServerInterface {
 		adc.putAction(agentId, actionId, ac);
 	}
 
-	public void takeControlV2(io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
+	public void takeControlV2(double time, io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
 		if (adc != null) {
 			Iterator<String> it = adc.getAgentIdIterator();
 			while (it.hasNext()) {
@@ -172,6 +172,7 @@ public abstract class JillModel implements BDIServerInterface {
 					if (content != null) {
 						try {
 							int id = Integer.parseInt(agentId);
+							getAgent(id).handlePercept(PerceptList.TIME, time);
 							getAgent(id).handlePercept(content.getPercept_type(), content.getValue());
 						} catch (Exception e) {
 							logger.error("While handling percept for Agent {}: {}", agentId, e.getMessage());
