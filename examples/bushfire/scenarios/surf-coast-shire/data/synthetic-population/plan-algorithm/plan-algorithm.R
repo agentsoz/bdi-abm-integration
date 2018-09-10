@@ -226,7 +226,7 @@ allocation_checker<-function(activity_locations,number_of_agents,subgroup)
   return(activity_locations)
 }
 
-plan_locations<-function (plan_times,activity_locations,locality_distances)
+plan_locations<-function (plan_times,activity_locations,locality_distances,stay_in_locality)
 {
   PLANS<-plan_times  
   for (h in 1:length(PLANS))
@@ -273,13 +273,24 @@ plan_locations<-function (plan_times,activity_locations,locality_distances)
         distances<-locality_distances[locality,names(locality_distances[locality,]) %in% unique(activity_locations[[activity]][[6]])]
         
         #set relative likelihood of staying in locality (ASSUMPTION) -- this gives approx 2/3 chance that will stay in locale
-        if(locality %in% names(distances)) {distances[locality]<-1000/(2*sum (1000/distances[names(distances)!=locality]))}
-        
-        choose_locality=sample(distances,1,prob = 1000/(distances))
+        if(stay_in_locality==1)
+        {
+          stay_in_locality==0.9999999
+        }
+        delta=stay_in_locality/(1-stay_in_locality)
+        if(locality %in% names(distances)) {distances[locality]<-1/((delta)*sum (1/distances[names(distances)!=locality]))}
+        #scale probabilities to sum to 1
+        prob = 1000/(distances)/(sum(1000/distances))
+        choose_locality=sample(distances,1,prob=prob)
         locality=names(choose_locality)
         choose=sample(nrow(activity_locations[[activity]][activity_locations[[activity]][[6]]==locality,]),1)
         place=activity_locations[[activity]][activity_locations[[activity]][[6]]==locality,][choose,]
         plan[i,4:5]=place[3:4]
+      }
+      else
+      {
+        #if agent goes home, reset location to home
+        locality<-unlist(as.vector(home[6]))
       }
     }
     PLANS[[h]]<-plan
@@ -290,7 +301,7 @@ plan_locations<-function (plan_times,activity_locations,locality_distances)
   return(pass_plans)
 }
 
-type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_names,type)
+type_plan<-function (n_activities,number_of_agents,travel_factor,locations_from_csv,location_names,type)
 {
   if (number_of_agents==0)
   {
@@ -322,7 +333,7 @@ type_plan<-function (n_activities,number_of_agents,locations_from_csv,location_n
 
   activity_locations<-location_map(locations_from_csv =locations_from_csv[[1]],location_names=location_names,subgroup=type)
   activity_locations<-allocation_checker(activity_locations,number_of_agents,subgroup = type)
-  PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations,locality_distances=locations_from_csv[[2]])  
+  PLANS<-plan_locations(plan_times = plan_times_type$Plans,activity_locations =activity_locations,locality_distances=locations_from_csv[[2]],stay_in_locality = (1-travel_factor))  
   output<-list(Agents=plan_times_type$Agents,Plans=PLANS$PLANS,updated_activity_locations=PLANS$updated_activity_locations)
   
   return(output)
@@ -567,43 +578,47 @@ read_locations_from_csv<-function(locations_csv_file)
   locs<-locs[locs[[allocation_title]]>0,]
   #reduce to necessary information
   locations<-locs[,c(location_type_title,allocation_title,xcoord_title,ycoord_title,address_title,locality_title)]
+  #get average point for each location
+  averages=data.frame(xcoord=double(),ycoord=double())
+  for (location in unique(locations[[locality_title]]))
+  {
+    points=locations[locations[[locality_title]]==location,3:4] 
+    point=t(as.data.frame(colSums(points)/nrow(points)))
+    rownames(point)=location
+    averages=rbind(averages,point)
+  }
   #distance matrix for all localities
-   
-  d=as.matrix(dist(locations[locations[[location_type_title]]==base_node_id,3:4]))
-  locales<-locations[rownames(d),][[locality_title]]
-  rownames(d)<-locales
-  colnames(d)<-locales
-
-  
+  d=as.matrix(dist(averages))
   LOCATIONS<-list(locations=locations,distances=d)
   return(LOCATIONS)
 }
 
-inputs<-function (distributions_file,locations_file,numbers_file)
+inputs<-function (distributions_file,locations_file,numbers_file,travel_file)
 {
   DISTRIBUTIONS<-read_distributions(distributions_file)
   
   types<-names(DISTRIBUTIONS)
   LOCATIONS<-read_locations(locations_file,types)
   NUMBERS<-read_numbers(numbers_file,types)
+  TRAVEL<-read_numbers(travel_file,types)
   
-  INPUT<-list(numbers=NUMBERS,distributions=DISTRIBUTIONS,locations=LOCATIONS)
+  INPUT<-list(numbers=NUMBERS,distributions=DISTRIBUTIONS,locations=LOCATIONS,travel=TRAVEL)
   return(INPUT)  
 }
 
 main<-function ()
 {
-   args<-commandArgs(trailingOnly = T)
-  #args<-c("typical-summer-weekday/distributions.csv","typical-summer-weekday/location_maps.csv","typical-summer-weekday/numbers.csv","Locations.csv","typical-summer-weekday/plans.xml")
+  args<-commandArgs(trailingOnly = T)
+  #args<-c("typical-summer-weekday/distributions.csv","typical-summer-weekday/location_maps.csv","typical-summer-weekday/numbers.csv","typical-summer-weekday/travel_factor.csv","Locations.csv","typical-summer-weekday/plans.xml")
 
-  input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3])  
-  locations_csv<-read_locations_from_csv(args[4])
+  input<-inputs(distributions_file = args[1],locations_file = args[2],numbers_file = args[3],travel_file=args[4])  
+  locations_csv<-read_locations_from_csv(args[5])
   PLANS<-list()
   AGENTS<-list()
   
   for (Type in names(input$numbers))
   {
-    run<-type_plan(n_activities = input$distributions[[Type]],number_of_agents =input$numbers[Type],locations_from_csv = locations_csv,location_names = input$locations[[Type]],type = Type)
+    run<-type_plan(n_activities = input$distributions[[Type]],number_of_agents =input$numbers[Type],travel_factor=input$travel[Type],locations_from_csv = locations_csv,location_names = input$locations[[Type]],type = Type)
     PLANS[[Type]]<-run$Plans
     AGENTS[[Type]]<-run$Agents
     locations_csv$locations[run$updated_activity_locations,][[2]]<- locations_csv$locations[run$updated_activity_locations,][[2]]-1
@@ -612,7 +627,7 @@ main<-function ()
   
   
   #write plan.xml (to working directory)
-  write_xml(PLANS = PLANS,output_location = args[5])
+  write_xml(PLANS = PLANS,output_location = args[6])
   
   write_log(AGENTS = AGENTS,DISTRIBUTIONS = input$distributions)
   

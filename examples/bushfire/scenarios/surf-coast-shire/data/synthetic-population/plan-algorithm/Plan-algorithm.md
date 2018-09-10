@@ -1,13 +1,13 @@
 ---
 title: "Plans algorithm documentation"
 author: "Dhirendra Singh, Joel Robertson"
-date: "17/07/2018"
+date: "05/09/2018"
 output:
   html_document:
     keep_md: yes
 ---
 
-[Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup due to the high number of visitors to townships around the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). On a given summer day for instance, Angleasea that has a [resident population around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045) can have as many as `15000` persons in the township.  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.
+[Surf Coast Shire](https://www.openstreetmap.org/relation/3290432) is unique in its population makeup due to the high number of visitors to townships around the [Great Ocean Road](https://www.openstreetmap.org/relation/6592912). On a given summer day for instance, Anglesea that has a [resident population around `2600`](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/SSC20045) can have as many as `15000` persons in the township.  In looking to construct a synthetic population for Surf Coast Shire for the purposes of evacuation modelling, it is therefore important to consider the numbers as well as behaviours of the significant transient population in the region.
 
 
 ## Population subgroups
@@ -69,16 +69,19 @@ The purpose of the model is to allow users to specify the makeup of the populati
 
 1. Departure times for activities are randomly distributed within the two hour time block they are allocated to. This ensures that that traffic is dispersed throughout the day, rather than in centralised pulses, but might not fully capture peak traffic events (e.g. main traffic influx clustered around 9am/5am for work). Could potentially tie departure to expected time to destination, but would need some form of routing. 
 
-1. Home locations are assigned randomly from the selected location options. Locations for each other activity are then selected probabilistically based on their Euclidean distance from the home node. This process could eventually be refined so that probabilities are established as an input for each location node, as per the [initial work done by Surf Cost Shire Council](https://github.com/agentsoz/bdi-abm-integration/blob/ees/examples/bushfire/scenarios/surf-coast-shire/data/from-scsc-201804/analysis-data-from-scsc-201804.md#surf-coast-shire-trips-scscsvgz).
+1. Home locations are now assigned by **allocation**. The shape file now supplies per address location data, and should also specify an allocation for that address. In the simplest terms, this will be either `1` or `0`, indicating whether the address is inhabited or not. Once an address has been allocated, the allocation count decreases by one. The ``day visitor`` subgroup provides a good illustration of how this process will work when the home location has an allocation greater than `1`; a ``day visitor`` will select a "home" location from one of the ``Out of Region`` locations (``MELBOURNE``, ``COLAC`` or ``APOLLO BAY``). Because the counts for these locations are large, multiple agents will be assigned to the same location. The proportion coming in from each place can be shaped by the allocation count as well; say there are `100 day visitor` agents, and the count for ``MELBOURNE=80`` ``COLAC=10`` and ``APOLLO BAY=10``. Then 80% of the tourist traffic will come from Melbourne, and 20% from locations west of Anglesea. 
+For a given subgroup, if the total allocation count for all locations that home maps to is less than the number of agents, then the algorithm automatically sets the allocation of each location to the number of agents in that subgroup. This ensures every agent has a home.  
+
+1. The choices of location for the activities in a given plan are now selected based on **locality**. This means that instead of basing selection on Euclidean distance from home, agents now select their next activity from within a locality near their *current* locality; the new locality is selected based on a probability proportional to inverse distance. The current locality is preferred (to a varying degree based on subgroup type). The distance between localities is calculated using an average of all coordinate values for each locality to give a "centroid" node for each locality.
 
 ## Model inputs
 
-*For each situation, for each population subgroup, users specify three inputs*:
+*For each situation, for each population subgroup, users specify these inputs*:
 
-* the number of agents;
-* the distribution of activites through the day;
-* the locations that each specified activity maps to.
-
+* the number of agents (`numbers.csv`);
+* the distribution of activites through the day`distributions.csv`;
+* the locations that each specified activity maps to (`location_map.csv`);
+* the probability of an agent from subgroup travelling outside of current location (`travel_factor.csv`).   
 
 For instance, on a "typical summer weekday", the distribution input for the `resident` subgroup might look like:
 
@@ -107,4 +110,27 @@ and the location mappings input for `resident` would be established by:
 
 ## Model outputs
 
-The *output of the process is a MATSim population (XML) file*, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An [example output XML file is here](./plans.xml).
+The output of the process is a **MATSim population (XML) file**, similar to what is currently used as input to the DSS, that describes the daily activity-plan for every individual in the population. An [example output XML file is here](./plans.xml).
+
+## Adding EES BDI Attributes
+Attributes can be added to the generated MATSim population file via the `BDI_attributes.R` script. The script will assign:
+
+* **A BDI agent class** 
+
+    Their subgroup type as specified in `numbers.csv`. The `BDI_attributes.R` script uses the same numbers input as the plan algorithm, so these numbers should match to the desired number and order in the input plan file (this is only really a concern when appending BDI attributes to an existing/outsourced MATSim plan file).
+
+* **Initial and final response thresholds** 
+    
+    These are determined from a plausible range for each subgroup (`thresholds.csv`) and additionally, a file `stay.csv` that indicates `true` or `false` for each subgroup whether it is possible for an agent to decide to stay and defend. The final threshold will always be greater than or equal to the initial response (and always equal to if there is no chance of the agent staying and defending). 
+    
+* **With some probability, a dependent's location**
+
+    The script will identify an agent's home location as the first location in their plan list. Each subgroup will have a percentage of agents with dependents (`dependents.csv`) and if an agent is allocated a dependent, the dependent's lcoation will be placed randomly within 20km of home. If the agent does not have a dependent, this field is empty.
+    
+* **A boolean "Will Go Home" attribute**
+
+  Again, this is based on a percentage per subgroup (`prob_go_home.csv`). Currently, the EES requires these to split into two attributes based on whether the agent has a dependent or not, but this will be consolidated in the future. At most one of the two attributes will be `true`.
+  
+* **An invacuation and evacuation preference point**
+
+  Currently this requires a separate "Points of Refuge" shapefile, which contains the locations of preferred evacuation and invacuation points (note these should be nodes, not polygon areas). The `Refuges.csv` input file is then derived from this. For each agent, these are selected based on distance to home with probability either inversely proportional (invacuation) proportional (evacuation).

@@ -6,12 +6,13 @@ Rscript $DIR/plan-algorithm.R \
   $SCENARIO/distributions.csv \
   $SCENARIO/location_maps.csv \
   $SCENARIO/numbers.csv \
+  $SCENARIO/travel_factor.csv \
   $SCENARIO/../Locations.csv \
   $SCENARIO/plans.xml
 
 # Call the attribute generator with required parameters
 
-Rscript $DIR/Attributes.R \
+Rscript $DIR/BDI_attributes.R \
   $SCENARIO/numbers.csv \
   $SCENARIO/dependents.csv \
   $SCENARIO/thresholds.csv \
