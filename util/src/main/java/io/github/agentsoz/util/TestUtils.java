@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
@@ -54,6 +53,8 @@ import org.matsim.core.utils.io.UncheckedIOException;
 import org.matsim.core.utils.misc.CRCChecksum;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * There is already a MatsimTestUtils.  So it might seem logical to add the methods here to that class.  However, 
@@ -64,7 +65,7 @@ import org.matsim.utils.eventsfilecomparison.EventsFileComparator.Result;
  *
  */
 public final class TestUtils {
-	private static final Logger log = Logger.getLogger( TestUtils.class ) ;
+	private static final Logger log = LoggerFactory.getLogger( TestUtils.class ) ;
 	
 	public static final String SEPARATOR = "---------------------------------------------" ;
 
