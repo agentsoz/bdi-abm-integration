@@ -1,4 +1,0 @@
-COORDS=$1
-SOURCE=$2
-DEST=$3
-ogr2ogr -f GeoJSON -t_srs $COORDS $DEST $SOURCE
