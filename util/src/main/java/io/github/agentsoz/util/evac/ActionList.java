@@ -24,6 +24,7 @@ package io.github.agentsoz.util.evac;
 
 public class ActionList {
 	public static final String DRIVETO = "drive_to";
+	public static final String REPLAN_CURRENT_DRIVETO = "replan_drive_to";
    	public static final String CONNECT_TO = "connect to";
 	public static final String PICKUP = "pick up";
 	public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
