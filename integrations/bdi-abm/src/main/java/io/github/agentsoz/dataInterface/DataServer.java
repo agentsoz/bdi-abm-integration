@@ -30,6 +30,7 @@ public class DataServer {
 
     private double time = 0.0;
     private double timeStep = 1.0;
+    private final String DATATYPE_TIME = "time";
     private Map<String, List<DataClient>> subscriptions = new LinkedHashMap<>();
     private SortedMap<Double, Map<String, List<DataSource>>> timedUpdates = new ConcurrentSkipListMap<>();
     private static Map<String, DataServer> servers = new LinkedHashMap<>();
@@ -94,7 +95,11 @@ public class DataServer {
     }
 
     public void stepTime() {
+        // update the internal clock
         time += timeStep;
+        // publish the time to all interested parties
+        publish(DATATYPE_TIME, getTime());
+        // move date from publishers to subscribers
         updateTimedSources();
     }
 
