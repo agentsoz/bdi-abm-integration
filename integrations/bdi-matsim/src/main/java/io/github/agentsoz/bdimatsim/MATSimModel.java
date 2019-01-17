@@ -131,7 +131,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private final Map<String, DataClient> dataListeners = createDataListeners();
 	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
 
-	public enum EvacRoutingMode {carFreespeed, carGlobalInformation}
+	public enum RoutingMode {carFreespeed, carGlobalInformation}
 
 	private Controler controller;
 
@@ -214,14 +214,14 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		{
 			Collection<String> modes = config.plansCalcRoute().getNetworkModes();
 			Set<String> newModes = new TreeSet<>( modes ) ;
-			for ( EvacRoutingMode mode : EvacRoutingMode.values() ) {
+			for ( RoutingMode mode : RoutingMode.values() ) {
 				newModes.add( mode.name() ) ;
 			}
 			config.plansCalcRoute().setNetworkModes( newModes );
 		}
 
 		// the router also needs scoring parameters:
-		for ( EvacRoutingMode mode : EvacRoutingMode.values() ) {
+		for ( RoutingMode mode : RoutingMode.values() ) {
 			ModeParams params = new ModeParams(mode.name());
 			config.planCalcScore().addModeParams(params);
 		}
@@ -577,7 +577,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				//final Person person = scenario.getPopulation().getPersons().get(agentID);
 				double res = 0.0;
 				synchronized (this.replanner) {
-					LeastCostPathCalculator.Path result = this.replanner.editRoutes(EvacRoutingMode.carFreespeed).getPathCalculator().calcLeastCostPath(
+					LeastCostPathCalculator.Path result = this.replanner.editRoutes(RoutingMode.carFreespeed).getPathCalculator().calcLeastCostPath(
 							currentLink.getFromNode(), destLink.getFromNode(), now, null, null
 					);
 					res = RouteUtils.calcDistance(result);

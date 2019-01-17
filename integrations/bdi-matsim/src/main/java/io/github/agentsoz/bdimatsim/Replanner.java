@@ -24,14 +24,11 @@ import javax.inject.Inject;
  * #L%
  */
 
-import ch.qos.logback.classic.Logger;
-import io.github.agentsoz.bdimatsim.MATSimModel.EvacRoutingMode;
+import io.github.agentsoz.bdimatsim.MATSimModel.RoutingMode;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.HasPerson;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.QSim;
@@ -90,8 +87,8 @@ public final class Replanner {
 		WithinDayAgentUtils.resetCaches(agent);
 	}
 	@Deprecated // I don't think that this is really needed for the bushfire applications.  kai, nov'17
-	public EditRoutes editRoutes(EvacRoutingMode evacRoutingMode) {
-		switch( evacRoutingMode ) {
+	public EditRoutes editRoutes(RoutingMode routingMode) {
+		switch(routingMode) {
 			case carFreespeed:
 				return editRoutes ;
 			default:
@@ -111,7 +108,7 @@ public final class Replanner {
 	
 	final void addNetworkChangeEvent(NetworkChangeEvent changeEvent) {
 		
-		TravelTime globalTTime = this.travelTimes.get(EvacRoutingMode.carGlobalInformation.name());
+		TravelTime globalTTime = this.travelTimes.get(RoutingMode.carGlobalInformation.name());
 		if ( globalTTime instanceof WithinDayTravelTime ) {
 			((WithinDayTravelTime) globalTTime).addNetworkChangeEvent(changeEvent);
 		}

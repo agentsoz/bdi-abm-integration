@@ -22,9 +22,7 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.ActionContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.PerceptContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
@@ -69,7 +67,7 @@ public final class DRIVETODefaultActionHandlerV2 implements BDIActionHandler {
 		Gbl.assertIf( args[1] instanceof double[] ) ;
 		double[] coords = (double[]) args[1];
 		Coord coord = new Coord( coords[0], coords[1] ) ;
-		Gbl.assertIf( args[3] instanceof MATSimModel.EvacRoutingMode ) ; // could have some default
+		Gbl.assertIf( args[3] instanceof MATSimModel.RoutingMode) ; // could have some default
 		
 		log.debug("replanning; time step=" + model.getTime()
 		+ "; agentId=" + agentID + "; routing mode " + args[3] ) ;
@@ -91,12 +89,12 @@ public final class DRIVETODefaultActionHandlerV2 implements BDIActionHandler {
 		
 		// routingMode:
 		String routingMode = null ; // could have some default
-		switch (((MATSimModel.EvacRoutingMode) args[3])) {
+		switch (((MATSimModel.RoutingMode) args[3])) {
 			case carFreespeed:
-				routingMode = MATSimModel.EvacRoutingMode.carFreespeed.name() ;
+				routingMode = MATSimModel.RoutingMode.carFreespeed.name() ;
 				break;
 			case carGlobalInformation:
-				routingMode = MATSimModel.EvacRoutingMode.carGlobalInformation.name() ;
+				routingMode = MATSimModel.RoutingMode.carGlobalInformation.name() ;
 				break;
 			default:
 				throw new RuntimeException("not implemented" ) ;

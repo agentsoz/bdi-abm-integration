@@ -25,16 +25,10 @@ package io.github.agentsoz.bdimatsim;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.matsim.core.network.NetworkUtils;
-import org.opengis.filter.expression.Add;
-
-import static io.github.agentsoz.bdimatsim.DRIVETODefaultActionHandler.printPlan;
 
 final class ActionHandlerXyz implements BDIActionHandler {
 	private static final Logger log = Logger.getLogger( ActionHandlerXyz.class ) ;
@@ -85,7 +79,7 @@ final class ActionHandlerXyz implements BDIActionHandler {
 		// 2. Modify the route within the current trip - but leave the rest of the plan after the trip intact.
 		{
 			final double now = model.getTime();
-			final String routingMode = MATSimModel.EvacRoutingMode.carGlobalInformation.name();
+			final String routingMode = MATSimModel.RoutingMode.carGlobalInformation.name();
 			
 			// This will force to replan, e.g. based on global knowledge (depending on what the routing mode is)
 			model.getReplanner().editTrips().replanCurrentTrip( agent, now, routingMode );
