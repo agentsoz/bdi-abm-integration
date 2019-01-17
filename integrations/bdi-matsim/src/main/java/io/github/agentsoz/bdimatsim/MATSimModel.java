@@ -105,6 +105,9 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 
 	private Scenario scenario = null;
+	private boolean scenarioLoaded = false ;
+	private boolean modelInitialised = false ;
+
 
 	/**
 	 * A helper class essentially provided by the framework, used here.  The only direct connection to matsim are the event
@@ -130,8 +133,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private final EventsMonitorRegistry eventsMonitors  = new EventsMonitorRegistry() ;
 	private Thread matsimThread;
 
-	private boolean scenarioLoaded = false ;
-
 	private DataServer dataServer;
 	private final Map<String, DataClient> dataListeners = createDataListeners();
 	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
@@ -141,7 +142,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
 	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
 
-
+	private Controler controller;
 
 
 	public MATSimModel(Map<String, String> opts, DataServer dataServer) {
@@ -289,7 +290,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		}
 		// ---
 
-		final Controler controller = new Controler( scenario );
+		controller = new Controler( scenario );
 
 		controller.getEvents().addHandler(eventsMonitors);
 
@@ -299,11 +300,10 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				controller.getEvents().addHandler(handler);
 			}
 		}
-		
+
 		// infrastructure at QSim level (separating line not fully logical)
 		controller.addOverridingQSimModule( new AbstractQSimModule() {
 			@Override protected void configureQSim() {
-				this.bind( AgentFactory.class ).to( EvacAgent.Factory.class ) ;
 				this.bind(Replanner.class).in( Singleton.class ) ;
 				this.bind( MATSimModel.class ).toInstance( MATSimModel.this );
 			}
@@ -312,7 +312,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		// infrastructure at Controler level (separating line not fully logical)
 		controller.addOverridingModule(new AbstractModule(){
 			@Override public void install() {
-				
+
 				this.bind( MobsimDataProvider.class ).in( Singleton.class ) ;
 				this.addMobsimListenerBinding().to( MobsimDataProvider.class ) ;
 				// (pulls mobsim from Listener Event.  maybe not so good ...)
@@ -323,7 +323,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 				// analysis:
 				this.addControlerListenerBinding().to( OutputEvents2TravelDiaries.class );
-				
+
 				this.addMobsimListenerBinding().toInstance((MobsimInitializedListener) e -> {
 					// memorize the qSim:
 					qSim = (QSim) e.getQueueSimulation() ;
@@ -335,18 +335,18 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 					//						initialiseVisualisedAgents() ;
 				}) ;
 
-				
+
 				// define the turn acceptance logic that reacts to blocked links:
 				{
 					ConfigurableQNetworkFactory qNetworkFactory = new ConfigurableQNetworkFactory( controller.getEvents(), scenario );
 					qNetworkFactory.setTurnAcceptanceLogic( new TurnAcceptanceLogic() {
 						TurnAcceptanceLogic delegate = new DefaultTurnAcceptanceLogic();
-						
+
 						@Override
 						public AcceptTurn isAcceptingTurn( Link currentLink, QLaneI currentLane, Id<Link> nextLinkId, QVehicle veh, QNetwork qNetwork, double now ) {
-							
+
 							AcceptTurn accept = delegate.isAcceptingTurn( currentLink, currentLane, nextLinkId, veh, qNetwork, now );
-							
+
 							QLinkI nextQLink = qNetwork.getNetsimLink( nextLinkId );
 							double speed = nextQLink.getLink().getFreespeed( now );
 							if ( speed < 0.1 ) { // m/s
@@ -360,7 +360,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 								// yyyy this event is now generated both here and in the agent.  In general,
 								// it should be triggered in the agent, giving the bdi time to compute.  However, the
 								// blockage may happen between there and arriving at the node ...  kai, dec'17
-								
+
 							}
 //							log.debug( "time=" + MATSimModel.this.getTime() + ";\t fromLink=" + currentLink.getId() +
 //										     ";\ttoLink=" + nextLinkId + ";\tanswer=" + accept.name() );
@@ -369,7 +369,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 					} );
 					bind( QNetworkFactory.class ).toInstance( qNetworkFactory );
 				}
-				
+
 			}
 
 			private void setupCarFreespeedRouting() {
@@ -426,7 +426,15 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
 			}
 		}) ;
+		modelInitialised = true;
 
+	}
+
+	public void start() {
+		if (!modelInitialised) {
+			log.warn("Model not initialised; cannot be run");
+			return;
+		}
 		// wrap the controller into a thread and start it:
 		this.matsimThread = new Thread( controller ) ;
 		this.matsimThread.setName("matsim");
@@ -440,6 +448,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				e.printStackTrace();
 			}
 		}
+
 
 	}
 
@@ -688,5 +697,9 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	public Map<Id<Link>, Double> getPenaltyFactorsOfLinksForEmergencyVehicles() {
 		return penaltyFactorsOfLinksForEmergencyVehicles;
+	}
+
+	public Controler getControler() {
+		return controller;
 	}
 }
