@@ -1,19 +1,16 @@
 package io.github.agentsoz.bdimatsim;
 
-import java.util.*;
-
-import ch.qos.logback.classic.Level;
-import com.google.gson.Gson;
-import com.vividsolutions.jts.geom.*;
+import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.data.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.dataInterface.DataClient;
-import io.github.agentsoz.nonmatsim.PAAgent;
-import io.github.agentsoz.util.EmergencyMessage;
+import io.github.agentsoz.dataInterface.DataServer;
+import io.github.agentsoz.nonmatsim.PAAgentManager;
+import io.github.agentsoz.util.Location;
 import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.util.evac.PerceptList;
-import io.github.agentsoz.util.Location;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -38,14 +35,7 @@ import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.core.mobsim.qsim.AbstractQSimModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.DefaultTurnAcceptanceLogic;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QLaneI;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkI;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetwork;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
-import org.matsim.core.mobsim.qsim.qnetsimengine.TurnAcceptanceLogic;
+import org.matsim.core.mobsim.qsim.qnetsimengine.*;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.RouteUtils;
@@ -54,12 +44,15 @@ import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.GeometryUtils;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 /*
  * #%L
@@ -82,16 +75,6 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
-
-import io.github.agentsoz.bdiabm.ABMServerInterface;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.dataInterface.DataServer;
-import io.github.agentsoz.nonmatsim.PAAgentManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * @author QingyuChen, KaiNagel, Dhi Singh
@@ -116,12 +99,10 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private double optCongestionReactionProbability = 0.10;
 
 
-	private EvacConfig evacConfig = null;
 	private Config config = null;
 	private boolean configLoaded = false;
     private Object sequenceLock;
 
-    public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
 
 	private Scenario scenario = null;
 
@@ -151,12 +132,17 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	private boolean scenarioLoaded = false ;
 
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
-
 	private DataServer dataServer;
 	private final Map<String, DataClient> dataListeners = createDataListeners();
 	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
+
+	// FIXME: move these application specific vars to https://github.com/agentsoz/ees
+	public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
+	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
+	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
+
+
+
 
 	public MATSimModel(Map<String, String> opts, DataServer dataServer) {
 		this( new String [] {
@@ -232,9 +218,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		config.planCalcScore().setWriteExperiencedPlans(true);
 
-		evacConfig = ConfigUtils.addOrGetModule(config,EvacConfig.class) ;
-		Gbl.assertNotNull(evacConfig);
-
 		// we have to declare those routingModes where we want to use the network router:
 		{
 			Collection<String> modes = config.plansCalcRoute().getNetworkModes();
@@ -280,31 +263,8 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		ScenarioUtils.loadScenario(scenario) ;
 
-		// make sure links don't have speed infinity (results in problems with the router; yy instead repair input files?):
-		for ( Link link : scenario.getNetwork().getLinks().values() ) {
-			final double veryLargeSpeed = 9999999999.;
-			if ( link.getFreespeed() > veryLargeSpeed ) {
-				link.setFreespeed(veryLargeSpeed);
-			}
-			if ( evacConfig.getSetup()== EvacConfig.Setup.tertiaryRoadsCorrection ) {
-				// yyyy correction for much too high speed value on tertiary roads. kai, dec'17
-				if (link.getFreespeed() == 27.77777777777778 && link.getCapacity() == 600.) {
-					link.setFreespeed(50. / 3.6);
-				}
-			}
-		}
-
 		scenarioLoaded=true ;
 		return scenario ;
-	}
-
-	public EvacConfig initialiseEvacConfig(Config config) {
-		EvacConfig evacConfig = ConfigUtils.addOrGetModule(config, EvacConfig.class);
-		evacConfig.setSetup(EvacConfig.Setup.standard);
-		evacConfig.setCongestionEvaluationInterval(getOptCongestionEvaluationInterval());
-		evacConfig.setCongestionToleranceThreshold(getOptCongestionToleranceThreshold());
-		evacConfig.setCongestionReactionProbability(getOptCongestionReactionProbability());
-		return evacConfig;
 	}
 
 	public final void init(List<String> bdiAgentIDs) {
