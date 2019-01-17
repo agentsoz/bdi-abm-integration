@@ -131,8 +131,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private final Map<String, DataClient> dataListeners = createDataListeners();
 	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
 
-	// FIXME: move these application specific vars to https://github.com/agentsoz/ees
-	public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
+	public enum EvacRoutingMode {carFreespeed, carGlobalInformation}
 
 	private Controler controller;
 
