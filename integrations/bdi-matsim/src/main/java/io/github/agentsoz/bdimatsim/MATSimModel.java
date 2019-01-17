@@ -139,8 +139,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	// FIXME: move these application specific vars to https://github.com/agentsoz/ees
 	public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
 
 	private Controler controller;
 
@@ -317,10 +315,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				this.addMobsimListenerBinding().to( MobsimDataProvider.class ) ;
 				// (pulls mobsim from Listener Event.  maybe not so good ...)
 
-				setupEmergencyVehicleRouting();
-				setupCarGlobalInformationRouting();
-				setupCarFreespeedRouting();
-
 				// analysis:
 				this.addControlerListenerBinding().to( OutputEvents2TravelDiaries.class );
 
@@ -370,60 +364,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 					bind( QNetworkFactory.class ).toInstance( qNetworkFactory );
 				}
 
-			}
-
-			private void setupCarFreespeedRouting() {
-				// memorize the routing mode:
-				String routingMode = EvacRoutingMode.carFreespeed.name() ;
-
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car,routingMode)) ;
-				// (above line means that when "routingMode" is requested, a "network" routing will be provided, and the route
-				// will be executed as "car" in the mobsim).
-
-				addTravelTimeBinding(routingMode).to(FreeSpeedTravelTime.class);
-				// (this defines which travel time this routing mode should use.  Here: free speed))
-
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinks);
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
-				// (this defines which travel disutility this routing mode should use.  Here: a specific evac travel disutility, which takes
-				// penalty factors as input.  The penalty factors are filled from fire data; if there is no fire data, they remain empty)
-			}
-
-			private void setupCarGlobalInformationRouting() {
-				final String routingMode = EvacRoutingMode.carGlobalInformation.name();
-
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car, routingMode)) ;
-
-				// congested travel time:
-				bind(WithinDayTravelTime.class).in(Singleton.class);
-				addEventHandlerBinding().to(WithinDayTravelTime.class);
-				addMobsimListenerBinding().to(WithinDayTravelTime.class);
-				addTravelTimeBinding(routingMode).to(WithinDayTravelTime.class) ;
-
-				// travel disutility includes the fire penalty. If no data arrives, it makes no difference.
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinks);
-				// (yyyyyy the now following cases are just there because of the different tests.  Solve by config,
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
-			}
-
-			private void setupEmergencyVehicleRouting() {
-				final String routingMode = EvacRoutingMode.emergencyVehicle.name();
-
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car, routingMode)) ;
-
-				// congested travel time:
-				bind(WithinDayTravelTime.class).in(Singleton.class);
-				addEventHandlerBinding().to(WithinDayTravelTime.class);
-				addMobsimListenerBinding().to(WithinDayTravelTime.class);
-				addTravelTimeBinding(routingMode).to(WithinDayTravelTime.class) ;
-
-				// travel disutility includes the fire penalty:
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinksForEmergencyVehicles);
-				// yyyyyy This uses the same disutility as the evacuees.  May not be what we want.
-				// But what do we want?  kai, dec'17/jan'18
-
-//					TravelDisutilityFactory disutilityFactory = new OnlyTimeDependentTravelDisutilityFactory();
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
 			}
 		}) ;
 		modelInitialised = true;
@@ -690,14 +630,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
     public void useSequenceLock(Object sequenceLock) {
 	    this.sequenceLock = sequenceLock;
     }
-
-	public Map<Id<Link>, Double> getPenaltyFactorsOfLinks() {
-		return penaltyFactorsOfLinks;
-	}
-
-	public Map<Id<Link>, Double> getPenaltyFactorsOfLinksForEmergencyVehicles() {
-		return penaltyFactorsOfLinksForEmergencyVehicles;
-	}
 
 	public Controler getControler() {
 		return controller;
