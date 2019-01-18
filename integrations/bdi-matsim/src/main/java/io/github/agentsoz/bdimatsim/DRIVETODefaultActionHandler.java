@@ -24,8 +24,8 @@ package io.github.agentsoz.bdimatsim;
 
 import io.github.agentsoz.bdiabm.data.ActionContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContainer;
-import io.github.agentsoz.util.evac.ActionList;
-import io.github.agentsoz.util.evac.PerceptList;
+import io.github.agentsoz.util.ActionList;
+import io.github.agentsoz.util.PerceptList;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;

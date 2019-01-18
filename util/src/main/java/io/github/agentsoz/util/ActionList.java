@@ -1,4 +1,4 @@
-package io.github.agentsoz.util.evac;
+package io.github.agentsoz.util;
 
 /*
  * #%L

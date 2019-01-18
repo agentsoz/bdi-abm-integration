@@ -33,7 +33,7 @@ import io.github.agentsoz.jill.config.Config;
 import io.github.agentsoz.jill.core.GlobalState;
 import io.github.agentsoz.jill.struct.AObject;
 import io.github.agentsoz.jill.util.ArgumentsLoader;
-import io.github.agentsoz.util.evac.PerceptList;
+import io.github.agentsoz.util.PerceptList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

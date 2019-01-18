@@ -25,7 +25,7 @@ package io.github.agentsoz.nonmatsim;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.util.ActionList;
 
 /**
  * @author Edmund Kemsley Processes action/s from MatsimActionList by updating

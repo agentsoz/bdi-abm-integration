@@ -1,4 +1,4 @@
-package io.github.agentsoz.util.evac;
+package io.github.agentsoz.util;
 
 /*
  * #%L
@@ -24,32 +24,21 @@ package io.github.agentsoz.util.evac;
 
 public final class PerceptList {
 	public static final String ARRIVED = "arrived";
-	public static final String ARRIVED_CONNECT_TO = "arrived_to_connect_to";
-	public static final String ARRIVED_AND_PICKED_UP = "arrived_and_picked_up";
 	public static final String BLOCKED = "blocked";
 	public static final String BROADCAST = "global";
 	public static final String CONGESTION = "congestion";
-	public static final String DISRUPTION = "disruption";
-	public static final String EMERGENCY_MESSAGE = "emergency_message";
-	public static final String FIELD_OF_VIEW = "field_of-view";
-	public static final String FIRE = "fire";
-	public static final String EMBERS_DATA = "embers_data";
-	public static final String FIRE_ALERT = "fire_alert";
-	public static final String FIRE_DATA  = "fire_data";
-	public static final String LEAVENOW = "leave_now";
-	public static final String PICKED_UP = "picked_up";
-	public static final String SIGHTED_EMBERS= "sighted_embers";
-	public static final String SIGHTED_FIRE= "sighted_fire";
 	public static final String TIME = "time";
 
-	//diffusion model percepts
-	public static final String DIFFUSION = "diffusion";
-    public static final String BDI_STATE_UPDATES    = "bdi_state_updates";
-	public static final String SOCIAL_NETWORK_MSG = "social_network_message";
-
+	// Used to control the simulation run and data passing between BDI and ABM models
+	public static final String TAKE_CONTROL_BDI = "take_control_bdi";
+	public static final String TAKE_CONTROL_ABM = "take_control_abm";
+	public static final String AGENT_DATA_CONTAINER_FROM_BDI = "agent_data_container_from_bdi";
+	public static final String AGENT_DATA_CONTAINER_FROM_ABM = "agent_data_container_from_abm";
 
     // BDI Query Percept strings
+
     public static final String REQUEST_LOCATION = "request_location";
+
 	/**
 	 * REQUEST_DRIVING_DISTANCE_TO works as follows:
 	 * <ul>
@@ -62,11 +51,6 @@ public final class PerceptList {
 	 */
 	public static final String REQUEST_DRIVING_DISTANCE_TO = "request_driving_distance_to";
 
-	// Used to control the simulation run and data passing between BDI and ABM models
-	public static final String TAKE_CONTROL_BDI = "take_control_bdi";
-	public static final String TAKE_CONTROL_ABM = "take_control_abm";
-	public static final String AGENT_DATA_CONTAINER_FROM_BDI = "agent_data_container_from_bdi";
-	public static final String AGENT_DATA_CONTAINER_FROM_ABM = "agent_data_container_from_abm";
 
 }
 
