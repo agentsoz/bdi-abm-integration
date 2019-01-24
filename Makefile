@@ -19,3 +19,10 @@ normal: quick-matsim
 	cd examples/bushfire-tutorial ; mvn clean install
 	cd examples/bushfire-tutorial ; mvn test -Dmaven.test.redirectTestOutputToFile
 
+conservation:
+	mvn clean install -N
+	cd util && mvn clean install
+	cd integrations/bdi-abm && mvn clean install
+	cd integrations/abm-jill && mvn clean install
+	cd integrations/bdi-gams && mvn clean install
+	cd examples/conservation && mvn clean install
