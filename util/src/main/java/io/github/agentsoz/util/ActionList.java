@@ -1,4 +1,4 @@
-package io.github.agentsoz.dataInterface;
+package io.github.agentsoz.util;
 
 /*
  * #%L
@@ -22,13 +22,11 @@ package io.github.agentsoz.dataInterface;
  * #L%
  */
 
-
-public interface DataSource<T> {
-   /**
-    * Sends scheduled data of the given type at the given time
-    * @param forTime the time for which data is scheduled to be produced
-    * @param dataType the type identifier for the data being produced
-    * @return
-    */
-   T sendData(double forTime, String dataType);
+public class ActionList {
+	public static final String DRIVETO = "drive_to";
+	public static final String REPLAN_CURRENT_DRIVETO = "replan_drive_to";
+   	public static final String CONNECT_TO = "connect to";
+	public static final String PICKUP = "pick up";
+	public static final String DRIVETO_AND_PICKUP = "drive to and pick up";
+	public static final String SET_DRIVE_TIME = "set drive time";
 }

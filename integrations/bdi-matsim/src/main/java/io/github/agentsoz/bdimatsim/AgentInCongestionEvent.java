@@ -1,10 +1,10 @@
 package io.github.agentsoz.bdimatsim;
 
-/*
+/*-
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2017 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2018 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -34,7 +34,7 @@ public final class AgentInCongestionEvent extends Event {
 	private final Id<Person> driverId;
 	private final Id<Link> currentLinkId;
 	
-	public AgentInCongestionEvent(double time, Id<Vehicle> vehicleId, Id<Person> driverId, Id<Link> currentLinkId ) {
+	public AgentInCongestionEvent( double time, Id<Vehicle> vehicleId, Id<Person> driverId, Id<Link> currentLinkId ) {
 		super(time);
 		this.vehicleId = vehicleId;
 		this.driverId = driverId ;

@@ -23,14 +23,13 @@ package io.github.agentsoz.dataInterface;
  */
 
 
-public interface DataClient {
+public interface DataClient<T> {
    
    /**
-    * @param time
-    * @param dataType
-    * @param data
-    * @return true if data was successfully consumed, false otherwise (this is, at least,
-    * how I interpret Dhirendra's example). kai, dec'17
+    * Receives data of a given type
+    * @param time the time at which the data being received was produced
+    * @param dataType the type identifier for the data being received
+    * @param data the data being received
     */
-   public boolean dataUpdate( double time, String dataType, Object data );
+   void receiveData(double time, String dataType, T data);
 }

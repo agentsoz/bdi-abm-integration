@@ -24,8 +24,6 @@ package io.github.agentsoz.bushfiretute.matsim;
 
 import io.github.agentsoz.util.evac.ActionList;
 import io.github.agentsoz.util.evac.PerceptList;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
@@ -50,17 +48,17 @@ import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DRIVETO_AND_PICKUPActionHandler implements BDIActionHandler {
-	private static final Logger logger = Logger.getLogger(DRIVETO_AND_PICKUPActionHandler.class) ;
+	private static final Logger logger = LoggerFactory.getLogger(DRIVETO_AND_PICKUPActionHandler.class) ;
 
 	private final BDIModel bdiModel;
 
 	private final MATSimModel model;
 
 	public DRIVETO_AND_PICKUPActionHandler(BDIModel bdiModel, MATSimModel model) {
-		logger.setLevel(Level.TRACE);
-		
 		this.bdiModel = bdiModel;
 		this.model = model;
 	}

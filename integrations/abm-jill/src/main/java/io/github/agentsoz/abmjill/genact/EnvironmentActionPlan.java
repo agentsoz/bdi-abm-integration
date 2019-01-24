@@ -49,8 +49,8 @@ public class EnvironmentActionPlan extends Plan {
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
 			EnvironmentAction goal = (EnvironmentAction) getGoal();
-			JillModel.packageAgentAction(Integer.toString(getAgent().getId()),
-					goal.getActionID(), goal.getActionParameters());
+			JillModel.packageAgentActionV2(Integer.toString(getAgent().getId()),
+					goal.getActionID(), goal.getActionParameters(), goal.getActionState());
 		}
 	}, };
 

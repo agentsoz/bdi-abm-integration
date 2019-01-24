@@ -48,7 +48,7 @@ import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
  * passive (timed) data updates - for these data updates the data source has to register to the data server
  * active data updates - do not have to register
  * 
- *  DataClient - receives dataUpdate from the subscribed data type.
+ *  DataClient - receives receiveData from the subscribed data type.
  */
 
 public class BDIModel extends JACKModel {  //DataSource

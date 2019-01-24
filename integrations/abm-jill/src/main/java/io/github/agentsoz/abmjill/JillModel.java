@@ -31,8 +31,9 @@ import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.jill.Main;
 import io.github.agentsoz.jill.config.Config;
 import io.github.agentsoz.jill.core.GlobalState;
+import io.github.agentsoz.jill.struct.AObject;
 import io.github.agentsoz.jill.util.ArgumentsLoader;
-import io.github.agentsoz.util.evac.PerceptList;
+import io.github.agentsoz.util.PerceptList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import java.util.*;
 
 public abstract class JillModel implements BDIServerInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
+	private static final Logger logger = LoggerFactory.getLogger(JillModel.class);
 
 	PrintStream writer = null;
 	private static AgentDataContainer nextContainer;
@@ -50,12 +51,18 @@ public abstract class JillModel implements BDIServerInterface {
 	private Config config;
 	private QueryPerceptInterface queryInterface;
 
+	private static io.github.agentsoz.bdiabm.v2.AgentDataContainer adc; // !! Be warned, this is static
+	private Object sequenceLock;
+
 	public JillModel() {
 	}
 
 	protected static Agent getAgent(int id) {
-		// FIXME: No contract that says returned object will be instanceof Agent
-		return (Agent) GlobalState.agents.get(id);
+		AObject agent = GlobalState.agents.get(id);
+		if (agent != null && agent instanceof Agent) {
+			return (Agent)agent;
+		}
+		throw new RuntimeException("Agent " + id + " is not of type io.github.agentsoz.bdiabm.Agent; found " + agent);
 	}
 
 	@Override
@@ -101,7 +108,7 @@ public abstract class JillModel implements BDIServerInterface {
 
 	// package new agent action into the agent data container
 	public static void packageAgentAction(String agentID, String actionID,
-			Object[] parameters) {
+										  Object[] parameters, String actionState) {
 		
 		getAgent(Integer.valueOf(agentID)).packageAction(actionID, parameters);
 
@@ -110,11 +117,85 @@ public abstract class JillModel implements BDIServerInterface {
 		boolean isNewAction = ac.register(actionID, parameters);
 		if (!isNewAction) {
 			ac.get(actionID).setParameters(parameters);
-			ac.get(actionID).setState(ActionContent.State.INITIATED);
+			ActionContent.State state = ActionContent.State.INITIATED;
+			if (actionState != null) {
+				try {
+					state = ActionContent.State.valueOf(actionState);
+				} catch (Exception e) {
+					logger.warn("ignoring unknown action state: "
+							+ " agent:" + agentID
+							+ ", action id:" + actionID
+							+ ", content:" + ac.get(actionID));
+				}
+			}
+			ac.get(actionID).setState(state);
 		}
 		logger.debug("added " + ((isNewAction) ? "new action" : "")
 				+ " into ActionContainer: agent:" + agentID + ", action id:"
 				+ actionID + ", content:" + ac.get(actionID));
+	}
+
+	public static io.github.agentsoz.bdiabm.v2.AgentDataContainer getAgentDataContainer() {
+		return adc;
+	}
+
+    public void setAgentDataContainer(io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
+        JillModel.adc = adc;
+    }
+
+
+    public static void packageAgentActionV2(String agentId,
+											String actionId,
+											Object[] parameters,
+											String actionState) {
+		ActionContent.State state = ActionContent.State.INITIATED;
+		if (actionState != null) {
+			try {
+				state = ActionContent.State.valueOf(actionState);
+			} catch (Exception e) {
+				logger.warn("agent {} ignoring unknown action state {}", agentId, actionState);
+			}
+		}
+		ActionContent ac = new ActionContent(parameters, state, actionId );
+		adc.putAction(agentId, actionId, ac);
+	}
+
+	public void takeControlV2(double time, io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
+		if (adc != null) {
+			Iterator<String> it = adc.getAgentIdIterator();
+			while (it.hasNext()) {
+				String agentId = it.next();
+				// Process the incoming percepts
+				Map<String, PerceptContent> percepts = adc.getAllPerceptsCopy(agentId);
+				for (String perceptId : percepts.keySet()) {
+					PerceptContent content = percepts.get(perceptId);
+					if (content != null) {
+						try {
+							int id = Integer.parseInt(agentId);
+							getAgent(id).handlePercept(PerceptList.TIME, time);
+							getAgent(id).handlePercept(content.getPercept_type(), content.getValue());
+						} catch (Exception e) {
+							logger.error("While handling percept for Agent {}: {}", agentId, e.getMessage());
+							e.printStackTrace();
+						}
+					}
+				}
+
+				// Process the incoming action updates
+				Map<String, ActionContent> actions = adc.getAllActionsCopy(agentId);
+				for (String actionId : actions.keySet()) {
+					ActionContent content = actions.get(actionId);
+					try {
+						int id = Integer.parseInt(agentId);
+						getAgent(id).updateAction(content.getInstance_id(), content);
+					} catch (Exception e) {
+						logger.error("While updating action status for Agent {}: {}", agentId, e.getMessage());
+					}
+				}
+			}
+		}
+		// Wait until idle
+		Main.waitUntilIdle();
 	}
 
 	@Override
@@ -218,4 +299,12 @@ public abstract class JillModel implements BDIServerInterface {
 		agentDataContainer.copy(nextContainer); // copies new actions
 		nextContainer.removeAll();
     }
+
+	public void useSequenceLock(Object sequenceLock) {
+		this.sequenceLock = sequenceLock;
+	}
+
+	protected Object getSequenceLock() {
+		return sequenceLock;
+	}
 }

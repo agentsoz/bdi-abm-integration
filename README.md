@@ -1,22 +1,22 @@
 # BDI-ABM Integration Package
 
-This software realises a mechanism for interacting 
+This software realises a mechanism for integrating
 Belief-Desire-Intention (BDI) reasoning into agents within an
 agent-based simulation (ABM). The concept is described
 in the following papers papers:
 
-1. Dhirendra Singh, Lin Padgham, Brian Logan. 
+1. Dhirendra Singh, Lin Padgham, Brian Logan.
    [Integrating BDI agents with Agent Based Simulation Platforms](https://researchbank.rmit.edu.au/view/rmit:37619).
-   Autonomous Agents and Multi-agent Systems, 2016. 
+   Autonomous Agents and Multi-agent Systems, 2016.
 
 2. Lin Padgham, Dhirendra Singh.
    [Making MATSim Agents Smarter with the Belief-Desire-Intention Framework](http://matsim.org/the-book)
    Horni, A., Nagel, K. and Axhausen, K.W. (eds.) The Multi-Agent Transport Simulation MATSim,
    pages 201-210, 2016. Ubiquity Press London.
-   
+
 3. Lin Padgham, Kai Nagel, Dhirendra Singh, Qingyu Chen.
-   [Integrating BDI Agents into a MATSim Simulation](https://researchbank.rmit.edu.au/view/rmit:28920). 
-   Frontiers in Artificial Intelligence and Applications 263 (ECAI 2014), 
+   [Integrating BDI Agents into a MATSim Simulation](https://researchbank.rmit.edu.au/view/rmit:28920).
+   Frontiers in Artificial Intelligence and Applications 263 (ECAI 2014),
    pages 681-686, 2014.
 
 
@@ -29,21 +29,21 @@ Examples of BDI-ABM applications are provided in the `./examples` directory.
 Any BDI-ABM application consists of three layers. A generic first layer
 (`./integrations/bdi-abm`) manages the high level interaction and message
 passing between the BDI and the ABM system. A second platform specific
-layer realises the connection between a specific BDI platform (such as 
-JACK, i.e., `./integrations/abm-jack`), and a specific ABM system (such 
+layer realises the connection between a specific BDI platform (such as
+JACK, i.e., `./integrations/abm-jack`), and a specific ABM system (such
 as MATSim, i.e., `./integrations/bdi-matsim`). Finally, a third application
 layer puts these together along with domain specific code (for instance
-`./examples/bushfire). 
+`./examples/bushfire).
 
 Overall, the repository consists of *integrations* and *examples*. Integrations
-are platform specific and live in `./integrations`. Examples are domain 
+are platform specific and live in `./integrations`. Examples are domain
 specific, and live in `./examples`. The following integrations
 are provided:
- 
+
 Integration   | Directory                   | Description
 :-------------|:----------------------------|:----------------------------
 BDI-ABM       | `./integrations/bdi-abm`    | BDI-ABM communication and data layer
-BDI-GAMS      | `./integrations/bdi-gams`   | Integration for GAMS (www.gams.com) 
+BDI-GAMS      | `./integrations/bdi-gams`   | Integration for GAMS (www.gams.com)
 BDI-MATSim    | `./integrations/bdi-matsim` | Integration for MATSim (www.matsim.org)
 ABM-JACK      | `./integrations/abm-jack`   | Integration for JACK (aosgrp.com/products/jack)
 ABM-Jill      | `./integrations/abm-jill`   | Integration for Jill (http://agentsoz.github.io/jill)
@@ -59,8 +59,8 @@ Bushfire Tutorial   | `./examples/bushfire-tutorial` | Uses JACK and MATSim
 Conservation Ethics | `./examples/conservation`      | Uses Jill and GAMS
 Child Vaccination   | `./examples/vaccination`       | Uses JACK and a custom Python-based ABM
 
-In addition to above, the repository consists of an *util* project. It lives in 
-`./util` and contains the utility classes used by integration libraries and example 
+In addition to above, the repository consists of an *util* project. It lives in
+`./util` and contains the utility classes used by integration libraries and example
 applications in the repository.
 
 Project     | Directory      | Description
@@ -70,22 +70,19 @@ Util        | `./util`       | Contains utility classes for integration librarie
 
 
 <a name="Dependencies"></a>
-## Build Dependencies 
+## Build Dependencies
 
 
-* Java Development Kit 1.8 
+* Java Development Kit 1.8
   http://en.wikipedia.org/wiki/Java_Development_Kit
-
-* ECLIPSE Luna with built-in Maven support
-  https://www.eclipse.org
 
 * Apache Maven 3.3.*
   http://maven.apache.org
 
-* Some of the integrations (e.g., JACK, GAMS) require third-party 
-  libraries to be installed in your local Maven repository. See 
+* Some of the integrations (e.g., JACK, GAMS) require third-party
+  libraries to be installed in your local Maven repository. See
   the respective READMEs (`./integrations/*/README.md`) for details.
-  *The project will not build unless these dependencies have been 
+  *The project will not build unless these dependencies have been
    resolved.*
 
 
@@ -95,15 +92,13 @@ Util        | `./util`       | Contains utility classes for integration librarie
 
 ### Bushfire example
 
-1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do
     `mvn clean install -N`
 2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
     for instructions
 3.  Build the UTIL library: See `/util/README.md`
     for instructions
-4.  Build the ABM-JACK library: See `/integrations/abm-jack/README.md`
-    for instructions
-5.  Build the ABM-Jill library: See `/integrations/abm-jill/README.md`
+4.  Build the ABM-Jill library: See `/integrations/abm-jill/README.md`
     for instructions
 6.  Build the Bushfire application: In `/examples/bushfire`, do
     `mvn clean install`
@@ -111,7 +106,7 @@ Util        | `./util`       | Contains utility classes for integration librarie
 
 ### Conservation Example
 
-1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do
     `mvn clean install -N`
 2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
     for instructions
@@ -119,13 +114,13 @@ Util        | `./util`       | Contains utility classes for integration librarie
     for instructions
 4.  Build the ABM-Jill library: See `/integrations/abm-jill/README.md`
     for instructions
-5.  Build the Bushfire application: In `/examples/conservation`, do
+5.  Build the Conservation application: In `/examples/conservation`, do
     `mvn clean install`
 
 
-### Vaccination Example
+### Vaccination Example (probably outdated as of 11/Sep/2018)
 
-1.  Build the bdi-abm-integration layer: In the source repository `/`, do 
+1.  Build the bdi-abm-integration layer: In the source repository `/`, do
     `mvn clean install -N`
 2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
     for instructions

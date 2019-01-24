@@ -8,3 +8,4 @@
 # IntelliJ ignores
 .idea/
 **/*.iml
+.Rproj.user

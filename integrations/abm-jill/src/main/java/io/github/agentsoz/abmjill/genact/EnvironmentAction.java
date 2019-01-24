@@ -30,11 +30,16 @@ public class EnvironmentAction extends Goal {
 
 	private String actionID;
 	private Object[] actionParameters;
-	
+	private String actionState;
+
 	public EnvironmentAction(String str, String actionID, Object[] actionParameters) {
+		this(str, actionID, actionParameters, null);
+	}
+	public EnvironmentAction(String str, String actionID, Object[] actionParameters, String actionState) {
 		super(str);
 		this.actionID = actionID;
 		this.actionParameters = actionParameters;
+		this.actionState = actionState;
 	}
 
 	public String getActionID() {
@@ -53,4 +58,7 @@ public class EnvironmentAction extends Goal {
 		this.actionParameters = actionParameters;
 	}
 
+	public String getActionState() {
+		return actionState;
+	}
 }

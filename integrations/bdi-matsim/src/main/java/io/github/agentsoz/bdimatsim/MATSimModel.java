@@ -1,22 +1,19 @@
 package io.github.agentsoz.bdimatsim;
 
-import java.util.*;
-
-import com.google.gson.Gson;
-import com.vividsolutions.jts.geom.*;
+import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.dataInterface.DataClient;
-import io.github.agentsoz.nonmatsim.PAAgent;
-import io.github.agentsoz.util.Disruption;
-import io.github.agentsoz.util.EmergencyMessage;
-import io.github.agentsoz.util.evac.ActionList;
-import io.github.agentsoz.util.evac.PerceptList;
+import io.github.agentsoz.dataInterface.DataServer;
+import io.github.agentsoz.nonmatsim.PAAgentManager;
 import io.github.agentsoz.util.Location;
+import io.github.agentsoz.util.ActionList;
+import io.github.agentsoz.util.PerceptList;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -34,20 +31,22 @@ import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.PlayPauseSimulationControl;
 import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
+import org.matsim.core.mobsim.qsim.AbstractQSimModule;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.qnetsimengine.*;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.NetworkRoutingProvider;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.GeometryUtils;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.vehicles.Vehicle;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
-import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 /*
  * #%L
@@ -71,43 +70,51 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.ABMServerInterface;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.dataInterface.DataServer;
-import io.github.agentsoz.nonmatsim.PAAgentManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * @author QingyuChen, KaiNagel, Dhi Singh
  */
 public final class MATSimModel implements ABMServerInterface, QueryPerceptInterface, DataClient {
 	private static final Logger log = LoggerFactory.getLogger(MATSimModel.class);
-	//private static final Logger log = Logger..getLogger(MATSimModel.class) ;
 	public static final String MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR = "--matsim-output-directory";
-	private final EvacConfig evacConfig;
-	private final FireWriter fireWriter;
-	private final DisruptionWriter disruptionWriter;
-	private final Config config;
-	private boolean configLoaded = false ;
 
-	public enum EvacRoutingMode {carFreespeed, carGlobalInformation, emergencyVehicle}
+	public static final String eGlobalStartHhMm = "startHHMM";
+	private static final String eConfigFile = "configXml";
+	private static final String eOutputDir = "outputDir";
+	private static final String eCongestionEvaluationInterval = "congestionEvaluationInterval";
+	private static final String eCongestionToleranceThreshold = "congestionToleranceThreshold";
+	private static final String eCongestionReactionProbability = "congestionReactionProbability";
 
-	private final Scenario scenario ;
+	// Defaults
+	private String optConfigFile = null;
+	private String optOutputDir = null;
+	private double optStartTimeInSeconds = 1.0;
+	private double optCongestionEvaluationInterval = 180;
+	private double optCongestionToleranceThreshold = 0.25;
+	private double optCongestionReactionProbability = 0.10;
+
+
+	private Config config = null;
+	private boolean configLoaded = false;
+    private Object sequenceLock;
+
+
+	private Scenario scenario = null;
+	private boolean scenarioLoaded = false ;
+	private boolean modelInitialised = false ;
+
 
 	/**
 	 * A helper class essentially provided by the framework, used here.  The only direct connection to matsim are the event
 	 * monitors, which need to be registered, via the events monitor registry, as a matsim events handler.
 	 */
-	private final PAAgentManager agentManager ;
+	private PAAgentManager agentManager = null;
 
 	/**
 	 * This is in fact a MATSim class that provides a view onto the QSim.
 	 */
-	private final MobsimDataProvider mobsimDataProvider = new MobsimDataProvider() ;
+	@Inject private MobsimDataProvider mobsimDataProvider ;
+	@Inject private Replanner replanner;
+	// yy This is working because MATSimModel is bound somewhere.
 
 	private QSim qSim;
 
@@ -119,25 +126,74 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	private PlayPauseSimulationControl playPause;
 	private final EventsMonitorRegistry eventsMonitors  = new EventsMonitorRegistry() ;
 	private Thread matsimThread;
-	@Inject private Replanner replanner;
 
-	private boolean scenarioLoaded = false ;
+	private DataServer dataServer;
+	private final Map<String, DataClient> dataListeners = createDataListeners();
+	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
 
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinks = new HashMap<>() ;
-	private final Map<Id<Link>,Double> penaltyFactorsOfLinksForEmergencyVehicles = new HashMap<>() ;
+	public enum RoutingMode {carFreespeed, carGlobalInformation}
 
-	public MATSimModel(String matSimFile, String matsimOutputDirectory) {
-		// not the most elegant way of doing this ...
-		// yy maybe just pass the whole string from above and take apart ourselves?
-		this(
-		matsimOutputDirectory==null ?
-				new String[]{matSimFile} :
-				new String[]{ matSimFile, MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory }
-		);
+	private Controler controller;
+
+
+	public MATSimModel(Map<String, String> opts, DataServer dataServer) {
+		this( new String [] {
+				opts.get( eConfigFile ) ,
+							  MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR , opts.get( eOutputDir) ,
+							  eGlobalStartHhMm , opts.get( eGlobalStartHhMm )
+		} ) ;
+
+		// yyyy this is so far NOT the same as what is was originally, see below, since the code below
+		// could pass "null" which the new code cannot.  (However, the "null" was not really handled
+		// correctly in the receiving code so it needs to be repaired ...).  kai, nov'18
+		
+//		this(opts.get(eConfigFile), opts.get(eOutputDir), opts.get(eGlobalStartHhMm));
+		
+		registerDataServer(dataServer);
+		if (opts == null) {
+			return;
+		}
+		for (String opt : opts.keySet()) {
+			log.info("Found option: {}={}", opt, opts.get(opt));
+			switch(opt) {
+				case eGlobalStartHhMm:
+					optStartTimeInSeconds = convertTimeToSeconds(opts.get(opt).replace(":", ""));
+					break;
+				case eConfigFile:
+					optConfigFile = opts.get(opt);
+					break;
+				case eOutputDir:
+					optOutputDir = opts.get(opt);
+					break;
+				case eCongestionEvaluationInterval:
+					optCongestionEvaluationInterval= Double.parseDouble(opts.get(opt));
+					break;
+				case eCongestionToleranceThreshold:
+					optCongestionToleranceThreshold= Double.parseDouble(opts.get(opt));
+					break;
+				case eCongestionReactionProbability:
+					optCongestionReactionProbability= Double.parseDouble(opts.get(opt));
+					break;
+				default:
+					log.warn("Ignoring option: " + opt + "=" + opts.get(opt));
+			}
+		}
 	}
 
+//	public MATSimModel(String matSimFile, String matsimOutputDirectory, String startHHMM) {
+//		// not the most elegant way of doing this ...
+//		// yy maybe just pass the whole string from above and take apart ourselves?
+//		this(
+//		matsimOutputDirectory==null ?
+//				new String[]{matSimFile} :
+//				new String[]{ matSimFile, MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR, matsimOutputDirectory, eGlobalStartHhMm, startHHMM }
+//		);
+//	}
+
 	public MATSimModel( String[] args) {
-//		((ch.qos.logback.classic.Logger)log).setLevel(Level.DEBUG);
+		// Log level should be set in logback.xml, see
+		// https://github.com/agentsoz/ees/blob/a769eb9497c444beac7cf823bfae05764eb06356/src/main/resources/logback.xml#L39
+		//((ch.qos.logback.classic.Logger)log).setLevel( Level.DEBUG);
 
 		config = ConfigUtils.loadConfig( args[0] ) ;
 
@@ -147,7 +203,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		config.plans().setActivityDurationInterpretation(ActivityDurationInterpretation.tryEndTimeThenDuration);
 
-		config.qsim().setStartTime( 1.00 );
 		config.qsim().setSimStarttimeInterpretation( StarttimeInterpretation.onlyUseStarttime );
 
 		config.controler().setWritePlansInterval(1);
@@ -155,21 +210,18 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		config.planCalcScore().setWriteExperiencedPlans(true);
 
-		evacConfig = ConfigUtils.addOrGetModule(config,EvacConfig.class) ;
-		Gbl.assertNotNull(evacConfig);
-
 		// we have to declare those routingModes where we want to use the network router:
 		{
 			Collection<String> modes = config.plansCalcRoute().getNetworkModes();
 			Set<String> newModes = new TreeSet<>( modes ) ;
-			for ( EvacRoutingMode mode : EvacRoutingMode.values() ) {
+			for ( RoutingMode mode : RoutingMode.values() ) {
 				newModes.add( mode.name() ) ;
 			}
 			config.plansCalcRoute().setNetworkModes( newModes );
 		}
 
 		// the router also needs scoring parameters:
-		for ( EvacRoutingMode mode : EvacRoutingMode.values() ) {
+		for ( RoutingMode mode : RoutingMode.values() ) {
 			ModeParams params = new ModeParams(mode.name());
 			config.planCalcScore().addModeParams(params);
 		}
@@ -187,9 +239,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		this.agentManager = new PAAgentManager(eventsMonitors) ;
 
-		this.fireWriter = new FireWriter( config ) ;
-		this.disruptionWriter = new DisruptionWriter( config ) ;
-
 	}
 
 	public Config loadAndPrepareConfig() {
@@ -206,20 +255,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 		ScenarioUtils.loadScenario(scenario) ;
 
-		// make sure links don't have speed infinity (results in problems with the router; yy instead repair input files?):
-		for ( Link link : scenario.getNetwork().getLinks().values() ) {
-			final double veryLargeSpeed = 9999999999.;
-			if ( link.getFreespeed() > veryLargeSpeed ) {
-				link.setFreespeed(veryLargeSpeed);
-			}
-			if ( evacConfig.getSetup()== EvacConfig.Setup.tertiaryRoadsCorrection ) {
-				// yyyy correction for much too high speed value on tertiary roads. kai, dec'17
-				if (link.getFreespeed() == 27.77777777777778 && link.getCapacity() == 600.) {
-					link.setFreespeed(50. / 3.6);
-				}
-			}
-		}
-
 		scenarioLoaded=true ;
 		return scenario ;
 	}
@@ -235,7 +270,9 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 			// default action:
 			agentManager.getAgent(agentId).getActionHandler().registerBDIAction(
-					ActionList.DRIVETO, new DRIVETODefaultActionHandler(this) );
+					ActionList.DRIVETO, new DRIVETODefaultActionHandlerV2(this) );
+			agentManager.getAgent(agentId).getActionHandler().registerBDIAction(
+					ActionList.REPLAN_CURRENT_DRIVETO, new ReplanDriveToDefaultActionHandlerV2(this) );
 		}
 		{
 			ActivityParams params = new ActivityParams("driveTo");
@@ -244,7 +281,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		}
 		// ---
 
-		final Controler controller = new Controler( scenario );
+		controller = new Controler( scenario );
 
 		controller.getEvents().addHandler(eventsMonitors);
 
@@ -255,13 +292,24 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			}
 		}
 
+		// infrastructure at QSim level (separating line not fully logical)
+		controller.addOverridingQSimModule( new AbstractQSimModule() {
+			@Override protected void configureQSim() {
+				this.bind(Replanner.class).in( Singleton.class ) ;
+				this.bind( MATSimModel.class ).toInstance( MATSimModel.this );
+			}
+		} );
+
+		// infrastructure at Controler level (separating line not fully logical)
 		controller.addOverridingModule(new AbstractModule(){
 			@Override public void install() {
-				setupEmergencyVehicleRouting();
-				setupCarGlobalInformationRouting();
-				setupCarFreespeedRouting();
 
-				install( new EvacQSimModule(MATSimModel.this, controller.getEvents()) ) ;
+				this.bind( MobsimDataProvider.class ).in( Singleton.class ) ;
+				this.addMobsimListenerBinding().to( MobsimDataProvider.class ) ;
+				// (pulls mobsim from Listener Event.  maybe not so good ...)
+
+				// analysis:
+				this.addControlerListenerBinding().to( OutputEvents2TravelDiaries.class );
 
 				this.addMobsimListenerBinding().toInstance((MobsimInitializedListener) e -> {
 					// memorize the qSim:
@@ -274,64 +322,55 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 					//						initialiseVisualisedAgents() ;
 				}) ;
 
-				// congestion detection in {@link EvacAgentTracker}
 
-				this.addMobsimListenerBinding().toInstance( mobsimDataProvider );
-			}
+				// define the turn acceptance logic that reacts to blocked links:
+				{
+					ConfigurableQNetworkFactory qNetworkFactory = new ConfigurableQNetworkFactory( controller.getEvents(), scenario );
+					qNetworkFactory.setTurnAcceptanceLogic( new TurnAcceptanceLogic() {
+						TurnAcceptanceLogic delegate = new DefaultTurnAcceptanceLogic();
 
-			private void setupCarFreespeedRouting() {
-				String routingMode = EvacRoutingMode.carFreespeed.name() ;
+						@Override
+						public AcceptTurn isAcceptingTurn( Link currentLink, QLaneI currentLane, Id<Link> nextLinkId, QVehicle veh, QNetwork qNetwork, double now ) {
 
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car,routingMode)) ;
+							AcceptTurn accept = delegate.isAcceptingTurn( currentLink, currentLane, nextLinkId, veh, qNetwork, now );
 
-				// freespeed travel time:
-				addTravelTimeBinding(routingMode).to(FreeSpeedTravelTime.class);
+							QLinkI nextQLink = qNetwork.getNetsimLink( nextLinkId );
+							double speed = nextQLink.getLink().getFreespeed( now );
+							if ( speed < 0.1 ) { // m/s
+								accept = AcceptTurn.WAIT;
+								Id<Person> driverId = veh.getDriver().getId();
+								Id<Link> currentLinkId = veh.getCurrentLink().getId();
+								Id<Vehicle> vehicleId = veh.getId();
+								Id<Link> blockedLinkId = nextLinkId;
+								controller.getEvents().processEvent( new NextLinkBlockedEvent( now, vehicleId,
+										driverId, currentLinkId, blockedLinkId ) );
+								// yyyy this event is now generated both here and in the agent.  In general,
+								// it should be triggered in the agent, giving the bdi time to compute.  However, the
+								// blockage may happen between there and arriving at the node ...  kai, dec'17
 
-				// travel disutility includes the fire penalty. If no data arrives, it makes no difference.
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinks);
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
-			}
+							}
+//							log.debug( "time=" + MATSimModel.this.getTime() + ";\t fromLink=" + currentLink.getId() +
+//										     ";\ttoLink=" + nextLinkId + ";\tanswer=" + accept.name() );
+							return accept;
+						}
+					} );
+					bind( QNetworkFactory.class ).toInstance( qNetworkFactory );
+				}
 
-			private void setupCarGlobalInformationRouting() {
-				final String routingMode = EvacRoutingMode.carGlobalInformation.name();
-
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car, routingMode)) ;
-
-				// congested travel time:
-				bind(WithinDayTravelTime.class).in(Singleton.class);
-				addEventHandlerBinding().to(WithinDayTravelTime.class);
-				addMobsimListenerBinding().to(WithinDayTravelTime.class);
-				addTravelTimeBinding(routingMode).to(WithinDayTravelTime.class) ;
-
-				// travel disutility includes the fire penalty. If no data arrives, it makes no difference.
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinks);
-				// (yyyyyy the now following cases are just there because of the different tests.  Solve by config,
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
-			}
-
-			private void setupEmergencyVehicleRouting() {
-				final String routingMode = EvacRoutingMode.emergencyVehicle.name();
-
-				addRoutingModuleBinding(routingMode).toProvider(new NetworkRoutingProvider(TransportMode.car, routingMode)) ;
-
-				// congested travel time:
-				bind(WithinDayTravelTime.class).in(Singleton.class);
-				addEventHandlerBinding().to(WithinDayTravelTime.class);
-				addMobsimListenerBinding().to(WithinDayTravelTime.class);
-				addTravelTimeBinding(routingMode).to(WithinDayTravelTime.class) ;
-
-				// travel disutility includes the fire penalty:
-				TravelDisutilityFactory disutilityFactory = new EvacTravelDisutility.Factory(penaltyFactorsOfLinksForEmergencyVehicles);
-				// yyyyyy This uses the same disutility as the evacuees.  May not be what we want.
-				// But what do we want?  kai, dec'17/jan'18
-
-//					TravelDisutilityFactory disutilityFactory = new OnlyTimeDependentTravelDisutilityFactory();
-				addTravelDisutilityFactoryBinding(routingMode).toInstance(disutilityFactory);
 			}
 		}) ;
+		modelInitialised = true;
 
+	}
+
+	public void start() {
+		if (!modelInitialised) {
+			log.warn("Model not initialised; cannot be run");
+			return;
+		}
 		// wrap the controller into a thread and start it:
 		this.matsimThread = new Thread( controller ) ;
+		this.matsimThread.setName("matsim");
 		matsimThread.start();
 
 		// wait until the thread has initialized before returning:
@@ -342,6 +381,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				e.printStackTrace();
 			}
 		}
+
 
 	}
 
@@ -360,6 +400,20 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			agentManager.transferActionsPerceptsToDataContainer(); // send back BDI actions/percepts/status'
 	}
 
+	public final void runUntilV2( long newTime , io.github.agentsoz.bdiabm.v2.AgentDataContainer inAdc) {
+		log.trace("Received {} ", inAdc);
+		//agentManager.updateActions(); // handle incoming BDI actions
+		agentManager.updateActions(inAdc, adc);
+		playPause.doStep( (int) (newTime) );
+		//agentManager.transferActionsPerceptsToDataContainer(); // send back BDI actions/percepts/status'
+	}
+
+	public void setAgentDataContainer(io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
+		this.adc = adc;
+	}
+
+
+
 	public final boolean isFinished() {
 		return playPause.isFinished() ;
 	}
@@ -372,12 +426,6 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-		if ( fireWriter!=null ) {
-			fireWriter.close();
-		}
-		if ( disruptionWriter!=null ) {
-			disruptionWriter.finish(this.getTime());
 		}
 	}
 
@@ -408,132 +456,76 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 	}
 
 	public final void registerDataServer( DataServer server ) {
-		// some blackboardy thing that sits between ABM and BDI
-		server.subscribe(this, PerceptList.FIRE_DATA);
-		server.subscribe(this, PerceptList.DISRUPTION);
-		server.subscribe(this, PerceptList.EMERGENCY_MESSAGE);
+		this.dataServer = server;
+		server.subscribe(this, PerceptList.TAKE_CONTROL_ABM);
 	}
 
-	@Override public boolean dataUpdate(double time, String dataType, Object data) {
-		if ( time+1 < getTime() || time-1 > getTime() ) {
-			log.error( "given time in dataUpdate is {}, simulation time is {}.  " +
-							   "Don't know what that means.  Will use simulation time.",
-					time, getTime() );
-		}
-		double now = getTime() ;
+	@Override public void receiveData(double time, String dataType, Object data) {
+		// receiveData can be called prior to runUntil for a new time step,
+		// which can be at a granularity greater than 1 sec. In that case
+		// time != getTime() is excepted so am disabling this check. DS,Nov18
+		//
+		//if ( time+1 < getTime() || time-1 > getTime() ) {
+		//	log.error( "given time in receiveData is {}, simulation time is {}.  " +
+		//					   "Don't know what that means.  Will use given time.",
+		//			time, getTime() );
+		//}
+		double now = time; //getTime() ;
 
 		switch( dataType ) {
-			case PerceptList.FIRE_DATA:
-				return processFireData(data, now, penaltyFactorsOfLinks, scenario,
-						penaltyFactorsOfLinksForEmergencyVehicles, fireWriter);
-			case PerceptList.DISRUPTION:
-				return processDisruptionData(data, now, scenario, disruptionWriter);
-			case PerceptList.EMERGENCY_MESSAGE:
-				return processEmergencyMessageData(data, now, scenario);
+			case PerceptList.TAKE_CONTROL_ABM:
+				dataListeners.get(dataType).receiveData(now, dataType, data);
+				break;
 			default:
-				throw new RuntimeException("not implemented") ;
+				throw new RuntimeException("Unknown data type received: " + dataType) ;
 		}
 	}
 
-	private boolean processDisruptionData( Object data, double now, Scenario scenario, DisruptionWriter disruptionWriter ) {
-		log.info("receiving disruption data at time={}", (now/3600) ); ;
+	/**
+	 * Creates a listener for each type of message we expect from the DataServer
+	 * @return
+	 */
+	private Map<String, DataClient> createDataListeners() {
+		Map<String, DataClient> listeners = new  HashMap<>();
 
-		log.info( new Gson().toJson(data) ) ;
-
-		Map<Double,Disruption> timeMapOfDisruptions = (Map<Double,Disruption>)data;
-
-		for (Disruption dd : timeMapOfDisruptions.values()) {
-
-			double speedInMpS = 0;
-			switch (dd.getEffectiveSpeedUnit()) {
-				case "kmph":
-				case "KMPH":
-					speedInMpS = dd.getEffectiveSpeed() / 3.6;
-					break;
-				default:
-					throw new RuntimeException("unimplemented speed unit");
-			}
-
-			String linkIds = Arrays.toString(dd.getImpactLinks())
-					.replaceAll("\\[", "")
-					.replaceAll("\\]", "")
-					.replaceAll(",", " ");
-			List<Link> links = NetworkUtils.getLinks(scenario.getNetwork(),NetworkUtils.getLinkIds(linkIds));
-			for (Link link : links) {
-				double prevSpeed = link.getFreespeed(now);
-				log.info("Updating freespeed on link {} from {} to {} due to disruption",
-						link.getId(), prevSpeed, speedInMpS);
-				{
-					double startTime = convertTimeToSeconds(dd.getStartHHMM());
-					if (startTime < now) {
-						startTime = now;
-					}
-					addNetworkChangeEvent(speedInMpS, link, startTime);
-					disruptionWriter.write(startTime, link.getId(), link.getCoord(), speedInMpS);
+		listeners.put(PerceptList.TAKE_CONTROL_ABM, (DataClient<io.github.agentsoz.bdiabm.v2.AgentDataContainer>) (time, dataType, data) -> {
+			synchronized (sequenceLock) {
+				adc.clear();
+				runUntilV2((long) time, data);
+				synchronized (this.getAgentManager().getAgentDataContainerV2()) {
+					copy(this.getAgentManager().getAgentDataContainerV2(), adc);
+					this.getAgentManager().getAgentDataContainerV2().clear();
 				}
-				{
-					double startTime = convertTimeToSeconds(dd.getEndHHMM());
-					if (startTime < now) {
-						startTime = now;
-					}
-					addNetworkChangeEvent(prevSpeed, link, startTime);
-					disruptionWriter.write(startTime, link.getId(), link.getCoord(), prevSpeed);
+				dataServer.publish(PerceptList.AGENT_DATA_CONTAINER_FROM_ABM, adc);
+			}
+		});
+
+		return listeners;
+	}
+
+	private void copy(io.github.agentsoz.bdiabm.v2.AgentDataContainer from, io.github.agentsoz.bdiabm.v2.AgentDataContainer to) {
+		if (from != null) {
+			Iterator<String> it = from.getAgentIdIterator();
+			while (it.hasNext()) {
+				String agentId = it.next();
+				// Copy percepts
+				Map<String, PerceptContent> percepts = from.getAllPerceptsCopy(agentId);
+				for (String perceptId : percepts.keySet()) {
+					PerceptContent content = percepts.get(perceptId);
+					to.putPercept(agentId, perceptId, content);
+				}
+				// Copy actions
+				Map<String, ActionContent> actions = from.getAllActionsCopy(agentId);
+				for (String actionId : actions.keySet()) {
+					ActionContent content = actions.get(actionId);
+					to.putAction(agentId, actionId, content);
 				}
 			}
 		}
-		return true ;
 	}
 
-	private boolean processEmergencyMessageData(Object data, double now, Scenario scenario) {
-		log.info("receiving emergency message data at time={}", (now/3600) ); ;
 
-		log.info( new Gson().toJson(data) ) ;
-
-		Map<Double,EmergencyMessage> timeMapOfEmergencyMessages = (Map<Double,EmergencyMessage>)data;
-
-		// FIXME: Assumes incoming is WSG84 format. See https://github.com/agentsoz/bdi-abm-integration/issues/34
-		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(
-				TransformationFactory.WGS84, scenario.getConfig().global().getCoordinateSystem());
-
-		// The key is time, value is a message
-		for (EmergencyMessage msg : timeMapOfEmergencyMessages.values()) {
-			// For each zone in this message
-			List<Id<Person>> personsInZones = new ArrayList<>();
-
-			for (String zoneId : msg.getBroadcastZones().keySet()) {
-				int personsMatched = 0;
-				Double[][] pairs = msg.getBroadcastZones().get(zoneId);
-				List<Coord> coords = new ArrayList<>() ;
-				for (Double[] pair : pairs) {
-					coords.add(transform.transform(new Coord(pair[0], pair[1])));
-				}
-				// Create a polygon for this zone
-				Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
-				// And find everyone inside it
-				for(Id<Person> personId : scenario.getPopulation().getPersons().keySet()) {
-					final Id<Link> linkId = this.getMobsimDataProvider().getAgent(personId).getCurrentLinkId();
-					final Link link = scenario.getNetwork().getLinks().get(linkId);
-					Point fromPoint = GeometryUtils.createGeotoolsPoint(link.getFromNode().getCoord());
-					if (polygon.contains(fromPoint)) { // coming from polygon area
-						// this agent is in (or has potentially just exited) the messaging area
-						personsMatched++;
-						personsInZones.add(personId);
-					}
-				}
-				log.info("For zone " + zoneId + ", found "+personsMatched+" persons currently within it");
-			}
-			log.info("Message " + msg.getType() + " will be sent to " + personsInZones.size() + " persons in zones " + msg.getBroadcastZones().keySet());
-			// package the messages up to send to the BDI side
-			for (Id<Person> personId : personsInZones) {
-				PAAgent agent = this.getAgentManager().getAgent(personId.toString());
-				agent.getPerceptContainer().put(PerceptList.EMERGENCY_MESSAGE, msg.getType());
-			}
-
-		}
-		return true ;
-	}
-
-	private void addNetworkChangeEvent(double speedInMpS, Link link, double startTime) {
+	public void addNetworkChangeEvent(double speedInMpS, Link link, double startTime) {
 		NetworkChangeEvent changeEvent = new NetworkChangeEvent( startTime ) ;
 		changeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
 				NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS,  speedInMpS
@@ -549,73 +541,14 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	}
 	
-	private double convertTimeToSeconds(String startHHMM) {
+	public static double convertTimeToSeconds(String startHHMM) {
 		int hours = Integer.parseInt(startHHMM.substring(0, 2));
 		int minutes = Integer.parseInt(startHHMM.substring(2, 4));
 		double startTime = hours * 3600 + minutes * 60;
-		log.info("orig={}, hours={}, min={}, sTime={}", startHHMM, hours, minutes, startTime);
+		log.debug("orig={}, hours={}, min={}, sTime={}", startHHMM, hours, minutes, startTime);
 		return startTime;
 	}
 	
-	private static boolean processFireData(Object data, double now, Map<Id<Link>, Double> penaltyFactorsOfLinks,
-										   Scenario scenario, Map<Id<Link>, Double> penaltyFactorsOfLinksForEmergencyVehicles,
-										   FireWriter fireWriter) {
-		// Is this called in every time step, or just every 5 min or so?  kai, dec'17
-
-		// Normally only one polygon per time step.  Might want to test for this, and get rid of multi-polygon code
-		// below.  On other hand, probably does not matter much.  kai, dec'17
-
-		log.warn("receiving fire data at time={}", now/3600. ) ;
-
-		CoordinateTransformation transform = TransformationFactory.getCoordinateTransformation(
-				TransformationFactory.WGS84, scenario.getConfig().global().getCoordinateSystem());
-
-		final String json = new Gson().toJson(data);
-		log.debug(json);
-
-		//			GeoJSONReader reader = new GeoJSONReader();
-		//			Geometry geometry = reader.read(json);
-		// unfortunately does not work since the incoming data is not typed accordingly. kai, dec'17
-
-		Map<Double, Double[][]> map = (Map<Double, Double[][]>) data;
-		// the map key is time; we just take the superset of all polygons
-		Geometry fire = null ;
-		for ( Double[][] pairs : map.values() ) {
-			List<Coord> coords = new ArrayList<>() ;
-			for (Double[] pair : pairs) {
-				coords.add(transform.transform(new Coord(pair[0], pair[1])));
-			}
-			Polygon polygon = GeometryUtils.createGeotoolsPolygon(coords);
-			if ( fire==null ) {
-				fire = polygon ;
-			} else {
-				fire = fire.union(polygon);
-			}
-		}
-
-//		https://stackoverflow.com/questions/38404095/how-to-calculate-the-distance-in-meters-between-a-geographic-point-and-a-given-p
-		{
-			// FIXME: Using a hardwired 10km buffer for vehicles; move to config
-			final double bufferWidth = 10000.;
-			Geometry buffer = fire.buffer(bufferWidth);
-			penaltyFactorsOfLinks.clear();
-//		Utils.penaltyMethod1(fire, buffer, penaltyFactorsOfLinks, scenario );
-			Utils.penaltyMethod2(fire, buffer, bufferWidth, penaltyFactorsOfLinks, scenario);
-			// I think that penaltyMethod2 looks nicer than method1.  kai, dec'17
-			// yy could make this settable, but for the time being this pedestrian approach
-			// seems sufficient.  kai, jan'18
-		}
-		{
-			// FIXME: Using a hardwired 1km buffer for emergency services; move to config
-			final double bufferWidth = 1000. ;
-			Geometry buffer = fire.buffer(bufferWidth);
-			penaltyFactorsOfLinksForEmergencyVehicles.clear();
-			Utils.penaltyMethod2(fire, buffer, bufferWidth, penaltyFactorsOfLinksForEmergencyVehicles, scenario);
-		}
-
-		fireWriter.write( now, fire);
-		return true;
-	}
 
 	public final double getTime() {
 		return this.qSim.getSimTimer().getTimeOfDay() ;
@@ -625,14 +558,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		log.debug("received query from agent {} for percept {} with args {}", agentID, perceptID, args);
 		switch(perceptID) {
 			case PerceptList.REQUEST_LOCATION:
-				if (args == null || !(args instanceof String)) {
-					throw new RuntimeException("Query percept '"+perceptID+"' expecting String argument, but found: " + args);
-				}
-				Link link = scenario.getNetwork().getLinks().get( Id.createLinkId( (String)args ));
-				if(link == null) {
-					log.warn(perceptID + " argument '"+args+"' is not a valid link id");
-					break;
-				}
+				final Link link = scenario.getNetwork().getLinks().get( this.getMobsimAgentFromIdString(agentID).getCurrentLinkId() );
 				Location[] coords = {
 						new Location(link.getFromNode().getId().toString(), link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY()),
 						new Location(link.getToNode().getId().toString(), link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY())
@@ -649,14 +575,17 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 				final Link currentLink = scenario.getNetwork().getLinks().get( this.getMobsimAgentFromIdString(agentID).getCurrentLinkId() );
 				final double now = getTime();
 				//final Person person = scenario.getPopulation().getPersons().get(agentID);
-				LeastCostPathCalculator.Path result = this.replanner.editRoutes(EvacRoutingMode.carFreespeed).getPathCalculator().calcLeastCostPath(
-						currentLink.getFromNode(), destLink.getFromNode(), now, null, null
-				);
-				return RouteUtils.calcDistance(result);
+				double res = 0.0;
+				synchronized (this.replanner) {
+					LeastCostPathCalculator.Path result = this.replanner.editRoutes(RoutingMode.carFreespeed).getPathCalculator().calcLeastCostPath(
+							currentLink.getFromNode(), destLink.getFromNode(), now, null, null
+					);
+					res = RouteUtils.calcDistance(result);
+				}
+				return res;
 			default:
 				throw new RuntimeException("Unknown query percept '"+perceptID+"' received from agent "+agentID+" with args " + args);
 		}
-		return null;
 	}
 
 	public PAAgentManager getAgentManager() {
@@ -679,4 +608,23 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		return config;
 	}
 
+	public double getOptCongestionEvaluationInterval() {
+		return optCongestionEvaluationInterval;
+	}
+
+	public double getOptCongestionToleranceThreshold() {
+		return optCongestionToleranceThreshold;
+	}
+
+	public double getOptCongestionReactionProbability() {
+		return optCongestionReactionProbability;
+	}
+
+    public void useSequenceLock(Object sequenceLock) {
+	    this.sequenceLock = sequenceLock;
+    }
+
+	public Controler getControler() {
+		return controller;
+	}
 }

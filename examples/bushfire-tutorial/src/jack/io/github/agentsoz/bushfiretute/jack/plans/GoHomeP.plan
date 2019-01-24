@@ -3,7 +3,7 @@ import io.github.agentsoz.bushfiretute.jack.events.*;
 import io.github.agentsoz.bushfiretute.jack.data.*;
 import io.github.agentsoz.bushfiretute.jack.agents.EvacResident;
 import io.github.agentsoz.abmjack.env.GenericActGoal;
-import io.github.agentsoz.util.evac.ActionList;
+import io.github.agentsoz.util.ActionList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
