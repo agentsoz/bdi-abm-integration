@@ -22,9 +22,41 @@ package io.github.agentsoz.bdiabm;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.PerceptContent;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 
 public interface ABMServerInterface {
-	public void takeControl(AgentDataContainer agentDataContainer);
+	/**
+	 * Initialises the system
+	 * @param params arguments to initialise with
+	 */
+	public void init(Object[] params);
+
+	/**
+	 * Starts the BDI system
+	 */
+	public void start();
+
+	/**
+	 * Handles an incoming agent data container
+	 * @param agentDataContainer
+	 */
+	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer);
+
+	/**
+	 * Terminates the system
+	 */
+	public void finish();
+
+	/**
+	 * Used to supply an external agent data container for use by this model
+	 * @param adc
+	 */
+	public void setAgentDataContainer(AgentDataContainer adc);
+
+	/**
+	 * Returns the agent data container in use by this model
+	 * @return
+	 */
+	public AgentDataContainer getAgentDataContainer();
+
 }

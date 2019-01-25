@@ -45,13 +45,6 @@ public interface Agent {
 	public abstract void handlePercept(String perceptID, Object parameters);
 
 
-	/**
-	 * Packages a new action for the ABM
-	 * @param actionID the action's ID
-	 * @param parameters the action's data
-	 */
-    public void packageAction(String actionID, Object[] parameters);
-
     /**
      * Updates the status of an action with the given content
      * @param actionID the action's ID
@@ -74,5 +67,18 @@ public interface Agent {
 	 * @return the implementing object
 	 */
 	public QueryPerceptInterface getQueryPerceptInterface();
+
+	/**
+	 * Sets the implementation for the {@EnvironmentActionInterface}
+	 * @param envActInterface
+	 */
+	public void setEnvironmentActionInterface(EnvironmentActionInterface envActInterface);
+
+	/**
+	 * Returns an object that implements {@EnvironmentActionInterface}
+	 * @return
+	 */
+	public EnvironmentActionInterface getEnvironmentActionInterface();
+
 
 }
