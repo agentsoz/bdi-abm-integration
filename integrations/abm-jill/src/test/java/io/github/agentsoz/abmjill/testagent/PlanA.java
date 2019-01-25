@@ -47,7 +47,7 @@ public class PlanA extends Plan {
 			// Post the test action
 			new PlanStep() {
 				public void step() {
-					post(new EnvironmentAction(
+					subgoal(new EnvironmentAction(
 							Integer.toString(((TestAgent)getAgent()).getId()),
 							"TESTACTION", null));
 					}

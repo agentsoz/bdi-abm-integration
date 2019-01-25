@@ -24,13 +24,17 @@ package io.github.agentsoz.abmjill.genact;
 
 import java.util.Map;
 
-import io.github.agentsoz.abmjill.JillModel;
+import io.github.agentsoz.bdiabm.EnvironmentActionInterface;
 import io.github.agentsoz.jill.lang.Agent;
 import io.github.agentsoz.jill.lang.Goal;
 import io.github.agentsoz.jill.lang.Plan;
 import io.github.agentsoz.jill.lang.PlanStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnvironmentActionPlan extends Plan {
+
+	private static final Logger logger = LoggerFactory.getLogger(EnvironmentActionPlan.class);
 
 	public EnvironmentActionPlan(Agent agent, Goal goal, String name) {
 		super(agent, goal, name);
@@ -49,8 +53,20 @@ public class EnvironmentActionPlan extends Plan {
 	PlanStep[] steps = { new PlanStep() {
 		public void step() {
 			EnvironmentAction goal = (EnvironmentAction) getGoal();
-			JillModel.packageAgentActionV2(Integer.toString(getAgent().getId()),
-					goal.getActionID(), goal.getActionParameters(), goal.getActionState());
+			Agent agent = getAgent();
+			if (agent instanceof io.github.agentsoz.bdiabm.Agent) {
+				((io.github.agentsoz.bdiabm.Agent)agent)
+						.getEnvironmentActionInterface()
+						.packageAction(
+								Integer.toString(agent.getId()),
+							goal.getActionID(),
+							goal.getActionParameters(),
+							goal.getActionState());
+			} else {
+				logger.error(agent.getName()
+						+ "does not implement EnvironmentActionInterface "
+						+ "so cannot execute environment action");
+			}
 		}
 	}, };
 

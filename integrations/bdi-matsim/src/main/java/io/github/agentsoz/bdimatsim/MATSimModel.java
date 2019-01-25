@@ -3,7 +3,7 @@ package io.github.agentsoz.bdimatsim;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.dataInterface.DataClient;
 import io.github.agentsoz.dataInterface.DataServer;
@@ -129,7 +129,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	private DataServer dataServer;
 	private final Map<String, DataClient> dataListeners = createDataListeners();
-	private io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
+	private AgentDataContainer adc = new AgentDataContainer();
 
 	public enum RoutingMode {carFreespeed, carGlobalInformation}
 
@@ -259,7 +259,9 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		return scenario ;
 	}
 
-	public final void init(List<String> bdiAgentIDs) {
+	@Override
+	public void init(Object[] args) {
+		List<String> bdiAgentIDs = (List<String>)args[0];
 		if ( !scenarioLoaded ) {
 			loadAndPrepareScenario() ;
 		}
@@ -363,6 +365,7 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	}
 
+	@Override
 	public void start() {
 		if (!modelInitialised) {
 			log.warn("Model not initialised; cannot be run");
@@ -389,35 +392,33 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 		return this.replanner ;
 	}
 
-	@Override public final void takeControl(AgentDataContainer agentDataContainer){
-		runUntil( (int)(playPause.getLocalTime() + 1), agentDataContainer ) ;
+	@Override public final AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer){
+		runUntilV2( (int)(playPause.getLocalTime() + 1), agentDataContainer ) ;
+		return adc;
 	}
 
-	public final void runUntil( long newTime , AgentDataContainer agentDataContainer ) {
-			log.trace("Received {} ", agentManager.getAgentDataContainer());
-			agentManager.updateActions(); // handle incoming BDI actions
-			playPause.doStep( (int) (newTime) );
-			agentManager.transferActionsPerceptsToDataContainer(); // send back BDI actions/percepts/status'
-	}
-
-	public final void runUntilV2( long newTime , io.github.agentsoz.bdiabm.v2.AgentDataContainer inAdc) {
+	public final void runUntilV2( long newTime , AgentDataContainer inAdc) {
 		log.trace("Received {} ", inAdc);
-		//agentManager.updateActions(); // handle incoming BDI actions
 		agentManager.updateActions(inAdc, adc);
 		playPause.doStep( (int) (newTime) );
-		//agentManager.transferActionsPerceptsToDataContainer(); // send back BDI actions/percepts/status'
 	}
 
-	public void setAgentDataContainer(io.github.agentsoz.bdiabm.v2.AgentDataContainer adc) {
+	@Override
+	public void setAgentDataContainer(AgentDataContainer adc) {
 		this.adc = adc;
 	}
 
+	@Override
+	public AgentDataContainer getAgentDataContainer() {
+		return adc;
+	}
 
 
 	public final boolean isFinished() {
 		return playPause.isFinished() ;
 	}
 
+	@Override
 	public void finish() {
 		playPause.play();
 		while( matsimThread.isAlive() ) {

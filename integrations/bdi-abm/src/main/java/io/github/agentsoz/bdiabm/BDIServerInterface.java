@@ -22,7 +22,7 @@ package io.github.agentsoz.bdiabm;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 
 public interface BDIServerInterface
@@ -30,12 +30,9 @@ public interface BDIServerInterface
 
 	/**
 	 * Initialises the BDI system
-	 * @param agentDataContainer
-	 * @param agentList
-	 * @param abmServer
-	 * @return
+	 * @param params arguments to initialise with
 	 */
-	public boolean init(AgentDataContainer agentDataContainer, AgentStateList agentList, ABMServerInterface abmServer, Object[] params);
+	public void init(Object[] params);
 	
 	
 	/**
@@ -47,7 +44,7 @@ public interface BDIServerInterface
 	 * Handles an incoming agent data container
 	 * @param agentDataContainer
 	 */
-	public void takeControl(AgentDataContainer agentDataContainer);
+	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer);
 
 	/**
 	 * Terminates the BDI system 
@@ -64,4 +61,16 @@ public interface BDIServerInterface
 	 * @return the implementing object
 	 */
 	public QueryPerceptInterface getQueryPerceptInterface();
+
+	/**
+	 * Used to supply an external agent data container for use by this model
+	 * @param adc
+	 */
+	public void setAgentDataContainer(AgentDataContainer adc);
+
+	/**
+	 * Returns the agent data container in use by this model
+	 * @return
+	 */
+	public AgentDataContainer getAgentDataContainer();
 }

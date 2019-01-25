@@ -45,10 +45,6 @@ public final class PAAgentManager {
 	private static final Logger log = LoggerFactory.getLogger(PAAgentManager.class);
 
 	/**
-	 * actions & percepts.  Reached around a lot.
-	 */
-	private final AgentDataContainer agentDataContainer;
-	/**
 	 * full agent information, that is, actions, percepts, actionHandlers, perceptHandlers, states.  Since actions&percepts
 	 * on the one hand, and state on the other hand are already in flat, indexed containers, the agent model ends up a bit 
 	 * inconsistent (for matsim taste). 
@@ -67,11 +63,6 @@ public final class PAAgentManager {
 		this.eventsMonitors = eventsMonitors;
 
 		agentsWithPerceptsAndActions = new LinkedHashMap<>();
-		this.agentDataContainer = new AgentDataContainer();
-	}
-
-	public final AgentDataContainer getAgentDataContainer() {
-		return agentDataContainer;
 	}
 
 	public final PAAgent getAgent(String agentID) {
@@ -103,35 +94,6 @@ public final class PAAgentManager {
 	}
 
 	/*
-	 * Called by MatsimModel to signal news actions from BDI side Handles two
-	 * types of changes, new actions (INITIATED) and dropped actions
-	 */
-	public final void updateActions() {
-		if (agentDataContainer.isEmpty()) {
-			return;
-		}
-		Iterator<String> i = agentDataContainer.getAgentIDs();
-		while (i.hasNext()) {
-			String agent = i.next();
-			ActionContainer actionContainer = agentDataContainer.getOrCreate( agent).getActionContainer();
-			for (String action : actionContainer.actionIDSet()) {
-				if (actionContainer.get(action).getState() == ActionContent.State.INITIATED) {
-					initiateNewAction(agent, action, actionContainer.get(action));
-					/*
-					 * dsingh; 21/apr/15: remove RUNNING actions for efficiency
-					 * reasons so that we do not transit them back and forth.
-					 * When the action is finished we will add it again with the
-					 * new status.
-					 */
-					//actionContainer.remove(action);
-				} else if (actionContainer.get(action).getState() == ActionContent.State.DROPPED) {
-					dropAction(agent, action, actionContainer.get(action));
-				}
-			}
-		}
-	}
-
-	/*
 	 * BDI side passed an action with state INITIATED Pass action parameters to
 	 * ActionHandler then update action to RUNNING
 	 */
@@ -154,26 +116,6 @@ public final class PAAgentManager {
 		return false;
 	}
 
-	public void transferActionsPerceptsToDataContainer() {
-		for (PAAgent agent : agentsWithPerceptsAndActions.values()) {
-			ActionContainer ac = agent.getActionContainer();
-			synchronized (ac) { // cannot be changed while we are in here
-				if (!ac.isEmpty()) {
-					ActionPerceptContainer apc = agentDataContainer.getOrCreate(agent.getAgentID());
-					apc.getActionContainer().copy(ac); // copy is already synchronised
-					ac.clear();
-				}
-			}
-			PerceptContainer pc = agent.getPerceptContainer();
-			synchronized (pc) { // cannot be changed while we are in here
-				if (!pc.isEmpty()) {
-					ActionPerceptContainer apc = agentDataContainer.getOrCreate(agent.getAgentID());
-					apc.getPerceptContainer().copy(pc);
-					pc.clear();
-				}
-			}
-		}
-	}
 	/*
 	 * BDI side wants to drop an action
 	 */

@@ -1,5 +1,6 @@
 package io.github.agentsoz.abmjill.testagent;
 
+import io.github.agentsoz.bdiabm.EnvironmentActionInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
@@ -36,7 +37,7 @@ import java.io.PrintStream;
 public class TestAgent extends Agent implements io.github.agentsoz.bdiabm.Agent {
 
 	private PrintStream writer = null;
-
+	private EnvironmentActionInterface environmentActionInterface = null;
 	public TestAgent(String str) {
 		super(str);
 	}
@@ -67,11 +68,6 @@ public class TestAgent extends Agent implements io.github.agentsoz.bdiabm.Agent 
 	}
 
 	@Override
-	public void packageAction(String actionID, Object[] parameters) {
-		Log.warn("TestAgent using a stub for io.github.agentsoz.bdiabm.Agent.packageAction(...)");
-	}
-
-	@Override
 	public void updateAction(String actionID, ActionContent content) {
 		Log.info("Agent"+getId()+" received action update: "+content);
 		if (content.getAction_type().equals("TESTACTION")) {
@@ -96,6 +92,16 @@ public class TestAgent extends Agent implements io.github.agentsoz.bdiabm.Agent 
 	@Override
 	public QueryPerceptInterface getQueryPerceptInterface() {
 		return null;
+	}
+
+	@Override
+	public void setEnvironmentActionInterface(EnvironmentActionInterface envActInterface) {
+		environmentActionInterface = envActInterface;
+	}
+
+	@Override
+	public EnvironmentActionInterface getEnvironmentActionInterface() {
+		return environmentActionInterface;
 	}
 
 }
