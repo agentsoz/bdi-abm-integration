@@ -44,7 +44,6 @@ public abstract class JillModel implements BDIServerInterface, EnvironmentAction
 	private QueryPerceptInterface queryInterface;
 
 	private AgentDataContainer outAdc;
-	private Object sequenceLock;
 
 	public JillModel() {
 		outAdc = new AgentDataContainer();
@@ -163,11 +162,4 @@ public abstract class JillModel implements BDIServerInterface, EnvironmentAction
 		return outAdc;
 	}
 
-	public void useSequenceLock(Object sequenceLock) {
-		this.sequenceLock = sequenceLock;
-	}
-
-	protected Object getSequenceLock() {
-		return sequenceLock;
-	}
 }
