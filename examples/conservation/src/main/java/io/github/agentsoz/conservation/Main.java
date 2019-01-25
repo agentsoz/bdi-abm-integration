@@ -214,7 +214,7 @@ public class Main {
 				extensionOffice.conductVisits(cycle);
 				
 				// Conduct the auction
-				auctioneerModel.conductAuction();
+				auctioneerModel.conductAuction(landholderModel);
 
 				// Send outputs
 				publishAuctionSummary(repeat, cycle);
@@ -400,8 +400,11 @@ public class Main {
 		}
 
 		// connect the two systems and initialise
-		auctioneerModel.setAgentDataContainer(adc);
 		landholderModel.init(args);
+		auctioneerModel.init(new Object[]{agentIds});
+
+		auctioneerModel.setAgentDataContainer(adc);
+		landholderModel.setAgentDataContainer(adc);
 		
 		// initialise the extension office with the agents ids
 		extensionOffice.init(adc, agentIds);

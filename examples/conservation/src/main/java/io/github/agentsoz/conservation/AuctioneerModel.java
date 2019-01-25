@@ -23,21 +23,18 @@ package io.github.agentsoz.conservation;
  */
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.AgentStateList;
-import io.github.agentsoz.bdiabm.data.ActionContent.State;
+import io.github.agentsoz.bdigams.GAMSModel;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 import io.github.agentsoz.conservation.outputwriters.ConstantFileNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.github.agentsoz.bdigams.GAMSModel;
 
 /**
  * Provide access to the {@link GAMSModel} and preforms auctioneer's actions.
@@ -47,16 +44,6 @@ import io.github.agentsoz.bdigams.GAMSModel;
 public final class AuctioneerModel extends GAMSModel {
 
     final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
-
-	/**
-	 * {@link LandholderModel} instance
-	 */
-	private LandholderModel landholderModel;
-
-	/**
-	 * Stores all agents percept and action data.
-	 */
-	private AgentDataContainer adc;
 
 	/**
 	 * State of the auction
@@ -79,6 +66,8 @@ public final class AuctioneerModel extends GAMSModel {
 	 * Input CSV file for GAMS, used to send bids to the GAMS system
 	 */
 	private String gamsInputFile = null;
+
+	String[] agentIds;
 
 	/**
 	 * Public Constructor
@@ -130,14 +119,14 @@ public final class AuctioneerModel extends GAMSModel {
 	 * finished bidding send the bids to the {@link GAMSModel}, send back the
 	 * results to land holders.
 	 */
-	public void conductAuction() {
+	public void conductAuction(LandholderModel landholderModel) {
 		double time = 0;
 		auctionState = AuctionState.NOT_STARTED;
 		
 		// Handle any extension officer visits (added externally) first
 		// Step time
-		landholderModel.takeControl(time, adc);
-		this.takeControl(time, adc);
+		landholderModel.takeControl(time, landholderModel.getAgentDataContainer());
+		this.takeControl(time, this.getAgentDataContainer());
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -146,18 +135,16 @@ public final class AuctioneerModel extends GAMSModel {
 		
 		// Send call for bids
 		{
-			Iterator<String> it = adc.getAgentIdIterator();
-			while (it.hasNext()) {
-				String agentId = it.next();
-				adc.putPercept(agentId,
+			for(String agentId : agentIds) {
+				this.getAgentDataContainer().putPercept(agentId,
 						Global.percepts.CALL_FOR_BIDS.toString(),
 						new PerceptContent(Global.percepts.CALL_FOR_BIDS.toString(), Main.packages));
 			}
 		}
 		// Step time
 		time++;
-		landholderModel.takeControl(time, adc);
-		this.takeControl(time, adc);
+		landholderModel.takeControl(time, landholderModel.getAgentDataContainer());
+		this.takeControl(time, this.getAgentDataContainer());
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -167,10 +154,10 @@ public final class AuctioneerModel extends GAMSModel {
 		// Process the bids (as well as set the BID actions to PASSED)
 		ArrayList<String> bids = new ArrayList<String>();
 		{
-			Iterator<String> it = adc.getAgentIdIterator();
+			Iterator<String> it = this.getAgentDataContainer().getAgentIdIterator();
 			while (it.hasNext()) {
 				String agentId = it.next();
-				Map<String, ActionContent> actions = adc.getAllActionsCopy(agentId);
+				Map<String, ActionContent> actions = this.getAgentDataContainer().getAllActionsCopy(agentId);
 				for (String actionId : actions.keySet()) {
 					ActionContent acc = actions.get(Global.actions.BID.toString());
 					if (acc != null) {
@@ -205,18 +192,18 @@ public final class AuctioneerModel extends GAMSModel {
 
 		// Send auction results
 		{
-			Iterator<String> it = adc.getAgentIdIterator();
+			Iterator<String> it = this.getAgentDataContainer().getAgentIdIterator();
 			while (it.hasNext()) {
 				String agentId = it.next();
-				adc.putPercept(agentId,
+				this.getAgentDataContainer().putPercept(agentId,
 						Global.percepts.AUCTION_RESULTS.toString(),
 						new PerceptContent(Global.percepts.AUCTION_RESULTS.toString(), inputs));
 			}
 		}
 		// Step time
 		time++;
-		landholderModel.takeControl(time, adc);
-		this.takeControl(time, adc);
+		landholderModel.takeControl(time, landholderModel.getAgentDataContainer());
+		this.takeControl(time, this.getAgentDataContainer());
 
 		try {
 			Thread.sleep(10);
@@ -296,5 +283,10 @@ public final class AuctioneerModel extends GAMSModel {
 
 	public void setGAMSInputFile(String file) {
 		gamsInputFile = file;
+	}
+
+	@Override
+	public void init(Object[] args) {
+		agentIds = (String[]) args[0];
 	}
 }

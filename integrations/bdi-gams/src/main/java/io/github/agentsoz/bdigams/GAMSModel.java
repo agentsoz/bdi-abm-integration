@@ -36,6 +36,7 @@ import com.gams.api.GAMSWorkspaceInfo;
 
 public class GAMSModel implements ABMServerInterface {
 
+    private AgentDataContainer adc;
 	private GAMSWorkspaceInfo wsInfo = null;
 	private GAMSWorkspace ws = null;
 	private GAMSJob job = null;
@@ -85,11 +86,11 @@ public class GAMSModel implements ABMServerInterface {
 
     @Override
     public void setAgentDataContainer(AgentDataContainer adc) {
-
+	    this.adc = adc;
     }
 
     @Override
     public AgentDataContainer getAgentDataContainer() {
-        return null;
+        return adc;
     }
 }

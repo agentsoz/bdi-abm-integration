@@ -1,6 +1,3 @@
-/**
- * 
- */
 package io.github.agentsoz.conservation.jill.plans;
 
 /*
