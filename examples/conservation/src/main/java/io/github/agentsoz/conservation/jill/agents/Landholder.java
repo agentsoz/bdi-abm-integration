@@ -22,6 +22,7 @@ package io.github.agentsoz.conservation.jill.agents;
  * #L%
  */
 
+import io.github.agentsoz.bdiabm.EnvironmentActionInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.conservation.AuctionResultSet;
@@ -68,7 +69,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 
     private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
     private String logprefix = "";
-
+	private EnvironmentActionInterface envInterface;
 
 	/**
 	 * This agent's ID in the GAMS system
@@ -342,8 +343,6 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	/**
 	 * Checks whether a given Conservation Ethic Barometer is high or low
 	 * 
-	 * @param c
-	 * @return
 	 */
 	private void chooseConservationEthicHighLow() {
 		double c = getConservationEthicBarometer();
@@ -367,9 +366,6 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 
 	/**
 	 * Checks whether a given Profit Motivation Barometer is high or low
-	 * 
-	 * @param p
-	 * @return
 	 */
 	private void chooseProfitMotivationHighLow() {
 		double p = getProfitMotiveBarometer();
@@ -461,13 +457,6 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void packageAction(String actionID, Object[] parameters) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public void updateAction(String actionID, ActionContent content) {
 	}
 
@@ -487,6 +476,16 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	@Override
 	public QueryPerceptInterface getQueryPerceptInterface() {
 		return null; // not used
+	}
+
+	@Override
+	public void setEnvironmentActionInterface(EnvironmentActionInterface envActInterface) {
+		this.envInterface = envActInterface;
+	}
+
+	@Override
+	public EnvironmentActionInterface getEnvironmentActionInterface() {
+		return envInterface;
 	}
 
 	/**
@@ -521,7 +520,7 @@ public class Landholder extends Agent implements io.github.agentsoz.bdiabm.Agent
 	/**
 	 * Set how did the land holder change his profit motive category
 	 * 
-	 * @param moveCEcategory
+	 * @param movePMcategory
 	 *            can be either NONE, UP or DOWN
 	 */
 	public void setMovePMcategory(

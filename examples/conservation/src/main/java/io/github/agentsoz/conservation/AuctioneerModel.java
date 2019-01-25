@@ -22,9 +22,9 @@ package io.github.agentsoz.conservation;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.ActionContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.data.PerceptContent;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
@@ -32,11 +32,7 @@ import io.github.agentsoz.conservation.outputwriters.ConstantFileNames;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +44,7 @@ import io.github.agentsoz.bdigams.GAMSModel;
  * 
  * @author Sewwandi Perera
  */
-public class AuctioneerModel extends GAMSModel {
+public final class AuctioneerModel extends GAMSModel {
 
     final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
@@ -61,11 +57,6 @@ public class AuctioneerModel extends GAMSModel {
 	 * Stores all agents percept and action data.
 	 */
 	private AgentDataContainer adc;
-
-	/**
-	 * Agents' status
-	 */
-	private AgentStateList asl;
 
 	/**
 	 * State of the auction
@@ -111,25 +102,10 @@ public class AuctioneerModel extends GAMSModel {
 	}
 
 	/**
-	 * Connect {@link LandholderModel} and agents' information to the
-	 * {@link AuctioneerModel}
-	 * 
-	 * @param landholderModel
-	 * @param adc
-	 * @param asl
-	 */
-	public void connect(LandholderModel landholderModel,
-			AgentDataContainer adc, AgentStateList asl) {
-		this.landholderModel = landholderModel;
-		this.adc = adc;
-		this.setAsl(asl);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void takeControl(AgentDataContainer agentDataContainer) {
+	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer) {
 		switch (auctionState) {
 		case NOT_STARTED:
 			auctionState = AuctionState.VISIT_BY_EXTENSION_OFFICER;
@@ -146,6 +122,7 @@ public class AuctioneerModel extends GAMSModel {
 		case ENDED:
 			break;
 		}
+		return agentDataContainer;
 	}
 
 	/**
@@ -154,43 +131,60 @@ public class AuctioneerModel extends GAMSModel {
 	 * results to land holders.
 	 */
 	public void conductAuction() {
+		double time = 0;
 		auctionState = AuctionState.NOT_STARTED;
 		
 		// Handle any extension officer visits (added externally) first
-		landholderModel.takeControl(adc);
-		this.takeControl(adc);
+		// Step time
+		landholderModel.takeControl(time, adc);
+		this.takeControl(time, adc);
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
+			throw new RuntimeException("ERROR while waiting for GAMS to finish stepping", e);
 		}
 		
 		// Send call for bids
-		adc.getOrCreate("global").getPerceptContainer()
-				.put(Global.percepts.CALL_FOR_BIDS.toString(), Main.packages);
-		landholderModel.takeControl(adc);
-		this.takeControl(adc);
+		{
+			Iterator<String> it = adc.getAgentIdIterator();
+			while (it.hasNext()) {
+				String agentId = it.next();
+				adc.putPercept(agentId,
+						Global.percepts.CALL_FOR_BIDS.toString(),
+						new PerceptContent(Global.percepts.CALL_FOR_BIDS.toString(), Main.packages));
+			}
+		}
+		// Step time
+		time++;
+		landholderModel.takeControl(time, adc);
+		this.takeControl(time, adc);
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
+			throw new RuntimeException("ERROR while waiting for GAMS to finish stepping", e);
 		}
 
-		// Process the bids (as well as set the BID BDI-actions to PASSED)
+		// Process the bids (as well as set the BID actions to PASSED)
 		ArrayList<String> bids = new ArrayList<String>();
-        Iterator<String> i = adc.getAgentIDs();
-        while (i.hasNext()) {
-            String agentId = i.next();
-			ActionContainer ac = adc.getOrCreate(agentId).getActionContainer();
-			ActionContent acc = ac.get(Global.actions.BID.toString());
-			if (acc != null) {
-				for (Object object : acc.getParameters()) {
-					Bid bid = (Bid) object;
-					String agentName = ((Landholder) landholderModel
-							.getLandholder(Integer.parseInt(agentId))).gamsID();
-					bids.add(String.format("%d,%s,%s,%011.9f", bid.id,
-							agentName, Main.packages[bid.id - 1].description,
-							bid.price));
+		{
+			Iterator<String> it = adc.getAgentIdIterator();
+			while (it.hasNext()) {
+				String agentId = it.next();
+				Map<String, ActionContent> actions = adc.getAllActionsCopy(agentId);
+				for (String actionId : actions.keySet()) {
+					ActionContent acc = actions.get(Global.actions.BID.toString());
+					if (acc != null) {
+						for (Object object : acc.getParameters()) {
+							Bid bid = (Bid) object;
+							String agentName = ((Landholder) landholderModel
+									.getLandholder(Integer.parseInt(agentId))).gamsID();
+							bids.add(String.format("%d,%s,%s,%011.9f", bid.id,
+									agentName, Main.packages[bid.id - 1].description,
+									bid.price));
+						}
+						acc.setState(State.PASSED);
+					}
 				}
-				acc.setState(State.PASSED);
 			}
 		}
 
@@ -209,10 +203,20 @@ public class AuctioneerModel extends GAMSModel {
 		inputs[0] = latestResultSet;
 		inputs[1] = this.getAverageConservationEthic();
 
-		adc.getOrCreate("global").getPerceptContainer()
-				.put(Global.percepts.AUCTION_RESULTS.toString(), inputs);
-		landholderModel.takeControl(adc);
-		this.takeControl(adc);
+		// Send auction results
+		{
+			Iterator<String> it = adc.getAgentIdIterator();
+			while (it.hasNext()) {
+				String agentId = it.next();
+				adc.putPercept(agentId,
+						Global.percepts.AUCTION_RESULTS.toString(),
+						new PerceptContent(Global.percepts.AUCTION_RESULTS.toString(), inputs));
+			}
+		}
+		// Step time
+		time++;
+		landholderModel.takeControl(time, adc);
+		this.takeControl(time, adc);
 
 		try {
 			Thread.sleep(10);
@@ -279,25 +283,6 @@ public class AuctioneerModel extends GAMSModel {
 
 		return accumulatedConservationEthic / agents.size();
 	}
-
-	/**
-	 * Returns agents state list
-	 * 
-	 * @return
-	 */
-	public AgentStateList getAsl() {
-		return asl;
-	}
-
-	/**
-	 * Sets agents state list
-	 * 
-	 * @param asl
-	 */
-	public void setAsl(AgentStateList asl) {
-		this.asl = asl;
-	}
-
 
 	public void writeGAMSInputFile(String s) {
 		try {

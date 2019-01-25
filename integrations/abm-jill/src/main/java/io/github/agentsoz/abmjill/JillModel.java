@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public abstract class JillModel implements BDIServerInterface, EnvironmentActionInterface {
+public class JillModel implements BDIServerInterface, EnvironmentActionInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(JillModel.class);
 
@@ -98,6 +98,7 @@ public abstract class JillModel implements BDIServerInterface, EnvironmentAction
 		Main.finish();
 	}
 
+	@Override
     public void packageAction(String agentId,
 							  String actionId,
 							  Object[] parameters,
@@ -154,10 +155,12 @@ public abstract class JillModel implements BDIServerInterface, EnvironmentAction
 		return outAdc;
 	}
 
+	@Override
 	public void setAgentDataContainer(AgentDataContainer adc) {
 		outAdc = adc;
 	}
 
+	@Override
 	public AgentDataContainer getAgentDataContainer() {
 		return outAdc;
 	}

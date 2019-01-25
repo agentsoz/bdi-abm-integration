@@ -16,10 +16,11 @@ package io.github.agentsoz.conservation;
 
 import java.util.HashMap;
 
+import io.github.agentsoz.bdiabm.data.PerceptContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 
 /**
@@ -259,8 +260,10 @@ public class ExtensionOffice {
       if (willVisit && numVisits > 0) {
         logger.debug("Agent " + name + " with contracts " + agent.getContracts()
             + " visited {} times by extension officers in this round", numVisits);
-        adc.getOrCreate(name).getPerceptContainer()
-            .put(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), (1.0*numVisits/maxVisitsPerLandholderPerRound));
+        adc.putPercept(name,
+                Global.percepts.EXTENSION_OFFICER_VISIT.toString(),
+                new PerceptContent(Global.percepts.EXTENSION_OFFICER_VISIT.toString(), (1.0*numVisits/maxVisitsPerLandholderPerRound)));
+
         // Record the visit
         visits.put(name, visits.get(name) + 1);
         visitsLastCycle += numVisits;

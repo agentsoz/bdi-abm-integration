@@ -22,21 +22,18 @@ package io.github.agentsoz.conservation;
  * #L%
  */
 
-import static io.github.agentsoz.conservation.ConservationUtils.*;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import io.github.agentsoz.bdiabm.data.ActionContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.AgentState;
-import io.github.agentsoz.bdiabm.data.AgentStateList;
-import io.github.agentsoz.bdiabm.data.PerceptContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
-import io.github.agentsoz.conservation.outputwriters.AgentsProgressWriter;
-import io.github.agentsoz.conservation.outputwriters.AgentsStatisticsWriter;
-import io.github.agentsoz.conservation.outputwriters.AuctionStatisticsWriter;
-import io.github.agentsoz.conservation.outputwriters.AuctionSummaryWriter;
-import io.github.agentsoz.conservation.outputwriters.BidsWriter;
-import io.github.agentsoz.conservation.outputwriters.ConstantFileNames;
-import io.github.agentsoz.conservation.outputwriters.LowCHighPStatistics;
+import io.github.agentsoz.conservation.outputwriters.*;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,14 +41,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
+import static io.github.agentsoz.conservation.ConservationUtils.*;
 
 /**
  * Main class of the conservation application
@@ -125,11 +115,6 @@ public class Main {
 	private static AgentDataContainer adc;
 
 	/**
-	 * Agents state list
-	 */
-	private static AgentStateList asl;
-
-	/**
 	 * Instance of {@link AuctioneerModel}
 	 */
 	private static AuctioneerModel auctioneerModel;
@@ -177,7 +162,6 @@ public class Main {
 		auctioneerModel = new AuctioneerModel(gamsDir, gamsModel);
 		landholderModel = new LandholderModel();
 		extensionOffice = new ExtensionOffice();
-		asl = new AgentStateList();
 		adc = new AgentDataContainer();
 
 		long t0, t1;
@@ -202,7 +186,7 @@ public class Main {
 				landholders.add((Landholder) landholderModel.getLandholder(i));
 			}
 
-			// set target
+			// set conservation targets
 			setTarget();
 
 			// send initial attributes of agents to the AgentsStatisticsWriter
@@ -409,60 +393,21 @@ public class Main {
 		// initalise the agent data container
 		adc = new AgentDataContainer();
 
-		// initalise the agent state container
-		asl = new AgentStateList();
-
 		// create the agents, and their data/state containers
 		String[] agentIds = new String[numLandholders];
 		for (int i = 0; i < numLandholders; i++) {
 			agentIds[i] = String.format("%d", i);
-			asl.add(new AgentState(agentIds[i]));
-			adc.getOrCreate(agentIds[i]);
 		}
 
 		// connect the two systems and initialise
-		auctioneerModel.connect(landholderModel, adc, asl);
-		landholderModel.init(adc, asl, auctioneerModel, args);
+		auctioneerModel.setAgentDataContainer(adc);
+		landholderModel.init(args);
 		
 		// initialise the extension office with the agents ids
 		extensionOffice.init(adc, agentIds);
 		
 		// start the bdi system
 		landholderModel.start();
-	}
-
-	/**
-	 * Called by MatsimModel to signal news actions from BDI side Handles two
-	 * types of changes, new actions (INITIATED) and dropped actions
-	 */
-	public static void updateActions(AgentDataContainer agentDataContainer) {
-		/*
-		 * Remove the former percepts as they are no longer needed
-		 */
-      Iterator<String> i = agentDataContainer.getAgentIDs();
-      while (i.hasNext()) {
-          String agentName = i.next();
-//			PerceptContainer newPerceptContainer = new PerceptContainer();
-//			agentDataContainer.getOrCreate(agentName).setPerceptContainer(
-//					newPerceptContainer);
-			agentDataContainer.getOrCreate(agentName).getPerceptContainer().clear(); 
-			// I think that this is much safer.  But it may change the results.  kai, nov'17
-      }
-
-      Iterator<String> ii = agentDataContainer.getAgentIDs();
-      while (ii.hasNext()) {
-        String agent = ii.next();
-			ActionContainer actionContainer = agentDataContainer.getOrCreate(
-					agent).getActionContainer();
-			for (String action : actionContainer.actionIDSet()) {
-				if (actionContainer.get(action).getState() == ActionContent.State.INITIATED) {
-					// TODO: placeholder for handling this state if required
-				}
-				if (actionContainer.get(action).getState() == ActionContent.State.DROPPED) {
-					// TODO: placeholder for handling this state if required
-				}
-			}
-		}
 	}
 
 	/**

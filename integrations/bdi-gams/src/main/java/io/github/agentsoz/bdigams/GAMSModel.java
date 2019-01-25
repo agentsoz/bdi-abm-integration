@@ -23,7 +23,7 @@ package io.github.agentsoz.bdigams;
  */
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,8 +64,32 @@ public class GAMSModel implements ABMServerInterface {
     }
 
     @Override
-	public void takeControl(AgentDataContainer agentDataContainer) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void init(Object[] params) {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer) {
+        return null;
+    }
+
+    @Override
+    public void finish() {
+
+    }
+
+    @Override
+    public void setAgentDataContainer(AgentDataContainer adc) {
+
+    }
+
+    @Override
+    public AgentDataContainer getAgentDataContainer() {
+        return null;
+    }
 }

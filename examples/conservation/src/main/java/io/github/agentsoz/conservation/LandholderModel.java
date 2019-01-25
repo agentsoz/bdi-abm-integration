@@ -23,7 +23,7 @@ package io.github.agentsoz.conservation;
  */
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
-import io.github.agentsoz.bdiabm.data.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.AgentStateList;
 import io.github.agentsoz.conservation.jill.agents.Landholder;
 
@@ -39,7 +39,7 @@ import io.github.agentsoz.abmjill.JillModel;
  * 
  * @author Sewwandi Perera
  */
-public class LandholderModel extends JillModel {
+public final class LandholderModel extends JillModel {
 
     final private Logger logger = LoggerFactory.getLogger(Main.LOGGER_NAME);
 
@@ -99,12 +99,9 @@ public class LandholderModel extends JillModel {
 	 * Initialise {@link LandholderModel}
 	 */
 	@Override
-	public boolean init(AgentDataContainer agentDataContainer,
-			AgentStateList agentList, ABMServerInterface abmServer,
-			Object[] params) {
+	public void init(Object[] params) {
 		// Call the integration level initialisation first
-		boolean result = super.init(agentDataContainer, agentList, abmServer,
-				params);
+		super.init(params);
 		// Now do any app level initialisations here
 		if (highConsevationAgents == -1) {
 			highConsevationAgents = (int) Math.round(ConservationUtils
@@ -148,7 +145,6 @@ public class LandholderModel extends JillModel {
 					+ numHighCEAgents);
 			System.exit(0);
 		}
-		return result;
 	}
 
 	public Landholder getLandholder(int i) {
