@@ -24,24 +24,29 @@ package io.github.agentsoz.bdiabm;
 
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 
-public interface ABMServerInterface {
+public interface ModelInterface {
+	/**
+	 * Initialises the model
+	 * @param params arguments to initialise with
+	 */
+	public void init(Object[] params);
 
 	/**
-	 * Handles an incoming agent data container
-	 * @param agentDataContainer
+	 * Starts the model
 	 */
-	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer);
+	public void start();
 
 	/**
-	 * Used to supply an external agent data container for use by this model
-	 * @param adc
+	 * Steps the model up to and including the given time step
+	 * @param time the time to progress the model to
+	 * @param args incoming data
+	 * @return outgoing data
 	 */
-	public void setAgentDataContainer(AgentDataContainer adc);
+	public Object[] step(double time, Object[] args);
 
 	/**
-	 * Returns the agent data container in use by this model
-	 * @return
+	 * Terminates the model
 	 */
-	public AgentDataContainer getAgentDataContainer();
+	public void finish();
 
 }

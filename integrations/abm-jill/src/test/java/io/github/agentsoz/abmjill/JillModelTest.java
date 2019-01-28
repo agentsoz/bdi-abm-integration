@@ -29,6 +29,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import io.github.agentsoz.bdiabm.Agent;
+import io.github.agentsoz.bdiabm.ModelInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.jill.core.GlobalState;
 import io.github.agentsoz.jill.struct.AObject;
@@ -142,7 +143,7 @@ public class JillModelTest {
 		
 	}
 	
-	private class StubABM implements ABMServerInterface {
+	private class StubABM implements ABMServerInterface, ModelInterface {
 
 		private AgentDataContainer outAdc;
 
@@ -170,6 +171,16 @@ public class JillModelTest {
 		public void start() {
 
 		}
+
+		@Override
+		public Object[] step(double time, Object[] args) {
+			if (args != null && args[0] != null && args[0] instanceof AgentDataContainer) {
+				AgentDataContainer inAdc = (AgentDataContainer) args[0];
+				return new Object[]{takeControl(time, inAdc)};
+			}
+			return null;
+		}
+
 
 		@Override
 		public AgentDataContainer takeControl(double time, AgentDataContainer adc) {

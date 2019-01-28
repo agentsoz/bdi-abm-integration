@@ -1,6 +1,7 @@
 package io.github.agentsoz.bdimatsim;
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
+import io.github.agentsoz.bdiabm.ModelInterface;
 import io.github.agentsoz.bdiabm.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
@@ -73,7 +74,7 @@ import java.util.*;
 /**
  * @author QingyuChen, KaiNagel, Dhi Singh
  */
-public final class MATSimModel implements ABMServerInterface, QueryPerceptInterface, DataClient {
+public final class MATSimModel implements ABMServerInterface, ModelInterface, QueryPerceptInterface, DataClient {
 	private static final Logger log = LoggerFactory.getLogger(MATSimModel.class);
 	public static final String MATSIM_OUTPUT_DIRECTORY_CONFIG_INDICATOR = "--matsim-output-directory";
 
@@ -390,6 +391,15 @@ public final class MATSimModel implements ABMServerInterface, QueryPerceptInterf
 
 	public final Replanner getReplanner() {
 		return this.replanner ;
+	}
+
+	@Override
+	public Object[] step(double time, Object[] args) {
+		if (args != null && args[0] != null && args[0] instanceof AgentDataContainer) {
+			AgentDataContainer inAdc = (AgentDataContainer) args[0];
+			return new Object[]{takeControl(time, inAdc)};
+		}
+		return null;
 	}
 
 	@Override public final AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer){

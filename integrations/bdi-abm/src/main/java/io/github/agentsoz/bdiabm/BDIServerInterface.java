@@ -29,27 +29,10 @@ public interface BDIServerInterface
 {
 
 	/**
-	 * Initialises the BDI system
-	 * @param params arguments to initialise with
-	 */
-	public void init(Object[] params);
-	
-	
-	/**
-	 * Starts the BDI system
-	 */
-	public void start();
-	
-	/**
 	 * Handles an incoming agent data container
 	 * @param agentDataContainer
 	 */
 	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer);
-
-	/**
-	 * Terminates the BDI system 
-	 */
-	public void finish();
 
 	/**
 	 * Sets the implementation for the {@link QueryPerceptInterface}
