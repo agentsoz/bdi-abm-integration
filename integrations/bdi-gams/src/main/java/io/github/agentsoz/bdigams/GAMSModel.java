@@ -23,6 +23,7 @@ package io.github.agentsoz.bdigams;
  */
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
+import io.github.agentsoz.bdiabm.ModelInterface;
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import com.gams.api.GAMSOptions;
 import com.gams.api.GAMSWorkspace;
 import com.gams.api.GAMSWorkspaceInfo;
 
-public class GAMSModel implements ABMServerInterface {
+public class GAMSModel implements ABMServerInterface, ModelInterface {
 
     private AgentDataContainer adc;
 	private GAMSWorkspaceInfo wsInfo = null;
@@ -72,6 +73,11 @@ public class GAMSModel implements ABMServerInterface {
     @Override
     public void start() {
 
+    }
+
+    @Override
+    public Object[] step(double time, Object[] args) {
+        return new Object[0];
     }
 
     @Override
