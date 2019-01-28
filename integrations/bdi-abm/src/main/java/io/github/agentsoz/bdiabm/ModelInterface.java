@@ -22,8 +22,6 @@ package io.github.agentsoz.bdiabm;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
-
 public interface ModelInterface {
 	/**
 	 * Initialises the model

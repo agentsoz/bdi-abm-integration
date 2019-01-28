@@ -23,7 +23,6 @@ package io.github.agentsoz.bdiabm;
  */
 
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
-import io.github.agentsoz.bdiabm.data.AgentStateList;
 
 public interface BDIServerInterface
 {
