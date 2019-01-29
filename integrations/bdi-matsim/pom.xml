@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>io.github.agentsoz</groupId>
 		<artifactId>bdi-abm-integration</artifactId>
-		<version>3.0.1-SNAPSHOT</version>
+		<version>3.0.0</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -48,18 +48,18 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>travelsummary</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>0.10.1</version>
 			<!--(does not (yet?) exist as weekly release)-->
 		</dependency>
 		<dependency>
 			<groupId>io.github.agentsoz</groupId>
 			<artifactId>bdi-abm</artifactId>
-			<version>3.0.1-SNAPSHOT</version>
+			<version>3.0.0</version>
 		</dependency>
         <dependency>
             <groupId>io.github.agentsoz</groupId>
             <artifactId>util</artifactId>
-            <version>3.0.1-SNAPSHOT</version>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 </project>
