@@ -14,11 +14,6 @@ before_install:
   #- cd $HOME/jill && git reset --hard 2510bed0037cc44520f2627ef85a4fee369e74a9 # fix commit to use
   - cd $HOME/jill && mvn clean install -N
   - cd $HOME/jill/jill && mvn clean install -DskipTests
-  # Diffusion Model config
-  - cd $HOME && git clone --depth=50 --branch=master https://github.com/agentsoz/diffusion-model.git
-  - cd $HOME/diffusion-model && git log -1
-  #- cd $HOME/diffusion-model && git reset --hard 2510bed0037cc44520f2627ef85a4fee369e74a9 # fix commit to use
-  - cd $HOME/diffusion-model && mvn clean install -DskipTests
 
 script:
   - cd $TRAVIS_BUILD_DIR && mvn package -B -Dmatsim.preferLocalDtds=true
