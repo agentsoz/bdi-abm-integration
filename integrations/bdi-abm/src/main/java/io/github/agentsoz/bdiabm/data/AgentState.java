@@ -49,7 +49,7 @@ public class AgentState implements Serializable
 	 * non-idle.
 	 * List of agent sent by Repast at the beginning
 	 * should be in non-idle state.
-	 * @param agentID
+	 * @param agentID the unique id of the agent
 	 */
 	public AgentState (String agentID)
 	{

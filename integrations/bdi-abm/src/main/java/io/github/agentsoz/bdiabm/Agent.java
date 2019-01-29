@@ -28,7 +28,7 @@ public interface Agent {
 
 	/**
 	 * Initialises the agent with the given arguments
-	 * @param args
+	 * @param args incoming arguments
 	 */
 	public void init(String[] args);
 	
@@ -59,6 +59,7 @@ public interface Agent {
 
 	/**
 	 * Sets the implementation for the {@link QueryPerceptInterface}
+	 * @param queryInterface the interface to use
 	 */
 	public void setQueryPerceptInterface(QueryPerceptInterface queryInterface);
 
@@ -69,14 +70,14 @@ public interface Agent {
 	public QueryPerceptInterface getQueryPerceptInterface();
 
 	/**
-	 * Sets the implementation for the {@EnvironmentActionInterface}
-	 * @param envActInterface
+	 * Sets the implementation for the {@link EnvironmentActionInterface}
+	 * @param envActInterface the interface to use
 	 */
 	public void setEnvironmentActionInterface(EnvironmentActionInterface envActInterface);
 
 	/**
-	 * Returns an object that implements {@EnvironmentActionInterface}
-	 * @return
+	 * Returns an object that implements {@link EnvironmentActionInterface}
+	 * @return the interface in use
 	 */
 	public EnvironmentActionInterface getEnvironmentActionInterface();
 

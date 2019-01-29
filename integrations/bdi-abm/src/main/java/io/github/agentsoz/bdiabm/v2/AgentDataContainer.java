@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * A thread-safe alternative for {@link io.github.agentsoz.bdiabm.data.AgentDataContainer}
+ * A thread-safe alternative for {@code io.github.agentsoz.bdiabm.data.AgentDataContainer}
  */
 public class AgentDataContainer {
     private final ConcurrentSkipListMap<String, AgentData> agentsData = new ConcurrentSkipListMap<>();

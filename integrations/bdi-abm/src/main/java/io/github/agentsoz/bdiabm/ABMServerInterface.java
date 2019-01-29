@@ -28,19 +28,21 @@ public interface ABMServerInterface {
 
 	/**
 	 * Handles an incoming agent data container
-	 * @param agentDataContainer
+	 * @param time the simulation time
+	 * @param agentDataContainer incoming data container
+	 * @return outgoing data container
 	 */
 	public AgentDataContainer takeControl(double time, AgentDataContainer agentDataContainer);
 
 	/**
 	 * Used to supply an external agent data container for use by this model
-	 * @param adc
+	 * @param adc the data container to use
 	 */
 	public void setAgentDataContainer(AgentDataContainer adc);
 
 	/**
 	 * Returns the agent data container in use by this model
-	 * @return
+	 * @return the data container in use
 	 */
 	public AgentDataContainer getAgentDataContainer();
 

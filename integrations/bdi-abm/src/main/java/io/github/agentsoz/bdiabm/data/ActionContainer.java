@@ -92,6 +92,7 @@ public class ActionContainer implements Serializable {
 
 	/**
 	 * Deep copy
+	 * @param ac the action container to copy from
 	 */
 	public synchronized void copy(ActionContainer ac) {
 		// shallow copy if the incoming container is null or empty
@@ -110,8 +111,8 @@ public class ActionContainer implements Serializable {
 	/**
 	 * Register action to container action will be started with state INITIATED
 	 * 
-	 * @param identifier
-	 * @param parameters
+	 * @param identifier the unique id of the action
+	 * @param parameters action parameter values
 	 * @return true if registration is successful. Only if the action's id to be
 	 *         registered is not contained yet in the container, then
 	 *         registration could be made.

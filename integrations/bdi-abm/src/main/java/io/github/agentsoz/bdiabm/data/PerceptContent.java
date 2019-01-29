@@ -56,7 +56,10 @@ public class PerceptContent implements Serializable {
 	private Object value;
 
 	/**
-	 * Public Constructor
+	 * Constructor
+	 * @param percept_type the type of this percept
+	 * @param parameters any meta data associated with this percept
+	 * @param value percept data
 	 */
 	public PerceptContent(String percept_type, Object[] parameters, Object value) {
 		this.percept_type = percept_type;
@@ -65,7 +68,9 @@ public class PerceptContent implements Serializable {
 	}
 
 	/**
-	 * Public Constructor
+	 * Constructor
+	 * @param percept_type the type of this percept
+	 * @param value percept data
 	 */
 	public PerceptContent(String percept_type, Object value) {
 		this(percept_type, null, value);
@@ -81,7 +86,7 @@ public class PerceptContent implements Serializable {
 	/**
 	 * Sets the type of the percept
 	 * 
-	 * @param percept_type
+	 * @param percept_type the type of this percept
 	 */
 	public void setPercept_type(String percept_type) {
 		this.percept_type = percept_type;
@@ -97,7 +102,7 @@ public class PerceptContent implements Serializable {
 	/**
 	 * Sets parameters of the percept
 	 * 
-	 * @param parameters
+	 * @param parameters any meta data associated with this percept
 	 */
 	public void setParameters(Object[] parameters) {
 		this.parameters = parameters;
@@ -113,7 +118,7 @@ public class PerceptContent implements Serializable {
 	/**
 	 * Sets the value of the percept
 	 * 
-	 * @param value
+	 * @param value percept data
 	 */
 	public void setValue(Object value) {
 		this.value = value;

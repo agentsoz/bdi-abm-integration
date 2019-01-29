@@ -28,7 +28,7 @@ public interface DataSource<T> {
     * Sends scheduled data of the given type at the given time
     * @param forTime the time for which data is scheduled to be produced
     * @param dataType the type identifier for the data being produced
-    * @return
+    * @return the data
     */
    T sendData(double forTime, String dataType);
 }

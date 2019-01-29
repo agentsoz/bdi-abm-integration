@@ -86,6 +86,7 @@ public class PerceptContainer implements Serializable {
 
 	/**
 	 * Deep copy
+	 * @param pc the container to copy from
 	 */
 	public synchronized void copy(PerceptContainer pc) {
 		// shallow copy if the incoming container is null or empty

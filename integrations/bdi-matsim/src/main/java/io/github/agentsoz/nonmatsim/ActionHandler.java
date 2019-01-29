@@ -46,9 +46,9 @@ public final class ActionHandler {
 	 *       return true;
 	 *    }
 	 * });
-	 * </pre></code>
-	 * @param actionID
-	 * @param actionHandler
+	 * </code></pre>
+	 * @param actionID unique action id
+	 * @param actionHandler the handler to use for this action
 	 */
 	public final void registerBDIAction(String actionID, BDIActionHandler actionHandler) {
 		registeredActions.put(actionID, actionHandler);
@@ -58,13 +58,10 @@ public final class ActionHandler {
 	 * Process incoming BDI actions by for this MATSim agent, by calling its
 	 * registered {@link BDIActionHandler}.
 	 * 
-	 * @param agentID
-	 *            ID of the agent
-	 * @param actionID
-	 *            ID of the action, defined in {@link ActionList}
-	 * @param parameters
-	 *            Parameters associated with the action
-	 * @return
+	 * @param agentID ID of the agent
+	 * @param actionID ID of the action, defined in {@link ActionList}
+	 * @param parameters Parameters associated with the action
+	 * @return whether the action was processed successfully or not
 	 */
 	final boolean processAction(String agentID, String actionID, Object[] parameters) {
 		if ( registeredActions.isEmpty() ) {

@@ -46,8 +46,8 @@ public class AgentStateList extends ArrayList<AgentState> implements Serializabl
 	
 	/**
 	 * get the idle state of the agent
-	 * @param agentID
-	 * @return
+	 * @param agentID the unique id of the agent
+	 * @return whether the agent is idle or not
 	 */
 	public boolean isIdle (String agentID)
 	{
@@ -60,8 +60,8 @@ public class AgentStateList extends ArrayList<AgentState> implements Serializabl
 	 * Set the idleState of the corresponding AgentState, 
 	 * instance with the agentID, into the value of 
 	 * parameter isIdle.
-	 * @param agentID
-	 * @param isIdle
+	 * @param agentID the unique id of the agent
+	 * @param isIdle whether the agent is idle or not
 	 */
 	public void setState (String agentID, Boolean isIdle)
 	{

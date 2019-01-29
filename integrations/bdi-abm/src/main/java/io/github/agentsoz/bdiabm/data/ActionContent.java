@@ -114,7 +114,7 @@ public class ActionContent implements Serializable {
 	/**
 	 * Set the parameter's values
 	 * 
-	 * @param parameters
+	 * @param parameters action parameter values
 	 */
 	public void setParameters(Object[] parameters) {
 		this.parameters = parameters;
@@ -123,7 +123,7 @@ public class ActionContent implements Serializable {
 	/**
 	 * Set the state of action
 	 * 
-	 * @param state
+	 * @param state the new state
 	 */
 	public void setState(State state) {
 		this.state = state;
@@ -144,7 +144,7 @@ public class ActionContent implements Serializable {
 	/**
 	 * Set an ID for the action
 	 * 
-	 * @param instance_id
+	 * @param instance_id the unique id of this instance of the action
 	 */
 	public void setInstance_id(String instance_id) {
 		this.instance_id = instance_id;
@@ -160,7 +160,7 @@ public class ActionContent implements Serializable {
 	/**
 	 * Set the action type (identifier)
 	 * 
-	 * @param action_type
+	 * @param action_type the type of this action
 	 */
 	public void setAction_type(String action_type) {
 		this.action_type = action_type;

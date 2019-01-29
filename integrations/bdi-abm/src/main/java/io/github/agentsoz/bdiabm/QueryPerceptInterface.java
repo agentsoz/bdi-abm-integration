@@ -32,11 +32,9 @@ public interface QueryPerceptInterface {
      * Example query: agentsID: agentX, perceptID: REQUEST_LOCATION,
      * returns the response: coordinates of agentX
      *
-     * @param agentID
-     *            ID of the agent
-     * @param perceptID
-     *            the percept to retrieve
-     * @param args
+     * @param agentID ID of the agent
+     * @param perceptID the percept to retrieve
+     * @param args query percept arguments
      * @return the response for the query
      */
     Object queryPercept(String agentID, String perceptID, Object args);
