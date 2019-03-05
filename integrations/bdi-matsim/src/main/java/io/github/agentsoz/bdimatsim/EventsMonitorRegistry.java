@@ -212,9 +212,11 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 			if (monitor.getAgentId().equals(event.getDriverId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), event.currentLinkId(), monitor.getEvent())) {
 					toRemove.put(driverId,monitor);
-					Monitor arrivedMonitor = monitors.get(ArrivedAtDestination).get(driverId);
-					if (arrivedMonitor != null) {
-						toRemove.put(driverId,arrivedMonitor);
+					if (monitors.containsKey(ArrivedAtDestination)) {
+						Monitor arrivedMonitor = monitors.get(ArrivedAtDestination).get(driverId);
+						if (arrivedMonitor != null) {
+							toRemove.put(driverId, arrivedMonitor);
+						}
 					}
 				}
 			}
