@@ -92,16 +92,7 @@ Util        | `./util`       | Contains utility classes for integration librarie
 
 ### Bushfire example
 
-1.  Build the bdi-abm-integration layer: In the source repository `/`, do
-    `mvn clean install -N`
-2.  Build the BDI-ABM library: See `/integrations/bdi-abm/README.md`
-    for instructions
-3.  Build the UTIL library: See `/util/README.md`
-    for instructions
-4.  Build the ABM-Jill library: See `/integrations/abm-jill/README.md`
-    for instructions
-6.  Build the Bushfire application: In `/examples/bushfire`, do
-    `mvn clean install`
+See [`examples/bushfire/README.md`](./examples/bushfire/README.md).
 
 
 ### Conservation Example
