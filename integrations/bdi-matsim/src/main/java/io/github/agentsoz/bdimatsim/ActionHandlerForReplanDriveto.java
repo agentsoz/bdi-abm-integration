@@ -29,11 +29,11 @@ import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ReplanDriveToDefaultActionHandlerV2 implements BDIActionHandler {
-	private static final Logger log = LoggerFactory.getLogger(ReplanDriveToDefaultActionHandlerV2.class ) ;
+public final class ActionHandlerForReplanDriveto implements BDIActionHandler {
+	private static final Logger log = LoggerFactory.getLogger(ActionHandlerForReplanDriveto.class ) ;
 
 	private final MATSimModel model;
-	public ReplanDriveToDefaultActionHandlerV2(MATSimModel model ) {
+	public ActionHandlerForReplanDriveto(MATSimModel model ) {
 		this.model = model;
 	}
 	@Override

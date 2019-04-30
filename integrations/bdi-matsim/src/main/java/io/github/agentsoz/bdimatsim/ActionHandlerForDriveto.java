@@ -22,8 +22,12 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.ActionContainer;
-import io.github.agentsoz.bdiabm.data.PerceptContainer;
+import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.data.PerceptContent;
+import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
+import io.github.agentsoz.nonmatsim.BDIActionHandler;
+import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
+import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
 import org.matsim.api.core.v01.Coord;
@@ -37,20 +41,14 @@ import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkUtils;
-
-import io.github.agentsoz.bdiabm.data.ActionContent;
-import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
-import io.github.agentsoz.nonmatsim.BDIActionHandler;
-import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
-import io.github.agentsoz.nonmatsim.PAAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class DRIVETODefaultActionHandler implements BDIActionHandler {
-	private static final Logger log = LoggerFactory.getLogger(DRIVETODefaultActionHandler.class ) ;
-	
+public final class ActionHandlerForDriveto implements BDIActionHandler {
+	private static final Logger log = LoggerFactory.getLogger(ActionHandlerForDriveto.class ) ;
+
 	private final MATSimModel model;
-	public DRIVETODefaultActionHandler(MATSimModel model ) {
+	public ActionHandlerForDriveto(MATSimModel model ) {
 //		log.setLevel(Level.DEBUG);
 		this.model = model;
 	}
@@ -122,23 +120,10 @@ public final class DRIVETODefaultActionHandler implements BDIActionHandler {
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
 						PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
 						Object[] params = {linkId.toString()};
-						agent.getActionContainer().register(ActionList.DRIVETO, params);
-						// (shouldn't this be earlier? --> there is a comment in the agent manager. kai, nov'17)
-						//agent.getActionContainer().get(ActionList.DRIVETO).setState(ActionContent.State.PASSED);
-						{
-							// dsingh, 17/may/18  -  attempt at fixing issue #12 below
-							ActionContainer ac = agent.getActionContainer();
-							synchronized (ac) {
-								ActionContent acc = ac.get(ActionList.DRIVETO);
-								if (acc == null) {
-									log.error("agent with id=" + agentId + " has null action content for DRIVETO action!!");
-								} else {
-									acc.setState(ActionContent.State.PASSED);
-								}
-							}
-						}
-						PerceptContainer pc = agent.getPerceptContainer();
-						agent.getPerceptContainer().put(PerceptList.ARRIVED, params[0]);
+						ActionContent ac = new ActionContent(params, ActionContent.State.PASSED, ActionList.DRIVETO);
+						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+						PerceptContent pc = new PerceptContent(PerceptList.ARRIVED, params[0]);
+						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ARRIVED, pc);
 						return true;
 					}
 				}
@@ -149,17 +134,12 @@ public final class DRIVETODefaultActionHandler implements BDIActionHandler {
 				null, new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-						log.debug( "agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-										   currentLinkId ) ;
 						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						Object[] params = { currentLinkId.toString() };
-						ActionContainer ac = agent.getActionContainer();
-						synchronized (ac) {
-							ac.register(ActionList.DRIVETO, params);
-							ac.get(ActionList.DRIVETO).setState(ActionContent.State.FAILED);
-						}
-						PerceptContainer pc = agent.getPerceptContainer();
-						agent.getPerceptContainer().put(PerceptList.BLOCKED, params[0]);
+						ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+						PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
+						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
 						return true;
 					}
 				}
@@ -170,21 +150,16 @@ public final class DRIVETODefaultActionHandler implements BDIActionHandler {
 				null, new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-						log.debug( "agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-								currentLinkId ) ;
 						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
 						Object[] params = { currentLinkId.toString() };
 						// Send the congestion percept back to the BDI agent. We should not fail the action here,
 						// but let the BDI agent decide to abort the action if it so decides. However, while
 						// abortion is not supported in Jill we will have to live with failing the action for
 						// the time being; dsingh 1/2/18
-						ActionContainer ac = agent.getActionContainer();
-						synchronized (ac) {
-							ac.register(ActionList.DRIVETO, params);
-							ac.get(ActionList.DRIVETO).setState(ActionContent.State.FAILED);
-						}
-						PerceptContainer pc = agent.getPerceptContainer();
-						pc.put(PerceptList.CONGESTION, params[0]);
+						ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+						PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
+						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
 						return true;
 					}
 				}
@@ -194,7 +169,7 @@ public final class DRIVETODefaultActionHandler implements BDIActionHandler {
 		return true;
 	}
 	
-	static void printPlan(String str ,MobsimAgent agent1) {
+	private void printPlan(String str ,MobsimAgent agent1) {
 		Plan plan = WithinDayAgentUtils.getModifiablePlan(agent1) ;
 		log.debug(str + plan ); ;
 		for ( PlanElement pe : plan.getPlanElements() ) {

@@ -271,11 +271,13 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 		for(String agentId: bdiAgentIDs) {
 			agentManager.createAndAddBDIAgent(agentId);
 
-			// default action:
+			// default actions:
 			agentManager.getAgent(agentId).getActionHandler().registerBDIAction(
-					ActionList.DRIVETO, new DRIVETODefaultActionHandlerV2(this) );
+					ActionList.DRIVETO, new ActionHandlerForDriveto(this) );
 			agentManager.getAgent(agentId).getActionHandler().registerBDIAction(
-					ActionList.REPLAN_CURRENT_DRIVETO, new ReplanDriveToDefaultActionHandlerV2(this) );
+					ActionList.REPLAN_CURRENT_DRIVETO, new ActionHandlerForReplanDriveto(this) );
+			agentManager.getAgent(agentId).getActionHandler().registerBDIAction(
+					ActionList.PERCEIVE, new ActionHandlerForPerceive(this));
 		}
 		{
 			ActivityParams params = new ActivityParams("driveTo");
