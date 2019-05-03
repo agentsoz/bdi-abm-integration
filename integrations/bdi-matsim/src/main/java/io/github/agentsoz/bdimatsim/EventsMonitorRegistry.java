@@ -90,7 +90,7 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 		// so the slf4j interface does not have these commands, but the logback implementation does.
 		// kai, based on pointer by dhirendra
 	}
-	
+
 	@Override public void handleEvent(VehicleEntersTrafficEvent event) {
 		vehicle2Driver.handleEvent(event);
 	}
@@ -99,7 +99,7 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 		vehicle2Driver.handleEvent(event);
 	}
 	
-	public Id<Person> getDriverOfVehicle(Id<Vehicle> vehicleId) {
+	private Id<Person> getDriverOfVehicle( Id<Vehicle> vehicleId ) {
 		return vehicle2Driver.getDriverOfVehicle(vehicleId);
 	}
 	
@@ -126,6 +126,16 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 	}
 
 	@Override public void handleEvent( Event event ) {
+		// yy I am fairly sure that you could run everything through this method and remove the other handleEvent methods.
+		// Code would be:
+		// ... handleEvent( Event event ) {
+		//         callRegisteredHandlers(event); // already has its own internal instanceof logic!
+		//         if ( event instanceof VehicleEntersTrafficEvent || event instanceof VehicleLeavesTrafficEvent ) {
+		//                vehicle2Driver.handleEvent(event) ;
+		//         }
+		//         ...
+		// kai, may'19
+
 		if (event instanceof NextLinkBlockedEvent || event instanceof AgentInCongestionEvent ) {
 			callRegisteredHandlers(event);
 		}
@@ -193,6 +203,7 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 					Monitor arrivedMonitor = monitors.get(ArrivedAtDestination).get(driverId);
 					if (arrivedMonitor != null) {
 						toRemove.put(driverId,arrivedMonitor);
+						// yyyy will this work?  below, toRemove is only applied to monitors of type AgentInCongestion.  kai, may'19
 					}
 				}
 			}
@@ -216,6 +227,7 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 						Monitor arrivedMonitor = monitors.get(ArrivedAtDestination).get(driverId);
 						if (arrivedMonitor != null) {
 							toRemove.put(driverId, arrivedMonitor);
+							// yyyy will this work?  below, toRemove is only applied to monitors of type NextLinkBlocked.  kai, may'19
 						}
 					}
 				}
