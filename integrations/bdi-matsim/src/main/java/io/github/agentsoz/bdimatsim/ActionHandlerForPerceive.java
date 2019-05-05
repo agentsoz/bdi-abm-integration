@@ -56,47 +56,50 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 	public boolean handle(String agentID, String actionID, Object[] args) {
 		// assertions:
 		Gbl.assertIf(args.length >= 1);
-		Gbl.assertIf(args[0] instanceof String);
 
-		String eventToPerceive = (String)args[0];
-		PAAgent paAgent = model.getAgentManager().getAgent( agentID );
+		for(int i=0; i<args.length; i++) {
+			Gbl.assertIf(args[i] instanceof String);
 
-		switch (eventToPerceive) {
-			case PerceptList.BLOCKED:
-				paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(),
-						MonitoredEventType.NextLinkBlocked,null, new BDIPerceptHandler() {
-							@Override
-							public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-								log.debug( "agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-										currentLinkId ) ;
-								PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
-								Object[] params = { currentLinkId.toString() };
-								PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
-								model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
-								return true;
+			String eventToPerceive = (String) args[i];
+			PAAgent paAgent = model.getAgentManager().getAgent(agentID);
+
+			switch (eventToPerceive) {
+				case PerceptList.BLOCKED:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
+							MonitoredEventType.NextLinkBlocked, null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									Object[] params = {currentLinkId.toString()};
+									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
+									return true;
+								}
 							}
-						}
-				);
-				break;
-			case PerceptList.CONGESTION:
-				// And yet another in case the agent gets stuck in congestion on the way
-				paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.AgentInCongestion,
-						null, new BDIPerceptHandler() {
-							@Override
-							public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-								log.debug( "agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-										currentLinkId ) ;
-								PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
-								Object[] params = { currentLinkId.toString() };
-								PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
-								model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
-								return true;
+					);
+					break;
+				case PerceptList.CONGESTION:
+					// And yet another in case the agent gets stuck in congestion on the way
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.AgentInCongestion,
+							null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									Object[] params = {currentLinkId.toString()};
+									PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
+									return true;
+								}
 							}
-						}
-				);
-				break;
-			default:
-				throw new RuntimeException("Cannot register for unknown percept type '"+eventToPerceive+"'");
+					);
+					break;
+				default:
+					throw new RuntimeException("Cannot register for unknown percept type '" + eventToPerceive + "'");
+			}
 		}
 		ActionContent ac = new ActionContent(null, ActionContent.State.PASSED, ActionList.PERCEIVE);
 		model.getAgentManager().getAgentDataContainerV2().putAction(agentID, ActionList.PERCEIVE, ac);
