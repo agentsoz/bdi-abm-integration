@@ -240,6 +240,22 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		}
 	}
 
+	public boolean hasPersonArrivalEventMonitorFor(String agentId) {
+		Id<Person> driverId = Id.createPersonId(agentId);
+		Gbl.assertNotNull(driverId);
+		return monitors.get(PersonArrivalEvent) != null && monitors.get(PersonArrivalEvent).containsKey(driverId);
+	}
+
+
+	public void removePersonArrivalEventMonitorFor(String agentId) {
+		if (hasPersonArrivalEventMonitorFor(agentId)){
+			Id<Person> driverId = Id.createPersonId(agentId);
+			synchronized (monitors.get(PersonArrivalEvent)) {
+				monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
+			}
+		}
+	}
+
 	private void handlePersonDepartureEvent(PersonDepartureEvent ev) {
 		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		PersonDepartureEvent event = ev;

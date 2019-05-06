@@ -44,21 +44,16 @@ import org.matsim.api.core.v01.network.Link;
 public final class PAAgent {
 	/* Design decisions/changes:
 	 * - drive actions were never used, so I removed them.  This should make the agent type more general.  kai, oct/nov'17
-	 * - because it was now more general, I renamed it first to AgentWithPerceptsAndActions, and now short to 
+	 * - because it was now more general, I renamed it first to AgentWithPerceptsAndActions, and now short to
 	 *   PAAgent = PerceptActionAgent.  Could be renamed into something else if that makes more sense from the framework
 	 *   perspective.  kai, oct/nov'17
 	 */
-	
-	private final PerceptHandler perceptHandler;
-	private final ActionHandler actionHandler = new ActionHandler() ;
-	private final String agentID;
-//	private String agentType;
-//
-//	private final List<Id<Link>> driveToActions = new ArrayList<>() ;
 
-	/**
-	 * the agent keeps a handle to its own material in {@link AgentDataContainer}, which is globally passed around
-	 */
+	private final PerceptHandler perceptHandler;
+	private final ActionHandler actionHandler = new ActionHandler();
+	private final EventsMonitorRegistry eventsMonitorRegistry;
+	private final String agentID;
+
 	private ActionPerceptContainer actPerceptContainer;
 
 	public final String getAgentID() {
@@ -74,7 +69,7 @@ public final class PAAgent {
 	}
 
 	public final ActionContainer getActionContainer() {
-		return this.actPerceptContainer.getActionContainer() ;
+		return this.actPerceptContainer.getActionContainer();
 	}
 
 	public final PerceptContainer getPerceptContainer() {
@@ -82,45 +77,17 @@ public final class PAAgent {
 	}
 
 	PAAgent(EventsMonitorRegistry eventsMonitors, String agentID, ActionPerceptContainer actPerceptContainer) {
-		this.perceptHandler = new PerceptHandler( eventsMonitors ) ;
+		this.eventsMonitorRegistry = eventsMonitors;
+		this.perceptHandler = new PerceptHandler(eventsMonitors);
 		this.agentID = agentID;
-		this.actPerceptContainer = actPerceptContainer ;
+		this.actPerceptContainer = actPerceptContainer;
 	}
 
-//	public final void newDriveTo(Id<Link> newAction) {
-//		driveToActions.add(newAction);
-//	}
-//
-//	final void removeActions(Id<Link> action) {
-//		driveToActions.remove(action);
-//	}
-//
-//	final void clearAllActions() {
-//		driveToActions.clear();
-//	}
-//
-//	/*
-//	 * Checks the location and returns which driveToAction has been
-//	 * PASSED/ARRIVED
-//	 */
-//	final Id<Link> arrivedAtDriveTo(Id<Link> location) {
-//		Iterator<Id<Link>> actions = driveToActions.iterator();
-//		while (actions.hasNext()) {
-//			Id<Link> dest = actions.next();
-//
-//			if (dest.equals(location)) {
-//				driveToActions.remove(dest);
-//				return dest;
-//			}
-//		}
-//		return Id.createLinkId(0);
-//	}
-//
-//	public String getAgentType() {
-//		return agentType;
-//	}
-//
-//	public void setAgentType(String agentType) {
-//		this.agentType = agentType;
-//	}
+	public boolean hasPersonArrivalEventMonitor() {
+		return eventsMonitorRegistry.hasPersonArrivalEventMonitorFor(agentID);
+	}
+
+	public void removePersonArrivalEventMonitor() {
+		eventsMonitorRegistry.removePersonArrivalEventMonitorFor(agentID);
+	}
 }

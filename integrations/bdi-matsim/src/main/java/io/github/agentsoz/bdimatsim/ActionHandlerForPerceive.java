@@ -65,8 +65,16 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
 									Object[] params = {currentLinkId.toString()};
+									// Create the BLOCKED percept
 									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
+									// If this agent is monitoring for arrival events, i.e. is driving,
+									// then also send back a failed driveTo status and remove the arrival monitor
+									if (agent.hasPersonArrivalEventMonitor()) {
+										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+										agent.removePersonArrivalEventMonitor();
+									}
 									return true;
 								}
 							}
@@ -82,8 +90,16 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
 									Object[] params = {currentLinkId.toString()};
+									// Create the CONGESTION percept
 									PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
+									// If this agent is monitoring for arrival events, i.e. is driving,
+									// then also send back a failed driveTo status and remove the arrival monitor
+									if (agent.hasPersonArrivalEventMonitor()) {
+										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+										agent.removePersonArrivalEventMonitor();
+									}
 									return true;
 								}
 							}
