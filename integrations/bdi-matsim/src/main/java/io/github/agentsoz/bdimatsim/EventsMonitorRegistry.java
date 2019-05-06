@@ -48,13 +48,9 @@ import static io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventT
  *
  * @author Edmund Kemsley
  */
-public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkLeaveEventHandler,
-				   PersonArrivalEventHandler, PersonDepartureEventHandler, ActivityEndEventHandler,
-				   VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, BasicEventHandler
+public final class EventsMonitorRegistry implements BasicEventHandler
 {
 	
-	private Map<Id<Vehicle>,Double> linkEnterEventsMap = new LinkedHashMap<>() ;
-
 	/**<p>
 	 * if these event types were sitting in bdi-abm, I would understand this.  But given that they are sitting here,
 	 * why not use the matsim events directly?  kai, nov'17
@@ -63,6 +59,7 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 	 * </p><p>
 	 *       yy But why can't we use MATSim event names directly? kai, nov'18
 	 * </p>
+	 * <p>TODO: These can be the same as MATSim events. Dhi, 06/may/19</p>
 	 */
 	public enum MonitoredEventType {
 		@Deprecated // confusing nomenclature; corresponds to enter link in matsim
@@ -91,14 +88,6 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 		// kai, based on pointer by dhirendra
 	}
 
-	@Override public void handleEvent(VehicleEntersTrafficEvent event) {
-		vehicle2Driver.handleEvent(event);
-	}
-	
-	@Override public void handleEvent(VehicleLeavesTrafficEvent event) {
-		vehicle2Driver.handleEvent(event);
-	}
-	
 	private Id<Person> getDriverOfVehicle( Id<Vehicle> vehicleId ) {
 		return vehicle2Driver.getDriverOfVehicle(vehicleId);
 	}
@@ -107,38 +96,9 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 
 	@Override public final void reset(int iteration) { }
 
-	@Override public final void handleEvent(LinkEnterEvent event) { callRegisteredHandlers(event); }
-
-	@Override public void handleEvent(LinkLeaveEvent event) {
-		callRegisteredHandlers(event);
-	}
-
-	@Override public final void handleEvent(PersonDepartureEvent event) {
-		callRegisteredHandlers(event);
-	}
-
-	@Override public final void handleEvent(PersonArrivalEvent event) {
-		callRegisteredHandlers(event);
-	}
-	
-	@Override public void handleEvent(ActivityEndEvent event) {
-		callRegisteredHandlers(event);
-	}
 
 	@Override public void handleEvent( Event event ) {
-		// yy I am fairly sure that you could run everything through this method and remove the other handleEvent methods.
-		// Code would be:
-		// ... handleEvent( Event event ) {
-		//         callRegisteredHandlers(event); // already has its own internal instanceof logic!
-		//         if ( event instanceof VehicleEntersTrafficEvent || event instanceof VehicleLeavesTrafficEvent ) {
-		//                vehicle2Driver.handleEvent(event) ;
-		//         }
-		//         ...
-		// kai, may'19
-
-		if (event instanceof NextLinkBlockedEvent || event instanceof AgentInCongestionEvent ) {
-			callRegisteredHandlers(event);
-		}
+		callRegisteredHandlers(event);
 	}
 
 	
@@ -146,14 +106,6 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 		// Register any new monitors waiting to be added
 		// Synchronise on toAdd which is allowed to be updated by other threads
 		synchronized (toAdd) {
-//			for(Id<Person> agentId : toAdd.keySet()) {
-//				Monitor monitor = toAdd.get(agentId);
-//				if (!monitors.containsKey(monitor.getEvent())) {
-//					monitors.put(monitor.getEvent(), new ConcurrentHashMap<>());
-//				}
-//				monitors.get(monitor.getEvent()).put(agentId,monitor);
-//			}
-//			toAdd.clear();
 			for(MonitoredEventType eventType : toAdd.keySet()) {
 				if (!monitors.containsKey(eventType)) {
 					monitors.put(eventType, new ConcurrentHashMap<>());
@@ -187,7 +139,14 @@ public final class EventsMonitorRegistry implements LinkEnterEventHandler, LinkL
 
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(EndedActivity)) {
 			handleActivityEndEvent((ActivityEndEvent) ev);
+
+		} else if (ev instanceof VehicleEntersTrafficEvent) {
+			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
+
+		} else if (ev instanceof VehicleLeavesTrafficEvent) {
+			vehicle2Driver.handleEvent((VehicleLeavesTrafficEvent)ev) ;
 		}
+
 	}
 
 	private void handleAgentInCongestionEvent( AgentInCongestionEvent ev) {
