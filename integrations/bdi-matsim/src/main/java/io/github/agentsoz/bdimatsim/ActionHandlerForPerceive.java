@@ -22,7 +22,6 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.data.ActionContainer;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
@@ -32,17 +31,10 @@ import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.mobsim.framework.MobsimAgent;
-import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.matsim.core.network.NetworkUtils;
 
 public final class ActionHandlerForPerceive implements BDIActionHandler {
 	private static final Logger log = Logger.getLogger( ActionHandlerForPerceive.class ) ;
@@ -66,7 +58,7 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 			switch (eventToPerceive) {
 				case PerceptList.BLOCKED:
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
-							MonitoredEventType.NextLinkBlocked, null, new BDIPerceptHandler() {
+							MonitoredEventType.NextLinkBlockedEvent, null, new BDIPerceptHandler() {
 								@Override
 								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
@@ -82,7 +74,7 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					break;
 				case PerceptList.CONGESTION:
 					// And yet another in case the agent gets stuck in congestion on the way
-					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.AgentInCongestion,
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent,
 							null, new BDIPerceptHandler() {
 								@Override
 								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {

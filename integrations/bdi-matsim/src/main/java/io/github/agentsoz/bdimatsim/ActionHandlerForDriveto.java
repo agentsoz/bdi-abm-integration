@@ -114,7 +114,7 @@ public final class ActionHandlerForDriveto implements BDIActionHandler {
 
 		// Now register an event handler for when the agent arrives at the destination
 		PAAgent paAgent = model.getAgentManager().getAgent( agentID );
-		paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.ArrivedAtDestination,
+		paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.PersonArrivalEvent,
 				newLinkId.toString(), new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
@@ -130,7 +130,7 @@ public final class ActionHandlerForDriveto implements BDIActionHandler {
 		);
 		
 		// And another in case the agent gets stuck on the way
-		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.NextLinkBlocked,
+		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.NextLinkBlockedEvent,
 				null, new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
@@ -146,7 +146,7 @@ public final class ActionHandlerForDriveto implements BDIActionHandler {
 		);
 
 		// And yet another in case the agent gets stuck in congestion on the way
-		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.AgentInCongestion,
+		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent,
 				null, new BDIPerceptHandler() {
 					@Override
 					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
