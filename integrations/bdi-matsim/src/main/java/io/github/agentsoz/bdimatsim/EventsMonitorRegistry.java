@@ -135,7 +135,6 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 	}
 
 	private void handleAgentInCongestionEvent( AgentInCongestionEvent ev) {
-		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		Id<Person> driverId = this.getDriverOfVehicle( ev.getVehicleId());
 		Gbl.assertNotNull(driverId);
 		Monitor monitor = monitors.get(AgentInCongestionEvent).get(driverId);
@@ -143,22 +142,15 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			log.debug("handling AgentInCongestionEvent event");
 			if (monitor.getAgentId().equals(driverId)) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), ev.getCurrentLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId, monitor);
-					Monitor arrivedMonitor = monitors.get(PersonArrivalEvent).get(driverId);
-					if (arrivedMonitor != null) {
-						toRemove.put(driverId,arrivedMonitor);
-						// yyyy will this work?  below, toRemove is only applied to monitors of type AgentInCongestionEvent.  kai, may'19
+					synchronized (monitors.get(AgentInCongestionEvent)) {
+						monitors.get(AgentInCongestionEvent).entrySet().remove(driverId);
 					}
 				}
-			}
-			synchronized (monitors.get(AgentInCongestionEvent)) {
-				monitors.get(AgentInCongestionEvent).entrySet().removeAll(toRemove.entrySet());
 			}
 		}
 	}
 
 	private void handleNextLinkBlockedEvent(NextLinkBlockedEvent ev) {
-		Map<Id<Person>, Monitor>  toRemove = new HashMap<>();
 		NextLinkBlockedEvent event = ev;
 		Id<Person> driverId = event.getDriverId();
 		Monitor monitor = monitors.get(NextLinkBlockedEvent).get(driverId);
@@ -166,24 +158,15 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			log.debug("catching a nextLinkBlocked event");
 			if (monitor.getAgentId().equals(event.getDriverId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), event.currentLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
-					if (monitors.containsKey(PersonArrivalEvent)) {
-						Monitor arrivedMonitor = monitors.get(PersonArrivalEvent).get(driverId);
-						if (arrivedMonitor != null) {
-							toRemove.put(driverId, arrivedMonitor);
-							// yyyy will this work?  below, toRemove is only applied to monitors of type NextLinkBlockedEvent.  kai, may'19
-						}
+					synchronized (monitors.get(NextLinkBlockedEvent)) {
+						monitors.get(NextLinkBlockedEvent).entrySet().remove(driverId);
 					}
 				}
-			}
-			synchronized (monitors.get(NextLinkBlockedEvent)) {
-				monitors.get(NextLinkBlockedEvent).entrySet().removeAll(toRemove.entrySet());
 			}
 		}
 	}
 
 	private void handleLinkEnterEvent(LinkEnterEvent ev) {
-		Map<Id<Person>, Monitor>  toRemove = new HashMap<>();
 		LinkEnterEvent event = ev;
 		Id<Person> driverId = this.getDriverOfVehicle(event.getVehicleId());
 		Gbl.assertNotNull(driverId);
@@ -191,17 +174,15 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		if (monitor != null) {
 			if (monitor.getAgentId().equals(driverId) && event.getLinkId().equals(monitor.getLinkId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
+					synchronized (monitors.get(LinkEnterEvent)) {
+						monitors.get(LinkEnterEvent).entrySet().remove(driverId);
+					}
 				}
 			}
-		}
-		synchronized (monitors.get(LinkEnterEvent)) {
-			monitors.get(LinkEnterEvent).entrySet().removeAll(toRemove.entrySet());
 		}
 	}
 
 	private void handleLinkLeaveEvent(LinkLeaveEvent ev) {
-		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		LinkLeaveEvent event = ev;
 		Id<Person> driverId = this.getDriverOfVehicle(event.getVehicleId());
 		Gbl.assertNotNull(driverId);
@@ -209,17 +190,15 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		if (monitor != null) {
 			if (monitor.getAgentId().equals(event.getDriverId()) && monitor.getLinkId().equals(event.getLinkId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
+					synchronized (monitors.get(LinkLeaveEvent)) {
+						monitors.get(LinkLeaveEvent).entrySet().remove(driverId);
+					}
 				}
 			}
-		}
-		synchronized (monitors.get(LinkLeaveEvent)) {
-			monitors.get(LinkLeaveEvent).entrySet().removeAll(toRemove.entrySet());
 		}
 	}
 
 	private void handlePersonArrivalEvent(PersonArrivalEvent ev) {
-		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		PersonArrivalEvent event = ev;
 		Id<Person> driverId = event.getPersonId();
 		Gbl.assertNotNull(driverId);
@@ -227,16 +206,11 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		if (monitor != null) {
 			if (monitor.getAgentId().equals(event.getPersonId()) && monitor.getLinkId().equals(event.getLinkId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
-				}
-				Monitor blockedMonitor = monitors.get(NextLinkBlockedEvent).get(driverId);
-				if (blockedMonitor != null) {
-					toRemove.put(driverId,blockedMonitor);
+					synchronized (monitors.get(PersonArrivalEvent)) {
+						monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
+					}
 				}
 			}
-		}
-		synchronized (monitors.get(PersonArrivalEvent)) {
-			monitors.get(PersonArrivalEvent).entrySet().removeAll(toRemove.entrySet());
 		}
 	}
 
@@ -257,7 +231,6 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 	}
 
 	private void handlePersonDepartureEvent(PersonDepartureEvent ev) {
-		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		PersonDepartureEvent event = ev;
 		Id<Person> driverId = event.getPersonId();
 		Gbl.assertNotNull(driverId);
@@ -265,29 +238,26 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		if (monitor != null) {
 			if (monitor.getAgentId().equals(event.getPersonId()) && monitor.getLinkId().equals(event.getLinkId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
+					synchronized (monitors.get(PersonDepartureEvent)) {
+						monitors.get(PersonDepartureEvent).entrySet().remove(driverId);
+					}
 				}
 			}
-		}
-		synchronized (monitors.get(PersonDepartureEvent)) {
-			monitors.get(PersonDepartureEvent).entrySet().removeAll(toRemove.entrySet());
 		}
 	}
 
 	private void handleActivityEndEvent(ActivityEndEvent ev) {
-		Map<Id<Person>, Monitor> toRemove = new HashMap<>();
 		Id<Person> driverId = ev.getPersonId();
 		Gbl.assertNotNull(driverId);
 		Monitor monitor = monitors.get(ActivityEndEvent).get(driverId);
 		if (monitor != null) {
 			if (monitor.getAgentId().equals( ev.getPersonId()) && monitor.getLinkId().equals( ev.getLinkId())) {
 				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					toRemove.put(driverId,monitor);
+					synchronized (monitors.get(ActivityEndEvent)) {
+						monitors.get(ActivityEndEvent).entrySet().remove(driverId);
+					}
 				}
 			}
-		}
-		synchronized (monitors.get(ActivityEndEvent)) {
-			monitors.get(ActivityEndEvent).entrySet().removeAll(toRemove.entrySet());
 		}
 	}
 
