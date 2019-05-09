@@ -51,8 +51,6 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 {
 	
 	public enum MonitoredEventType {
-		// yyyy I am resurrecting this comment, sorry: I still can't see a reason why not to use matsim events directly here: I think that this "adapter"
-		// approach just makes it less general, without buying anything in return.  kai, may'19
 		AgentInCongestionEvent,
 		ActivityEndEvent,
 		LinkEnterEvent,
@@ -60,6 +58,10 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		NextLinkBlockedEvent,
 		PersonArrivalEvent,
 		PersonDepartureEvent,
+
+		// a reason for having this here is that one can work on objects of type MonitoredEventType rather than Class<? extends Event>, since the first is
+		// conceptually simpler.   There is also no way around handing each event type separately, since the syntax to get driverId and linkId out of
+		// them is not uniform across events, see below.  kai, may'19
 	}
 	
 	private static final Logger log = LoggerFactory.getLogger(EventsMonitorRegistry.class ) ;
@@ -107,25 +109,25 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		}
 
 		if (ev instanceof AgentInCongestionEvent && monitors.containsKey(AgentInCongestionEvent)) {
-			handleAgentInCongestionEvent((AgentInCongestionEvent) ev);
+			removeMonitor( this.getDriverOfVehicle( ((AgentInCongestionEvent) ev).getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, ((AgentInCongestionEvent) ev).getCurrentLinkId() );
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(NextLinkBlockedEvent)) {
-			handleNextLinkBlockedEvent((NextLinkBlockedEvent) ev);
+			removeMonitor( ((NextLinkBlockedEvent) ev).getDriverId(), MonitoredEventType.NextLinkBlockedEvent, ((NextLinkBlockedEvent) ev).currentLinkId() );
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(LinkEnterEvent)) {
-			handleLinkEnterEvent((LinkEnterEvent) ev);
+			removeMonitor( this.getDriverOfVehicle( ((LinkEnterEvent) ev).getVehicleId() ), MonitoredEventType.LinkEnterEvent, ((LinkEnterEvent) ev).getLinkId() );
 
 		} else if (ev instanceof LinkLeaveEvent && monitors.containsKey(LinkLeaveEvent)) {
-			handleLinkLeaveEvent((LinkLeaveEvent) ev);
+			removeMonitor( this.getDriverOfVehicle( ((LinkLeaveEvent) ev).getVehicleId() ), MonitoredEventType.LinkLeaveEvent, ((LinkLeaveEvent) ev).getLinkId() );
 
 		} else if (ev instanceof PersonArrivalEvent && monitors.containsKey(PersonArrivalEvent)) {
-			handlePersonArrivalEvent((PersonArrivalEvent) ev);
+			removeMonitor( ((PersonArrivalEvent) ev).getPersonId(), PersonArrivalEvent, ((PersonArrivalEvent) ev).getLinkId() );
 
 		} else if (ev instanceof PersonDepartureEvent && monitors.containsKey(PersonDepartureEvent)) {
-			handlePersonDepartureEvent((PersonDepartureEvent) ev);
+			removeMonitor( ((PersonDepartureEvent) ev).getPersonId(), PersonDepartureEvent, ((PersonDepartureEvent) ev).getLinkId() );
 
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(ActivityEndEvent)) {
-			handleActivityEndEvent((ActivityEndEvent) ev);
+			removeMonitor( ((ActivityEndEvent) ev).getPersonId(), ActivityEndEvent, ((ActivityEndEvent) ev).getLinkId() );
 
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
@@ -134,26 +136,6 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			vehicle2Driver.handleEvent((VehicleLeavesTrafficEvent)ev) ;
 		}
 
-	}
-
-	private void handleAgentInCongestionEvent( AgentInCongestionEvent ev) {
-		removeMonitor( this.getDriverOfVehicle( ev.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, ev.getCurrentLinkId() );
-	}
-
-	private void handleNextLinkBlockedEvent(NextLinkBlockedEvent ev) {
-		removeMonitor( ev.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, ev.currentLinkId() );
-	}
-
-	private void handleLinkEnterEvent(LinkEnterEvent ev) {
-		removeMonitor( this.getDriverOfVehicle( ev.getVehicleId() ), MonitoredEventType.LinkEnterEvent, ev.getLinkId() );
-	}
-
-	private void handleLinkLeaveEvent(LinkLeaveEvent ev) {
-		removeMonitor( this.getDriverOfVehicle( ev.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, ev.getLinkId() );
-	}
-
-	private void handlePersonArrivalEvent(PersonArrivalEvent ev) {
-		removeMonitor( ev.getPersonId(), PersonArrivalEvent, ev.getLinkId() );
 	}
 
 	public boolean hasPersonArrivalEventMonitorFor(String agentId) {
@@ -171,14 +153,6 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 				monitors.get(PersonArrivalEvent).remove(driverId);
 			}
 		}
-	}
-
-	private void handlePersonDepartureEvent(PersonDepartureEvent ev) {
-		removeMonitor( ev.getPersonId(), PersonDepartureEvent, ev.getLinkId() );
-	}
-
-	private void handleActivityEndEvent(ActivityEndEvent ev) {
-		removeMonitor( ev.getPersonId(), ActivityEndEvent, ev.getLinkId() );
 	}
 
 	/**
