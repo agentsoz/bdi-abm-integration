@@ -57,53 +57,57 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 
 			switch (eventToPerceive) {
 				case PerceptList.BLOCKED:
-					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
-							MonitoredEventType.NextLinkBlockedEvent, null, new BDIPerceptHandler() {
-								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
-									// Create the BLOCKED percept
-									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
-									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
-									// If this agent is monitoring for arrival events, i.e. is driving,
-									// then also send back a failed driveTo status and remove the arrival monitor
-									if (agent.hasPersonArrivalEventMonitor()) {
-										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
-										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-										agent.removePersonArrivalEventMonitor();
-									}
-									return true;
-								}
-							}
-					);
+					// Create the BLOCKED percept
+					// If this agent is monitoring for arrival events, i.e. is driving,
+					// then also send back a failed driveTo status and remove the arrival monitor
+					paAgent.getEventsMonitorRegistry().registerMonitor( paAgent.getAgentID(), MonitoredEventType.NextLinkBlockedEvent, null,
+						  new BDIPerceptHandler() {
+											@Override
+											public boolean handle( Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent ) {
+												log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+														currentLinkId);
+												PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+												Object[] params = {currentLinkId.toString()};
+												// Create the BLOCKED percept
+												PerceptContent pc = new PerceptContent( PerceptList.BLOCKED, params[0]);
+												model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
+												// If this agent is monitoring for arrival events, i.e. is driving,
+												// then also send back a failed driveTo status and remove the arrival monitor
+												if (agent.hasPersonArrivalEventMonitor()) {
+													ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+													model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+													agent.removePersonArrivalEventMonitor();
+												}
+												return true;
+											}
+										} );
 					break;
 				case PerceptList.CONGESTION:
 					// And yet another in case the agent gets stuck in congestion on the way
-					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent,
-							null, new BDIPerceptHandler() {
-								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
-											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
-									// Create the CONGESTION percept
-									PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
-									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
-									// If this agent is monitoring for arrival events, i.e. is driving,
-									// then also send back a failed driveTo status and remove the arrival monitor
-									if (agent.hasPersonArrivalEventMonitor()) {
-										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
-										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-										agent.removePersonArrivalEventMonitor();
-									}
-									return true;
-								}
-							}
-					);
+					// Create the CONGESTION percept
+					// If this agent is monitoring for arrival events, i.e. is driving,
+					// then also send back a failed driveTo status and remove the arrival monitor
+					paAgent.getEventsMonitorRegistry().registerMonitor( paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent, null,
+						  new BDIPerceptHandler() {
+											@Override
+											public boolean handle( Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent ) {
+												log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+														currentLinkId);
+												PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+												Object[] params = {currentLinkId.toString()};
+												// Create the CONGESTION percept
+												PerceptContent pc = new PerceptContent( PerceptList.CONGESTION, params[0]);
+												model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
+												// If this agent is monitoring for arrival events, i.e. is driving,
+												// then also send back a failed driveTo status and remove the arrival monitor
+												if (agent.hasPersonArrivalEventMonitor()) {
+													ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
+													model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+													agent.removePersonArrivalEventMonitor();
+												}
+												return true;
+											}
+										} );
 					break;
 				default:
 					throw new RuntimeException("Cannot register for unknown percept type '" + eventToPerceive + "'");

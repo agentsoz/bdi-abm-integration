@@ -49,7 +49,6 @@ public final class PAAgent {
 	 *   perspective.  kai, oct/nov'17
 	 */
 
-	private final PerceptHandler perceptHandler;
 	private final ActionHandler actionHandler = new ActionHandler();
 	private final EventsMonitorRegistry eventsMonitorRegistry;
 	private final String agentID;
@@ -60,8 +59,8 @@ public final class PAAgent {
 		return agentID;
 	}
 
-	public final PerceptHandler getPerceptHandler() {
-		return perceptHandler;
+	public final EventsMonitorRegistry getEventsMonitorRegistry() {
+		return eventsMonitorRegistry;
 	}
 
 	public final ActionHandler getActionHandler() {
@@ -78,7 +77,6 @@ public final class PAAgent {
 
 	PAAgent(EventsMonitorRegistry eventsMonitors, String agentID, ActionPerceptContainer actPerceptContainer) {
 		this.eventsMonitorRegistry = eventsMonitors;
-		this.perceptHandler = new PerceptHandler(eventsMonitors);
 		this.agentID = agentID;
 		this.actPerceptContainer = actPerceptContainer;
 	}
