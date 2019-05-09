@@ -132,8 +132,11 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
 
-		} else if (ev instanceof VehicleLeavesTrafficEvent) {
-			vehicle2Driver.handleEvent((VehicleLeavesTrafficEvent)ev) ;
+		} else if (ev instanceof VehicleLeavesTrafficEvent){
+			vehicle2Driver.handleEvent( (VehicleLeavesTrafficEvent) ev );
+
+		} else {
+			throw new RuntimeException( "not implemented" ) ;
 		}
 
 	}
@@ -151,8 +154,12 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			synchronized (monitors.get(PersonArrivalEvent)) {
 //				monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
 				monitors.get(PersonArrivalEvent).remove(driverId);
+
+				// yyyyyy I am somewhat certain that the commented out syntax did not do as expected.  kai, may'19
 			}
 		}
+
+		// yy maybe this could be the same as removeMonitor below, but it has a slightly different semantics.  kai, may'19
 	}
 
 	/**
