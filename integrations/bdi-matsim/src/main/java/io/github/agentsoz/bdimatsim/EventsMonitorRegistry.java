@@ -58,6 +58,10 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		NextLinkBlockedEvent,
 		PersonArrivalEvent,
 		PersonDepartureEvent,
+
+		// a reason for having this here is that one can work on objects of type MonitoredEventType rather than Class<? extends Event>, since the first is
+		// conceptually simpler.   There is also no way around handing each event type separately, since the syntax to get driverId and linkId out of
+		// them is not uniform across events, see below.  kai, may'19
 	}
 	
 	private static final Logger log = LoggerFactory.getLogger(EventsMonitorRegistry.class ) ;
@@ -105,113 +109,43 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		}
 
 		if (ev instanceof AgentInCongestionEvent && monitors.containsKey(AgentInCongestionEvent)) {
-			handleAgentInCongestionEvent((AgentInCongestionEvent) ev);
+			final io.github.agentsoz.bdimatsim.AgentInCongestionEvent event = (AgentInCongestionEvent) ev;
+			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId() );
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(NextLinkBlockedEvent)) {
-			handleNextLinkBlockedEvent((NextLinkBlockedEvent) ev);
+			final io.github.agentsoz.bdimatsim.NextLinkBlockedEvent event = (NextLinkBlockedEvent) ev;
+			removeMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId() );
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(LinkEnterEvent)) {
-			handleLinkEnterEvent((LinkEnterEvent) ev);
+			final org.matsim.api.core.v01.events.LinkEnterEvent event = (LinkEnterEvent) ev;
+			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkEnterEvent, event.getLinkId() );
 
 		} else if (ev instanceof LinkLeaveEvent && monitors.containsKey(LinkLeaveEvent)) {
-			handleLinkLeaveEvent((LinkLeaveEvent) ev);
+			final org.matsim.api.core.v01.events.LinkLeaveEvent event = (LinkLeaveEvent) ev;
+			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, event.getLinkId() );
 
 		} else if (ev instanceof PersonArrivalEvent && monitors.containsKey(PersonArrivalEvent)) {
-			handlePersonArrivalEvent((PersonArrivalEvent) ev);
+			final org.matsim.api.core.v01.events.PersonArrivalEvent event = (PersonArrivalEvent) ev;
+			removeMonitor( event.getPersonId(), PersonArrivalEvent, event.getLinkId() );
 
 		} else if (ev instanceof PersonDepartureEvent && monitors.containsKey(PersonDepartureEvent)) {
-			handlePersonDepartureEvent((PersonDepartureEvent) ev);
+			final org.matsim.api.core.v01.events.PersonDepartureEvent event = (PersonDepartureEvent) ev;
+			removeMonitor( event.getPersonId(), PersonDepartureEvent, event.getLinkId() );
 
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(ActivityEndEvent)) {
-			handleActivityEndEvent((ActivityEndEvent) ev);
+			final org.matsim.api.core.v01.events.ActivityEndEvent event = (ActivityEndEvent) ev;
+			removeMonitor( event.getPersonId(), ActivityEndEvent, event.getLinkId() );
 
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
 
-		} else if (ev instanceof VehicleLeavesTrafficEvent) {
-			vehicle2Driver.handleEvent((VehicleLeavesTrafficEvent)ev) ;
+		} else if (ev instanceof VehicleLeavesTrafficEvent){
+			vehicle2Driver.handleEvent( (VehicleLeavesTrafficEvent) ev );
+
+		} else {
+			throw new RuntimeException( "not implemented" ) ;
 		}
 
-	}
-
-	private void handleAgentInCongestionEvent( AgentInCongestionEvent ev) {
-		Id<Person> driverId = this.getDriverOfVehicle( ev.getVehicleId());
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(AgentInCongestionEvent).get(driverId);
-		if (monitor != null) {
-			log.debug("handling AgentInCongestionEvent event");
-			if (monitor.getAgentId().equals(driverId)) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), ev.getCurrentLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(AgentInCongestionEvent)) {
-						monitors.get(AgentInCongestionEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
-	}
-
-	private void handleNextLinkBlockedEvent(NextLinkBlockedEvent ev) {
-		NextLinkBlockedEvent event = ev;
-		Id<Person> driverId = event.getDriverId();
-		Monitor monitor = monitors.get(NextLinkBlockedEvent).get(driverId);
-		if (monitor != null) {
-			log.debug("catching a nextLinkBlocked event");
-			if (monitor.getAgentId().equals(event.getDriverId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), event.currentLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(NextLinkBlockedEvent)) {
-						monitors.get(NextLinkBlockedEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
-	}
-
-	private void handleLinkEnterEvent(LinkEnterEvent ev) {
-		LinkEnterEvent event = ev;
-		Id<Person> driverId = this.getDriverOfVehicle(event.getVehicleId());
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(LinkEnterEvent).get(driverId);
-		if (monitor != null) {
-			if (monitor.getAgentId().equals(driverId) && event.getLinkId().equals(monitor.getLinkId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(LinkEnterEvent)) {
-						monitors.get(LinkEnterEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
-	}
-
-	private void handleLinkLeaveEvent(LinkLeaveEvent ev) {
-		LinkLeaveEvent event = ev;
-		Id<Person> driverId = this.getDriverOfVehicle(event.getVehicleId());
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(LinkLeaveEvent).get(driverId);
-		if (monitor != null) {
-			if (monitor.getAgentId().equals(event.getDriverId()) && monitor.getLinkId().equals(event.getLinkId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(LinkLeaveEvent)) {
-						monitors.get(LinkLeaveEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
-	}
-
-	private void handlePersonArrivalEvent(PersonArrivalEvent ev) {
-		PersonArrivalEvent event = ev;
-		Id<Person> driverId = event.getPersonId();
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(PersonArrivalEvent).get(driverId);
-		if (monitor != null) {
-			if (monitor.getAgentId().equals(event.getPersonId()) && monitor.getLinkId().equals(event.getLinkId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(PersonArrivalEvent)) {
-						monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
 	}
 
 	public boolean hasPersonArrivalEventMonitorFor(String agentId) {
@@ -225,40 +159,14 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		if (hasPersonArrivalEventMonitorFor(agentId)){
 			Id<Person> driverId = Id.createPersonId(agentId);
 			synchronized (monitors.get(PersonArrivalEvent)) {
-				monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
-			}
-		}
-	}
+//				monitors.get(PersonArrivalEvent).entrySet().remove(driverId);
+				monitors.get(PersonArrivalEvent).remove(driverId);
 
-	private void handlePersonDepartureEvent(PersonDepartureEvent ev) {
-		PersonDepartureEvent event = ev;
-		Id<Person> driverId = event.getPersonId();
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(PersonDepartureEvent).get(driverId);
-		if (monitor != null) {
-			if (monitor.getAgentId().equals(event.getPersonId()) && monitor.getLinkId().equals(event.getLinkId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(PersonDepartureEvent)) {
-						monitors.get(PersonDepartureEvent).entrySet().remove(driverId);
-					}
-				}
+				// yyyyyy I am somewhat certain that the commented out syntax did not do as expected.  kai, may'19
 			}
 		}
-	}
 
-	private void handleActivityEndEvent(ActivityEndEvent ev) {
-		Id<Person> driverId = ev.getPersonId();
-		Gbl.assertNotNull(driverId);
-		Monitor monitor = monitors.get(ActivityEndEvent).get(driverId);
-		if (monitor != null) {
-			if (monitor.getAgentId().equals( ev.getPersonId()) && monitor.getLinkId().equals( ev.getLinkId())) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
-					synchronized (monitors.get(ActivityEndEvent)) {
-						monitors.get(ActivityEndEvent).entrySet().remove(driverId);
-					}
-				}
-			}
-		}
+		// yy maybe this could be the same as removeMonitor below, but it has a slightly different semantics.  kai, may'19
 	}
 
 	/**
@@ -284,6 +192,21 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		}
 	}
 
+	private void removeMonitor( Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId ){
+		Gbl.assertNotNull( personId );
+		Monitor monitor = monitors.get( monitoredEventType ).get( personId );
+		if (monitor != null) {
+			if (monitor.getAgentId().equals( personId ) && monitor.getLinkId().equals( linkId )) {
+				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
+					synchronized (monitors.get( monitoredEventType )) {
+//						monitors.get( monitoredEventType ).entrySet().remove( personId );
+						monitors.get( monitoredEventType ).remove( personId ); // !!
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Internal structure used to store information about MATSim events to monitor
 	 * @author dsingh
@@ -296,7 +219,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		private MonitoredEventType event;
 		private BDIPerceptHandler handler;
 		
-		public Monitor(String agentId2, String linkId, MonitoredEventType event, BDIPerceptHandler handler) {
+		Monitor( String agentId2, String linkId, MonitoredEventType event, BDIPerceptHandler handler ) {
 			super();
 
 			this.agentId = Id.createPersonId(agentId2);
