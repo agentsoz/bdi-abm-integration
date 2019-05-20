@@ -110,31 +110,31 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 
 		if (ev instanceof AgentInCongestionEvent && monitors.containsKey(AgentInCongestionEvent)) {
 			final io.github.agentsoz.bdimatsim.AgentInCongestionEvent event = (AgentInCongestionEvent) ev;
-			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), AgentInCongestionEvent, event.getCurrentLinkId() );
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(NextLinkBlockedEvent)) {
 			final io.github.agentsoz.bdimatsim.NextLinkBlockedEvent event = (NextLinkBlockedEvent) ev;
-			removeMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId() );
+			handleEventAndRemoveMonitor( event.getDriverId(), NextLinkBlockedEvent, event.currentLinkId() );
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(LinkEnterEvent)) {
 			final org.matsim.api.core.v01.events.LinkEnterEvent event = (LinkEnterEvent) ev;
-			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkEnterEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), LinkEnterEvent, event.getLinkId() );
 
 		} else if (ev instanceof LinkLeaveEvent && monitors.containsKey(LinkLeaveEvent)) {
 			final org.matsim.api.core.v01.events.LinkLeaveEvent event = (LinkLeaveEvent) ev;
-			removeMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), LinkLeaveEvent, event.getLinkId() );
 
 		} else if (ev instanceof PersonArrivalEvent && monitors.containsKey(PersonArrivalEvent)) {
 			final org.matsim.api.core.v01.events.PersonArrivalEvent event = (PersonArrivalEvent) ev;
-			removeMonitor( event.getPersonId(), PersonArrivalEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), PersonArrivalEvent, event.getLinkId() );
 
 		} else if (ev instanceof PersonDepartureEvent && monitors.containsKey(PersonDepartureEvent)) {
 			final org.matsim.api.core.v01.events.PersonDepartureEvent event = (PersonDepartureEvent) ev;
-			removeMonitor( event.getPersonId(), PersonDepartureEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), PersonDepartureEvent, event.getLinkId() );
 
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(ActivityEndEvent)) {
 			final org.matsim.api.core.v01.events.ActivityEndEvent event = (ActivityEndEvent) ev;
-			removeMonitor( event.getPersonId(), ActivityEndEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), ActivityEndEvent, event.getLinkId() );
 
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
@@ -143,7 +143,9 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			vehicle2Driver.handleEvent( (VehicleLeavesTrafficEvent) ev );
 
 		} else {
-			throw new RuntimeException( "not implemented" ) ;
+			// Not throwing all else, which includes also cases of all events above
+			// but without the monitor, as well as other events like "time"; dhi 21/may/19
+			// throw new RuntimeException( "Handler for event not implemented:" + ev ) ;
 		}
 
 	}
@@ -163,10 +165,15 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 				monitors.get(PersonArrivalEvent).remove(driverId);
 
 				// yyyyyy I am somewhat certain that the commented out syntax did not do as expected.  kai, may'19
+
+				// Oops, dhi 21/may/19
 			}
 		}
 
-		// yy maybe this could be the same as removeMonitor below, but it has a slightly different semantics.  kai, may'19
+		// yy maybe this could be the same as handleEventAndRemoveMonitor below, but it has a slightly different semantics.  kai, may'19
+
+		// I have renamed the function below to make the distinction obvious,
+		// i.e., here we do not handle the event but just remove the monitor; dhi 21/may/19
 	}
 
 	/**
@@ -192,15 +199,22 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		}
 	}
 
-	private void removeMonitor( Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId ){
+	/**
+	 * Handles and removes a monitored event for a given person on a given link.
+	 * @param personId the person the event is related to
+	 * @param monitoredEventType the monitored event to handle and remove
+	 * @param linkId the link associated with the event
+	 */
+	private void handleEventAndRemoveMonitor(Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId ){
 		Gbl.assertNotNull( personId );
 		Monitor monitor = monitors.get( monitoredEventType ).get( personId );
 		if (monitor != null) {
-			if (monitor.getAgentId().equals( personId ) && monitor.getLinkId().equals( linkId )) {
-				if (monitor.getHandler().handle(monitor.getAgentId(), monitor.getLinkId(), monitor.getEvent())) {
+			// match personId and (optionally) linkId if the monitor has an associated link id
+			if (monitor.getAgentId().equals( personId ) && (monitor.getLinkId()==null || monitor.getLinkId().equals( linkId ))) {
+				// always pass the linkId of this event to the handler
+				if (monitor.getHandler().handle(monitor.getAgentId(), linkId, monitor.getEvent())) {
 					synchronized (monitors.get( monitoredEventType )) {
-//						monitors.get( monitoredEventType ).entrySet().remove( personId );
-						monitors.get( monitoredEventType ).remove( personId ); // !!
+						monitors.get( monitoredEventType ).remove( personId );
 					}
 				}
 			}
