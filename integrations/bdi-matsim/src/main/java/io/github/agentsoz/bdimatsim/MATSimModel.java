@@ -347,8 +347,10 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 								Id<Link> currentLinkId = veh.getCurrentLink().getId();
 								Id<Vehicle> vehicleId = veh.getId();
 								Id<Link> blockedLinkId = nextLinkId;
-								controller.getEvents().processEvent( new NextLinkBlockedEvent( now, vehicleId,
-										driverId, currentLinkId, blockedLinkId ) );
+								NextLinkBlockedEvent nextLinkBlockedEvent = new NextLinkBlockedEvent( now, vehicleId,
+										driverId, currentLinkId, blockedLinkId );
+								log.debug(nextLinkBlockedEvent.toString());
+								controller.getEvents().processEvent( nextLinkBlockedEvent );
 								// yyyy this event is now generated both here and in the agent.  In general,
 								// it should be triggered in the agent, giving the bdi time to compute.  However, the
 								// blockage may happen between there and arriving at the node ...  kai, dec'17

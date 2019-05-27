@@ -34,11 +34,13 @@ public final class NextLinkBlockedEvent extends Event {
 	private static final String NEXT_LINK_BLOCKED_EVENT_NAME = "nextLinkBlocked";
 	private final Id<Person> driverId;
 	private final Id<Link> currentLinkId;
-	
+	private final Id<Link> blockedLinkId;
+
 	public NextLinkBlockedEvent( double time, Id<Vehicle> vehicleId, Id<Person> driverId, Id<Link> currentLinkId, Id<Link> blockedLinkId ) {
 		super(time);
 		this.driverId = driverId ;
 		this.currentLinkId = currentLinkId;
+		this.blockedLinkId = blockedLinkId;
 	}
 	@Override public String getEventType() {
 		return NEXT_LINK_BLOCKED_EVENT_NAME;
@@ -49,12 +51,15 @@ public final class NextLinkBlockedEvent extends Event {
 	public Id<Link> currentLinkId() {
 		return this.currentLinkId ;
 	}
+	public Id<Link> blockedLinkId() {
+		return this.blockedLinkId ;
+	}
 
 	public Map<String, String> getAttributes() {
 		Map<String, String> attrs = super.getAttributes();
 		attrs.put("person", this.driverId.toString());
 		attrs.put("link", this.currentLinkId.toString());
+		attrs.put("nextlink", this.blockedLinkId.toString());
 		return attrs;
 	}
-
 }
