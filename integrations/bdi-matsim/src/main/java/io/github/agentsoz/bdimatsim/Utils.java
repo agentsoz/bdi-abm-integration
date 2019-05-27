@@ -22,13 +22,9 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import io.github.agentsoz.util.Location;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,10 +38,12 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.GeometryUtils;
-
-import com.vividsolutions.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -260,7 +258,7 @@ public final class Utils {
 	}
 	
 	static void penaltyMethod2(Geometry fire, Geometry buffer, double bufferWidth,
-									   Map<Id<Link>, Double> penaltyFactorsOfLinks, Scenario scenario ) {
+							   Map<Id<Link>, Double> penaltyFactorsOfLinks, Scenario scenario ) {
 		// Starting thoughts:
 		// * Could make everything very expensive in buffer + fire, they find the fastest path out.  This may, however,
 		// be through the fire.

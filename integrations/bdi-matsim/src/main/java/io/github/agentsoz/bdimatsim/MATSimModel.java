@@ -302,31 +302,6 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 			@Override protected void configureQSim() {
 				this.bind(Replanner.class).in( Singleton.class ) ;
 				this.bind( MATSimModel.class ).toInstance( MATSimModel.this );
-			}
-		} );
-
-		// infrastructure at Controler level (separating line not fully logical)
-		controller.addOverridingModule(new AbstractModule(){
-			@Override public void install() {
-
-				this.bind( MobsimDataProvider.class ).in( Singleton.class ) ;
-				this.addMobsimListenerBinding().to( MobsimDataProvider.class ) ;
-				// (pulls mobsim from Listener Event.  maybe not so good ...)
-
-				// analysis:
-				this.addControlerListenerBinding().to( OutputEvents2TravelDiaries.class );
-
-				this.addMobsimListenerBinding().toInstance((MobsimInitializedListener) e -> {
-					// memorize the qSim:
-					qSim = (QSim) e.getQueueSimulation() ;
-
-					// start the playPause functionality
-					playPause = new PlayPauseSimulationControl( qSim ) ;
-					playPause.pause();
-
-					//						initialiseVisualisedAgents() ;
-				}) ;
-
 
 				// define the turn acceptance logic that reacts to blocked links:
 				{
@@ -363,7 +338,30 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 					} );
 					bind( QNetworkFactory.class ).toInstance( qNetworkFactory );
 				}
+			}
+		} );
 
+		// infrastructure at Controler level (separating line not fully logical)
+		controller.addOverridingModule(new AbstractModule(){
+			@Override public void install() {
+
+				this.bind( MobsimDataProvider.class ).in( Singleton.class ) ;
+				this.addMobsimListenerBinding().to( MobsimDataProvider.class ) ;
+				// (pulls mobsim from Listener Event.  maybe not so good ...)
+
+				// analysis:
+				this.addControlerListenerBinding().to( OutputEvents2TravelDiaries.class );
+
+				this.addMobsimListenerBinding().toInstance((MobsimInitializedListener) e -> {
+					// memorize the qSim:
+					qSim = (QSim) e.getQueueSimulation() ;
+
+					// start the playPause functionality
+					playPause = new PlayPauseSimulationControl( qSim ) ;
+					playPause.pause();
+
+					//						initialiseVisualisedAgents() ;
+				}) ;
 			}
 		}) ;
 		modelInitialised = true;
