@@ -22,8 +22,10 @@ package io.github.agentsoz.nonmatsim;
  * #L%
  */
 
+import io.github.agentsoz.bdiabm.data.ActionContent;
+
 public interface BDIActionHandler {
 	
-	public boolean handle(String agentID, String actionID, Object[] actionArgs);
+	public ActionContent.State handle(String agentID, String actionID, Object[] actionArgs);
 
 }

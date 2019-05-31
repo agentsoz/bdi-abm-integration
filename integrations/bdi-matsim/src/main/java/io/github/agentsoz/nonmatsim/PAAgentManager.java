@@ -97,7 +97,7 @@ public final class PAAgentManager {
 	 * BDI side passed an action with state INITIATED Pass action parameters to
 	 * ActionHandler then update action to RUNNING
 	 */
-	private final boolean initiateNewAction(String agentID, String actionID, ActionContent action) {
+	private final ActionContent.State initiateNewAction(String agentID, String actionID, ActionContent action) {
 		if (agentsWithPerceptsAndActions.containsKey(agentID) ) {
 			PAAgent agent = getAgent(agentID);
 			Object[] parameters = action.getParameters();
@@ -105,15 +105,11 @@ public final class PAAgentManager {
 			if (!didRegister) {
 				log.warn("failed to register new action {}:{}" + actionID, action);
 			}
-			if (agent.getActionHandler().processAction(agentID, actionID, parameters)) {
-				agent.getActionContainer().get(actionID) .setState(ActionContent.State.RUNNING);
-				return true;
-			} else {
-				agent.getActionContainer().get(actionID) .setState(ActionContent.State.FAILED);
-				return false;
-			}
+			ActionContent.State res = agent.getActionHandler().processAction(agentID, actionID, parameters);
+			agent.getActionContainer().get(actionID).setState(res);
+			return res;
 		}
-		return false;
+		return ActionContent.State.FAILED;
 	}
 
 	/*
@@ -142,11 +138,8 @@ public final class PAAgentManager {
 						if (agentsWithPerceptsAndActions.containsKey(agentId)) {
 							PAAgent agent = getAgent(agentId);
 							Object[] parameters = content.getParameters();
-							if (agent.getActionHandler().processAction(agentId, actionId, parameters)) {
-								content.setState(ActionContent.State.RUNNING);
-							} else {
-								content.setState(ActionContent.State.FAILED);
-							}
+							ActionContent.State res = agent.getActionHandler().processAction(agentId, actionId, parameters);
+							content.setState(res);
 							outAdc.putAction(agentId, actionId, content);
 						}
 					} else if (content.getState()== ActionContent.State.DROPPED) {

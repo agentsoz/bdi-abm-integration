@@ -22,6 +22,7 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -40,7 +41,7 @@ final class ActionHandlerXyz implements BDIActionHandler {
 	}
 
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args) {
+	public ActionContent.State handle(String agentID, String actionID, Object[] args) {
 		
 		// This is just example code for what could be done.
 		
@@ -107,7 +108,7 @@ final class ActionHandlerXyz implements BDIActionHandler {
 		}
 		
 		
-		return true;
+		return ActionContent.State.PASSED;
 	}
 	
 }

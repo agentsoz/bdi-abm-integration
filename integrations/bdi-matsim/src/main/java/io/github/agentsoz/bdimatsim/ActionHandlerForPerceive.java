@@ -45,7 +45,7 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 		this.model = model;
 	}
 	@Override
-	public boolean handle(String agentID, String actionID, Object[] args) {
+	public ActionContent.State handle(String agentID, String actionID, Object[] args) {
 		// assertions:
 		Gbl.assertIf(args.length >= 1);
 
@@ -112,6 +112,6 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 		ActionContent ac = new ActionContent(null, ActionContent.State.PASSED, ActionList.PERCEIVE);
 		model.getAgentManager().getAgentDataContainerV2().putAction(agentID, ActionList.PERCEIVE, ac);
 
-		return true;
+		return ActionContent.State.PASSED;
 	}
 }

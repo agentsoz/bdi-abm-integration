@@ -25,6 +25,7 @@ package io.github.agentsoz.nonmatsim;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.util.ActionList;
 
 /**
@@ -63,7 +64,7 @@ public final class ActionHandler {
 	 * @param parameters Parameters associated with the action
 	 * @return whether the action was processed successfully or not
 	 */
-	final boolean processAction(String agentID, String actionID, Object[] parameters) {
+	final ActionContent.State processAction(String agentID, String actionID, Object[] parameters) {
 		if ( registeredActions.isEmpty() ) {
 			throw new RuntimeException("no BDI action registered at all; this is probably not what you want; aborting ... " ) ;
 		}
@@ -72,7 +73,7 @@ public final class ActionHandler {
 				return registeredActions.get(actionID).handle(agentID, actionID, parameters);
 			}
 		}
-		return false;
+		return ActionContent.State.FAILED;
 	}
 
 	public void deregisterBDIAction(String actionID) {
