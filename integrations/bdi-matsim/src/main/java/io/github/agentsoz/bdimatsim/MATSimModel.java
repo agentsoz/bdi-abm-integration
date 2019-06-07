@@ -280,9 +280,26 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 					ActionList.PERCEIVE, new ActionHandlerForPerceive(this));
 		}
 		{
+			// New default activity type
 			ActivityParams params = new ActivityParams("driveTo");
 			params.setScoringThisActivityAtAll(false);
 			scenario.getConfig().planCalcScore().addActivityParams(params);
+			// Any extra activity types provided by the caller
+			if (args.length>1) {
+				try {
+					List<String> activityNames = (List<String>)args[1];
+					for (String activity : activityNames) {
+						ActivityParams ap = new ActivityParams(activity);
+						ap.setScoringThisActivityAtAll(false);
+						scenario.getConfig().planCalcScore().addActivityParams(ap);
+					}
+				} catch (Exception e) {
+					log.error("Could not parse expected list of activity names from: {}", args[1]);
+					e.printStackTrace();
+				}
+
+			}
+
 		}
 		// ---
 
