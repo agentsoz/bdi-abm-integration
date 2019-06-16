@@ -60,13 +60,14 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
 							MonitoredEventType.NextLinkBlockedEvent, null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+								public boolean handle(Id<Person> agentId, Id<Link> blockedLinkId, MonitoredEventType monitoredEvent) {
+									Id<Link> currentLinkId = model.getMobsimAgentFromIdString(agentId.toString()).getCurrentLinkId();
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
+									Object[] params = {currentLinkId.toString(), blockedLinkId.toString()};
 									// Create the BLOCKED percept
-									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
+									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
 									// If this agent is monitoring for arrival events, i.e. is driving,
 									// then also send back a failed driveTo status and remove the arrival monitor

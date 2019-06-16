@@ -112,7 +112,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(MonitoredEventType.NextLinkBlockedEvent)) {
 			final io.github.agentsoz.bdimatsim.NextLinkBlockedEvent event = (NextLinkBlockedEvent) ev;
-			handleEventAndRemoveMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId() );
+			handleEventAndRemoveMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.blockedLinkId() );
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(MonitoredEventType.LinkEnterEvent)) {
 			final org.matsim.api.core.v01.events.LinkEnterEvent event = (LinkEnterEvent) ev;
