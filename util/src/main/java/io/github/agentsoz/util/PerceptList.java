@@ -38,6 +38,8 @@ public final class PerceptList {
     // BDI Query Percept strings
 
     public static final String REQUEST_LOCATION = "request_location";
+	public static final String REQUEST_DESTINATION_COORDINATES = "request_destination_coordinates";
+
 
 	/**
 	 * REQUEST_DRIVING_DISTANCE_TO works as follows:
