@@ -24,9 +24,12 @@ package io.github.agentsoz.util;
 
 public final class PerceptList {
 	public static final String ARRIVED = "arrived";
+	public static final String ACTIVITY_STARTED = "activity_started";
+	public static final String ACTIVITY_ENDED = "activity_ended";
 	public static final String BLOCKED = "blocked";
 	public static final String BROADCAST = "global";
 	public static final String CONGESTION = "congestion";
+	public static final String DEPARTED = "departed";
 	public static final String TIME = "time";
 
 	// Used to control the simulation run and data passing between BDI and ABM models

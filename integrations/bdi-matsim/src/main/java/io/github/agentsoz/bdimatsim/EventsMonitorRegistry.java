@@ -51,6 +51,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 	public enum MonitoredEventType {
 		AgentInCongestionEvent,
 		ActivityEndEvent,
+		ActivityStartEvent,
 		LinkEnterEvent,
 		LinkLeaveEvent,
 		NextLinkBlockedEvent,
@@ -133,6 +134,10 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(MonitoredEventType.ActivityEndEvent)) {
 			final org.matsim.api.core.v01.events.ActivityEndEvent event = (ActivityEndEvent) ev;
 			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityEndEvent, event.getLinkId() );
+
+		} else if (ev instanceof ActivityStartEvent && monitors.containsKey(MonitoredEventType.ActivityStartEvent)) {
+			final org.matsim.api.core.v01.events.ActivityStartEvent event = (ActivityStartEvent) ev;
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityStartEvent, event.getLinkId() );
 
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;

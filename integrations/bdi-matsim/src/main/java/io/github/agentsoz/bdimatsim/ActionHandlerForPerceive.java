@@ -29,10 +29,12 @@ import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
+import io.github.agentsoz.util.Location;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 
@@ -102,6 +104,56 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 										agent.removePersonArrivalEventMonitor();
 									}
 									return true;
+								}
+							}
+					);
+					break;
+				case PerceptList.ACTIVITY_STARTED:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.ActivityStartEvent,
+							null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									Object[] params = {currentLinkId.toString()};
+									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_STARTED, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ACTIVITY_STARTED, pc);
+									return false; // do not unregister
+								}
+							}
+					);
+					break;
+				case PerceptList.ACTIVITY_ENDED:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.ActivityEndEvent,
+							null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									Object[] params = {currentLinkId.toString()};
+									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_ENDED, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ACTIVITY_ENDED, pc);
+									return false; // do not unregister
+								}
+							}
+					);
+					break;
+				case PerceptList.DEPARTED:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.PersonDepartureEvent,
+							null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
+									Location destination = new Location(destAct.getType(), destAct.getCoord().getX(),destAct.getCoord().getY());
+									Object[] params = {currentLinkId.toString(), destination};
+									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
+									return false; // do not unregister
 								}
 							}
 					);
