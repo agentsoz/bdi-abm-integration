@@ -25,6 +25,7 @@ package io.github.agentsoz.bdimatsim;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.github.agentsoz.nonmatsim.EventData;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.network.Link;
@@ -107,37 +108,39 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			toAdd.clear();
 		}
 
+		EventData eventData = new EventData(ev.getTime(), ev.getEventType(), ev.getAttributes());
+
 		if (ev instanceof AgentInCongestionEvent && monitors.containsKey(MonitoredEventType.AgentInCongestionEvent)) {
 			final io.github.agentsoz.bdimatsim.AgentInCongestionEvent event = (AgentInCongestionEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId(), eventData );
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(MonitoredEventType.NextLinkBlockedEvent)) {
 			final io.github.agentsoz.bdimatsim.NextLinkBlockedEvent event = (NextLinkBlockedEvent) ev;
-			handleEventAndRemoveMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.blockedLinkId() );
+			handleEventAndRemoveMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId(), eventData );
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(MonitoredEventType.LinkEnterEvent)) {
 			final org.matsim.api.core.v01.events.LinkEnterEvent event = (LinkEnterEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkEnterEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkEnterEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof LinkLeaveEvent && monitors.containsKey(MonitoredEventType.LinkLeaveEvent)) {
 			final org.matsim.api.core.v01.events.LinkLeaveEvent event = (LinkLeaveEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof PersonArrivalEvent && monitors.containsKey(MonitoredEventType.PersonArrivalEvent)) {
 			final org.matsim.api.core.v01.events.PersonArrivalEvent event = (PersonArrivalEvent) ev;
-			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonArrivalEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonArrivalEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof PersonDepartureEvent && monitors.containsKey(MonitoredEventType.PersonDepartureEvent)) {
 			final org.matsim.api.core.v01.events.PersonDepartureEvent event = (PersonDepartureEvent) ev;
-			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonDepartureEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonDepartureEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof ActivityEndEvent && monitors.containsKey(MonitoredEventType.ActivityEndEvent)) {
 			final org.matsim.api.core.v01.events.ActivityEndEvent event = (ActivityEndEvent) ev;
-			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityEndEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityEndEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof ActivityStartEvent && monitors.containsKey(MonitoredEventType.ActivityStartEvent)) {
 			final org.matsim.api.core.v01.events.ActivityStartEvent event = (ActivityStartEvent) ev;
-			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityStartEvent, event.getLinkId() );
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.ActivityStartEvent, event.getLinkId(), eventData );
 
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
@@ -208,14 +211,14 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 	 * @param monitoredEventType the monitored event to handle and remove
 	 * @param linkId the link associated with the event
 	 */
-	private void handleEventAndRemoveMonitor(Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId ){
+	private void handleEventAndRemoveMonitor(Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId, EventData event ){
 		Gbl.assertNotNull( personId );
 		Monitor monitor = monitors.get( monitoredEventType ).get( personId );
 		if (monitor != null) {
 			// match personId and (optionally) linkId if the monitor has an associated link id
 			if (monitor.getAgentId().equals( personId ) && (monitor.getLinkId()==null || monitor.getLinkId().equals( linkId ))) {
 				// always pass the linkId of this event to the handler
-				if (monitor.getHandler().handle(monitor.getAgentId(), linkId, monitor.getEvent())) {
+				if (monitor.getHandler().handle(monitor.getAgentId().toString(), linkId.toString(), monitor.getEvent(), event)) {
 					synchronized (monitors.get( monitoredEventType )) {
 						monitors.get( monitoredEventType ).remove( personId );
 					}

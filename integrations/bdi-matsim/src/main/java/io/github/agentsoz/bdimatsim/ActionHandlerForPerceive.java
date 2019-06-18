@@ -27,6 +27,7 @@ import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
+import io.github.agentsoz.nonmatsim.EventData;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.Location;
@@ -62,23 +63,21 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
 							MonitoredEventType.NextLinkBlockedEvent, null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> blockedLinkId, MonitoredEventType monitoredEvent) {
-									Id<Link> currentLinkId = model.getMobsimAgentFromIdString(agentId.toString()).getCurrentLinkId();
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString(), blockedLinkId.toString()};
-									// Create the BLOCKED percept
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									Object[] params = {currentLinkId, event.getAttributes().get("nextLink")};
 									PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
-									// If this agent is monitoring for arrival events, i.e. is driving,
-									// then also send back a failed driveTo status and remove the arrival monitor
-									if (agent.hasPersonArrivalEventMonitor()) {
+
+									// If agent was driving then also send back status for the driveTo action
+									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
+										model.getAgentsPerformingBdiDriveTo().remove(agentID);
 										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-										agent.removePersonArrivalEventMonitor();
 									}
-									return true;
+									return false; // do not unregister
 								}
 							}
 					);
@@ -88,22 +87,22 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent,
 							null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
-									// Create the CONGESTION percept
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									Object[] params = {currentLinkId};
 									PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
-									// If this agent is monitoring for arrival events, i.e. is driving,
-									// then also send back a failed driveTo status and remove the arrival monitor
-									if (agent.hasPersonArrivalEventMonitor()) {
+
+									// If agent was driving to this link then also send back status for the driveTo action
+									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
+										model.getAgentsPerformingBdiDriveTo().remove(agentID);
 										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-										agent.removePersonArrivalEventMonitor();
 									}
-									return true;
+
+									return false; // do not unregister
 								}
 							}
 					);
@@ -112,11 +111,11 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.ActivityStartEvent,
 							null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									Object[] params = {currentLinkId};
 									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_STARTED, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ACTIVITY_STARTED, pc);
 									return false; // do not unregister
@@ -128,11 +127,11 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.ActivityEndEvent,
 							null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-									Object[] params = {currentLinkId.toString()};
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									Object[] params = {currentLinkId};
 									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_ENDED, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ACTIVITY_ENDED, pc);
 									return false; // do not unregister
@@ -144,15 +143,39 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.PersonDepartureEvent,
 							null, new BDIPerceptHandler() {
 								@Override
-								public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
 									Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
 									Location destination = new Location(destAct.getType(), destAct.getCoord().getX(),destAct.getCoord().getY());
-									Object[] params = {currentLinkId.toString(), destination};
+									Object[] params = {currentLinkId, destination};
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, params[0]);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
+									return false; // do not unregister
+								}
+							}
+					);
+					break;
+				case PerceptList.ARRIVED:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.PersonArrivalEvent,
+							null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									Object[] params = {currentLinkId};
+									PerceptContent pc = new PerceptContent(PerceptList.ARRIVED, params[0]);
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ARRIVED, pc);
+
+									// If agent was driving to this link then also send back status for the driveTo action
+									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)
+											&& model.getAgentsPerformingBdiDriveTo().get(agentID).toString().equals(currentLinkId)) {
+										model.getAgentsPerformingBdiDriveTo().remove(agentID);
+										ActionContent ac = new ActionContent(params, ActionContent.State.PASSED, ActionList.DRIVETO);
+										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+									}
 									return false; // do not unregister
 								}
 							}

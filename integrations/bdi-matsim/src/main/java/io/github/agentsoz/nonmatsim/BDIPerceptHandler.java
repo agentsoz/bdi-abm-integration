@@ -41,6 +41,6 @@ public interface BDIPerceptHandler {
 	 * @param monitoredEvent
 	 * @return
 	 */
-	public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent); 
+	public boolean handle(String agentId, String linkId, MonitoredEventType monitoredEvent, EventData eventData);
 
 }

@@ -27,6 +27,7 @@ import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry.MonitoredEventType;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
 import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
+import io.github.agentsoz.nonmatsim.EventData;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
@@ -109,61 +110,9 @@ public final class ActionHandlerForDriveto implements BDIActionHandler {
 		Activity newAct = model.getReplanner().editPlans().createFinalActivity( "driveTo", newLinkId ) ;
 		model.getReplanner().editPlans().addActivityAtEnd(mobsimAgent, newAct, routingMode) ;
 		printPlan("after adding act: " , mobsimAgent ) ;
-		
-		// beyond is already non-matsim:
 
-		// Now register an event handler for when the agent arrives at the destination
-		PAAgent paAgent = model.getAgentManager().getAgent( agentID );
-		paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(), MonitoredEventType.PersonArrivalEvent,
-				newLinkId.toString(), new BDIPerceptHandler() {
-					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> linkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = model.getAgentManager().getAgent(agentId.toString());
-						Object[] params = {linkId.toString()};
-						ActionContent ac = new ActionContent(params, ActionContent.State.PASSED, ActionList.DRIVETO);
-						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-						PerceptContent pc = new PerceptContent(PerceptList.ARRIVED, params[0]);
-						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ARRIVED, pc);
-						return true;
-					}
-				}
-		);
-		
-		// And another in case the agent gets stuck on the way
-		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.NextLinkBlockedEvent,
-				null, new BDIPerceptHandler() {
-					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
-						Object[] params = { currentLinkId.toString() };
-						ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
-						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-						PerceptContent pc = new PerceptContent(PerceptList.BLOCKED, params[0]);
-						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
-						return true;
-					}
-				}
-		);
-
-		// And yet another in case the agent gets stuck in congestion on the way
-		paAgent.getPerceptHandler().registerBDIPerceptHandler( paAgent.getAgentID(), MonitoredEventType.AgentInCongestionEvent,
-				null, new BDIPerceptHandler() {
-					@Override
-					public boolean handle(Id<Person> agentId, Id<Link> currentLinkId, MonitoredEventType monitoredEvent) {
-						PAAgent agent = model.getAgentManager().getAgent( agentId.toString() );
-						Object[] params = { currentLinkId.toString() };
-						// Send the congestion percept back to the BDI agent. We should not fail the action here,
-						// but let the BDI agent decide to abort the action if it so decides. However, while
-						// abortion is not supported in Jill we will have to live with failing the action for
-						// the time being; dsingh 1/2/18
-						ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
-						model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
-						PerceptContent pc = new PerceptContent(PerceptList.CONGESTION, params[0]);
-						model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
-						return true;
-					}
-				}
-		);
+		// Record that this agent is driving
+		model.getAgentsPerformingBdiDriveTo().put(agentID, newLinkId);
 
 		log.debug("------------------------------------------------------------------------------------------"); ;
 		return ActionContent.State.RUNNING;
