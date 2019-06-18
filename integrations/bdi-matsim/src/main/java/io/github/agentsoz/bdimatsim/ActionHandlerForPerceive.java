@@ -30,14 +30,12 @@ import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.EventData;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
-import io.github.agentsoz.util.Location;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
+
+import java.util.Map;
 
 public final class ActionHandlerForPerceive implements BDIActionHandler {
 	private static final Logger log = Logger.getLogger( ActionHandlerForPerceive.class ) ;
@@ -130,8 +128,7 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
-									Object[] params = {currentLinkId};
-									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_ENDED, params[0]);
+									PerceptContent pc = new PerceptContent(PerceptList.ACTIVITY_ENDED, event.getAttributes());
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ACTIVITY_ENDED, pc);
 									return false; // do not unregister
 								}
@@ -147,7 +144,8 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
 									Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
-									Location destination = new Location(destAct.getType(), destAct.getCoord().getX(),destAct.getCoord().getY());
+									Map<String, String> attributes = event.getAttributes();
+									attributes.put("actType", destAct.getType());
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
 									return false; // do not unregister
