@@ -126,9 +126,10 @@ public class JillModel implements BDIServerInterface, ModelInterface, Environmen
 
 	@Override
 	public AgentDataContainer takeControl(double time, AgentDataContainer inAdc) {
-		for(int i = 0; i < GlobalState.agents.size(); i++) {
-			getAgent(i).handlePercept(PerceptList.TIME, time);
-		}
+		// Sending TIME percept always to every agent is too costly, dhi 20/jun/19
+		//for(int i = 0; i < GlobalState.agents.size(); i++) {
+		//	getAgent(i).handlePercept(PerceptList.TIME, time);
+		//}
 		if (inAdc != null) {
 			Iterator<String> it = inAdc.getAgentIdIterator();
 			while (it.hasNext()) {

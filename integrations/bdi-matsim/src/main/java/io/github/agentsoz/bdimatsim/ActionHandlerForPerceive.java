@@ -34,6 +34,7 @@ import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.withinday.utils.ReplanningException;
 
 import java.util.Map;
 
@@ -143,9 +144,18 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
-									Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
 									Map<String, String> attributes = event.getAttributes();
-									attributes.put("actType", destAct.getType());
+									{ // FIXME: getting 'trip not found' exception for large scenarios, dhi 19/jun/19
+										Activity destAct = null;
+										while (destAct == null) {
+											try {
+												destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
+												attributes.put("actType", destAct.getType());
+											} catch (ReplanningException e) {
+												log.error(e.getMessage());
+											}
+										}
+									}
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
 									return false; // do not unregister
