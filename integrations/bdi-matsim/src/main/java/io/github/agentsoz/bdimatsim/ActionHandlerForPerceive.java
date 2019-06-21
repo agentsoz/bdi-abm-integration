@@ -146,14 +146,12 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
 									Map<String, String> attributes = event.getAttributes();
 									{ // FIXME: getting 'trip not found' exception for large scenarios, dhi 19/jun/19
-										Activity destAct = null;
-										while (destAct == null) {
-											try {
-												destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
-												attributes.put("actType", destAct.getType());
-											} catch (ReplanningException e) {
-												log.error(e.getMessage());
-											}
+										try {
+											Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
+											attributes.put("actType", destAct.getType());
+										} catch (ReplanningException e) {
+											attributes.put("actType", "unknown");
+											log.error(agentId + " " +e.getMessage());
 										}
 									}
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
