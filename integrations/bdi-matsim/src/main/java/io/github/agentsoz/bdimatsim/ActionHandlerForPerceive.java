@@ -151,7 +151,7 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 											attributes.put("actType", destAct.getType());
 										} catch (ReplanningException e) {
 											attributes.put("actType", "unknown");
-											log.error(agentId + " " +e.getMessage());
+											log.warn(agentId + " " +e.getMessage());
 										}
 									}
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
