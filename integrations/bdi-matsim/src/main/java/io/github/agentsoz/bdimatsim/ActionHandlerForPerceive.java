@@ -33,9 +33,14 @@ import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.gbl.Gbl;
+import org.matsim.core.mobsim.framework.MobsimAgent;
+import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.withinday.utils.ReplanningException;
 
+import java.util.List;
 import java.util.Map;
 
 public final class ActionHandlerForPerceive implements BDIActionHandler {
@@ -145,15 +150,19 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 											currentLinkId);
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
 									Map<String, String> attributes = event.getAttributes();
-									{ // FIXME: getting 'trip not found' exception for large scenarios, dhi 19/jun/19
-										try {
-											Activity destAct = model.getReplanner().editTrips().findCurrentTrip(model.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
-											attributes.put("actType", destAct.getType());
-										} catch (ReplanningException e) {
-											attributes.put("actType", "unknown");
-											log.warn(agentId + " " +e.getMessage());
-										}
+
+									// Find the destination activity for the trip just started
+									MobsimAgent mobsimAgent = model.getMobsimAgentFromIdString(agentId);
+									int index = WithinDayAgentUtils.getCurrentPlanElementIndex(mobsimAgent);
+									// Extra check to ensure that we have moved out of the activity just finished,
+									// otherwise we often get 'trip not found' exceptions for large scenarios.
+									// Likely some thread synchornisation issue. dhi 19/jun/19
+									if (model.getReplanner().editPlans().isAtRealActivity(mobsimAgent)) {
+										index++;
 									}
+									Activity destAct = model.getReplanner().editTrips().findTripAtPlanElementIndex(mobsimAgent,index).getDestinationActivity();
+									attributes.put("actType", destAct.getType());
+
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
 									return false; // do not unregister
