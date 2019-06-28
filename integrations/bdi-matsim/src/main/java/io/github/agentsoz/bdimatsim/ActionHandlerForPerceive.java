@@ -156,12 +156,18 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									int index = WithinDayAgentUtils.getCurrentPlanElementIndex(mobsimAgent);
 									// Extra check to ensure that we have moved out of the activity just finished,
 									// otherwise we often get 'trip not found' exceptions for large scenarios.
-									// Likely some thread synchornisation issue. dhi 19/jun/19
+									// Likely some thread synchornisation issue. dhi 28/jun/19
 									if (model.getReplanner().editPlans().isAtRealActivity(mobsimAgent)) {
 										index++;
 									}
-									Activity destAct = model.getReplanner().editTrips().findTripAtPlanElementIndex(mobsimAgent,index).getDestinationActivity();
-									attributes.put("actType", destAct.getType());
+									try {
+										// Still getting trip not found sometimes, dhi, 28/jun/19
+										Activity destAct = model.getReplanner().editTrips().findTripAtPlanElementIndex(mobsimAgent,index).getDestinationActivity();
+										attributes.put("actType", destAct.getType());
+									} catch (ReplanningException e) {
+										log.error("Could not determine current destination for agent " + agentId + ": " + e.getMessage());
+										attributes.put("actType", "unknown");
+									}
 
 									PerceptContent pc = new PerceptContent(PerceptList.DEPARTED, event.getAttributes());
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.DEPARTED, pc);
