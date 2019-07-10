@@ -18,6 +18,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -35,6 +36,7 @@ import org.matsim.core.mobsim.framework.PlayPauseSimulationControl;
 import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.core.mobsim.qsim.AbstractQSimModule;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.mobsim.qsim.qnetsimengine.*;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
@@ -628,19 +630,25 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 				return res;
 			case PerceptList.REQUEST_DESTINATION_COORDINATES :
 				MobsimAgent agent = this.getMobsimAgentFromIdString(agentID);
+				double[] cords= {-1,-1};
 				if(this.getReplanner().editPlans().isAtRealActivity(agent)){ // if agent is currently in an activity
 
 					int currentIndex = EditPlans.getCurrentPlanElementIndex(agent);
-					Activity nextAct = this.getReplanner().editPlans().findRealActAfter(agent,currentIndex);
-					double[] cords = {nextAct.getCoord().getX(),nextAct.getCoord().getY()};
-					return cords;
+					Plan plan = WithinDayAgentUtils.getModifiablePlan(agent);
+					if(currentIndex < plan.getPlanElements().size() - 1){ // not the last activity
+						Activity nextAct = this.getReplanner().editPlans().findRealActAfter(agent,currentIndex);
+						cords[0] = nextAct.getCoord().getX();
+						cords[1] = nextAct.getCoord().getY();
+					}
+
 				}
 				else{ // if agent is currently in a leg
 					
 					Activity destAct = this.getReplanner().editTrips().findCurrentTrip(this.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
-					double[] cords = {destAct.getCoord().getX(),destAct.getCoord().getY()};
-					return cords;
+					cords[0] = destAct.getCoord().getX();
+					cords[1] = destAct.getCoord().getY();
 				}
+				return cords;
 			default:
 				throw new RuntimeException("Unknown query percept '"+perceptID+"' received from agent "+agentID+" with args " + args);
 		}
