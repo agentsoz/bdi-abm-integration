@@ -43,6 +43,7 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
+import org.matsim.withinday.utils.EditPlans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -626,9 +627,20 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 				}
 				return res;
 			case PerceptList.REQUEST_DESTINATION_COORDINATES :
-				Activity destAct = this.getReplanner().editTrips().findCurrentTrip(this.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
-				double[] cords = {destAct.getCoord().getX(),destAct.getCoord().getY()};
-				return cords;
+				MobsimAgent agent = this.getMobsimAgentFromIdString(agentID);
+				if(this.getReplanner().editPlans().isAtRealActivity(agent)){ // if agent is currently in an activity
+
+					int currentIndex = EditPlans.getCurrentPlanElementIndex(agent);
+					Activity nextAct = this.getReplanner().editPlans().findRealActAfter(agent,currentIndex);
+					double[] cords = {nextAct.getCoord().getX(),nextAct.getCoord().getY()};
+					return cords;
+				}
+				else{ // if agent is currently in a leg
+					
+					Activity destAct = this.getReplanner().editTrips().findCurrentTrip(this.getMobsimAgentFromIdString(agentID)).getDestinationActivity();
+					double[] cords = {destAct.getCoord().getX(),destAct.getCoord().getY()};
+					return cords;
+				}
 			default:
 				throw new RuntimeException("Unknown query percept '"+perceptID+"' received from agent "+agentID+" with args " + args);
 		}
