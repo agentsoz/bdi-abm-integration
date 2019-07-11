@@ -137,8 +137,6 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 
 	private Controler controller;
 
-	private Map<String, Id<Link>> agentsPerformingBdiDriveTo;
-
 	public MATSimModel(Map<String, String> opts, DataServer dataServer) {
 		this( new String [] {
 				opts.get( eConfigFile ) ,
@@ -153,8 +151,6 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 //		this(opts.get(eConfigFile), opts.get(eOutputDir), opts.get(eGlobalStartHhMm));
 		
 		registerDataServer(dataServer);
-
-		agentsPerformingBdiDriveTo = new HashMap<>();
 
 		if (opts == null) {
 			return;
@@ -637,8 +633,6 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 	public PAAgentManager getAgentManager() {
 		return agentManager;
 	}
-
-	public Map<String, Id<Link>> getAgentsPerformingBdiDriveTo() { return agentsPerformingBdiDriveTo; }
 
 	public MobsimDataProvider getMobsimDataProvider() {
 		return mobsimDataProvider;

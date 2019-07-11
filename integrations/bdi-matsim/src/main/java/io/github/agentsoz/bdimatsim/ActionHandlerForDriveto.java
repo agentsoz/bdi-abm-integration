@@ -112,7 +112,7 @@ public final class ActionHandlerForDriveto implements BDIActionHandler {
 		printPlan("after adding act: " , mobsimAgent ) ;
 
 		// Record that this agent is driving
-		model.getAgentsPerformingBdiDriveTo().put(agentID, newLinkId);
+		model.getAgentManager().getAgentsPerformingBdiDriveTo().put(agentID, newLinkId.toString());
 
 		log.debug("------------------------------------------------------------------------------------------"); ;
 		return ActionContent.State.RUNNING;

@@ -1,9 +1,6 @@
 package io.github.agentsoz.nonmatsim;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /*
  * #%L
@@ -51,6 +48,9 @@ public final class PAAgentManager {
 	 */
 	private final LinkedHashMap<String, PAAgent> agentsWithPerceptsAndActions;
 
+	private Map<String, String> agentsPerformingBdiDriveTo;
+
+
 	private final EventsMonitorRegistry eventsMonitors;
 
 	private final io.github.agentsoz.bdiabm.v2.AgentDataContainer adc = new io.github.agentsoz.bdiabm.v2.AgentDataContainer();
@@ -63,11 +63,17 @@ public final class PAAgentManager {
 		this.eventsMonitors = eventsMonitors;
 
 		agentsWithPerceptsAndActions = new LinkedHashMap<>();
+		agentsPerformingBdiDriveTo = new HashMap<>();
+
+
 	}
 
 	public final PAAgent getAgent(String agentID) {
 		return agentsWithPerceptsAndActions.get(agentID);
 	}
+
+	public Map<String, String> getAgentsPerformingBdiDriveTo() { return agentsPerformingBdiDriveTo; }
+
 
 	/*
 	 * Creates a new matsimAgent and it to the list Passes the ActionHandler,

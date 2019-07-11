@@ -75,8 +75,8 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.BLOCKED, pc);
 
 									// If agent was driving then also send back status for the driveTo action
-									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
-										model.getAgentsPerformingBdiDriveTo().remove(agentID);
+									if (model.getAgentManager().getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
+										model.getAgentManager().getAgentsPerformingBdiDriveTo().remove(agentID);
 										Object[] params = {currentLinkId, event.getAttributes().get("nextLink")};
 										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
@@ -99,8 +99,8 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.CONGESTION, pc);
 
 									// If agent was driving to this link then also send back status for the driveTo action
-									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
-										model.getAgentsPerformingBdiDriveTo().remove(agentID);
+									if (model.getAgentManager().getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
+										model.getAgentManager().getAgentsPerformingBdiDriveTo().remove(agentID);
 										Object[] params = {currentLinkId};
 										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
@@ -192,9 +192,9 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.ARRIVED, pc);
 
 									// If agent was driving to this link then also send back status for the driveTo action
-									if (model.getAgentsPerformingBdiDriveTo().containsKey(agentID)
-											&& model.getAgentsPerformingBdiDriveTo().get(agentID).toString().equals(currentLinkId)) {
-										model.getAgentsPerformingBdiDriveTo().remove(agentID);
+									if (model.getAgentManager().getAgentsPerformingBdiDriveTo().containsKey(agentID)
+											&& model.getAgentManager().getAgentsPerformingBdiDriveTo().get(agentID).equals(currentLinkId)) {
+										model.getAgentManager().getAgentsPerformingBdiDriveTo().remove(agentID);
 										Object[] params = {currentLinkId};
 										ActionContent ac = new ActionContent(params, ActionContent.State.PASSED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
