@@ -25,7 +25,9 @@ import java.util.*;
  */
 
 import io.github.agentsoz.bdiabm.data.*;
+import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdimatsim.EventsMonitorRegistry;
+import io.github.agentsoz.util.PerceptList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,8 @@ public final class PAAgentManager {
 	 */
 	private final LinkedHashMap<String, PAAgent> agentsWithPerceptsAndActions;
 
-	private Map<String, String> agentsPerformingBdiDriveTo;
+	private final Map<String, String> agentsPerformingBdiDriveTo;
+	private final Map<String, Double> agentsWaitingForTimeEvent;
 
 
 	private final EventsMonitorRegistry eventsMonitors;
@@ -61,11 +64,9 @@ public final class PAAgentManager {
 
 	public PAAgentManager(EventsMonitorRegistry eventsMonitors) {
 		this.eventsMonitors = eventsMonitors;
-
 		agentsWithPerceptsAndActions = new LinkedHashMap<>();
 		agentsPerformingBdiDriveTo = new HashMap<>();
-
-
+		agentsWaitingForTimeEvent = new HashMap<>();
 	}
 
 	public final PAAgent getAgent(String agentID) {
@@ -73,6 +74,8 @@ public final class PAAgentManager {
 	}
 
 	public Map<String, String> getAgentsPerformingBdiDriveTo() { return agentsPerformingBdiDriveTo; }
+
+	public Map<String, Double> getAgentsWaitingForTimeEvent() { return agentsWaitingForTimeEvent; }
 
 
 	/*
@@ -158,6 +161,23 @@ public final class PAAgentManager {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Adds TIME percept for agents waiting for given time to lapse
+	 * @param adc the data container to add the TIME percepts to
+	 * @param now the current time, to calculate lapsed timers against
+	 */
+	public void addTimePerceptForLapsedTimers(AgentDataContainer adc, double now) {
+		for (Iterator<String> i = agentsWaitingForTimeEvent.keySet().iterator(); i.hasNext();) {
+			String agentId = i.next();
+			Double timer = agentsWaitingForTimeEvent.get(agentId);
+			if (timer <= now ) {
+				PerceptContent pc = new PerceptContent(PerceptList.TIME, now);
+				adc.putPercept(agentId, PerceptList.TIME, pc);
+				i.remove(); // remove this timer since the time has passed
 			}
 		}
 	}

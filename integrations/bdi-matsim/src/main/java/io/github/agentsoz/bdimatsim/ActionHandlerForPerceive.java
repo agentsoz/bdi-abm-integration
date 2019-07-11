@@ -63,6 +63,16 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 			PAAgent paAgent = model.getAgentManager().getAgent(agentID);
 
 			switch (eventToPerceive) {
+				case PerceptList.TIME:
+					// Time percept is managed by the PAAgentManager; Dhi 11/Jul/19
+					if (i+1>=args.length || !(args[i+1] instanceof Double)) {
+						throw new RuntimeException("Percept '" + eventToPerceive + "' must be followed by a time (double) value");
+					} else {
+						i++;
+						Double timeToMonitor = (Double)args[i];
+						model.getAgentManager().getAgentsWaitingForTimeEvent().put(actionID, timeToMonitor);
+					}
+					break;
 				case PerceptList.BLOCKED:
 					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
 							MonitoredEventType.NextLinkBlockedEvent, null, new BDIPerceptHandler() {
