@@ -69,8 +69,8 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 						throw new RuntimeException("Percept '" + eventToPerceive + "' must be followed by a time (double) value");
 					} else {
 						i++;
-						Double timeToMonitor = (Double)args[i];
-						model.getAgentManager().getAgentsWaitingForTimeEvent().put(actionID, timeToMonitor);
+						Double timeToMonitor = model.getTime() + (Double)args[i];
+						model.getAgentManager().getAgentsWaitingForTimeEvent().put(agentID, timeToMonitor);
 					}
 					break;
 				case PerceptList.BLOCKED:

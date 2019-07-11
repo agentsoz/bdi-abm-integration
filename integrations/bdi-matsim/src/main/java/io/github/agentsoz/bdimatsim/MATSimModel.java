@@ -441,7 +441,7 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 		log.trace("Received {} ", inAdc);
 		agentManager.updateActions(inAdc, adc);
 		playPause.doStep( (int) (newTime) );
-		agentManager.addTimePerceptForLapsedTimers(adc, getTime());
+		agentManager.addTimePerceptForLapsedTimers(adc, newTime);
 	}
 
 	@Override
