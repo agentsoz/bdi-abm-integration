@@ -1,5 +1,5 @@
 language: java
-jdk: oraclejdk8
+jdk: openjdk8
 sudo: required # enabled 30/aug/18 due to travis issue #6593 causing failure; https://github.com/travis-ci/travis-ci/issues/3259
 
 before_install:
