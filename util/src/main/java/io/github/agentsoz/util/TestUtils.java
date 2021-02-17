@@ -283,4 +283,10 @@ public final class TestUtils {
 		new MatsimEventsReader(events).readFile(filename);
 		return collecteds ;
 	}
+
+	public static void compareFiles(String expected, String actual) {
+		final long expectedHash = CRCChecksum.getCRCFromFile(expected);
+		final long actualHash = CRCChecksum.getCRCFromFile(actual);
+		Assert.assertEquals("Files "+ expected + " and " + actual + " differ", expectedHash, actualHash);
+	}
 }
