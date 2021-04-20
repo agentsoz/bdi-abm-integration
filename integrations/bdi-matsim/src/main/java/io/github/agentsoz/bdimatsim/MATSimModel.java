@@ -602,8 +602,8 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 			case PerceptList.REQUEST_LOCATION:
 				final Link link = scenario.getNetwork().getLinks().get( this.getMobsimAgentFromIdString(agentID).getCurrentLinkId() );
 				Location[] coords = {
-						new Location(link.getFromNode().getId().toString(), link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY()),
-						new Location(link.getToNode().getId().toString(), link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY())
+						new Location(link.getId().toString() + ":" + link.getFromNode().getId().toString(), link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY()),
+						new Location(link.getId().toString() + ":" + link.getToNode().getId().toString(), link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY())
 				};
 				return coords;
 			case PerceptList.REQUEST_DRIVING_DISTANCE_TO :
