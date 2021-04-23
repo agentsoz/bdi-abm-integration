@@ -22,22 +22,23 @@ package io.github.agentsoz.bdimatsim;
  * #L%
  */
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
+import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import io.github.agentsoz.nonmatsim.EventData;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-
-import io.github.agentsoz.nonmatsim.BDIPerceptHandler;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.events.handler.BasicEventHandler;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.vehicles.Vehicle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**<p>
  * Acts as a simple listener for Matsim agent events then
@@ -58,6 +59,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		NextLinkBlockedEvent,
 		PersonArrivalEvent,
 		PersonDepartureEvent,
+		PersonStuckEvent,
 
 		// a reason for having this here is that one can work on objects of type MonitoredEventType rather than Class<? extends Event>, since the first is
 		// conceptually simpler.   There is also no way around handing each event type separately, since the syntax to get driverId and linkId out of
@@ -145,8 +147,12 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		} else if (ev instanceof VehicleEntersTrafficEvent) {
 			vehicle2Driver.handleEvent((VehicleEntersTrafficEvent)ev) ;
 
-		} else if (ev instanceof VehicleLeavesTrafficEvent){
-			vehicle2Driver.handleEvent( (VehicleLeavesTrafficEvent) ev );
+		} else if (ev instanceof VehicleLeavesTrafficEvent) {
+			vehicle2Driver.handleEvent((VehicleLeavesTrafficEvent) ev);
+
+		} else if (ev instanceof PersonStuckEvent) {
+			final org.matsim.api.core.v01.events.PersonStuckEvent event = (PersonStuckEvent) ev;
+			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonStuckEvent, event.getLinkId(), eventData );
 
 		} else {
 			// Not throwing all else, which includes also cases of all events above

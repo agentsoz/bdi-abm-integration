@@ -30,6 +30,7 @@ public final class PerceptList {
 	public static final String BROADCAST = "global";
 	public static final String CONGESTION = "congestion";
 	public static final String DEPARTED = "departed";
+	public static final String STUCK = "stuck";
 	public static final String TIME = "time";
 
 	// Used to control the simulation run and data passing between BDI and ABM models

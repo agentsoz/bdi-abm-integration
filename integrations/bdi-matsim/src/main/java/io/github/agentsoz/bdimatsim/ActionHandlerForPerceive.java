@@ -33,14 +33,10 @@ import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.matsim.withinday.utils.ReplanningException;
 
-import java.util.List;
 import java.util.Map;
 
 public final class ActionHandlerForPerceive implements BDIActionHandler {
@@ -207,6 +203,29 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 										model.getAgentManager().getAgentsPerformingBdiDriveTo().remove(agentID);
 										Object[] params = {currentLinkId};
 										ActionContent ac = new ActionContent(params, ActionContent.State.PASSED, ActionList.DRIVETO);
+										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
+									}
+									return false; // do not unregister
+								}
+							}
+					);
+					break;
+				case PerceptList.STUCK:
+					paAgent.getPerceptHandler().registerBDIPerceptHandler(paAgent.getAgentID(),
+							MonitoredEventType.PersonStuckEvent, null, new BDIPerceptHandler() {
+								@Override
+								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
+									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
+											currentLinkId);
+									PAAgent agent = model.getAgentManager().getAgent(agentId);
+									PerceptContent pc = new PerceptContent(PerceptList.STUCK, event.getAttributes());
+									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.STUCK, pc);
+
+									// If agent was driving then also send back status for the driveTo action
+									if (model.getAgentManager().getAgentsPerformingBdiDriveTo().containsKey(agentID)) {
+										model.getAgentManager().getAgentsPerformingBdiDriveTo().remove(agentID);
+										Object[] params = {currentLinkId, event.getAttributes().get("nextLink")};
+										ActionContent ac = new ActionContent(params, ActionContent.State.FAILED, ActionList.DRIVETO);
 										model.getAgentManager().getAgentDataContainerV2().putAction(agent.getAgentID(), ActionList.DRIVETO, ac);
 									}
 									return false; // do not unregister
