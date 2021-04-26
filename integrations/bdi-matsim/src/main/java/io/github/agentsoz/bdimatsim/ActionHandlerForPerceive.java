@@ -32,6 +32,8 @@ import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
@@ -217,8 +219,17 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
+									Link link = model.getScenario().getNetwork().getLinks().get(Id.createLinkId(currentLinkId));
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
-									PerceptContent pc = new PerceptContent(PerceptList.STUCK, event.getAttributes());
+									Object[] obj = {
+											link.getId().toString() + ":" + link.getFromNode().getId().toString(),
+											link.getFromNode().getCoord().getX(),
+											link.getFromNode().getCoord().getY(),
+											link.getId().toString() + ":" + link.getToNode().getId().toString(),
+											link.getToNode().getCoord().getX(),
+											link.getToNode().getCoord().getY()
+									};
+									PerceptContent pc = new PerceptContent(PerceptList.STUCK, obj);
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.STUCK, pc);
 
 									// If agent was driving then also send back status for the driveTo action
