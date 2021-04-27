@@ -23,7 +23,7 @@
                 </repository>
                 <repository>
                         <id>matsim</id>
-                        <url>http://dl.bintray.com/matsim/matsim</url>
+                        <url>https://dl.bintray.com/matsim/matsim</url>
                 </repository>
                 <repository>
                         <!-- For MATSim monthly snapshots: -->
@@ -33,7 +33,7 @@
                 </repository>
                 <repository>
                         <id>ojo-snapshots</id>
-                        <url>http://oss.jfrog.org/libs-snapshot</url>
+                        <url>https://oss.jfrog.org/libs-snapshot</url>
                 </repository>
         </repositories>
 
