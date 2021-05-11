@@ -23,7 +23,7 @@
                 </repository>
                 <repository>
                         <id>matsim</id>
-                        <url>https://dl.bintray.com/matsim/matsim</url>
+                        <url>https://repo.matsim.org/repository/matsim</url>
                 </repository>
                 <repository>
                         <!-- For MATSim monthly snapshots: -->
@@ -42,8 +42,7 @@
                         <groupId>org.matsim</groupId>
                         <artifactId>matsim</artifactId>
                                 <!--13.0-2020w27-SNAPSHOT fixes #1054; previous versions will not work -->
-                                <version>13.0-2020w27-SNAPSHOT</version>
-                                <!--<version>13.0-SNAPSHOT</version>-->
+                                <version>13.0</version>
                         </dependency>
                         <dependency>
                                 <groupId>org.matsim.contrib</groupId>

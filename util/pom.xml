@@ -25,7 +25,7 @@
 		</repository>
 		<repository>
 			<id>matsim</id>
-			<url>https://dl.bintray.com/matsim/matsim</url>
+      <url>https://repo.matsim.org/repository/matsim</url>
 		</repository>
 		<repository>
 			<id>ojo-snapshots</id>
@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>11.0</version>
+			<version>13.0</version>
 		</dependency>
 	</dependencies>
 
