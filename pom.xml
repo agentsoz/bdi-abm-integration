@@ -5,7 +5,7 @@
   <version>3.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>BDI ABM Integration</name>
+  <name>BDI ABM Integration Project</name>
   <description>Integrating Belief-Desire-Intention (BDI) systems with Agent-based Models (ABM)</description>
   <url>https://github.com/agentsoz/bdi-abm-integration.git</url>
 
