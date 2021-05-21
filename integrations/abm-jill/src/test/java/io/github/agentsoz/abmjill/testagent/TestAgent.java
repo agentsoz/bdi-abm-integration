@@ -1,7 +1,7 @@
 package io.github.agentsoz.abmjill.testagent;
 
 import io.github.agentsoz.bdiabm.EnvironmentActionInterface;
-import io.github.agentsoz.bdiabm.QueryPerceptInterface;
+import io.github.agentsoz.bdiabm.v3.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.data.ActionContent.State;
 

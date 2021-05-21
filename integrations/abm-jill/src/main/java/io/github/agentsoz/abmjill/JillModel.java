@@ -22,9 +22,14 @@ package io.github.agentsoz.abmjill;
  * #L%
  */
 
-import io.github.agentsoz.bdiabm.*;
-import io.github.agentsoz.bdiabm.data.*;
+import io.github.agentsoz.bdiabm.Agent;
+import io.github.agentsoz.bdiabm.BDIServerInterface;
+import io.github.agentsoz.bdiabm.EnvironmentActionInterface;
+import io.github.agentsoz.bdiabm.ModelInterface;
+import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
+import io.github.agentsoz.bdiabm.v3.QueryPerceptInterface;
 import io.github.agentsoz.jill.Main;
 import io.github.agentsoz.jill.config.Config;
 import io.github.agentsoz.jill.core.GlobalState;

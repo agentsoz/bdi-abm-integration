@@ -2,12 +2,13 @@ package io.github.agentsoz.bdimatsim;
 
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.ModelInterface;
-import io.github.agentsoz.bdiabm.QueryPerceptInterface;
+import io.github.agentsoz.bdiabm.v3.QueryPerceptInterface;
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.bdiabm.v2.AgentDataContainer;
 import io.github.agentsoz.bdiabm.data.PerceptContent;
 import io.github.agentsoz.dataInterface.DataClient;
 import io.github.agentsoz.dataInterface.DataServer;
+import io.github.agentsoz.bdiabm.v3.AgentNotFoundException;
 import io.github.agentsoz.nonmatsim.PAAgentManager;
 import io.github.agentsoz.util.Location;
 import io.github.agentsoz.util.ActionList;
@@ -596,11 +597,15 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 		return this.qSim.getSimTimer().getTimeOfDay() ;
 	}
 
-	@Override public Object queryPercept(String agentID, String perceptID, Object args) {
+	@Override public Object queryPercept(String agentID, String perceptID, Object args) throws AgentNotFoundException {
 		log.debug("received query from agent {} for percept {} with args {}", agentID, perceptID, args);
+		MobsimAgent mobsimAgent = this.getMobsimAgentFromIdString(agentID) ;
+		if (mobsimAgent == null) {
+			throw new AgentNotFoundException("MobsimAgent " + agentID + " not found");
+		}
 		switch(perceptID) {
 			case PerceptList.REQUEST_LOCATION:
-				final Link link = scenario.getNetwork().getLinks().get( this.getMobsimAgentFromIdString(agentID).getCurrentLinkId() );
+				final Link link = scenario.getNetwork().getLinks().get( mobsimAgent.getCurrentLinkId() );
 				Location[] coords = {
 						new Location(link.getId().toString() + ":" + link.getFromNode().getId().toString(), link.getFromNode().getCoord().getX(), link.getFromNode().getCoord().getY()),
 						new Location(link.getId().toString() + ":" + link.getToNode().getId().toString(), link.getToNode().getCoord().getX(), link.getToNode().getCoord().getY())
@@ -614,7 +619,7 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 				Coord coord = new Coord( dest[0], dest[1] ) ;
 				final Link destLink = NetworkUtils.getNearestLink(getScenario().getNetwork(), coord );
 				Gbl.assertNotNull(destLink);
-				final Link currentLink = scenario.getNetwork().getLinks().get( this.getMobsimAgentFromIdString(agentID).getCurrentLinkId() );
+				final Link currentLink = scenario.getNetwork().getLinks().get( mobsimAgent.getCurrentLinkId() );
 				final double now = getTime();
 				//final Person person = scenario.getPopulation().getPersons().get(agentID);
 				double res = 0.0;
@@ -626,14 +631,13 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 				}
 				return res;
 			case PerceptList.REQUEST_DESTINATION_COORDINATES :
-				MobsimAgent agent = this.getMobsimAgentFromIdString(agentID);
 				double[] cords= {-1,-1};
-				if(this.getReplanner().editPlans().isAtRealActivity(agent)){ // if agent is currently in an activity
+				if(this.getReplanner().editPlans().isAtRealActivity(mobsimAgent)){ // if agent is currently in an activity
 
-					int currentIndex = EditPlans.getCurrentPlanElementIndex(agent);
-					Plan plan = WithinDayAgentUtils.getModifiablePlan(agent);
+					int currentIndex = EditPlans.getCurrentPlanElementIndex(mobsimAgent);
+					Plan plan = WithinDayAgentUtils.getModifiablePlan(mobsimAgent);
 					if(currentIndex < plan.getPlanElements().size() - 1){ // not the last activity
-						Activity nextAct = this.getReplanner().editPlans().findRealActAfter(agent,currentIndex);
+						Activity nextAct = this.getReplanner().editPlans().findRealActAfter(mobsimAgent,currentIndex);
 						cords[0] = nextAct.getCoord().getX();
 						cords[1] = nextAct.getCoord().getY();
 					}

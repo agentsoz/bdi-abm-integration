@@ -23,6 +23,7 @@ package io.github.agentsoz.bdiabm;
  */
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
+import io.github.agentsoz.bdiabm.v3.QueryPerceptInterface;
 
 public interface Agent {
 
