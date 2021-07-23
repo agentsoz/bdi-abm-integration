@@ -27,12 +27,6 @@
             <url>https://repo.matsim.org/repository/matsim</url>
         </repository>
         <repository>
-            <!-- For MATSim monthly snapshots: -->
-            <id>bintray-matsim-eth-matsim</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/matsim-eth/matsim</url>
-        </repository>
-        <repository>
             <id>ojo-snapshots</id>
             <url>https://oss.jfrog.org/libs-snapshot</url>
         </repository>
