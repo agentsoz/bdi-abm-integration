@@ -30,10 +30,6 @@
             <id>matsim</id>
             <url>https://repo.matsim.org/repository/matsim</url>
         </repository>
-        <repository>
-            <id>ojo-snapshots</id>
-            <url>https://oss.jfrog.org/libs-snapshot</url>
-        </repository>
     </repositories>
 
     <dependencies>
