@@ -15,6 +15,10 @@
     <name>BDI MATSim Integration</name>
     <description>Allows the use of MATsim (www.matsim.org) as the underlying ABM</description>
 
+    <properties>
+        <matsim.version>13.0</matsim.version>
+    </properties>
+
     <repositories>
         <repository>
             <!-- Geotools is not on Maven central -->
@@ -37,13 +41,12 @@
             <groupId>org.matsim</groupId>
             <artifactId>matsim</artifactId>
             <!--13.0-2020w27-SNAPSHOT fixes #1054; previous versions will not work -->
-            <version>13.0</version>
+            <version>${matsim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.matsim.contrib</groupId>
-            <artifactId>travelsummary</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
-            <!--(does not (yet?) exist as weekly release)-->
+            <artifactId>analysis</artifactId>
+            <version>${matsim.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.agentsoz</groupId>
