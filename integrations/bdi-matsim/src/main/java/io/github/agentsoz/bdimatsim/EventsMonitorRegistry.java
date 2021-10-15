@@ -224,7 +224,8 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 			// match personId and (optionally) linkId if the monitor has an associated link id
 			if (monitor.getAgentId().equals( personId ) && (monitor.getLinkId()==null || monitor.getLinkId().equals( linkId ))) {
 				// always pass the linkId of this event to the handler
-				if (monitor.getHandler().handle(monitor.getAgentId().toString(), linkId.toString(), monitor.getEvent(), event)) {
+				String link = (linkId == null) ? null : linkId.toString();
+				if (monitor.getHandler().handle(monitor.getAgentId().toString(), link, monitor.getEvent(), event)) {
 					synchronized (monitors.get( monitoredEventType )) {
 						monitors.get( monitoredEventType ).remove( personId );
 					}

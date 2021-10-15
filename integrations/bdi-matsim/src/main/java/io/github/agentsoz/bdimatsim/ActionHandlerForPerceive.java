@@ -219,17 +219,20 @@ public final class ActionHandlerForPerceive implements BDIActionHandler {
 								public boolean handle(String agentId, String currentLinkId, MonitoredEventType monitoredEvent, EventData event) {
 									log.debug("agent with id=" + agentId + " perceiving a " + monitoredEvent + " event on link with id=" +
 											currentLinkId);
-									Link link = model.getScenario().getNetwork().getLinks().get(Id.createLinkId(currentLinkId));
 									PAAgent agent = model.getAgentManager().getAgent(agentId);
-									Object[] obj = {
-											link.getId().toString() + ":" + link.getFromNode().getId().toString(),
-											link.getFromNode().getCoord().getX(),
-											link.getFromNode().getCoord().getY(),
-											link.getId().toString() + ":" + link.getToNode().getId().toString(),
-											link.getToNode().getCoord().getX(),
-											link.getToNode().getCoord().getY()
-									};
-									PerceptContent pc = new PerceptContent(PerceptList.STUCK, obj);
+									PerceptContent pc = new PerceptContent(PerceptList.STUCK, null);
+									if(currentLinkId != null) {
+										Link link = model.getScenario().getNetwork().getLinks().get(Id.createLinkId(currentLinkId));
+										Object[] obj = {
+												link.getId().toString() + ":" + link.getFromNode().getId().toString(),
+												link.getFromNode().getCoord().getX(),
+												link.getFromNode().getCoord().getY(),
+												link.getId().toString() + ":" + link.getToNode().getId().toString(),
+												link.getToNode().getCoord().getX(),
+												link.getToNode().getCoord().getY()
+										};
+										pc.setParameters(obj);
+									}
 									model.getAgentManager().getAgentDataContainerV2().putPercept(agent.getAgentID(), PerceptList.STUCK, pc);
 
 									// If agent was driving then also send back status for the driveTo action
