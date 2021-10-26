@@ -1,0 +1,4 @@
+[submodule "libs/jill"]
+  path = libs/jill
+  url = git@github.com:agentsoz/jill.git
+  branch = dev

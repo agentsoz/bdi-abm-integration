@@ -59,6 +59,7 @@
     <module>integrations/bdi-abm</module>
     <!--<module>integrations/bdi-gams</module>-->
     <!--<module>integrations/abm-jack</module>-->
+    <module>libs/jill</module>
     <module>integrations/abm-jill</module>
     <!--<module>integrations/abm-jadex</module>-->
     <module>integrations/bdi-matsim</module>
