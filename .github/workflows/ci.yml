@@ -36,5 +36,8 @@ jobs:
         with:
           args: git submodule update --init --recursive
 
+      - name: Add write permissions to clone
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
       - name: Build with Maven
         run: mvn -B package
