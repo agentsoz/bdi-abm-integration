@@ -1,22 +1,28 @@
 # BDI-ABM Integration Package
 
+`master`![passing?](https://github.com/agentsoz/bdi-abm-integration/actions/workflows/ci.yml/badge.svg?branch=master) `dev`![passing?](https://github.com/agentsoz/bdi-abm-integration/actions/workflows/ci.yml/badge.svg?branch=dev)
+
 This software realises a mechanism for integrating
 Belief-Desire-Intention (BDI) reasoning into agents within an
 agent-based simulation (ABM). The concept is described
-in the following papers papers:
+in the following papers:
 
-1. Dhirendra Singh, Lin Padgham, Brian Logan.
-   [Integrating BDI agents with Agent Based Simulation Platforms](https://researchbank.rmit.edu.au/view/rmit:37619).
-   Autonomous Agents and Multi-agent Systems, 2016.
+1. Dhirendra Singh, Lin Padgham, Kai Nagel.
+   [Using MATSim as a Component in Dynamic Agent-Based Micro-Simulations](https://link.springer.com/chapter/10.1007/978-3-030-51417-4_5)
+   International Workshop on Engineering Multi-Agent Systems (EMAS), pages 85-105, 2019.
 
-2. Lin Padgham, Dhirendra Singh.
+2. Dhirendra Singh, Lin Padgham, Brian Logan.
+   [Integrating BDI agents with Agent Based Simulation Platforms](https://link.springer.com/article/10.1007/s10458-016-9332-x).
+   Autonomous Agents and Multi-agent Systems 30, pages 1050–1071, 2016.
+
+3. Lin Padgham, Dhirendra Singh.
    [Making MATSim Agents Smarter with the Belief-Desire-Intention Framework](http://matsim.org/the-book)
    Horni, A., Nagel, K. and Axhausen, K.W. (eds.) The Multi-Agent Transport Simulation MATSim,
    pages 201-210, 2016. Ubiquity Press London.
 
-3. Lin Padgham, Kai Nagel, Dhirendra Singh, Qingyu Chen.
-   [Integrating BDI Agents into a MATSim Simulation](https://researchbank.rmit.edu.au/view/rmit:28920).
-   Frontiers in Artificial Intelligence and Applications 263 (ECAI 2014),
+4. Lin Padgham, Kai Nagel, Dhirendra Singh, Qingyu Chen.
+   [Integrating BDI Agents into a MATSim Simulation](https://ebooks.iospress.nl/volumearticle/37020).
+   Frontiers in Artificial Intelligence and Applications (ECAI) 263,
    pages 681-686, 2014.
 
 
