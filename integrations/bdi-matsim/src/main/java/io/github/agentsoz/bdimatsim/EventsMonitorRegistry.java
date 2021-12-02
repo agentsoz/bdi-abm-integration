@@ -218,16 +218,17 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 	 * @param linkId the link associated with the event
 	 */
 	private void handleEventAndRemoveMonitor(Id<Person> personId, MonitoredEventType monitoredEventType, Id<Link> linkId, EventData event ){
-		Gbl.assertNotNull( personId );
-		Monitor monitor = monitors.get( monitoredEventType ).get( personId );
-		if (monitor != null) {
-			// match personId and (optionally) linkId if the monitor has an associated link id
-			if (monitor.getAgentId().equals( personId ) && (monitor.getLinkId()==null || monitor.getLinkId().equals( linkId ))) {
-				// always pass the linkId of this event to the handler
-				String link = (linkId == null) ? null : linkId.toString();
-				if (monitor.getHandler().handle(monitor.getAgentId().toString(), link, monitor.getEvent(), event)) {
-					synchronized (monitors.get( monitoredEventType )) {
-						monitors.get( monitoredEventType ).remove( personId );
+		if (personId != null) {
+			Monitor monitor = monitors.get(monitoredEventType).get(personId);
+			if (monitor != null) {
+				// match personId and (optionally) linkId if the monitor has an associated link id
+				if (monitor.getAgentId().equals(personId) && (monitor.getLinkId() == null || monitor.getLinkId().equals(linkId))) {
+					// always pass the linkId of this event to the handler
+					String link = (linkId == null) ? null : linkId.toString();
+					if (monitor.getHandler().handle(monitor.getAgentId().toString(), link, monitor.getEvent(), event)) {
+						synchronized (monitors.get(monitoredEventType)) {
+							monitors.get(monitoredEventType).remove(personId);
+						}
 					}
 				}
 			}
