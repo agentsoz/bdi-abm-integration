@@ -34,7 +34,7 @@ jobs:
       - name: Checkout submodules
         uses: srt32/git-actions@v0.0.3
         with:
-          args: git submodule update --init --recursive
+          args: git config --global --add safe.directory /github/workspace && git config --global --add safe.directory /github/workspace/libs/jill && git submodule update --init --recursive
 
       - name: Add write permissions to clone
         run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
