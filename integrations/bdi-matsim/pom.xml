@@ -16,7 +16,7 @@
     <description>Allows the use of MATsim (www.matsim.org) as the underlying ABM</description>
 
     <properties>
-        <matsim.version>13.0</matsim.version>
+        <matsim.version>14.0</matsim.version>
     </properties>
 
     <repositories>

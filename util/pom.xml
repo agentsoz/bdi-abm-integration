@@ -27,17 +27,13 @@
 			<id>matsim</id>
       <url>https://repo.matsim.org/repository/matsim</url>
 		</repository>
-		<repository>
-			<id>ojo-snapshots</id>
-			<url>https://oss.jfrog.org/libs-snapshot</url>
-		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>13.0</version>
+			<version>14.0</version>
 		</dependency>
 	</dependencies>
 

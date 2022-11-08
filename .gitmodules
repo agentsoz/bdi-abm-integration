@@ -2,3 +2,4 @@
   path = libs/jill
   url = ../jill.git
   branch = dev
+  update = merge
