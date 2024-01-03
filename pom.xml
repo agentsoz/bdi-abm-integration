@@ -202,7 +202,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
+      <version>1.4.14</version>
     </dependency>
     <!-- for JSON-style toString() of objects -->
     <dependency>
@@ -220,7 +220,7 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>5.1.0</version>
+      <version>7.0.0</version>
     </dependency>
   </dependencies>
 
