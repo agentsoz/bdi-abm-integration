@@ -137,7 +137,7 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 	private final Map<String, DataClient> dataListeners = createDataListeners();
 	private AgentDataContainer adc = new AgentDataContainer();
 
-	public enum RoutingMode {carFreespeed, carGlobalInformation}
+	public enum RoutingMode {carFreespeed, carGlobalInformation, van}
 
 	private Controler controller;
 
