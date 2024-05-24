@@ -1,7 +1,5 @@
 package io.github.agentsoz.bdimatsim;
 
-import javax.inject.Inject;
-
 /*
  * #%L
  * BDI-ABM Integration Package
@@ -24,6 +22,7 @@ import javax.inject.Inject;
  * #L%
  */
 
+import com.google.inject.Inject;
 import io.github.agentsoz.bdimatsim.MATSimModel.RoutingMode;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
@@ -34,7 +33,7 @@ import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
 import org.matsim.core.network.NetworkChangeEvent;
-import org.matsim.core.router.FastAStarLandmarksFactory;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
@@ -60,15 +59,15 @@ public final class Replanner {
 	private EditRoutes editRoutes;
 	private EditTrips editTrips ;
 	private EditPlans editPlans ;
-	
+
 	@Inject
 	Replanner(QSim qSim2, TripRouter tripRouter, Map<String,TravelTime> travelTimes ) {
 		Scenario scenario = qSim2.getScenario();
 		this.travelTimes = travelTimes ;
 		{
 			TravelTime travelTime = TravelTimeUtils.createFreeSpeedTravelTime();
-			TravelDisutility travelDisutility = TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility(scenario.getConfig().planCalcScore());
-			LeastCostPathCalculator pathCalculator = new FastAStarLandmarksFactory(1).createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime);
+			TravelDisutility travelDisutility = TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility(scenario.getConfig().scoring());
+			LeastCostPathCalculator pathCalculator = new AStarLandmarksFactory(1).createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime);
 			this.editRoutes = new EditRoutes(scenario.getNetwork(), pathCalculator, scenario.getPopulation().getFactory());
 		}
 		this.editTrips = new EditTrips(tripRouter, qSim2.getScenario(), null, TimeInterpretation.create(scenario.getConfig())) ;

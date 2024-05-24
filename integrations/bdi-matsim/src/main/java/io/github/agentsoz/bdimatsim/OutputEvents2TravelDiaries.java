@@ -45,7 +45,7 @@ public class OutputEvents2TravelDiaries implements IterationStartsListener, Iter
 
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
-		if (event.getIteration() != scenario.getConfig().controler().getLastIteration())
+		if (event.getIteration() != scenario.getConfig().controller().getLastIteration())
 			return;
 		delegate = new EventsToTravelDiaries(scenario);
 		eventsManager.addHandler(delegate);
@@ -53,10 +53,10 @@ public class OutputEvents2TravelDiaries implements IterationStartsListener, Iter
 
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
-		if (event.getIteration() != scenario.getConfig().controler().getLastIteration())
+		if (event.getIteration() != scenario.getConfig().controller().getLastIteration())
 			return;
 		try {
-			delegate.writeSimulationResultsToTabSeparated(scenario.getConfig().controler().getOutputDirectory(),"output_");
+			delegate.writeSimulationResultsToTabSeparated(scenario.getConfig().controller().getOutputDirectory(),"output_");
 		} catch (IOException e) {
 			log.error("Writing of traveldiaries failed.");
 			e.printStackTrace();

@@ -240,7 +240,7 @@ public final class Utils {
 					if (i + 1 < args.length) {
 						i++;
 						log.info("setting matsim output directory to " + args[i] );
-						config.controler().setOutputDirectory( args[i] );
+						config.controller().setOutputDirectory( args[i] );
 					}
 					break;
 				case MATSimModel.eGlobalStartHhMm:

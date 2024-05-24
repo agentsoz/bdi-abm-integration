@@ -1,6 +1,6 @@
 # BDI-ABM Integration Package
 
-`master`![passing?](https://github.com/agentsoz/bdi-abm-integration/actions/workflows/ci.yml/badge.svg?branch=master) `dev`![passing?](https://github.com/agentsoz/bdi-abm-integration/actions/workflows/ci.yml/badge.svg?branch=dev)
+`main`![passing?](https://github.com/agentsoz/bdi-abm-integration/actions/workflows/ci.yml/badge.svg?branch=main)
 
 This software realises a mechanism for integrating
 Belief-Desire-Intention (BDI) reasoning into agents within an

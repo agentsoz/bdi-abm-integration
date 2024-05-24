@@ -49,10 +49,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsManagerImpl;
 import org.matsim.core.events.MatsimEventsReader;
-import org.matsim.core.utils.io.UncheckedIOException;
 import org.matsim.core.utils.misc.CRCChecksum;
+import org.matsim.utils.eventsfilecomparison.ComparisonResult;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator;
-import org.matsim.utils.eventsfilecomparison.EventsFileComparator.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,7 +173,7 @@ public final class TestUtils {
 				}
 			});
 		} catch (IOException e) {
-			throw new UncheckedIOException(e.getMessage(), e);
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	
 		return expecteds ;
@@ -258,10 +257,10 @@ public final class TestUtils {
 	public static void compareFullEvents(final String primaryExpectedEventsFilename, String actualEventsFilename, boolean failWhenDifferent ) {
 		log.info(SEPARATOR) ;
 		log.info("START comparing full events:") ;
-		Result result = EventsFileComparator.compare(primaryExpectedEventsFilename, actualEventsFilename) ;
+		ComparisonResult result = EventsFileComparator.compare(primaryExpectedEventsFilename, actualEventsFilename) ;
 		log.info("Full events file: comparison: result=" + result.name() );
 		if (failWhenDifferent ) {
-			Assert.assertEquals(Result.FILES_ARE_EQUAL, result);
+			Assert.assertEquals(ComparisonResult.FILES_ARE_EQUAL, result);
 		}
 		log.info("... comparing full events DONE.") ;
 		log.info(SEPARATOR) ;

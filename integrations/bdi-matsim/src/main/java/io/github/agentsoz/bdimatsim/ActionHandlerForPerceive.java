@@ -31,18 +31,19 @@ import io.github.agentsoz.nonmatsim.EventData;
 import io.github.agentsoz.nonmatsim.PAAgent;
 import io.github.agentsoz.util.ActionList;
 import io.github.agentsoz.util.PerceptList;
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public final class ActionHandlerForPerceive implements BDIActionHandler {
-	private static final Logger log = Logger.getLogger( ActionHandlerForPerceive.class ) ;
+	private static final Logger log = LoggerFactory.getLogger( ActionHandlerForPerceive.class ) ;
 
 	private final MATSimModel model;
 

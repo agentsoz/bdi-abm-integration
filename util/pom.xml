@@ -16,6 +16,11 @@
 	<name>Util</name>
 	<description>Utilities for all integration and example projects</description>
 
+	<properties>
+		<matsim.version>2024.0</matsim.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<repositories>
 		<repository>
 			<!-- Geotools is not on Maven central -->
@@ -33,11 +38,8 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>14.0</version>
+			<version>${matsim.version}</version>
 		</dependency>
 	</dependencies>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 </project>
