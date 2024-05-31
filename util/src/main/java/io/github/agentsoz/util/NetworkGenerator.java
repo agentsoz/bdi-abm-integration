@@ -4,7 +4,7 @@ package io.github.agentsoz.util;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -148,15 +148,15 @@ public class NetworkGenerator {
          *
          */
 		onr.setHighwayDefaults(1, "motorway",      2, 110.0/3.6, 1.0, 2000, true);
-		onr.setHighwayDefaults(1, "motorway_link", 1, 80.0/3.6, 1.0, 2000, true);
+		onr.setHighwayDefaults(1, "motorway_link", 1, 80.0/3.6, 1.0, 1500, true);
 		onr.setHighwayDefaults(2, "trunk",         1, 100.0/3.6, 1.0, 2000);
-		onr.setHighwayDefaults(2, "trunk_link",    1, 80.0/3.6, 1.0, 2000);
+		onr.setHighwayDefaults(2, "trunk_link",    1, 80.0/3.6, 1.0, 1500);
 		onr.setHighwayDefaults(3, "primary",       1, 80.0/3.6, 1.0, 1500);
-		onr.setHighwayDefaults(3, "primary_link",  1, 80.0/3.6, 1.0, 1500);
-		onr.setHighwayDefaults(4, "secondary",     1, 80.0/3.6, 1.0, 1200);
-		onr.setHighwayDefaults(4, "secondary_link",1, 80.0/3.6, 1.0, 1200);
-		onr.setHighwayDefaults(5, "tertiary",      1, 60.0/3.6, 1.0,  900);
-		onr.setHighwayDefaults(5, "tertiary_link", 1, 60.0/3.6, 1.0,  900);
+		onr.setHighwayDefaults(3, "primary_link",  1, 60.0/3.6, 1.0, 1500);
+		onr.setHighwayDefaults(4, "secondary",     1, 60.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(4, "secondary_link",1, 60.0/3.6, 1.0, 1000);
+		onr.setHighwayDefaults(5, "tertiary",      1, 50.0/3.6, 1.0,  600);
+		onr.setHighwayDefaults(5, "tertiary_link", 1, 50.0/3.6, 1.0,  600);
 		onr.setHighwayDefaults(6, "unclassified",  1, 50.0/3.6, 1.0,  600);
 		onr.setHighwayDefaults(7, "residential",   1, 50.0/3.6, 1.0,  600);
 		onr.setHighwayDefaults(8, "living_street", 1, 50.0/3.6, 1.0,  300);

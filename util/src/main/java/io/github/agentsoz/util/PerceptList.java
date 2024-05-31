@@ -4,7 +4,7 @@ package io.github.agentsoz.util;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -27,6 +27,8 @@ public final class PerceptList {
 	public static final String ACTIVITY_STARTED = "activity_started";
 	public static final String ACTIVITY_ENDED = "activity_ended";
 	public static final String BLOCKED = "blocked";
+//added oemer
+	public static final String SUM_LINK_LENGTH = "sum_link_length";
 	public static final String BROADCAST = "global";
 	public static final String CONGESTION = "congestion";
 	public static final String DEPARTED = "departed";

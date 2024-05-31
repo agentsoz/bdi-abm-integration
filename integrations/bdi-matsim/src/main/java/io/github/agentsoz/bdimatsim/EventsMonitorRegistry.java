@@ -4,7 +4,7 @@ package io.github.agentsoz.bdimatsim;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -60,6 +60,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		PersonArrivalEvent,
 		PersonDepartureEvent,
 		PersonStuckEvent,
+		TotalLinkLengthTraveledEvent,
 
 		// a reason for having this here is that one can work on objects of type MonitoredEventType rather than Class<? extends Event>, since the first is
 		// conceptually simpler.   There is also no way around handing each event type separately, since the syntax to get driverId and linkId out of
@@ -97,14 +98,14 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 		// Register any new monitors waiting to be added
 		// Synchronise on toAdd which is allowed to be updated by other threads
 		synchronized (toAdd) {
-			for(MonitoredEventType eventType : toAdd.keySet()) {
+			for (MonitoredEventType eventType : toAdd.keySet()) {
 				if (!monitors.containsKey(eventType)) {
 					monitors.put(eventType, new ConcurrentHashMap<>());
 				}
 				Map<Id<Person>, Monitor> map = toAdd.get(eventType);
 				for (Id<Person> agentId : map.keySet()) {
 					Monitor monitor = map.get(agentId);
-					monitors.get(eventType).put(agentId,monitor);
+					monitors.get(eventType).put(agentId, monitor);
 				}
 			}
 			toAdd.clear();
@@ -114,25 +115,29 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 
 		if (ev instanceof AgentInCongestionEvent && monitors.containsKey(MonitoredEventType.AgentInCongestionEvent)) {
 			final io.github.agentsoz.bdimatsim.AgentInCongestionEvent event = (AgentInCongestionEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId(), eventData );
+			handleEventAndRemoveMonitor(this.getDriverOfVehicle(event.getVehicleId()), MonitoredEventType.AgentInCongestionEvent, event.getCurrentLinkId(), eventData);
 
 		} else if (ev instanceof NextLinkBlockedEvent && monitors.containsKey(MonitoredEventType.NextLinkBlockedEvent)) {
 			final io.github.agentsoz.bdimatsim.NextLinkBlockedEvent event = (NextLinkBlockedEvent) ev;
-			handleEventAndRemoveMonitor( event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId(), eventData );
+			handleEventAndRemoveMonitor(event.getDriverId(), MonitoredEventType.NextLinkBlockedEvent, event.currentLinkId(), eventData);
 
 		} else if (ev instanceof LinkEnterEvent && monitors.containsKey(MonitoredEventType.LinkEnterEvent)) {
 			final org.matsim.api.core.v01.events.LinkEnterEvent event = (LinkEnterEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkEnterEvent, event.getLinkId(), eventData );
+			handleEventAndRemoveMonitor(this.getDriverOfVehicle(event.getVehicleId()), MonitoredEventType.LinkEnterEvent, event.getLinkId(), eventData);
 
 		} else if (ev instanceof LinkLeaveEvent && monitors.containsKey(MonitoredEventType.LinkLeaveEvent)) {
 			final org.matsim.api.core.v01.events.LinkLeaveEvent event = (LinkLeaveEvent) ev;
-			handleEventAndRemoveMonitor( this.getDriverOfVehicle( event.getVehicleId() ), MonitoredEventType.LinkLeaveEvent, event.getLinkId(), eventData );
+			handleEventAndRemoveMonitor(this.getDriverOfVehicle(event.getVehicleId()), MonitoredEventType.LinkLeaveEvent, event.getLinkId(), eventData);
 
 		} else if (ev instanceof PersonArrivalEvent && monitors.containsKey(MonitoredEventType.PersonArrivalEvent)) {
 			final org.matsim.api.core.v01.events.PersonArrivalEvent event = (PersonArrivalEvent) ev;
-			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonArrivalEvent, event.getLinkId(), eventData );
+			handleEventAndRemoveMonitor(event.getPersonId(), MonitoredEventType.PersonArrivalEvent, event.getLinkId(), eventData);
+			//added -oemer
+	    }else if (ev instanceof TotalLinkLengthTraveledEvent && monitors.containsKey(MonitoredEventType.TotalLinkLengthTraveledEvent)) {
+			final TotalLinkLengthTraveledEvent event = (TotalLinkLengthTraveledEvent) ev;
+			handleEventAndRemoveMonitor(event.getPersonId(), MonitoredEventType.TotalLinkLengthTraveledEvent, event.currentLinkId(), eventData);
 
-		} else if (ev instanceof PersonDepartureEvent && monitors.containsKey(MonitoredEventType.PersonDepartureEvent)) {
+		}else if (ev instanceof PersonDepartureEvent && monitors.containsKey(MonitoredEventType.PersonDepartureEvent)) {
 			final org.matsim.api.core.v01.events.PersonDepartureEvent event = (PersonDepartureEvent) ev;
 			handleEventAndRemoveMonitor( event.getPersonId(), MonitoredEventType.PersonDepartureEvent, event.getLinkId(), eventData );
 
@@ -225,6 +230,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 				if (monitor.getAgentId().equals(personId) && (monitor.getLinkId() == null || monitor.getLinkId().equals(linkId))) {
 					// always pass the linkId of this event to the handler
 					String link = (linkId == null) ? null : linkId.toString();
+
 					if (monitor.getHandler().handle(monitor.getAgentId().toString(), link, monitor.getEvent(), event)) {
 						synchronized (monitors.get(monitoredEventType)) {
 							monitors.get(monitoredEventType).remove(personId);
@@ -244,6 +250,7 @@ public final class EventsMonitorRegistry implements BasicEventHandler
 
 		private Id<Person> agentId;
 		private Id<Link> linkId;
+
 		private MonitoredEventType event;
 		private BDIPerceptHandler handler;
 		

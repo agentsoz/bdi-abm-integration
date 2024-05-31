@@ -4,7 +4,7 @@ package io.github.agentsoz.util;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,6 +22,7 @@ package io.github.agentsoz.util;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -37,9 +38,10 @@ import java.util.Collection;
 public class Location {
 
 	private String name;
-	private double x;
-	private double y;
+	public double x;
+	public double y;
 	private Object attributes;
+
 
 	/**
 	 * Create a new location
@@ -97,5 +99,4 @@ public class Location {
 	public String toString() {
 		return "(" + name + ", coords=" + x + "," + y + ")";
 	}
-
 }

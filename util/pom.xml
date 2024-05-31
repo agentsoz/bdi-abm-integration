@@ -16,11 +16,6 @@
 	<name>Util</name>
 	<description>Utilities for all integration and example projects</description>
 
-	<properties>
-		<matsim.version>2024.0</matsim.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<repositories>
 		<repository>
 			<!-- Geotools is not on Maven central -->
@@ -32,14 +27,21 @@
 			<id>matsim</id>
       <url>https://repo.matsim.org/repository/matsim</url>
 		</repository>
+		<repository>
+			<id>ojo-snapshots</id>
+			<url>https://oss.jfrog.org/libs-snapshot</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>${matsim.version}</version>
+			<version>13.0</version>
 		</dependency>
 	</dependencies>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 </project>

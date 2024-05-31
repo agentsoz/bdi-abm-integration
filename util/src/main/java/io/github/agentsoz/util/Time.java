@@ -4,7 +4,7 @@ package io.github.agentsoz.util;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -21,6 +21,9 @@ package io.github.agentsoz.util;
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Time {
 
@@ -55,7 +58,6 @@ public class Time {
 			convertedTime /= 1;
 		}
 		return convertedTime;
+
 	}
-
-
 }

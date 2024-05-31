@@ -1,5 +1,4 @@
 [submodule "libs/jill"]
   path = libs/jill
-  url = ../jill.git
+  url = https://github.com/agentsoz/jill.git
   branch = dev
-  update = merge

@@ -4,7 +4,7 @@ package io.github.agentsoz.bdimatsim;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -240,7 +240,7 @@ public final class Utils {
 					if (i + 1 < args.length) {
 						i++;
 						log.info("setting matsim output directory to " + args[i] );
-						config.controller().setOutputDirectory( args[i] );
+						config.controler().setOutputDirectory( args[i] );
 					}
 					break;
 				case MATSimModel.eGlobalStartHhMm:

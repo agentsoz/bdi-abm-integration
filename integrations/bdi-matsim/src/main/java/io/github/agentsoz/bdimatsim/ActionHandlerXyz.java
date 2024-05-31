@@ -4,7 +4,7 @@ package io.github.agentsoz.bdimatsim;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -24,16 +24,15 @@ package io.github.agentsoz.bdimatsim;
 
 import io.github.agentsoz.bdiabm.data.ActionContent;
 import io.github.agentsoz.nonmatsim.BDIActionHandler;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.agents.WithinDayAgentUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class ActionHandlerXyz implements BDIActionHandler {
-	private static final Logger log = LoggerFactory.getLogger( ActionHandlerXyz.class ) ;
+	private static final Logger log = Logger.getLogger( ActionHandlerXyz.class ) ;
 	
 	private final MATSimModel model;
 

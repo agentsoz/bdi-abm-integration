@@ -4,7 +4,7 @@ package io.github.agentsoz.bdimatsim;
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -45,7 +45,7 @@ public class OutputEvents2TravelDiaries implements IterationStartsListener, Iter
 
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
-		if (event.getIteration() != scenario.getConfig().controller().getLastIteration())
+		if (event.getIteration() != scenario.getConfig().controler().getLastIteration())
 			return;
 		delegate = new EventsToTravelDiaries(scenario);
 		eventsManager.addHandler(delegate);
@@ -53,10 +53,10 @@ public class OutputEvents2TravelDiaries implements IterationStartsListener, Iter
 
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
-		if (event.getIteration() != scenario.getConfig().controller().getLastIteration())
+		if (event.getIteration() != scenario.getConfig().controler().getLastIteration())
 			return;
 		try {
-			delegate.writeSimulationResultsToTabSeparated(scenario.getConfig().controller().getOutputDirectory(),"output_");
+			delegate.writeSimulationResultsToTabSeparated(scenario.getConfig().controler().getOutputDirectory(),"output_");
 		} catch (IOException e) {
 			log.error("Writing of traveldiaries failed.");
 			e.printStackTrace();

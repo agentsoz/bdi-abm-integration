@@ -1,7 +1,5 @@
 package io.github.agentsoz.bdimatsim;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.github.agentsoz.bdiabm.ABMServerInterface;
 import io.github.agentsoz.bdiabm.ModelInterface;
 import io.github.agentsoz.bdiabm.v3.QueryPerceptInterface;
@@ -25,8 +23,8 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.PlansConfigGroup.ActivityDurationInterpretation;
 import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
 import org.matsim.core.controler.AbstractModule;
@@ -52,13 +50,15 @@ import org.matsim.withinday.utils.EditPlans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 
 /*
  * #%L
  * BDI-ABM Integration Package
  * %%
- * Copyright (C) 2014 - 2024 by its authors. See AUTHORS file.
+ * Copyright (C) 2014 - 2023 by its authors. See AUTHORS file.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -118,8 +118,7 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 	/**
 	 * This is in fact a MATSim class that provides a view onto the QSim.
 	 */
-	@Inject
-	private MobsimDataProvider mobsimDataProvider ;
+	@Inject private MobsimDataProvider mobsimDataProvider ;
 	@Inject private Replanner replanner;
 	// yy This is working because MATSimModel is bound somewhere.
 
@@ -212,25 +211,25 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 
 		config.qsim().setSimStarttimeInterpretation( StarttimeInterpretation.onlyUseStarttime );
 
-		config.controller().setWritePlansInterval(1);
-		config.controller().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
+		config.controler().setWritePlansInterval(1);
+		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
 
-		config.scoring().setWriteExperiencedPlans(true);
+		config.planCalcScore().setWriteExperiencedPlans(true);
 
 		// we have to declare those routingModes where we want to use the network router:
 		{
-			Collection<String> modes = config.routing().getNetworkModes();
+			Collection<String> modes = config.plansCalcRoute().getNetworkModes();
 			Set<String> newModes = new TreeSet<>( modes ) ;
 			for ( RoutingMode mode : RoutingMode.values() ) {
 				newModes.add( mode.name() ) ;
 			}
-			config.routing().setNetworkModes( newModes );
+			config.plansCalcRoute().setNetworkModes( newModes );
 		}
 
 		// the router also needs scoring parameters:
 		for ( RoutingMode mode : RoutingMode.values() ) {
 			ModeParams params = new ModeParams(mode.name());
-			config.scoring().addModeParams(params);
+			config.planCalcScore().addModeParams(params);
 		}
 
 //		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
@@ -290,12 +289,12 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 			{
 				ActivityParams params = new ActivityParams("DriveTo");
 				params.setScoringThisActivityAtAll(false);
-				scenario.getConfig().scoring().addActivityParams(params);
+				scenario.getConfig().planCalcScore().addActivityParams(params);
 			}
 			{
 				ActivityParams params = new ActivityParams("Replan");
 				params.setScoringThisActivityAtAll(false);
-				scenario.getConfig().scoring().addActivityParams(params);
+				scenario.getConfig().planCalcScore().addActivityParams(params);
 			}
 			// Any extra activity types provided by the caller
 			if (args.length>1) {
@@ -304,7 +303,7 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 					for (String activity : activityNames) {
 						ActivityParams ap = new ActivityParams(activity);
 						ap.setScoringThisActivityAtAll(false);
-						scenario.getConfig().scoring().addActivityParams(ap);
+						scenario.getConfig().planCalcScore().addActivityParams(ap);
 					}
 				} catch (Exception e) {
 					log.error("Could not parse expected list of activity names from: {}", args[1]);
@@ -361,8 +360,8 @@ public final class MATSimModel implements ABMServerInterface, ModelInterface, Qu
 								// blockage may happen between there and arriving at the node ...  kai, dec'17
 
 							}
-//							log.debug( "time=" + MATSimModel.this.getTime() + ";\t fromLink=" + currentLink.getId() +
-//										     ";\ttoLink=" + nextLinkId + ";\tanswer=" + accept.name() );
+							//log.debug( "time=" + MATSimModel.this.getTime() + ";\t fromLink=" + currentLink.getId() +
+							//			     ";\ttoLink=" + nextLinkId + ";\tanswer=" + accept.name() );
 							return accept;
 						}
 					} );
